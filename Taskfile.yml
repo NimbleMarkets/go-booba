@@ -1,0 +1,80 @@
+# booba - Copyright (c) 2025 Neomantra Corp.
+
+version: '3'
+
+tasks:
+  default:
+    desc: 'Default task runs the "build" task'
+    deps:
+      - build
+
+  list:
+    desc: 'Lists available tasks'
+    cmds:
+      - task --list-all
+
+  dev-deps:
+    desc: 'Install developer dependencies'
+    cmds:
+      - go install 'golang.org/x/tools/cmd/godoc@latest'
+      - go install 'golang.org/x/pkgsite/cmd/pkgsite@latest'
+
+###############################################################################
+
+  go-tidy:
+    desc: 'Go tidy all the things'
+    cmds:
+      - go mod tidy
+
+  go-update:
+    desc: 'Go update all the dependencies'
+    cmds:
+      - go get -u ./...
+
+  build:
+    desc: 'Build all the things'
+    deps:
+      - build-cmds
+
+  clean:
+    desc: 'Clean commands'
+    deps:
+      - clean-cmds
+
+
+###############################################################################
+# Commands
+
+  build-cmds:
+    desc: 'Build all commands'
+    deps:
+      - build-cmd-booba-view-example-native
+      - build-cmd-booba-view-example-wasm
+
+  build-cmd-booba-view-example-native:
+    desc: 'Build booba-view-example command'
+    deps: [go-tidy]
+    cmds:
+      - go build -o bin/booba-view-example cmd/booba-view-example/*.go
+    sources:
+      - cmd/booba-view-example/*.go
+    generates:
+      - bin/booba-view-example
+
+  build-cmd-booba-view-example-wasm:
+    desc: 'Build booba-view-example command in WASM'
+    deps: [go-tidy]
+    env:
+      GOOS: js
+      GOARCH: wasm 
+    cmds:
+      - go build -o bin/booba-view-example cmd/booba-view-example/*.go
+    sources:
+      - cmd/booba-view-example/*.go
+    generates:
+      - bin/booba-view-example.wasm
+
+  clean-cmds:
+    desc: 'Cleans all commands'
+    cmds:
+      - rm -f bin/booba-view-example

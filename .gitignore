@@ -1,0 +1,5 @@
+# booba .gitignore
+
+.task
+.DS_Store
+bin/
