@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-beta.5
 	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1
 	github.com/fogleman/ease v0.0.0-20170301025033-8da417bf1776
+	github.com/gorilla/websocket v1.5.3
 	github.com/lucasb-eyer/go-colorful v1.3.0
 )
 

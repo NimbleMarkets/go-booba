@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booba View Example</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        #terminal {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="terminal"></div>
+    <script type="module">
+        import { init, Terminal } from './ghostty-web/ghostty-web.js';
+
+        async function main() {
+            await init();
+            const term = new Terminal({
+                fontSize: 14,
+                theme: {
+                    background: '#1a1b26',
+                    foreground: '#a9b1d6',
+                },
+            });
+            term.open(document.getElementById('terminal'));
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            const websocket = new WebSocket(wsUrl);
+
+            term.onData((data) => {
+                if (websocket.readyState === WebSocket.OPEN) {
+                    websocket.send(data);
+                }
+            });
+
+            websocket.onmessage = (e) => {
+                // Handle binary data if needed, but text is usually fine for xterm/ghostty
+                if (e.data instanceof Blob) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        term.write(new Uint8Array(reader.result));
+                    };
+                    reader.readAsArrayBuffer(e.data);
+                } else {
+                    term.write(e.data);
+                }
+            };
+
+            websocket.onopen = () => {
+                console.log('Connected to WebSocket');
+                // Optional: Send initial resize or ping
+            };
+
+            websocket.onclose = () => {
+                console.log('Disconnected from WebSocket');
+                term.write('\r\nConnection closed.\r\n');
+            };
+        }
+
+        main().catch(console.error);
+    </script>
+</body>
+
+</html>

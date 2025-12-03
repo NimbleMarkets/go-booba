@@ -12,8 +12,12 @@ package main
 // implementing a progress bar from scratch here.
 
 import (
+	"bytes"
+	"flag"
 	"fmt"
+	"log"
 	"math"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +25,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss/v2"
 	"github.com/fogleman/ease"
+	"github.com/gorilla/websocket"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -45,12 +50,86 @@ var (
 	ramp = makeRampStyles("#B14FFF", "#00FFA3", progressBarWidth)
 )
 
+var (
+	flagWeb = flag.String("web", "", "start web server on this address (e.g. :8080)")
+)
+
 func main() {
+	flag.Parse()
+
+	if *flagWeb != "" {
+		startWebServer(*flagWeb)
+		return
+	}
+
 	initialModel := model{0, false, 10, 0, 0, false, false}
 	p := tea.NewProgram(initialModel)
 	if _, err := p.Run(); err != nil {
 		fmt.Println("could not start program:", err)
 	}
+}
+
+func startWebServer(addr string) {
+	http.Handle("/", http.FileServer(http.Dir("assets")))
+	http.HandleFunc("/ws", handleWebSocket)
+
+	log.Printf("Starting web server on %s", addr)
+	if err := http.ListenAndServe(addr, nil); err != nil {
+		log.Fatal("ListenAndServe:", err)
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow all origins for example
+	},
+}
+
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("upgrade:", err)
+		return
+	}
+	defer conn.Close()
+
+	// Create a custom ReadWriter for the WebSocket
+	wsRw := &wsReadWriter{conn: conn}
+
+	initialModel := model{0, false, 10, 0, 0, false, false}
+	p := tea.NewProgram(initialModel, tea.WithInput(wsRw), tea.WithOutput(wsRw))
+	if _, err := p.Run(); err != nil {
+		log.Println("program error:", err)
+	}
+}
+
+type wsReadWriter struct {
+	conn *websocket.Conn
+	buf  bytes.Buffer
+}
+
+func (w *wsReadWriter) Read(p []byte) (n int, err error) {
+	if w.buf.Len() > 0 {
+		return w.buf.Read(p)
+	}
+
+	_, message, err := w.conn.ReadMessage()
+	if err != nil {
+		return 0, err
+	}
+
+	w.buf.Write(message)
+	return w.buf.Read(p)
+}
+
+func (w *wsReadWriter) Write(p []byte) (n int, err error) {
+	err = w.conn.WriteMessage(websocket.BinaryMessage, p)
+	if err != nil {
+		return 0, err
+	}
+	return len(p), nil
 }
 
 type (
