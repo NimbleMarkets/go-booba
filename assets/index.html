@@ -6,161 +6,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booba View Example</title>
     <style>
-        body,
-        html {
+        * {
             margin: 0;
             padding: 0;
-            height: 100%;
-            background-color: #000;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .terminal-window {
+            width: 100%;
+            max-width: 1000px;
+            background: #1e1e1e;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             overflow: hidden;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+        }
+
+        .title-bar {
+            background: #2d2d2d;
+            padding: 12px 16px;
+            display: flex;
             align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #1a1a1a;
         }
 
-        #terminal {
-            width: 80%;
-            height: 80%;
-            border: 2px solid #333;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
         }
 
-        #status-overlay {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-family: sans-serif;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.5);
-            pointer-events: none;
+        .light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .light.red {
+            background: #ff5f56;
+        }
+
+        .light.yellow {
+            background: #ffbd2e;
+        }
+
+        .light.green {
+            background: #27c93f;
+        }
+
+        .title {
+            color: #e5e5e5;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .connection-status {
+            margin-left: auto;
+            font-size: 11px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .connection-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #666;
             transition: background-color 0.3s;
         }
 
-        .status-connecting {
-            background-color: #e6b800 !important;
+        .connection-dot.connected {
+            background: #27c93f;
         }
 
-        /* Yellow */
-        .status-connected {
-            background-color: #28a745 !important;
+        .connection-dot.disconnected {
+            background: #dc3545;
         }
 
-        /* Green */
-        .status-disconnected {
-            background-color: #dc3545 !important;
+        .connection-dot.connecting {
+            background: #e6b800;
         }
 
-        /* Red */
+        #terminal-container {
+            padding: 16px;
+            background: #1e1e1e;
+            /* Ensure the container has dimensions for the terminal */
+            min-height: 400px;
+        }
     </style>
 </head>
 
 <body>
-    <div id="terminal"></div>
-    <div id="status-overlay" class="status-connecting">Connecting...</div>
+    <div class="terminal-window">
+        <div class="title-bar">
+            <div class="traffic-lights">
+                <span class="light red"></span>
+                <span class="light yellow"></span>
+                <span class="light green"></span>
+            </div>
+            <div class="title">booba-view-example</div>
+            <div class="connection-status">
+                <span class="connection-dot connecting" id="connection-dot"></span>
+                <span id="connection-text">Connecting...</span>
+            </div>
+        </div>
+        <div id="terminal-container"></div>
+    </div>
+
     <script type="module">
+        import { BoobaTerminal } from './booba/booba.js';
+
+        const connectionDot = document.getElementById('connection-dot');
+        const connectionText = document.getElementById('connection-text');
+
         window.onerror = function (message, source, lineno, colno, error) {
             console.error('Global Error:', message, source, lineno, colno, error);
-            const overlay = document.getElementById('status-overlay');
-            if (overlay) {
-                overlay.textContent = 'Error: ' + message;
-                overlay.className = 'status-disconnected';
-            }
+            connectionText.textContent = 'Error: ' + message;
+            connectionDot.className = 'connection-dot disconnected';
         };
 
-        import { init, Terminal } from './ghostty-web/ghostty-web.js';
-
-        const statusOverlay = document.getElementById('status-overlay');
-
-        function updateStatus(state, message) {
-            statusOverlay.className = `status-${state}`;
-            statusOverlay.textContent = message;
-        }
-
         async function main() {
-            await init();
-            const term = new Terminal({
-                fontSize: 14,
+            const booba = new BoobaTerminal('terminal-container', {
                 cols: 80,
                 rows: 24,
-                theme: {
-                    background: '#1a1b26',
-                    foreground: '#a9b1d6',
-                },
             });
-            term.open(document.getElementById('terminal'));
-            console.log('Terminal opened. Size:', term.cols, 'x', term.rows);
+
+            booba.onStatusChange = (state, message) => {
+                connectionDot.className = `connection-dot ${state}`;
+                connectionText.textContent = message;
+            };
+
+            await booba.init();
 
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
-            const websocket = new WebSocket(wsUrl);
-
-            term.onData((data) => {
-                if (websocket.readyState === WebSocket.OPEN) {
-                    // Protocol: 0x01 + data
-                    const payload = new Uint8Array(data.length + 1);
-                    payload[0] = 0x01;
-                    for (let i = 0; i < data.length; i++) {
-                        payload[i + 1] = data.charCodeAt(i);
-                    }
-                    websocket.send(payload);
-                }
-            });
-
-            function sendResize(cols, rows) {
-                if (websocket.readyState === WebSocket.OPEN) {
-                    // Protocol: 0x02 + JSON
-                    const json = JSON.stringify({ cols, rows });
-                    const encoder = new TextEncoder();
-                    const jsonBytes = encoder.encode(json);
-                    const payload = new Uint8Array(jsonBytes.length + 1);
-                    payload[0] = 0x02;
-                    payload.set(jsonBytes, 1);
-                    websocket.send(payload);
-                    console.log('Sent resize:', cols, rows);
-                }
-            }
-
-            // Simple fit logic (approximate) or just rely on window resize
-            // Since we don't have xterm-addon-fit, we'll just send the current size on connect
-            // and maybe listen to window resize to update if we could calculate it.
-            // For now, let's just send the initial size.
-
-            websocket.onmessage = (e) => {
-                // console.log('WebSocket Message Received:', e.data);
-                // Handle binary data if needed, but text is usually fine for xterm/ghostty
-                if (e.data instanceof Blob) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        // console.log('WebSocket Binary Data:', new Uint8Array(reader.result));
-                        term.write(new Uint8Array(reader.result));
-                    };
-                    reader.readAsArrayBuffer(e.data);
-                } else {
-                    // console.log('Writing to terminal:', e.data);
-                    term.write(e.data);
-                }
-            };
-
-            websocket.onopen = () => {
-                console.log('Connected to WebSocket');
-                updateStatus('connected', 'Connected');
-                sendResize(term.cols, term.rows);
-            };
-
-            websocket.onclose = (e) => {
-                console.log('Disconnected from WebSocket', e.code, e.reason);
-                term.write('\r\nConnection closed.\r\n');
-                updateStatus('disconnected', 'Disconnected');
-            };
-
-            websocket.onerror = (e) => {
-                console.error('WebSocket Error:', e);
-                updateStatus('disconnected', 'Error');
-            };
+            booba.connect(wsUrl);
         }
 
         main().catch(console.error);

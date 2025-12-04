@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ESNext",
+        "lib": [
+            "ES2020",
+            "DOM"
+        ],
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "allowJs": true,
+        "declarationMap": true,
+        "declaration": true,
+        "sourceMap": true,
+        "outDir": "./assets/booba",
+        "rootDir": "./ts",
+        "strict": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+    },
+    "include": [
+        "ts/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.test.ts"
+    ]
+}

@@ -15,19 +15,17 @@ tasks:
 
   dev-deps:
     desc: 'Install developer dependencies'
-    deps:
-      - npm-deps
     cmds:
       - go install 'golang.org/x/tools/cmd/godoc@latest'
       - go install 'golang.org/x/pkgsite/cmd/pkgsite@latest'
+      - npm install
 
   npm-deps:
     desc: 'Install npm dependencies'
     cmds:
-      - npm install
+      - npm ci
     sources:
       - package.json
-    generates:
       - package-lock.json
 
 ###############################################################################
@@ -45,19 +43,29 @@ tasks:
   build:
     desc: 'Build all the things'
     deps:
-      - dev-deps
+      - build-assets
       - build-cmds
+
+  build-assets:
+    desc: 'Build frontend assets'
+    deps: [npm-deps]
+    cmds:
+      - npx tsc
+    sources:
+      - ts/*.ts
+    generates:
+      - assets/booba/*.js
 
   clean:
     desc: 'Clean commands'
     deps:
       - clean-cmds
-      - clean-npm
+      - clean-assets
  
-  clean-npm:
+  clean-assets:
     desc: 'Cleans node_modules and package-lock.json'
     cmds:
-      - rm -rf node_modules package-lock.json
+      - rm -rf assets/booba
 
 ###############################################################################
 # Commands
