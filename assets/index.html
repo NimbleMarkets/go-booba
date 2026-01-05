@@ -142,7 +142,7 @@
         async function main() {
             const booba = new BoobaTerminal('terminal-container', {
                 cols: 80,
-                rows: 24,
+                rows: 60,
             });
 
             booba.onStatusChange = (state, message) => {
@@ -154,7 +154,7 @@
 
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
-            booba.connect(wsUrl);
+            booba.connectWebSocket(wsUrl);
         }
 
         main().catch(console.error);

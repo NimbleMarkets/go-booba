@@ -1,5 +1,6 @@
 // @ts-ignore - Import will resolve at runtime in browser
 import { init, Terminal, FitAddon } from '../ghostty-web/ghostty-web.js';
+import { BoobaAdapter, BoobaConnectionState, BoobaWebSocketAdapter, BoobaWasmAdapter } from './adapter.js';
 
 export interface BoobaTerminalOptions {
     fontSize?: number;
@@ -17,7 +18,7 @@ export class BoobaTerminal {
     container: HTMLElement | null;
     options: BoobaTerminalOptions;
     term: any; // Using any for now as we don't have full types for Terminal
-    ws: WebSocket | null;
+    adapter: BoobaAdapter | null;
     onStatusChange: ((state: string, message: string) => void) | null;
     fitAddon: FitAddon | null;
 
@@ -34,7 +35,7 @@ export class BoobaTerminal {
             ...options
         };
         this.term = null;
-        this.ws = null;
+        this.adapter = null;
         this.onStatusChange = null;
         this.fitAddon = null;
     }
@@ -57,72 +58,72 @@ export class BoobaTerminal {
 
         // Listen for resize events from the terminal (triggered by fit addon)
         this.term.onResize((size: { cols: number; rows: number }) => {
-            this.sendResize(size.cols, size.rows);
+            this.adapter?.boobaResize(size.cols, size.rows);
         });
 
         console.log('Terminal opened. Size:', this.term.cols, 'x', this.term.rows);
 
+        // Send user input through adapter
         this.term.onData((data: string) => {
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                // Protocol: 0x01 + data
-                const payload = new Uint8Array(data.length + 1);
-                payload[0] = 0x01;
-                for (let i = 0; i < data.length; i++) {
-                    payload[i + 1] = data.charCodeAt(i);
-                }
-                this.ws.send(payload);
-            }
+            this.adapter?.boobaWrite(data);
         });
     }
 
-    connect(url: string) {
-        this.ws = new WebSocket(url);
-
-        this.ws.onopen = () => {
-            console.log('Connected to WebSocket');
-            this._updateStatus('connected', 'Connected');
-            // Send current size immediately
-            if (this.term) {
-                this.sendResize(this.term.cols, this.term.rows);
-            }
-        };
-
-        this.ws.onmessage = (e: MessageEvent) => {
-            if (e.data instanceof Blob) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    this.term.write(new Uint8Array(reader.result as ArrayBuffer));
-                };
-                reader.readAsArrayBuffer(e.data);
-            } else {
-                this.term.write(e.data);
-            }
-        };
-
-        this.ws.onclose = (e: CloseEvent) => {
-            console.log('Disconnected from WebSocket', e.code, e.reason);
-            this.term.write('\r\nConnection closed.\r\n');
-            this._updateStatus('disconnected', 'Disconnected');
-        };
-
-        this.ws.onerror = (e: Event) => {
-            console.error('WebSocket Error:', e);
-            this._updateStatus('disconnected', 'Error');
-        };
+    /**
+     * Connect to a BubbleTea backend via WebSocket
+     * @param url WebSocket URL (e.g., 'ws://localhost:8080/ws')
+     */
+    connectWebSocket(url: string) {
+        this.adapter = new BoobaWebSocketAdapter(url);
+        this._setupAdapter();
     }
 
-    sendResize(cols: number, rows: number) {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            // Protocol: 0x02 + JSON
-            const json = JSON.stringify({ cols, rows });
-            const encoder = new TextEncoder();
-            const jsonBytes = encoder.encode(json);
-            const payload = new Uint8Array(jsonBytes.length + 1);
-            payload[0] = 0x02;
-            payload.set(jsonBytes, 1);
-            this.ws.send(payload);
-            console.log('Sent resize:', cols, rows);
-        }
+    /**
+     * Connect to a BubbleTea program running in WASM
+     * @param pollMs Polling interval in milliseconds (default: 16ms / ~60fps)
+     */
+    connectWasm(pollMs: number = 16) {
+        this.adapter = new BoobaWasmAdapter(pollMs);
+        this._setupAdapter();
+    }
+
+    /**
+     * Use a custom adapter implementation
+     * @param adapter Custom BubbleTeaAdapter
+     */
+    connectAdapter(adapter: BoobaAdapter) {
+        this.adapter = adapter;
+        this._setupAdapter();
+    }
+
+    private _setupAdapter() {
+        if (!this.adapter) return;
+
+        this.adapter.connect(
+            (data: string | Uint8Array) => {
+                // Write data from BubbleTea to terminal
+                this.term.write(data);
+            },
+            (state: BoobaConnectionState, message: string) => {
+                // Update connection status
+                this._updateStatus(state, message);
+
+                // Send initial size when connected
+                if (state === 'connected' && this.term) {
+                    this.adapter?.boobaResize(this.term.cols, this.term.rows);
+                }
+
+                // Show disconnect message in terminal
+                if (state === 'disconnected') {
+                    this.term.write('\r\nConnection closed.\r\n');
+                }
+            }
+        );
+    }
+
+    disconnect() {
+        this.adapter?.disconnect();
+        this.adapter = null;
     }
 
     _updateStatus(state: string, message: string) {
@@ -131,3 +132,6 @@ export class BoobaTerminal {
         }
     }
 }
+
+// Re-export adapter types for convenience
+export { BoobaAdapter, BoobaWebSocketAdapter, BoobaWasmAdapter, BoobaConnectionState };

@@ -12,8 +12,6 @@ package main
 // implementing a progress bar from scratch here.
 
 import (
-	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -23,10 +21,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/NimbleMarkets/booba/internal/booba_server"
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/charmbracelet/lipgloss/v2"
 	"github.com/fogleman/ease"
-	"github.com/gorilla/websocket"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -71,121 +69,22 @@ func main() {
 }
 
 func startWebServer(addr string) {
+	// Create BubbleTea WebSocket server
+	btServer := booba_server.NewServer()
+
+	// Serve static assets
 	http.Handle("/", http.FileServer(http.Dir("assets")))
-	http.HandleFunc("/ws", handleWebSocket)
+
+	// Handle WebSocket connections
+	http.HandleFunc("/ws", btServer.Handler(func() tea.Model {
+		// Create a new model for each connection
+		return model{0, false, 3600, 0, 0, false, false}
+	}))
 
 	log.Printf("Starting web server on %s", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow all origins for example
-	},
-}
-
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("upgrade:", err)
-		return
-	}
-	defer conn.Close()
-
-	// Create a custom ReadWriter for the WebSocket
-	wsRw := &wsReadWriter{conn: conn}
-
-	initialModel := model{0, false, 3600, 0, 0, false, false}
-	p := tea.NewProgram(initialModel, tea.WithInput(wsRw), tea.WithOutput(wsRw))
-	wsRw.program = p
-
-	// Simulate a terminal resize to ensure the program renders
-	go func() {
-		time.Sleep(100 * time.Millisecond)
-		p.Send(tea.WindowSizeMsg{Width: 80, Height: 24})
-	}()
-
-	if _, err := p.Run(); err != nil {
-		log.Println("program error:", err)
-	}
-}
-
-const (
-	msgInput  = 0x01
-	msgResize = 0x02
-)
-
-type wsReadWriter struct {
-	conn    *websocket.Conn
-	buf     bytes.Buffer
-	program *tea.Program
-}
-
-func (w *wsReadWriter) Read(p []byte) (n int, err error) {
-	if w.buf.Len() > 0 {
-		return w.buf.Read(p)
-	}
-
-	for {
-		_, message, err := w.conn.ReadMessage()
-		if err != nil {
-			log.Printf("WebSocket Read Error: %v", err)
-			return 0, err
-		}
-
-		if len(message) == 0 {
-			continue
-		}
-
-		msgType := message[0]
-		payload := message[1:]
-
-		switch msgType {
-		case msgInput:
-			log.Printf("WebSocket Input: %d bytes", len(payload))
-			if len(payload) == 0 {
-				continue
-			}
-			w.buf.Write(payload)
-			return w.buf.Read(p)
-
-		case msgResize:
-			if len(payload) >= 4 {
-				// Simple binary format: [cols_high, cols_low, rows_high, rows_low]
-				// Or JSON: {"cols": 80, "rows": 24}
-				// Let's stick to JSON as planned for ease
-				var size struct {
-					Cols int `json:"cols"`
-					Rows int `json:"rows"`
-				}
-				if err := json.Unmarshal(payload, &size); err == nil {
-					log.Printf("WebSocket Resize: %dx%d", size.Cols, size.Rows)
-					if w.program != nil {
-						w.program.Send(tea.WindowSizeMsg{Width: size.Cols, Height: size.Rows})
-					}
-				} else {
-					log.Printf("WebSocket Resize Error: %v", err)
-				}
-			}
-			// Continue loop to read next message (don't return from Read)
-		default:
-			log.Printf("Unknown message type: %d", msgType)
-		}
-	}
-}
-
-func (w *wsReadWriter) Write(p []byte) (n int, err error) {
-	log.Printf("WebSocket Write: %d bytes", len(p))
-	err = w.conn.WriteMessage(websocket.BinaryMessage, p)
-	if err != nil {
-		log.Printf("WebSocket Write Error: %v", err)
-		return 0, err
-	}
-	return len(p), nil
 }
 
 type (

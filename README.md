@@ -14,6 +14,8 @@ There are two facets we address with this package:
 
  * Running a Terminal in a browser that connects over WebSockets to a BubbleTea backend
 
+## How and What?
+
 The primary enabling technologies of this are:
 
  * [`libghostty`](https://github.com/ghostty-org/ghostty)
