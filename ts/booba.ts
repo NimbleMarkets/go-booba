@@ -2,6 +2,7 @@
 import { init, Terminal, FitAddon } from '../ghostty-web/ghostty-web.js';
 import { BoobaAdapter, BoobaConnectionState, BoobaWasmAdapter } from './adapter.js';
 import { BoobaProtocolAdapter, type WebSocketAdapterCallbacks } from './websocket_adapter.js';
+import { BoobaAutoAdapter } from './auto_adapter.js';
 import { OSC52Scanner } from './clipboard.js';
 import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js';
 
@@ -122,6 +123,22 @@ export class BoobaTerminal {
             },
         };
         this.adapter = new BoobaProtocolAdapter(url, callbacks);
+        this._setupAdapter();
+    }
+
+    /**
+     * Connect with auto-detection: tries WebTransport first, falls back to WebSocket.
+     * @param wsUrl WebSocket URL (e.g., 'ws://localhost:8080/ws')
+     * @param wtUrl WebTransport URL (e.g., 'https://localhost:8081/wt'), or null to skip
+     * @param certHashUrl URL to fetch cert hash (e.g., 'http://localhost:8080/cert-hash'), or null
+     */
+    connectAuto(wsUrl: string, wtUrl: string | null = null, certHashUrl: string | null = null) {
+        const callbacks = {
+            onTitle: (title: string) => { this.onTitleChange?.(title); },
+            onOptions: (_opts: any) => {},
+            onClose: (reason: string) => { this.term?.write(`\r\n${reason}\r\n`); },
+        };
+        this.adapter = new BoobaAutoAdapter(wsUrl, wtUrl, certHashUrl, callbacks);
         this._setupAdapter();
     }
 
@@ -370,5 +387,7 @@ export class BoobaTerminal {
 // Re-export adapter types for convenience
 export { BoobaAdapter, BoobaWasmAdapter, BoobaConnectionState };
 export { BoobaProtocolAdapter } from './websocket_adapter.js';
+export { BoobaAutoAdapter } from './auto_adapter.js';
+export { BoobaWebTransportAdapter } from './webtransport_adapter.js';
 export { OSC52Scanner } from './clipboard.js';
 export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';

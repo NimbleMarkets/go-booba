@@ -73,9 +73,15 @@
 
             await booba.init();
 
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws`;
-            booba.connectWebSocket(wsUrl);
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+
+            // WebTransport on port+1 (requires HTTPS)
+            const wtPort = parseInt(window.location.port || '80') + 1;
+            const wtUrl = `https://${window.location.hostname}:${wtPort}/wt`;
+            const certHashUrl = `${window.location.protocol}//${window.location.host}/cert-hash`;
+
+            booba.connectAuto(wsUrl, wtUrl, certHashUrl);
             booba.focus();
         }
 
