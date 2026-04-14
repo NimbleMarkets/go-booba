@@ -68,7 +68,10 @@ func (s *Server) start(ctx context.Context) error {
 			return fmt.Errorf("load TLS cert: %w", err)
 		}
 		s.certInfo = &CertInfo{
-			TLSConfig: &tls.Config{Certificates: []tls.Certificate{cert}},
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+				NextProtos:   []string{"h3"},
+			},
 		}
 	} else {
 		host := s.config.Host
@@ -124,7 +127,11 @@ func (s *Server) start(ctx context.Context) error {
 		wtServer.H3.Handler = wtMux
 
 		go func() {
-			log.Printf("WebTransport listening on https://%s", wtAddr)
+			logHostName := s.config.Host
+			if logHostName == "" {
+				logHostName = "localhost"
+			}
+			log.Printf("WebTransport listening on https://%s:%d", logHostName, wtPort)
 			if err := wtServer.ListenAndServe(); err != nil {
 				log.Printf("WebTransport server error: %v", err)
 			}
@@ -138,7 +145,11 @@ func (s *Server) start(ctx context.Context) error {
 	}
 
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
-	log.Printf("Starting server on http://%s", addr)
+	logHostName := s.config.Host
+	if logHostName == "" {
+		logHostName = "localhost"
+	}
+	log.Printf("Starting server on http://%s:%d", logHostName, s.config.Port)
 
 	server := &http.Server{
 		Addr:    addr,

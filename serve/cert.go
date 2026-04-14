@@ -73,6 +73,7 @@ func GenerateSelfSignedCert(host string) (*CertInfo, error) {
 	return &CertInfo{
 		TLSConfig: &tls.Config{
 			Certificates: []tls.Certificate{tlsCert},
+			NextProtos:   []string{"h3"},
 		},
 		DER:  der,
 		Hash: sha256.Sum256(der),
