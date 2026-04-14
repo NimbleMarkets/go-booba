@@ -121,11 +121,10 @@ func (s *Server) start(ctx context.Context) error {
 			CheckOrigin: func(r *http.Request) bool { return true },
 		}
 
-		wtMux := http.NewServeMux()
-		wtMux.HandleFunc("/wt", func(w http.ResponseWriter, r *http.Request) {
+		wtServer.H3.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log.Printf("WT handler: %s %s %s proto=%s", r.Method, r.URL.Path, r.URL.String(), r.Proto)
 			s.handleWT(w, r, wtServer)
 		})
-		wtServer.H3.Handler = wtMux
 
 		go func() {
 			logHostName := s.config.Host
@@ -268,6 +267,7 @@ func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webtransport.Server) {
+	log.Printf("WebTransport handler called: %s %s %s", r.Method, r.URL.Path, r.Proto)
 	if s.config.MaxConnections > 0 {
 		if int(s.connCount.Load()) >= s.config.MaxConnections {
 			http.Error(w, "max connections reached", http.StatusServiceUnavailable)
