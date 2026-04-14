@@ -6,7 +6,7 @@
             "ES2020",
             "DOM"
         ],
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
