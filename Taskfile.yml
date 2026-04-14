@@ -77,9 +77,11 @@ tasks:
       - clean-assets
  
   clean-assets:
-    desc: 'Cleans node_modules and package-lock.json'
+    desc: 'Cleans compiled assets'
     cmds:
       - rm -rf assets/booba
+      - rm -rf serve/static/booba
+      - rm -rf serve/static/ghostty-web
 
 ###############################################################################
 # Commands
@@ -96,7 +98,8 @@ tasks:
     cmds:
       - go build -o bin/booba-view-example ./cmd/booba-view-example/
     sources:
-      - ./cmd/booba-view-example/
+      - cmd/booba-view-example/*.go
+      - serve/*.go
     generates:
       - bin/booba-view-example
 
@@ -106,8 +109,8 @@ tasks:
     cmds:
       - internal/wasm_overlay/wasm_build.sh -o bin/booba-view-example.wasm ./cmd/booba-view-example/
     sources:
-      - ./cmd/booba-view-example/
-      - internal/**/*.go
+      - cmd/booba-view-example/*.go
+      - internal/wasm_overlay/*.go
     generates:
       - bin/booba-view-example.wasm
 
@@ -115,3 +118,4 @@ tasks:
     desc: 'Cleans all commands'
     cmds:
       - rm -f bin/booba-view-example
+      - rm -f bin/booba-view-example.wasm
