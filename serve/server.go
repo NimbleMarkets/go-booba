@@ -114,8 +114,9 @@ func (s *Server) start(ctx context.Context) error {
 		wtAddr := fmt.Sprintf("%s:%d", s.config.Host, wtPort)
 		wtServer := &webtransport.Server{
 			H3: &http3.Server{
-				Addr:      wtAddr,
-				TLSConfig: s.certInfo.TLSConfig,
+				Addr:            wtAddr,
+				TLSConfig:       s.certInfo.TLSConfig,
+				EnableDatagrams: true,
 			},
 			CheckOrigin: func(r *http.Request) bool { return true },
 		}
