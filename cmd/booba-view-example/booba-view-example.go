@@ -12,7 +12,6 @@ package main
 // implementing a progress bar from scratch here.
 
 import (
-	"flag"
 	"fmt"
 	"math"
 	"strconv"
@@ -23,6 +22,7 @@ import (
 	"charm.land/lipgloss/v2"
 	"github.com/fogleman/ease"
 	"github.com/lucasb-eyer/go-colorful"
+	"github.com/spf13/pflag"
 )
 
 const (
@@ -47,7 +47,7 @@ var (
 )
 
 func main() {
-	flag.Parse()
+	pflag.Parse()
 
 	if startWebServerIfRequested() {
 		return

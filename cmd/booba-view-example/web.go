@@ -4,16 +4,23 @@ package main
 
 import (
 	"context"
-	"flag"
 	"log"
 	"net"
 	"strconv"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/NimbleMarkets/booba/serve"
+	"github.com/spf13/pflag"
 )
 
-var flagWeb = flag.String("web", "", "start web server on this address (e.g. :8080)")
+var (
+	flagWeb      = pflag.String("web", "", "start web server on this address (e.g. :8080)")
+	flagWTPort   = pflag.Int("wt-port", 0, "WebTransport port (default: web port + 1, -1 to disable)")
+	flagTLSCert  = pflag.String("tls-cert", "", "TLS certificate file path")
+	flagTLSKey   = pflag.String("tls-key", "", "TLS key file path")
+	flagReadOnly = pflag.Bool("read-only", false, "disable client input")
+	flagDebug    = pflag.Bool("debug", false, "verbose logging")
+)
 
 func startWebServerIfRequested() bool {
 	if *flagWeb == "" {
@@ -28,6 +35,12 @@ func startWebServerIfRequested() bool {
 			config.Port = p
 		}
 	}
+
+	config.WTPort = *flagWTPort
+	config.TLSCert = *flagTLSCert
+	config.TLSKey = *flagTLSKey
+	config.ReadOnly = *flagReadOnly
+	config.Debug = *flagDebug
 
 	server := serve.NewServer(config)
 
