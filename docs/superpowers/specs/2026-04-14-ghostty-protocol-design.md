@@ -6,7 +6,7 @@ Replace booba's current ad-hoc binary protocol with a Sip-compatible terminal pr
 
 ## Design Principles
 
-- **Sip-compatible**: Message types `'0'`-`'7'` match Sip's wire format exactly. A booba ghostty-web frontend can connect to a Sip server, and a Sip xterm.js frontend can connect to a booba server (minus Ghostty-specific extensions).
+- **Sip-compatible**: Message types `'0'`-`'7'` match Sip's wire format exactly. A booba ghostty-web frontend can connect to a Sip server, and a Sip xterm.js frontend can connect to a booba server (minus Ghostty-specific extensions). Booba does not depend on the `sip` Go module — it implements the protocol independently, inspired by Sip's design but using its own WebSocket/WebTransport handlers, PTY management, and static asset serving.
 - **Ghostty-native**: Sets `TERM=ghostty` on PTYs and leverages Ghostty's native capabilities (Kitty keyboard protocol, OSC 8 hyperlinks) via standard terminal escape sequence negotiation — not custom protocol messages.
 - **PTY-based**: Every session gets a real pseudo-terminal, eliminating the need for LNM hacks, TERM workarounds, and newline mapping fixes.
 - **Transport-agnostic**: Same protocol over WebSocket and WebTransport, with auto-detection and fallback.
