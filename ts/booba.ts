@@ -1,7 +1,7 @@
 // @ts-ignore - Import will resolve at runtime in browser
 import { init, Terminal, FitAddon } from '../ghostty-web/ghostty-web.js';
 import { BoobaAdapter, BoobaConnectionState, BoobaWebSocketAdapter, BoobaWasmAdapter } from './adapter.js';
-import type { BoobaTheme, BoobaLinkProvider } from './types.js';
+import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js';
 
 export interface BoobaTerminalOptions {
     fontSize?: number;
@@ -19,12 +19,15 @@ export interface BoobaTerminalOptions {
 }
 
 export class BoobaTerminal {
-    container: HTMLElement | null;
+    container: HTMLElement | null = null;
     options: BoobaTerminalOptions;
-    term: any; // Using any for now as we don't have full types for Terminal
-    adapter: BoobaAdapter | null;
-    onStatusChange: ((state: string, message: string) => void) | null;
-    fitAddon: FitAddon | null;
+    term: any = null;
+    adapter: BoobaAdapter | null = null;
+    fitAddon: FitAddon | null = null;
+    private _resizeHandler: (() => void) | null = null;
+
+    // --- Event Callbacks ---
+    onStatusChange: ((state: string, message: string) => void) | null = null;
     onBell: (() => void) | null = null;
     onSelectionChange: (() => void) | null = null;
     onKey: ((event: { key: string; domEvent: KeyboardEvent }) => void) | null = null;
@@ -45,10 +48,6 @@ export class BoobaTerminal {
             },
             ...options
         };
-        this.term = null;
-        this.adapter = null;
-        this.onStatusChange = null;
-        this.fitAddon = null;
     }
 
     async init() {
@@ -63,9 +62,8 @@ export class BoobaTerminal {
         this.fitAddon.observeResize();
 
         // Handle window resize as fallback
-        window.addEventListener('resize', () => {
-            this.fitAddon?.fit();
-        });
+        this._resizeHandler = () => { this.fitAddon?.fit(); };
+        window.addEventListener('resize', this._resizeHandler);
 
         // Listen for resize events from the terminal (triggered by fit addon)
         this.term.onResize((size: { cols: number; rows: number }) => {
@@ -167,136 +165,173 @@ export class BoobaTerminal {
 
     // --- Selection & Clipboard ---
 
+    /** Get the currently selected text */
     getSelection(): string {
         return this.term?.getSelection() ?? '';
     }
 
+    /** Check if there's an active selection */
     hasSelection(): boolean {
         return this.term?.hasSelection() ?? false;
     }
 
+    /** Clear the current selection */
     clearSelection(): void {
         this.term?.clearSelection();
     }
 
+    /** Copy the current selection to clipboard. Returns true if text was copied. */
     copySelection(): boolean {
         return this.term?.copySelection() ?? false;
     }
 
+    /** Select all text in the terminal */
     selectAll(): void {
         this.term?.selectAll();
     }
 
+    /** Select text at a specific position */
     select(column: number, row: number, length: number): void {
         this.term?.select(column, row, length);
     }
 
+    /** Select entire lines from start to end (inclusive) */
     selectLines(start: number, end: number): void {
         this.term?.selectLines(start, end);
     }
 
-    getSelectionPosition(): { start: { x: number; y: number }; end: { x: number; y: number } } | undefined {
+    /** Get the selection position as a buffer range, or undefined if no selection */
+    getSelectionPosition(): BoobaBufferRange | undefined {
         return this.term?.getSelectionPosition();
     }
 
     // --- Scrollback & Viewport ---
 
+    /** Scroll by a number of lines (positive = down, negative = up into history) */
     scrollLines(amount: number): void {
         this.term?.scrollLines(amount);
     }
 
+    /** Scroll by a number of pages */
     scrollPages(amount: number): void {
         this.term?.scrollPages(amount);
     }
 
+    /** Scroll to the top of the scrollback buffer */
     scrollToTop(): void {
         this.term?.scrollToTop();
     }
 
+    /** Scroll to the bottom (current output) */
     scrollToBottom(): void {
         this.term?.scrollToBottom();
     }
 
+    /** Scroll to a specific line in the buffer */
     scrollToLine(line: number): void {
         this.term?.scrollToLine(line);
     }
 
+    /** Get the current viewport Y position (lines scrolled back from bottom) */
     getViewportY(): number {
         return this.term?.getViewportY() ?? 0;
     }
 
     // --- Terminal Control ---
 
+    /** Paste text into the terminal (uses bracketed paste if the program supports it) */
     paste(data: string): void {
         this.term?.paste(data);
     }
 
+    /** Input data as if typed by the user */
     input(data: string): void {
         this.term?.input(data, true);
     }
 
+    /** Focus the terminal */
     focus(): void {
         this.term?.focus();
     }
 
+    /** Remove focus from the terminal */
     blur(): void {
         this.term?.blur();
     }
 
+    /** Clear the terminal screen */
     clear(): void {
         this.term?.clear();
     }
 
+    /** Reset the terminal state */
     reset(): void {
         this.term?.reset();
     }
 
+    /** Write data to the terminal display */
     write(data: string | Uint8Array, callback?: () => void): void {
         this.term?.write(data, callback);
     }
 
+    /** Write data with a trailing newline */
     writeln(data: string | Uint8Array, callback?: () => void): void {
         this.term?.writeln(data, callback);
     }
 
     // --- Terminal Mode Queries ---
 
+    /** Check if the program has enabled mouse tracking */
     hasMouseTracking(): boolean {
         return this.term?.hasMouseTracking() ?? false;
     }
 
+    /** Check if the program has enabled bracketed paste mode */
     hasBracketedPaste(): boolean {
         return this.term?.hasBracketedPaste() ?? false;
     }
 
+    /** Check if the program has enabled focus event reporting */
     hasFocusEvents(): boolean {
         return this.term?.hasFocusEvents() ?? false;
     }
 
+    /** Query an arbitrary terminal mode by number */
     getMode(mode: number, isAnsi?: boolean): boolean {
         return this.term?.getMode(mode, isAnsi) ?? false;
     }
 
     // --- Link Detection ---
 
+    /**
+     * Register a link provider for detecting clickable links in terminal output.
+     * Returns a disposable to unregister the provider.
+     */
     registerLinkProvider(provider: BoobaLinkProvider): { dispose(): void } | undefined {
         return this.term?.registerLinkProvider(provider);
     }
 
     // --- Custom Event Handlers ---
 
+    /** Attach a custom keyboard event handler. Return true to prevent default handling. */
     attachCustomKeyEventHandler(handler: (event: KeyboardEvent) => boolean): void {
         this.term?.attachCustomKeyEventHandler(handler);
     }
 
+    /** Attach a custom wheel event handler. Return true to prevent default scroll handling. */
     attachCustomWheelEventHandler(handler?: (event: WheelEvent) => boolean): void {
         this.term?.attachCustomWheelEventHandler(handler);
     }
 
     // --- Lifecycle ---
 
+    /** Dispose the terminal and clean up all resources */
     dispose(): void {
         this.disconnect();
+        if (this._resizeHandler) {
+            window.removeEventListener('resize', this._resizeHandler);
+            this._resizeHandler = null;
+        }
         this.term?.dispose();
         this.term = null;
         this.fitAddon = null;
@@ -304,14 +339,17 @@ export class BoobaTerminal {
 
     // --- Advanced Access ---
 
+    /** Get the underlying ghostty-web Terminal instance for advanced use cases */
     get terminal(): any {
         return this.term;
     }
 
+    /** Get the current number of columns */
     get cols(): number {
         return this.term?.cols ?? 0;
     }
 
+    /** Get the current number of rows */
     get rows(): number {
         return this.term?.rows ?? 0;
     }
