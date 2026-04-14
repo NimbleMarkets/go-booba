@@ -94,9 +94,9 @@ tasks:
     desc: 'Build booba-view-example command'
     deps: [go-tidy, build-serve-assets]
     cmds:
-      - go build -o bin/booba-view-example cmd/booba-view-example/*.go
+      - go build -o bin/booba-view-example ./cmd/booba-view-example/
     sources:
-      - cmd/booba-view-example/*.go
+      - ./cmd/booba-view-example/
     generates:
       - bin/booba-view-example
 
@@ -104,9 +104,9 @@ tasks:
     desc: 'Build booba-view-example command in WASM'
     deps: [go-tidy]
     cmds:
-      - internal/wasm_overlay/wasm_build.sh -o bin/booba-view-example.wasm cmd/booba-view-example/*.go
+      - internal/wasm_overlay/wasm_build.sh -o bin/booba-view-example.wasm ./cmd/booba-view-example/
     sources:
-      - cmd/booba-view-example/*.go
+      - ./cmd/booba-view-example/
       - internal/**/*.go
     generates:
       - bin/booba-view-example.wasm

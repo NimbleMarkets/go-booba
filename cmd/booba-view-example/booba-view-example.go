@@ -12,19 +12,15 @@ package main
 // implementing a progress bar from scratch here.
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"log"
 	"math"
-	"net"
 	"strconv"
 	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/NimbleMarkets/booba/serve"
 	"github.com/fogleman/ease"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -50,15 +46,10 @@ var (
 	ramp = makeRampStyles("#B14FFF", "#00FFA3", progressBarWidth)
 )
 
-var (
-	flagWeb = flag.String("web", "", "start web server on this address (e.g. :8080)")
-)
-
 func main() {
 	flag.Parse()
 
-	if *flagWeb != "" {
-		startWebServer(*flagWeb)
+	if startWebServerIfRequested() {
 		return
 	}
 
@@ -66,27 +57,6 @@ func main() {
 	p := tea.NewProgram(initialModel)
 	if _, err := p.Run(); err != nil {
 		fmt.Println("could not start program:", err)
-	}
-}
-
-func startWebServer(addr string) {
-	config := serve.DefaultConfig()
-
-	// Parse addr to extract host:port
-	if host, port, err := net.SplitHostPort(addr); err == nil {
-		config.Host = host
-		if p, err := strconv.Atoi(port); err == nil {
-			config.Port = p
-		}
-	}
-
-	server := serve.NewServer(config)
-
-	ctx := context.Background()
-	if err := server.Serve(ctx, func(sess serve.Session) tea.Model {
-		return model{0, false, 3600, 0, 0, false, false}
-	}); err != nil {
-		log.Fatal("Server error:", err)
 	}
 }
 
