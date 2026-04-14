@@ -347,3 +347,4 @@ export class BoobaTerminal {
 
 // Re-export adapter types for convenience
 export { BoobaAdapter, BoobaWebSocketAdapter, BoobaWasmAdapter, BoobaConnectionState };
+export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';
