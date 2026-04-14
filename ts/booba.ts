@@ -1,6 +1,7 @@
 // @ts-ignore - Import will resolve at runtime in browser
 import { init, Terminal, FitAddon } from '../ghostty-web/ghostty-web.js';
 import { BoobaAdapter, BoobaConnectionState, BoobaWebSocketAdapter, BoobaWasmAdapter } from './adapter.js';
+import type { BoobaTheme, BoobaLinkProvider } from './types.js';
 
 export interface BoobaTerminalOptions {
     fontSize?: number;
@@ -14,30 +15,7 @@ export interface BoobaTerminalOptions {
     convertEol?: boolean;
     disableStdin?: boolean;
     smoothScrollDuration?: number;
-    theme?: {
-        foreground?: string;
-        background?: string;
-        cursor?: string;
-        cursorAccent?: string;
-        selectionBackground?: string;
-        selectionForeground?: string;
-        black?: string;
-        red?: string;
-        green?: string;
-        yellow?: string;
-        blue?: string;
-        magenta?: string;
-        cyan?: string;
-        white?: string;
-        brightBlack?: string;
-        brightRed?: string;
-        brightGreen?: string;
-        brightYellow?: string;
-        brightBlue?: string;
-        brightMagenta?: string;
-        brightCyan?: string;
-        brightWhite?: string;
-    };
+    theme?: BoobaTheme;
 }
 
 export class BoobaTerminal {
@@ -301,8 +279,8 @@ export class BoobaTerminal {
 
     // --- Link Detection ---
 
-    registerLinkProvider(provider: { provideLinks(y: number, callback: (links: any[] | undefined) => void): void; dispose?(): void }): void {
-        this.term?.registerLinkProvider(provider);
+    registerLinkProvider(provider: BoobaLinkProvider): { dispose(): void } | undefined {
+        return this.term?.registerLinkProvider(provider);
     }
 
     // --- Custom Event Handlers ---
@@ -338,7 +316,7 @@ export class BoobaTerminal {
         return this.term?.rows ?? 0;
     }
 
-    _updateStatus(state: string, message: string) {
+    private _updateStatus(state: string, message: string) {
         if (this.onStatusChange) {
             this.onStatusChange(state, message);
         }
