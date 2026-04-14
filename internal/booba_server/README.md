@@ -54,6 +54,8 @@ http.HandleFunc("/ws", btServer.Handler(
 ))
 ```
 
+Mouse events from the browser terminal (clicks, scrolls, motion) are encoded as escape sequences by ghostty-web and sent through the `0x01` input protocol. When you pass `tea.WithMouseCellMotion()` or `tea.WithMouseAllMotion()`, BubbleTea will receive `tea.MouseMsg` events as expected.
+
 ## Protocol
 
 The package uses a simple binary protocol for WebSocket communication:

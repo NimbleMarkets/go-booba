@@ -1,6 +1,6 @@
 # Booba Adapter Usage Guide
 
-The BubbleTea adapter abstraction allows you to connect to Booba-based BubbleTea programs in two ways:
+The BubbleTea adapter abstraction allows you to connect to Booba-based BubbleTea programs in multiple ways. For the full `BoobaTerminal` API reference, see [README.md](./README.md).
 
 ## 1. WebSocket Mode (Backend Server)
 
@@ -12,14 +12,21 @@ import { BoobaTerminal } from './booba/booba.js';
 const booba = new BoobaTerminal('terminal-container', {
     cols: 80,
     rows: 24,
+    scrollback: 1000,
+    cursorBlink: true,
 });
 
 booba.onStatusChange = (state, message) => {
     console.log(`Connection ${state}: ${message}`);
 };
 
+booba.onTitleChange = (title) => {
+    document.title = title || 'My Terminal';
+};
+
 await booba.init();
 booba.connectWebSocket('ws://localhost:8080/ws');
+booba.focus();
 ```
 
 **Protocol**: Uses a custom binary protocol
@@ -138,3 +145,13 @@ Set up the connection and register callbacks for received data and connection st
 
 ### `disconnect(): void`
 Close the connection and clean up resources.
+
+## Terminal Features Available Across All Adapters
+
+Regardless of which adapter you use, all `BoobaTerminal` features work the same way. The adapter only handles the transport (how data gets to/from the BubbleTea program). Features like selection, scrollback, paste, focus, link detection, and events are handled by the terminal layer above the adapter.
+
+**Mouse tracking**: If your BubbleTea program enables mouse tracking (e.g., via `tea.WithMouseCellMotion()`), mouse events are encoded as escape sequences by ghostty-web and flow through the adapter's `boobaWrite` as regular input data. No adapter changes are needed.
+
+**Bracketed paste**: Similarly, `booba.paste(data)` wraps the text in bracketed paste escape sequences when the program has enabled bracketed paste mode. The escape sequences flow through `boobaWrite` transparently.
+
+**Lifecycle**: Always call `booba.dispose()` when tearing down the terminal to clean up event listeners and resources. This automatically calls `disconnect()` on the adapter.
