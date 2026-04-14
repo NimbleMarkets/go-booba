@@ -56,22 +56,27 @@ func (s *Server) Handler(modelFactory func() tea.Model, options ...tea.ProgramOp
 
 		// Wait for the client to send its actual terminal size before
 		// starting the program. The client sends a resize message (0x02)
-		// immediately on connect.
+		// immediately on connect. We store it so the adapter can deliver
+		// it via Send() once the program is running.
 		initialSize := adapter.waitForInitialSize()
 		log.Printf("Initial terminal size: %dx%d", initialSize.Width, initialSize.Height)
 
-		// Create BubbleTea program with WebSocket I/O
+		// Create BubbleTea program with WebSocket I/O.
+		// Set TERM so BubbleTea's renderer can use terminfo for cursor movement.
 		prog := tea.NewProgram(model, append([]tea.ProgramOption{
 			tea.WithInput(adapter),
 			tea.WithOutput(adapter),
+			tea.WithEnvironment([]string{"TERM=xterm-256color"}),
 		}, options...)...)
 
 		adapter.program = prog
+		adapter.initialSize = &initialSize
 
-		// Send the initial size now that the program exists
-		go func() {
-			prog.Send(initialSize)
-		}()
+		// Enable LNM (Line Feed/New Line Mode) so the terminal treats
+		// LF (\n) as CR+LF. BubbleTea's renderer sends bare \n when
+		// mapNl is true (non-TTY output), expecting the terminal to
+		// handle the carriage return.
+		adapter.Write([]byte("\x1b[20h"))
 
 		// Run the program (blocks until program exits)
 		if _, err := prog.Run(); err != nil {
@@ -82,9 +87,10 @@ func (s *Server) Handler(modelFactory func() tea.Model, options ...tea.ProgramOp
 
 // webSocketAdapter adapts a WebSocket connection to io.ReadWriter for BubbleTea.
 type webSocketAdapter struct {
-	conn    *websocket.Conn
-	buf     bytes.Buffer
-	program *tea.Program
+	conn        *websocket.Conn
+	buf         bytes.Buffer
+	program     *tea.Program
+	initialSize *tea.WindowSizeMsg
 }
 
 // waitForInitialSize reads from the WebSocket until a resize message arrives,
@@ -137,6 +143,15 @@ func newWebSocketAdapter(conn *websocket.Conn) *webSocketAdapter {
 
 // Read implements io.Reader, reading from the WebSocket and handling the protocol.
 func (a *webSocketAdapter) Read(p []byte) (n int, err error) {
+	// On the first Read call, send the initial window size to the program.
+	// This must happen here (not before Run) because BubbleTea's message
+	// channel isn't ready until Run starts reading input.
+	if a.initialSize != nil && a.program != nil {
+		size := *a.initialSize
+		a.initialSize = nil
+		a.program.Send(size)
+	}
+
 	if a.buf.Len() > 0 {
 		return a.buf.Read(p)
 	}
@@ -189,7 +204,7 @@ func (a *webSocketAdapter) Read(p []byte) (n int, err error) {
 
 // Write implements io.Writer, writing to the WebSocket.
 func (a *webSocketAdapter) Write(p []byte) (n int, err error) {
-	//TODO	log.Printf("WebSocket write: %d bytes", len(p))
+	log.Printf("WebSocket write: %d bytes", len(p))
 	err = a.conn.WriteMessage(websocket.BinaryMessage, p)
 	if err != nil {
 		log.Printf("WebSocket write error: %v", err)

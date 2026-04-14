@@ -101,6 +101,7 @@ export class BoobaWebSocketAdapter implements BoobaAdapter {
     ): void {
         this.onDataCallback = onData;
         this.ws = new WebSocket(this.url);
+        this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
             console.log('WebSocket connected');
@@ -108,12 +109,8 @@ export class BoobaWebSocketAdapter implements BoobaAdapter {
         };
 
         this.ws.onmessage = (e: MessageEvent) => {
-            if (e.data instanceof Blob) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    onData(new Uint8Array(reader.result as ArrayBuffer));
-                };
-                reader.readAsArrayBuffer(e.data);
+            if (e.data instanceof ArrayBuffer) {
+                onData(new Uint8Array(e.data));
             } else {
                 onData(e.data);
             }
