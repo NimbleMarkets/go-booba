@@ -150,11 +150,25 @@
                 connectionText.textContent = message;
             };
 
+            booba.onTitleChange = (title) => {
+                document.querySelector('.title').textContent = title || 'booba-view-example';
+            };
+
+            booba.onBell = () => {
+                // Brief visual flash on bell
+                const container = document.getElementById('terminal-container');
+                container.style.outline = '2px solid #ffbd2e';
+                setTimeout(() => { container.style.outline = 'none'; }, 150);
+            };
+
             await booba.init();
 
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
             booba.connectWebSocket(wsUrl);
+
+            // Focus terminal for immediate keyboard input
+            booba.focus();
         }
 
         main().catch(console.error);
