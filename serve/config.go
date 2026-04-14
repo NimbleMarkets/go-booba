@@ -5,7 +5,8 @@ import "time"
 // Config holds server configuration.
 type Config struct {
 	Host           string        // Bind address (default "0.0.0.0")
-	Port           int           // WebSocket port (default 8080)
+	Port           int           // WebSocket/HTTP port (default 8080)
+	WTPort         int           // WebTransport port (default Port+1, 0 = disabled)
 	MaxConnections int           // 0 = unlimited
 	IdleTimeout    time.Duration // 0 = no timeout
 	ReadOnly       bool          // Disable client input

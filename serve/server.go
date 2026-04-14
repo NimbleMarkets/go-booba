@@ -102,9 +102,13 @@ func (s *Server) start(ctx context.Context) error {
 		mux.HandleFunc("/cert-hash", s.handleCertHash)
 	}
 
-	// Start WebTransport server on port+1
-	if s.certInfo != nil {
-		wtAddr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port+1)
+	// Start WebTransport server
+	wtPort := s.config.WTPort
+	if wtPort == 0 {
+		wtPort = s.config.Port + 1
+	}
+	if s.certInfo != nil && wtPort > 0 {
+		wtAddr := fmt.Sprintf("%s:%d", s.config.Host, wtPort)
 		wtServer := &webtransport.Server{
 			H3: &http3.Server{
 				Addr:      wtAddr,
