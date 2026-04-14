@@ -4,14 +4,40 @@ import { BoobaAdapter, BoobaConnectionState, BoobaWebSocketAdapter, BoobaWasmAda
 
 export interface BoobaTerminalOptions {
     fontSize?: number;
+    fontFamily?: string;
     cols?: number;
     rows?: number;
+    cursorBlink?: boolean;
+    cursorStyle?: 'block' | 'underline' | 'bar';
+    scrollback?: number;
+    allowTransparency?: boolean;
+    convertEol?: boolean;
+    disableStdin?: boolean;
+    smoothScrollDuration?: number;
     theme?: {
-        background?: string;
         foreground?: string;
-        [key: string]: string | undefined;
+        background?: string;
+        cursor?: string;
+        cursorAccent?: string;
+        selectionBackground?: string;
+        selectionForeground?: string;
+        black?: string;
+        red?: string;
+        green?: string;
+        yellow?: string;
+        blue?: string;
+        magenta?: string;
+        cyan?: string;
+        white?: string;
+        brightBlack?: string;
+        brightRed?: string;
+        brightGreen?: string;
+        brightYellow?: string;
+        brightBlue?: string;
+        brightMagenta?: string;
+        brightCyan?: string;
+        brightWhite?: string;
     };
-    [key: string]: any; // Allow additional options to pass through to Terminal
 }
 
 export class BoobaTerminal {
