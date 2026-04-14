@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/gorilla/websocket"
@@ -55,6 +54,12 @@ func (s *Server) Handler(modelFactory func() tea.Model, options ...tea.ProgramOp
 		// Create WebSocket adapter
 		adapter := newWebSocketAdapter(conn)
 
+		// Wait for the client to send its actual terminal size before
+		// starting the program. The client sends a resize message (0x02)
+		// immediately on connect.
+		initialSize := adapter.waitForInitialSize()
+		log.Printf("Initial terminal size: %dx%d", initialSize.Width, initialSize.Height)
+
 		// Create BubbleTea program with WebSocket I/O
 		prog := tea.NewProgram(model, append([]tea.ProgramOption{
 			tea.WithInput(adapter),
@@ -63,10 +68,9 @@ func (s *Server) Handler(modelFactory func() tea.Model, options ...tea.ProgramOp
 
 		adapter.program = prog
 
-		// Send initial window size
+		// Send the initial size now that the program exists
 		go func() {
-			time.Sleep(100 * time.Millisecond)
-			prog.Send(tea.WindowSizeMsg{Width: 80, Height: 24})
+			prog.Send(initialSize)
 		}()
 
 		// Run the program (blocks until program exits)
@@ -81,6 +85,48 @@ type webSocketAdapter struct {
 	conn    *websocket.Conn
 	buf     bytes.Buffer
 	program *tea.Program
+}
+
+// waitForInitialSize reads from the WebSocket until a resize message arrives,
+// buffering any input messages that arrive first. Returns the initial window size.
+// Falls back to 80x24 if the first message isn't a resize.
+func (a *webSocketAdapter) waitForInitialSize() tea.WindowSizeMsg {
+	for {
+		_, message, err := a.conn.ReadMessage()
+		if err != nil {
+			log.Printf("WebSocket read error waiting for initial size: %v", err)
+			return tea.WindowSizeMsg{Width: 80, Height: 24}
+		}
+
+		if len(message) == 0 {
+			continue
+		}
+
+		msgType := message[0]
+		payload := message[1:]
+
+		switch msgType {
+		case MsgResize:
+			var size struct {
+				Cols int `json:"cols"`
+				Rows int `json:"rows"`
+			}
+			if err := json.Unmarshal(payload, &size); err == nil && size.Cols > 0 && size.Rows > 0 {
+				return tea.WindowSizeMsg{Width: size.Cols, Height: size.Rows}
+			}
+			log.Printf("Invalid initial resize message, using default: %v", err)
+			return tea.WindowSizeMsg{Width: 80, Height: 24}
+
+		case MsgInput:
+			// Buffer any input that arrives before the resize
+			if len(payload) > 0 {
+				a.buf.Write(payload)
+			}
+
+		default:
+			log.Printf("Unknown message type waiting for initial size: 0x%02x", msgType)
+		}
+	}
 }
 
 func newWebSocketAdapter(conn *websocket.Conn) *webSocketAdapter {
@@ -143,7 +189,7 @@ func (a *webSocketAdapter) Read(p []byte) (n int, err error) {
 
 // Write implements io.Writer, writing to the WebSocket.
 func (a *webSocketAdapter) Write(p []byte) (n int, err error) {
-	log.Printf("WebSocket write: %d bytes", len(p))
+	//TODO	log.Printf("WebSocket write: %d bytes", len(p))
 	err = a.conn.WriteMessage(websocket.BinaryMessage, p)
 	if err != nil {
 		log.Printf("WebSocket write error: %v", err)

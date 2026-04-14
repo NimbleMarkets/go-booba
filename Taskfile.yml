@@ -89,14 +89,11 @@ tasks:
   build-cmd-booba-view-example-wasm:
     desc: 'Build booba-view-example command in WASM'
     deps: [go-tidy]
-    env:
-      GOOS: js
-      GOARCH: wasm
     cmds:
-      - go build -overlay=<(internal/wasm_overlay/gen_overlay.sh) -o bin/booba-view-example.wasm cmd/booba-view-example/*.go
+      - internal/wasm_overlay/wasm_build.sh -o bin/booba-view-example.wasm cmd/booba-view-example/*.go
     sources:
       - cmd/booba-view-example/*.go
-      - internal/wasm_overlay/*.go
+      - internal/**/*.go
     generates:
       - bin/booba-view-example.wasm
 

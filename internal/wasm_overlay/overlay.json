@@ -1,6 +1,0 @@
-{
-  "Replace": {
-    "/Users/evan/projects/bubbletea/signals_js.go": "/Users/evan/projects/booba/internal/wasm_overlay/signals_js.go",
-    "/Users/evan/projects/bubbletea/tty_js.go": "/Users/evan/projects/booba/internal/wasm_overlay/tty_js.go"
-  }
-}
