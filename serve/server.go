@@ -4,10 +4,13 @@ package serve
 
 import (
 	"context"
+	"crypto/tls"
 	"embed"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net"
@@ -15,6 +18,8 @@ import (
 	"sync/atomic"
 
 	"github.com/coder/websocket"
+	"github.com/quic-go/quic-go/http3"
+	"github.com/quic-go/webtransport-go"
 )
 
 //go:embed static/*
@@ -56,6 +61,29 @@ func (s *Server) ServeCommand(ctx context.Context, name string, args ...string) 
 }
 
 func (s *Server) start(ctx context.Context) error {
+	// Set up TLS for WebTransport
+	if s.config.TLSCert != "" && s.config.TLSKey != "" {
+		cert, err := tls.LoadX509KeyPair(s.config.TLSCert, s.config.TLSKey)
+		if err != nil {
+			return fmt.Errorf("load TLS cert: %w", err)
+		}
+		s.certInfo = &CertInfo{
+			TLSConfig: &tls.Config{Certificates: []tls.Certificate{cert}},
+		}
+	} else {
+		host := s.config.Host
+		if host == "" || host == "0.0.0.0" {
+			host = "localhost"
+		}
+		certInfo, err := GenerateSelfSignedCert(host)
+		if err != nil {
+			log.Printf("WebTransport disabled: cert generation failed: %v", err)
+		} else {
+			s.certInfo = certInfo
+			log.Printf("Generated self-signed cert (hash: %s)", hex.EncodeToString(s.certInfo.Hash[:]))
+		}
+	}
+
 	mux := http.NewServeMux()
 
 	// Static files (ghostty-web assets, compiled TypeScript)
@@ -72,6 +100,37 @@ func (s *Server) start(ctx context.Context) error {
 	// Certificate hash endpoint for WebTransport
 	if s.certInfo != nil {
 		mux.HandleFunc("/cert-hash", s.handleCertHash)
+	}
+
+	// Start WebTransport server on port+1
+	if s.certInfo != nil {
+		wtAddr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port+1)
+		wtServer := &webtransport.Server{
+			H3: &http3.Server{
+				Addr:      wtAddr,
+				TLSConfig: s.certInfo.TLSConfig,
+			},
+			CheckOrigin: func(r *http.Request) bool { return true },
+		}
+
+		wtMux := http.NewServeMux()
+		wtMux.HandleFunc("/wt", func(w http.ResponseWriter, r *http.Request) {
+			s.handleWT(w, r, wtServer)
+		})
+		wtServer.H3.Handler = wtMux
+
+		go func() {
+			log.Printf("WebTransport listening on https://%s", wtAddr)
+			if err := wtServer.ListenAndServe(); err != nil {
+				log.Printf("WebTransport server error: %v", err)
+			}
+		}()
+
+		// Graceful shutdown
+		go func() {
+			<-ctx.Done()
+			wtServer.Close()
+		}()
 	}
 
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
@@ -190,4 +249,80 @@ func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"hash": hex.EncodeToString(s.certInfo.Hash[:]),
 	})
+}
+
+func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webtransport.Server) {
+	if s.config.MaxConnections > 0 {
+		if int(s.connCount.Load()) >= s.config.MaxConnections {
+			http.Error(w, "max connections reached", http.StatusServiceUnavailable)
+			return
+		}
+	}
+	s.connCount.Add(1)
+	defer s.connCount.Add(-1)
+
+	wtSess, err := wtServer.Upgrade(w, r)
+	if err != nil {
+		log.Printf("webtransport upgrade: %v", err)
+		return
+	}
+	defer wtSess.CloseWithError(0, "")
+
+	stream, err := wtSess.AcceptStream(r.Context())
+	if err != nil {
+		log.Printf("webtransport accept stream: %v", err)
+		return
+	}
+
+	ctx := r.Context()
+
+	// Read initial resize (length-prefixed)
+	lenBuf := make([]byte, 4)
+	if _, err := io.ReadFull(stream, lenBuf); err != nil {
+		return
+	}
+	msgLen := binary.BigEndian.Uint32(lenBuf)
+	if msgLen == 0 || msgLen > MaxMessageSize {
+		return
+	}
+	msgBuf := make([]byte, msgLen)
+	if _, err := io.ReadFull(stream, msgBuf); err != nil {
+		return
+	}
+	if msgBuf[0] != MsgResize {
+		return
+	}
+	var rm ResizeMessage
+	if err := json.Unmarshal(msgBuf[1:], &rm); err != nil || rm.Cols <= 0 || rm.Rows <= 0 {
+		return
+	}
+
+	sess, err := newPtySession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
+	if err != nil {
+		log.Printf("create session: %v", err)
+		return
+	}
+	defer sess.Close()
+
+	log.Printf("New WebTransport session: %dx%d", rm.Cols, rm.Rows)
+
+	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
+
+	go func() {
+		defer sess.Close()
+		var runErr error
+		switch {
+		case s.handler != nil:
+			runErr = runBubbleTea(ctx, sess, s.handler, nil)
+		case s.progHandler != nil:
+			runErr = runBubbleTeaProgram(ctx, sess, s.progHandler)
+		case s.cmdName != "":
+			runErr = runCommand(ctx, sess, s.cmdName, s.cmdArgs...)
+		}
+		if runErr != nil {
+			log.Printf("session error: %v", runErr)
+		}
+	}()
+
+	handleWebTransport(ctx, sess, stream, opts)
 }
