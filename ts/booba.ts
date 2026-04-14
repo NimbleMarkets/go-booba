@@ -1,6 +1,8 @@
 // @ts-ignore - Import will resolve at runtime in browser
 import { init, Terminal, FitAddon } from '../ghostty-web/ghostty-web.js';
-import { BoobaAdapter, BoobaConnectionState, BoobaWebSocketAdapter, BoobaWasmAdapter } from './adapter.js';
+import { BoobaAdapter, BoobaConnectionState, BoobaWasmAdapter } from './adapter.js';
+import { BoobaProtocolAdapter, type WebSocketAdapterCallbacks } from './websocket_adapter.js';
+import { OSC52Scanner } from './clipboard.js';
 import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js';
 
 export interface BoobaTerminalOptions {
@@ -25,6 +27,7 @@ export class BoobaTerminal {
     adapter: BoobaAdapter | null = null;
     fitAddon: FitAddon | null = null;
     private _resizeHandler: (() => void) | null = null;
+    private osc52Scanner: OSC52Scanner = new OSC52Scanner();
 
     // --- Event Callbacks ---
     onStatusChange: ((state: string, message: string) => void) | null = null;
@@ -111,7 +114,14 @@ export class BoobaTerminal {
      * @param url WebSocket URL (e.g., 'ws://localhost:8080/ws')
      */
     connectWebSocket(url: string) {
-        this.adapter = new BoobaWebSocketAdapter(url);
+        const callbacks: WebSocketAdapterCallbacks = {
+            onTitle: (title) => { this.onTitleChange?.(title); },
+            onOptions: (_opts) => { /* store readOnly state if needed */ },
+            onClose: (reason) => {
+                this.term?.write(`\r\n${reason}\r\n`);
+            },
+        };
+        this.adapter = new BoobaProtocolAdapter(url, callbacks);
         this._setupAdapter();
     }
 
@@ -135,22 +145,18 @@ export class BoobaTerminal {
 
     private _setupAdapter() {
         if (!this.adapter) return;
-
         this.adapter.connect(
             (data: string | Uint8Array) => {
-                // Write data from BubbleTea to terminal
+                if (data instanceof Uint8Array) {
+                    this.osc52Scanner.scan(data);
+                }
                 this.term.write(data);
             },
             (state: BoobaConnectionState, message: string) => {
-                // Update connection status
                 this._updateStatus(state, message);
-
-                // Send initial size when connected
                 if (state === 'connected' && this.term) {
                     this.adapter?.boobaResize(this.term.cols, this.term.rows);
                 }
-
-                // Show disconnect message in terminal
                 if (state === 'disconnected') {
                     this.term.write('\r\nConnection closed.\r\n');
                 }
@@ -362,5 +368,7 @@ export class BoobaTerminal {
 }
 
 // Re-export adapter types for convenience
-export { BoobaAdapter, BoobaWebSocketAdapter, BoobaWasmAdapter, BoobaConnectionState };
+export { BoobaAdapter, BoobaWasmAdapter, BoobaConnectionState };
+export { BoobaProtocolAdapter } from './websocket_adapter.js';
+export { OSC52Scanner } from './clipboard.js';
 export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';

@@ -5,7 +5,7 @@
  * Supports both WebSocket (backend-server) and WASM (pure embedding) modes.
  */
 
-export type BoobaConnectionState = 'connecting' | 'connected' | 'disconnected';
+export type BoobaConnectionState = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
 
 export interface BoobaAdapter {
     /**
@@ -41,101 +41,6 @@ export interface BoobaAdapter {
      * Disconnect and clean up resources
      */
     disconnect(): void;
-}
-
-/**
- * WebSocket-based adapter for backend-server mode
- * 
- * Uses a custom binary protocol:
- * - 0x01 + data: User input
- * - 0x02 + JSON: Terminal resize
- */
-export class BoobaWebSocketAdapter implements BoobaAdapter {
-    private ws: WebSocket | null = null;
-    private onDataCallback: ((data: string | Uint8Array) => void) | null = null;
-
-    constructor(private url: string) { }
-
-    boobaRead(): string | Uint8Array | null {
-        // WebSocket is push-based, data arrives via onmessage
-        // This method is not used in WebSocket mode
-        return null;
-    }
-
-    boobaWrite(data: string | Uint8Array): void {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            console.warn('WebSocket not connected, cannot write');
-            return;
-        }
-
-        // Protocol: 0x01 + data
-        const dataStr = typeof data === 'string' ? data : new TextDecoder().decode(data);
-        const payload = new Uint8Array(dataStr.length + 1);
-        payload[0] = 0x01;
-        for (let i = 0; i < dataStr.length; i++) {
-            payload[i + 1] = dataStr.charCodeAt(i);
-        }
-        this.ws.send(payload);
-    }
-
-    boobaResize(cols: number, rows: number): void {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            console.warn('WebSocket not connected, cannot resize');
-            return;
-        }
-
-        // Protocol: 0x02 + JSON
-        const json = JSON.stringify({ cols, rows });
-        const encoder = new TextEncoder();
-        const jsonBytes = encoder.encode(json);
-        const payload = new Uint8Array(jsonBytes.length + 1);
-        payload[0] = 0x02;
-        payload.set(jsonBytes, 1);
-        this.ws.send(payload);
-        console.log('Sent resize:', cols, rows);
-    }
-
-    connect(
-        onData: (data: string | Uint8Array) => void,
-        onStateChange: (state: BoobaConnectionState, message: string) => void
-    ): void {
-        this.onDataCallback = onData;
-        this.ws = new WebSocket(this.url);
-        this.ws.binaryType = 'arraybuffer';
-
-        this.ws.onopen = () => {
-            console.log('WebSocket connected');
-            onStateChange('connected', 'Connected');
-        };
-
-        this.ws.onmessage = (e: MessageEvent) => {
-            if (e.data instanceof ArrayBuffer) {
-                onData(new Uint8Array(e.data));
-            } else {
-                onData(e.data);
-            }
-        };
-
-        this.ws.onclose = (e: CloseEvent) => {
-            console.log('WebSocket disconnected', e.code, e.reason);
-            onStateChange('disconnected', 'Disconnected');
-        };
-
-        this.ws.onerror = (e: Event) => {
-            console.error('WebSocket error:', e);
-            onStateChange('disconnected', 'Error');
-        };
-
-        onStateChange('connecting', 'Connecting...');
-    }
-
-    disconnect(): void {
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-        this.onDataCallback = null;
-    }
 }
 
 /**
