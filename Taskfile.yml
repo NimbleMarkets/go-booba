@@ -56,6 +56,20 @@ tasks:
     generates:
       - assets/booba/*.js
 
+  build-serve-assets:
+    desc: 'Copy compiled TS + ghostty-web into serve/static/ for go:embed'
+    deps: [build-assets]
+    cmds:
+      - mkdir -p serve/static/booba
+      - cp -r assets/booba/* serve/static/booba/
+      - mkdir -p serve/static/ghostty-web
+      - cp -r node_modules/ghostty-web/dist/* serve/static/ghostty-web/
+    sources:
+      - assets/booba/*.js
+      - node_modules/ghostty-web/dist/*
+    generates:
+      - serve/static/booba/*.js
+
   clean:
     desc: 'Clean commands'
     deps:
@@ -78,7 +92,7 @@ tasks:
 
   build-cmd-booba-view-example-native:
     desc: 'Build booba-view-example command'
-    deps: [go-tidy]
+    deps: [go-tidy, build-serve-assets]
     cmds:
       - go build -o bin/booba-view-example cmd/booba-view-example/*.go
     sources:

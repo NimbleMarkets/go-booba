@@ -7,3 +7,6 @@ node_modules/
 
 # This is commented to allow Antigravity to edit the JS
 assets/booba/
+
+serve/static/booba/
+serve/static/ghostty-web/

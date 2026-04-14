@@ -12,18 +12,19 @@ package main
 // implementing a progress bar from scratch here.
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"math"
-	"net/http"
+	"net"
 	"strconv"
 	"strings"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/NimbleMarkets/booba/internal/booba_server"
+	"github.com/NimbleMarkets/booba/serve"
 	"github.com/fogleman/ease"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -69,21 +70,23 @@ func main() {
 }
 
 func startWebServer(addr string) {
-	// Create BubbleTea WebSocket server
-	btServer := booba_server.NewServer()
+	config := serve.DefaultConfig()
 
-	// Serve static assets
-	http.Handle("/", http.FileServer(http.Dir("assets")))
+	// Parse addr to extract host:port
+	if host, port, err := net.SplitHostPort(addr); err == nil {
+		config.Host = host
+		if p, err := strconv.Atoi(port); err == nil {
+			config.Port = p
+		}
+	}
 
-	// Handle WebSocket connections
-	http.HandleFunc("/ws", btServer.Handler(func() tea.Model {
-		// Create a new model for each connection
+	server := serve.NewServer(config)
+
+	ctx := context.Background()
+	if err := server.Serve(ctx, func(sess serve.Session) tea.Model {
 		return model{0, false, 3600, 0, 0, false, false}
-	}))
-
-	log.Printf("Starting web server on %s", addr)
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
+	}); err != nil {
+		log.Fatal("Server error:", err)
 	}
 }
 

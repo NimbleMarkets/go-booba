@@ -1,2 +1,85 @@
 <!DOCTYPE html>
-<html><body><p>booba - assets not built yet. Run: task build-serve-assets</p></body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>booba</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1e1e1e;
+            min-height: 100vh;
+            display: flex;
+            align-items: stretch;
+        }
+        #terminal-container {
+            flex: 1;
+            padding: 4px;
+        }
+        .status {
+            position: fixed;
+            top: 8px;
+            right: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 10;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #666;
+            transition: background-color 0.3s;
+        }
+        .status-dot.connected { background: #27c93f; }
+        .status-dot.disconnected { background: #dc3545; }
+        .status-dot.connecting, .status-dot.reconnecting { background: #e6b800; }
+    </style>
+</head>
+<body>
+    <div class="status">
+        <span class="status-dot connecting" id="status-dot"></span>
+        <span id="status-text">Connecting...</span>
+    </div>
+    <div id="terminal-container"></div>
+
+    <script type="module">
+        import { BoobaTerminal } from './static/booba/booba.js';
+
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+
+        async function main() {
+            const booba = new BoobaTerminal('terminal-container');
+
+            booba.onStatusChange = (state, message) => {
+                dot.className = `status-dot ${state}`;
+                text.textContent = message;
+            };
+
+            booba.onTitleChange = (title) => {
+                document.title = title || 'booba';
+            };
+
+            booba.onBell = () => {
+                const c = document.getElementById('terminal-container');
+                c.style.outline = '2px solid #ffbd2e';
+                setTimeout(() => { c.style.outline = 'none'; }, 150);
+            };
+
+            await booba.init();
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            booba.connectWebSocket(wsUrl);
+            booba.focus();
+        }
+
+        main().catch(console.error);
+    </script>
+</body>
+</html>
