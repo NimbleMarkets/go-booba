@@ -8,7 +8,6 @@ require (
 	github.com/charmbracelet/x/xpty v0.1.3
 	github.com/coder/websocket v1.8.14
 	github.com/fogleman/ease v0.0.0-20170301025033-8da417bf1776
-	github.com/gorilla/websocket v1.5.3
 	github.com/lucasb-eyer/go-colorful v1.4.0
 	github.com/quic-go/quic-go v0.59.0
 	github.com/quic-go/webtransport-go v0.10.0

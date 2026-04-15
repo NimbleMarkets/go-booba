@@ -71,18 +71,16 @@ tasks:
     sources:
       - ts/*.ts
     generates:
-      - assets/booba/*.js
+      - serve/static/booba/*.js
 
   build-serve-assets:
-    desc: 'Copy compiled TS + ghostty-web into serve/static/ for go:embed'
+    desc: 'Copy ghostty-web into serve/static/ for go:embed'
     deps: [build-assets]
     cmds:
-      - mkdir -p serve/static/booba
-      - cp -r assets/booba/* serve/static/booba/
       - mkdir -p serve/static/ghostty-web
       - cp -r node_modules/ghostty-web/dist/* serve/static/ghostty-web/
     sources:
-      - assets/booba/*.js
+      - serve/static/booba/*.js
       - node_modules/ghostty-web/dist/*
     generates:
       - serve/static/booba/*.js
@@ -96,7 +94,6 @@ tasks:
   clean-assets:
     desc: 'Cleans compiled assets'
     cmds:
-      - rm -rf assets/booba
       - rm -rf serve/static/booba
       - rm -rf serve/static/ghostty-web
 

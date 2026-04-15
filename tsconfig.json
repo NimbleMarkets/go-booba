@@ -14,7 +14,7 @@
         "declarationMap": true,
         "declaration": true,
         "sourceMap": true,
-        "outDir": "./assets/booba",
+        "outDir": "./serve/static/booba",
         "rootDir": "./ts",
         "strict": true,
         "skipLibCheck": true,
