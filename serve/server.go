@@ -243,7 +243,12 @@ func (s *Server) runSession(ctx context.Context, sess Session) error {
 		}
 		return runCommand(ctx, ptySess, s.cmdName, s.cmdArgs...)
 	default:
-		return nil
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-sess.Done():
+			return nil
+		}
 	}
 }
 

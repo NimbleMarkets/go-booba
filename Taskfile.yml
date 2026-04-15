@@ -30,6 +30,17 @@ tasks:
       - package.json
       - package-lock.json
 
+  build:
+    desc: 'Build all the things'
+    deps:
+      - build-assets
+      - build-cmds
+
+  test:
+    desc: 'Test go-booba'
+    deps:
+      - go-test
+
 ###############################################################################
 
   go-tidy:
@@ -45,13 +56,12 @@ tasks:
   go-lint:
     desc: Run golangci-lint with errcheck
     cmds:
-      - golangci-lint run --enable=errcheck --timeout=5m ./...
+      - GOCACHE=/tmp/go-build GOLANGCI_LINT_CACHE=/tmp/golangci-lint GOPROXY=off golangci-lint run --enable=errcheck --timeout=5m ./...
 
-  build:
-    desc: 'Build all the things'
-    deps:
-      - build-assets
-      - build-cmds
+  go-test:
+    desc: 'Run Go tests'
+    cmds:
+      - GOCACHE=/tmp/go-build GOPROXY=off go test ./...
 
   build-assets:
     desc: 'Build frontend assets'

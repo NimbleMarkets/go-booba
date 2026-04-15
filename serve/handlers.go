@@ -48,7 +48,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		handleInputWS(ctx, conn, sess)
+		handleInputWS(ctx, conn, sess, opts)
 	}()
 
 	wg.Wait()
@@ -80,7 +80,7 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 }
 
 // handleInputWS reads messages from WebSocket and dispatches them.
-func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
+func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage) {
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
@@ -90,14 +90,17 @@ func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 		if err != nil {
 			continue
 		}
-		processMessage(ctx, conn, sess, msgType, payload)
+		processMessage(ctx, conn, sess, opts, msgType, payload)
 	}
 }
 
 // processMessage dispatches a protocol message.
-func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, msgType byte, payload []byte) {
+func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, msgType byte, payload []byte) {
 	switch msgType {
 	case MsgInput:
+		if opts.ReadOnly {
+			return
+		}
 		if len(payload) > 0 {
 			if _, err := sess.InputWriter().Write(payload); err != nil {
 				log.Printf("session input write error: %v", err)
@@ -148,7 +151,7 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		handleInputWT(ctx, sess, stream)
+		handleInputWT(ctx, sess, stream, opts)
 	}()
 
 	wg.Wait()
@@ -180,7 +183,7 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 }
 
 // handleInputWT reads length-prefixed messages from WebTransport stream.
-func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream) {
+func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage) {
 	lenBuf := make([]byte, 4)
 	for {
 		// Read 4-byte length prefix
@@ -201,14 +204,17 @@ func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Strea
 		msgType := msgBuf[0]
 		payload := msgBuf[1:]
 
-		processWTMessage(ctx, stream, sess, msgType, payload)
+		processWTMessage(ctx, stream, sess, opts, msgType, payload)
 	}
 }
 
 // processWTMessage dispatches a WebTransport protocol message.
-func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, msgType byte, payload []byte) {
+func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, opts OptionsMessage, msgType byte, payload []byte) {
 	switch msgType {
 	case MsgInput:
+		if opts.ReadOnly {
+			return
+		}
 		if len(payload) > 0 {
 			if _, err := sess.InputWriter().Write(payload); err != nil {
 				log.Printf("session input write error: %v", err)
