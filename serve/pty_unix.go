@@ -5,7 +5,6 @@ package serve
 import (
 	"context"
 	"io"
-	"log"
 	"sync"
 
 	"github.com/charmbracelet/x/xpty"
@@ -58,7 +57,6 @@ func (s *ptySession) WindowSize() WindowSize {
 
 func (s *ptySession) Resize(cols, rows int) {
 	size := WindowSize{Width: cols, Height: rows}
-	log.Printf("pty resize applied: %dx%d", cols, rows)
 
 	s.mu.Lock()
 	s.winSize = size

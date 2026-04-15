@@ -29,6 +29,7 @@ export class BoobaTerminal {
     adapter: BoobaAdapter | null = null;
     fitAddon: FitAddon | null = null;
     private _resizeHandler: (() => void) | null = null;
+    private _dprCleanup: (() => void) | null = null;
     private osc52Scanner: OSC52Scanner;
 
     // --- Event Callbacks ---
@@ -44,7 +45,7 @@ export class BoobaTerminal {
     constructor(containerId: string, options: BoobaTerminalOptions = {}) {
         this.container = document.getElementById(containerId);
         this.options = {
-            fontSize: 14,
+            fontSize: 15,
             cols: 80,
             rows: 24,
             allowOSC52: false,
@@ -71,6 +72,9 @@ export class BoobaTerminal {
         // Handle window resize as fallback
         this._resizeHandler = () => { this.fitAddon?.fit(); };
         window.addEventListener('resize', this._resizeHandler);
+
+        // Watch for devicePixelRatio changes (browser zoom, display switch)
+        this._dprCleanup = this._watchDevicePixelRatio();
 
         // Listen for resize events from the terminal (triggered by fit addon)
         this.term.onResize((size: { cols: number; rows: number }) => {
@@ -331,10 +335,9 @@ export class BoobaTerminal {
 
     /**
      * Register a link provider for detecting clickable links in terminal output.
-     * Returns a disposable to unregister the provider.
      */
-    registerLinkProvider(provider: BoobaLinkProvider): { dispose(): void } | undefined {
-        return this.term?.registerLinkProvider(provider);
+    registerLinkProvider(provider: BoobaLinkProvider): void {
+        this.term?.registerLinkProvider(provider);
     }
 
     // --- Custom Event Handlers ---
@@ -358,6 +361,8 @@ export class BoobaTerminal {
             window.removeEventListener('resize', this._resizeHandler);
             this._resizeHandler = null;
         }
+        this._dprCleanup?.();
+        this._dprCleanup = null;
         this.term?.dispose();
         this.term = null;
         this.fitAddon = null;
@@ -384,6 +389,42 @@ export class BoobaTerminal {
         if (this.onStatusChange) {
             this.onStatusChange(state, message);
         }
+    }
+
+    /**
+     * Watch for devicePixelRatio changes (browser zoom, moving between displays).
+     * Patches the renderer's cached DPR and forces a canvas re-scale.
+     */
+    private _watchDevicePixelRatio(): () => void {
+        let currentDpr = window.devicePixelRatio;
+        let mql: MediaQueryList | null = null;
+
+        const onChange = () => {
+            const newDpr = window.devicePixelRatio;
+            if (newDpr !== currentDpr) {
+                currentDpr = newDpr;
+                const renderer = this.term?.renderer;
+                if (renderer) {
+                    (renderer as any).devicePixelRatio = newDpr;
+                    renderer.resize(this.term.cols, this.term.rows);
+                }
+                this.fitAddon?.fit();
+            }
+            // Re-register: matchMedia for DPR is a one-shot per value
+            listen();
+        };
+
+        const listen = () => {
+            mql?.removeEventListener('change', onChange);
+            mql = window.matchMedia(`(resolution: ${currentDpr}dppx)`);
+            mql.addEventListener('change', onChange);
+        };
+
+        listen();
+
+        return () => {
+            mql?.removeEventListener('change', onChange);
+        };
     }
 }
 

@@ -6,15 +6,19 @@
     <title>booba</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
         body {
             background: #1e1e1e;
-            min-height: 100vh;
             display: flex;
-            align-items: stretch;
         }
         #terminal-container {
             flex: 1;
+            min-height: 0;
             padding: 4px;
+            overflow: hidden;
         }
         .status {
             position: fixed;
@@ -90,6 +94,20 @@
 
             booba.connectAuto(wsUrl, wtUrl, certHashUrl);
             booba.focus();
+
+            // Handle mobile keyboard showing/hiding using visualViewport API
+            if (window.visualViewport) {
+                const container = document.getElementById('terminal-container');
+                window.visualViewport.addEventListener('resize', () => {
+                    const keyboardHeight = window.innerHeight - window.visualViewport.height;
+                    if (keyboardHeight > 100) {
+                        container.style.height = window.visualViewport.height + 'px';
+                    } else {
+                        container.style.height = '';
+                    }
+                    booba.fitAddon?.fit();
+                });
+            }
         }
 
         main().catch(console.error);
