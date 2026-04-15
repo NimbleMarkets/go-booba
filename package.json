@@ -1,8 +1,37 @@
 {
-  "dependencies": {
-    "ghostty-web": "^0.4.0-next.14.g6a1a50d"
+  "name": "@nimblemarkets/booba",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Terminal wrapper for BubbleTea programs using ghostty-web",
+  "main": "dist/booba.js",
+  "module": "dist/booba.js",
+  "types": "dist/booba.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/booba.js",
+      "types": "./dist/booba.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:embed": "tsc -p tsconfig.embed.json && sed -i'' -e \"s|from 'ghostty-web'|from '../ghostty-web/ghostty-web.js'|\" serve/static/booba/booba.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NimbleMarkets/go-booba.git"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "ghostty-web": "^0.4.0"
   },
   "devDependencies": {
+    "ghostty-web": "^0.4.0-next.14.g6a1a50d",
     "typescript": "^5.9.3"
   }
 }
