@@ -18,6 +18,8 @@ tasks:
     cmds:
       - go install 'golang.org/x/tools/cmd/godoc@latest'
       - go install 'golang.org/x/pkgsite/cmd/pkgsite@latest'
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install github.com/kisielk/errcheck@latest
       - npm install
 
   npm-deps:
@@ -39,6 +41,11 @@ tasks:
     desc: 'Go update all the dependencies'
     cmds:
       - go get -u ./...
+
+  go-lint:
+    desc: Run golangci-lint with errcheck
+    cmds:
+      - golangci-lint run --enable=errcheck --timeout=5m ./...
 
   build:
     desc: 'Build all the things'
