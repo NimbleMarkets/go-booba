@@ -36,11 +36,15 @@ type Server struct {
 	cmdArgs     []string
 	connCount   atomic.Int32
 	certInfo    *CertInfo
+	newSession  SessionFactory
 }
 
 // NewServer creates a new server with the given config.
 func NewServer(config Config) *Server {
-	return &Server{config: config}
+	return &Server{
+		config:     config,
+		newSession: defaultSessionFactory,
+	}
 }
 
 // Serve starts the server with a BubbleTea handler.
@@ -62,89 +66,33 @@ func (s *Server) ServeCommand(ctx context.Context, name string, args ...string) 
 	return s.start(ctx)
 }
 
+// SetSessionFactory overrides how terminal sessions are created.
+func (s *Server) SetSessionFactory(factory SessionFactory) {
+	if factory == nil {
+		s.newSession = defaultSessionFactory
+		return
+	}
+	s.newSession = factory
+}
+
+// HTTPHandler constructs the application HTTP handler without starting listeners.
+func (s *Server) HTTPHandler() (http.Handler, error) {
+	return s.newMux(nil)
+}
+
 func (s *Server) start(ctx context.Context) error {
-	// Set up TLS for WebTransport
-	if s.config.TLSCert != "" && s.config.TLSKey != "" {
-		cert, err := tls.LoadX509KeyPair(s.config.TLSCert, s.config.TLSKey)
-		if err != nil {
-			return fmt.Errorf("load TLS cert: %w", err)
-		}
-		s.certInfo = &CertInfo{
-			TLSConfig: &tls.Config{
-				Certificates: []tls.Certificate{cert},
-				NextProtos:   []string{"h3"},
-			},
-		}
-	} else {
-		host := s.config.Host
-		if host == "" || host == "0.0.0.0" {
-			host = "localhost"
-		}
-		certInfo, err := GenerateSelfSignedCert(host)
-		if err != nil {
-			log.Printf("WebTransport disabled: cert generation failed: %v", err)
-		} else {
-			s.certInfo = certInfo
-			log.Printf("Generated self-signed cert (hash: %s)", hex.EncodeToString(s.certInfo.Hash[:]))
-		}
+	if err := s.configureTransport(); err != nil {
+		return err
 	}
 
-	mux := http.NewServeMux()
-
-	// Static files (ghostty-web assets, compiled TypeScript)
-	staticFS, err := fs.Sub(staticFiles, "static")
+	wtServer := s.newWebTransportServer()
+	mux, err := s.newMux(wtServer)
 	if err != nil {
-		return fmt.Errorf("static fs: %w", err)
-	}
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
-	mux.HandleFunc("/", s.handleIndex)
-
-	// WebSocket endpoint
-	mux.HandleFunc("/ws", s.handleWS)
-
-	// Certificate hash endpoint for WebTransport
-	if s.certInfo != nil {
-		mux.HandleFunc("/cert-hash", s.handleCertHash)
+		return err
 	}
 
-	// Start WebTransport server
-	wtPort := s.config.WTPort
-	if wtPort == 0 {
-		wtPort = s.config.Port + 1
-	}
-	if s.certInfo != nil && wtPort > 0 {
-		wtAddr := fmt.Sprintf("%s:%d", s.config.Host, wtPort)
-		wtServer := &webtransport.Server{
-			H3: &http3.Server{
-				Addr:            wtAddr,
-				TLSConfig:       s.certInfo.TLSConfig,
-				EnableDatagrams: true,
-			},
-			CheckOrigin: s.checkOrigin,
-		}
-		webtransport.ConfigureHTTP3Server(wtServer.H3)
-
-		wtServer.H3.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("WT handler: %s %s %s proto=%s", r.Method, r.URL.Path, r.URL.String(), r.Proto)
-			s.handleWT(w, r, wtServer)
-		})
-
-		go func() {
-			logHostName := s.config.Host
-			if logHostName == "" {
-				logHostName = "localhost"
-			}
-			log.Printf("WebTransport listening on https://%s:%d", logHostName, wtPort)
-			if err := wtServer.ListenAndServe(); err != nil {
-				log.Printf("WebTransport server error: %v", err)
-			}
-		}()
-
-		// Graceful shutdown
-		go func() {
-			<-ctx.Done()
-			wtServer.Close()
-		}()
+	if wtServer != nil {
+		s.startWebTransport(ctx, wtServer)
 	}
 
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
@@ -168,7 +116,135 @@ func (s *Server) start(ctx context.Context) error {
 		server.Close()
 	}()
 
+	return s.listenAndServeHTTP(server)
+}
+
+func (s *Server) configureTransport() error {
+	if s.config.TLSCert != "" && s.config.TLSKey != "" {
+		cert, err := tls.LoadX509KeyPair(s.config.TLSCert, s.config.TLSKey)
+		if err != nil {
+			return fmt.Errorf("load TLS cert: %w", err)
+		}
+		s.certInfo = &CertInfo{
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+				NextProtos:   []string{"h3"},
+			},
+		}
+		return nil
+	}
+
+	host := s.config.Host
+	if host == "" || host == "0.0.0.0" {
+		host = "localhost"
+	}
+	certInfo, err := GenerateSelfSignedCert(host)
+	if err != nil {
+		log.Printf("WebTransport disabled: cert generation failed: %v", err)
+		s.certInfo = nil
+		return nil
+	}
+
+	s.certInfo = certInfo
+	log.Printf("Generated self-signed cert (hash: %s)", hex.EncodeToString(s.certInfo.Hash[:]))
+	return nil
+}
+
+func (s *Server) newMux(wtServer *webtransport.Server) (http.Handler, error) {
+	mux := http.NewServeMux()
+
+	staticFS, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		return nil, fmt.Errorf("static fs: %w", err)
+	}
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
+	mux.HandleFunc("/", s.handleIndex)
+	mux.HandleFunc("/ws", s.handleWS)
+
+	if s.certInfo != nil {
+		mux.HandleFunc("/cert-hash", s.handleCertHash)
+	}
+	if wtServer != nil {
+		mux.HandleFunc("/wt", func(w http.ResponseWriter, r *http.Request) {
+			log.Printf("WT handler: %s %s %s proto=%s", r.Method, r.URL.Path, r.URL.String(), r.Proto)
+			s.handleWT(w, r, wtServer)
+		})
+	}
+
+	return mux, nil
+}
+
+func (s *Server) newWebTransportServer() *webtransport.Server {
+	wtPort := s.config.WTPort
+	if wtPort == 0 {
+		wtPort = s.config.Port + 1
+	}
+	if s.certInfo == nil || wtPort <= 0 {
+		return nil
+	}
+
+	wtAddr := fmt.Sprintf("%s:%d", s.config.Host, wtPort)
+	wtServer := &webtransport.Server{
+		H3: &http3.Server{
+			Addr:            wtAddr,
+			TLSConfig:       s.certInfo.TLSConfig,
+			EnableDatagrams: true,
+		},
+		CheckOrigin: s.checkOrigin,
+	}
+	webtransport.ConfigureHTTP3Server(wtServer.H3)
+	return wtServer
+}
+
+func (s *Server) startWebTransport(ctx context.Context, wtServer *webtransport.Server) {
+	go func() {
+		logHostName := s.config.Host
+		if logHostName == "" {
+			logHostName = "localhost"
+		}
+		_, port, err := net.SplitHostPort(wtServer.H3.Addr)
+		if err != nil {
+			port = wtServer.H3.Addr
+		}
+		log.Printf("WebTransport listening on https://%s:%s", logHostName, port)
+		if err := wtServer.ListenAndServe(); err != nil {
+			log.Printf("WebTransport server error: %v", err)
+		}
+	}()
+
+	go func() {
+		<-ctx.Done()
+		wtServer.Close()
+	}()
+}
+
+func (s *Server) listenAndServeHTTP(server *http.Server) error {
 	return server.ListenAndServe()
+}
+
+func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, error) {
+	factory := s.newSession
+	if factory == nil {
+		factory = defaultSessionFactory
+	}
+	return factory(ctx, size)
+}
+
+func (s *Server) runSession(ctx context.Context, sess Session) error {
+	switch {
+	case s.handler != nil:
+		return runBubbleTea(ctx, sess, s.handler, nil)
+	case s.progHandler != nil:
+		return runBubbleTeaProgram(ctx, sess, s.progHandler)
+	case s.cmdName != "":
+		ptySess, ok := sess.(*ptySession)
+		if !ok {
+			return fmt.Errorf("command mode requires PTY session")
+		}
+		return runCommand(ctx, ptySess, s.cmdName, s.cmdArgs...)
+	default:
+		return nil
+	}
 }
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -233,7 +309,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create PTY session
-	sess, err := newPtySession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
+	sess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
 	if err != nil {
 		log.Printf("create session: %v", err)
 		_ = conn.CloseNow()
@@ -248,17 +324,8 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	// Start the session workload in a goroutine
 	go func() {
 		defer sess.Close()
-		var runErr error
-		switch {
-		case s.handler != nil:
-			runErr = runBubbleTea(ctx, sess, s.handler, nil)
-		case s.progHandler != nil:
-			runErr = runBubbleTeaProgram(ctx, sess, s.progHandler)
-		case s.cmdName != "":
-			runErr = runCommand(ctx, sess, s.cmdName, s.cmdArgs...)
-		}
-		if runErr != nil {
-			log.Printf("session error: %v", runErr)
+		if err := s.runSession(ctx, sess); err != nil {
+			log.Printf("session error: %v", err)
 		}
 	}()
 
@@ -336,7 +403,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		return
 	}
 
-	sess, err := newPtySession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
+	sess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
 	if err != nil {
 		log.Printf("create session: %v", err)
 		return
@@ -349,17 +416,8 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 
 	go func() {
 		defer sess.Close()
-		var runErr error
-		switch {
-		case s.handler != nil:
-			runErr = runBubbleTea(ctx, sess, s.handler, nil)
-		case s.progHandler != nil:
-			runErr = runBubbleTeaProgram(ctx, sess, s.progHandler)
-		case s.cmdName != "":
-			runErr = runCommand(ctx, sess, s.cmdName, s.cmdArgs...)
-		}
-		if runErr != nil {
-			log.Printf("session error: %v", runErr)
+		if err := s.runSession(ctx, sess); err != nil {
+			log.Printf("session error: %v", err)
 		}
 	}()
 

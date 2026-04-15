@@ -38,10 +38,14 @@ func newPtySession(ctx context.Context, size WindowSize) (*ptySession, error) {
 	}, nil
 }
 
+func defaultSessionFactory(ctx context.Context, size WindowSize) (Session, error) {
+	return newPtySession(ctx, size)
+}
+
 func (s *ptySession) Context() context.Context { return s.ctx }
-func (s *ptySession) OutputReader() io.Reader   { return s.pty }
-func (s *ptySession) InputWriter() io.Writer    { return s.pty }
-func (s *ptySession) Done() <-chan struct{}      { return s.done }
+func (s *ptySession) OutputReader() io.Reader  { return s.pty }
+func (s *ptySession) InputWriter() io.Writer   { return s.pty }
+func (s *ptySession) Done() <-chan struct{}    { return s.done }
 
 func (s *ptySession) WindowSize() WindowSize {
 	s.mu.Lock()

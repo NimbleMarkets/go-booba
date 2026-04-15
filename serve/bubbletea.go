@@ -50,7 +50,7 @@ func MakeTeaOptions(sess Session) []tea.ProgramOption {
 }
 
 // runBubbleTea starts a BubbleTea program attached to the session PTY.
-func runBubbleTea(ctx context.Context, sess *ptySession, handler Handler, extraOpts []tea.ProgramOption) error {
+func runBubbleTea(ctx context.Context, sess Session, handler Handler, extraOpts []tea.ProgramOption) error {
 	model := handler(sess)
 	opts := MakeTeaOptions(sess)
 	opts = append(opts, extraOpts...)
@@ -69,7 +69,7 @@ func runBubbleTea(ctx context.Context, sess *ptySession, handler Handler, extraO
 }
 
 // runBubbleTeaProgram starts a pre-configured tea.Program.
-func runBubbleTeaProgram(ctx context.Context, sess *ptySession, handler ProgramHandler) error {
+func runBubbleTeaProgram(ctx context.Context, sess Session, handler ProgramHandler) error {
 	prog := handler(sess)
 
 	go func() {

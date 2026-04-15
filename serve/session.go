@@ -34,3 +34,6 @@ type Session interface {
 	// Close cleans up the session.
 	Close() error
 }
+
+// SessionFactory creates a new session for an incoming terminal client.
+type SessionFactory func(ctx context.Context, size WindowSize) (Session, error)
