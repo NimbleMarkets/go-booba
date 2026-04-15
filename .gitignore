@@ -1,6 +1,7 @@
 # booba .gitignore
 
 .task
+.superpowers/
 .DS_Store
 node_modules/
 bin/

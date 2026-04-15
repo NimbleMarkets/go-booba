@@ -57,12 +57,12 @@ tasks:
   go-lint:
     desc: Run golangci-lint with errcheck
     cmds:
-      - GOCACHE=/tmp/go-build GOLANGCI_LINT_CACHE=/tmp/golangci-lint GOPROXY=off golangci-lint run --enable=errcheck --timeout=5m ./...
+      - golangci-lint run --enable=errcheck --timeout=5m ./...
 
   go-test:
     desc: 'Run Go tests'
     cmds:
-      - GOCACHE=/tmp/go-build GOPROXY=off go test ./...
+      - go test ./...
 
   build-assets:
     desc: 'Build frontend assets'
