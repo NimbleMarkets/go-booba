@@ -16,6 +16,16 @@ type Handler func(sess Session) tea.Model
 // ProgramHandler creates a fully configured tea.Program for each new session.
 type ProgramHandler func(sess Session) *tea.Program
 
+type resizeEventSource interface {
+	ResizeEvents() <-chan WindowSize
+}
+
+var progSend = defaultProgSend
+
+func defaultProgSend(prog *tea.Program, msg tea.Msg) {
+	prog.Send(msg)
+}
+
 // MakeTeaOptions returns tea.ProgramOption values that wire a BubbleTea program
 // to the PTY session. Sets TERM=ghostty and COLORTERM=truecolor.
 func MakeTeaOptions(sess Session) []tea.ProgramOption {
@@ -56,11 +66,7 @@ func runBubbleTea(ctx context.Context, sess Session, handler Handler, extraOpts 
 	opts = append(opts, extraOpts...)
 
 	prog := tea.NewProgram(model, opts...)
-
-	go func() {
-		ws := sess.WindowSize()
-		prog.Send(tea.WindowSizeMsg{Width: ws.Width, Height: ws.Height})
-	}()
+	forwardResizeEvents(ctx, sess, prog)
 
 	if _, err := prog.Run(); err != nil {
 		return fmt.Errorf("bubbletea: %w", err)
@@ -71,14 +77,36 @@ func runBubbleTea(ctx context.Context, sess Session, handler Handler, extraOpts 
 // runBubbleTeaProgram starts a pre-configured tea.Program.
 func runBubbleTeaProgram(ctx context.Context, sess Session, handler ProgramHandler) error {
 	prog := handler(sess)
-
-	go func() {
-		ws := sess.WindowSize()
-		prog.Send(tea.WindowSizeMsg{Width: ws.Width, Height: ws.Height})
-	}()
+	forwardResizeEvents(ctx, sess, prog)
 
 	if _, err := prog.Run(); err != nil {
 		return fmt.Errorf("bubbletea: %w", err)
 	}
 	return nil
+}
+
+func forwardResizeEvents(ctx context.Context, sess Session, prog *tea.Program) {
+	go func() {
+		ws := sess.WindowSize()
+		progSend(prog, tea.WindowSizeMsg{Width: ws.Width, Height: ws.Height})
+
+		source, ok := sess.(resizeEventSource)
+		if !ok {
+			return
+		}
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-sess.Done():
+				return
+			case ws, ok := <-source.ResizeEvents():
+				if !ok {
+					return
+				}
+				progSend(prog, tea.WindowSizeMsg{Width: ws.Width, Height: ws.Height})
+			}
+		}
+	}()
 }

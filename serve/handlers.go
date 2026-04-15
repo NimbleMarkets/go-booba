@@ -125,6 +125,9 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 	case MsgResize:
 		var rm ResizeMessage
 		if err := json.Unmarshal(payload, &rm); err == nil && rm.Cols > 0 && rm.Rows > 0 {
+			if debug {
+				log.Printf("websocket resize: %dx%d", rm.Cols, rm.Rows)
+			}
 			sess.Resize(rm.Cols, rm.Rows)
 		}
 	case MsgPing:
@@ -257,6 +260,9 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 	case MsgResize:
 		var rm ResizeMessage
 		if err := json.Unmarshal(payload, &rm); err == nil && rm.Cols > 0 && rm.Rows > 0 {
+			if debug {
+				log.Printf("webtransport resize: %dx%d", rm.Cols, rm.Rows)
+			}
 			sess.Resize(rm.Cols, rm.Rows)
 		}
 	case MsgPing:

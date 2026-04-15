@@ -5,6 +5,7 @@ package serve
 import (
 	"context"
 	"io"
+	"log"
 	"sync"
 
 	"github.com/charmbracelet/x/xpty"
@@ -14,6 +15,7 @@ import (
 type ptySession struct {
 	pty     xpty.Pty
 	winSize WindowSize
+	resize  chan WindowSize
 	ctx     context.Context
 	cancel  context.CancelFunc
 	done    chan struct{}
@@ -32,6 +34,7 @@ func newPtySession(ctx context.Context, size WindowSize) (*ptySession, error) {
 	return &ptySession{
 		pty:     pty,
 		winSize: size,
+		resize:  make(chan WindowSize, 1),
 		ctx:     ctx,
 		cancel:  cancel,
 		done:    make(chan struct{}),
@@ -54,14 +57,30 @@ func (s *ptySession) WindowSize() WindowSize {
 }
 
 func (s *ptySession) Resize(cols, rows int) {
+	size := WindowSize{Width: cols, Height: rows}
+	log.Printf("pty resize applied: %dx%d", cols, rows)
+
 	s.mu.Lock()
-	s.winSize = WindowSize{Width: cols, Height: rows}
+	s.winSize = size
 	s.mu.Unlock()
+
+	select {
+	case s.resize <- size:
+	default:
+		select {
+		case <-s.resize:
+		default:
+		}
+		s.resize <- size
+	}
+
 	_ = s.pty.Resize(cols, rows)
 }
 
 // Pty returns the underlying PTY for attaching to processes.
 func (s *ptySession) Pty() xpty.Pty { return s.pty }
+
+func (s *ptySession) ResizeEvents() <-chan WindowSize { return s.resize }
 
 func (s *ptySession) Close() error {
 	s.mu.Lock()
