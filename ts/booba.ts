@@ -1,5 +1,4 @@
-// @ts-ignore - Import will resolve at runtime in browser
-import { init, Terminal, FitAddon } from '../ghostty-web/ghostty-web.js';
+import { init, Terminal, FitAddon } from 'ghostty-web';
 import { BoobaAdapter, BoobaConnectionState, BoobaWasmAdapter } from './adapter.js';
 import { BoobaProtocolAdapter, type WebSocketAdapterCallbacks } from './websocket_adapter.js';
 import { BoobaAutoAdapter } from './auto_adapter.js';
