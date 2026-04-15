@@ -5,6 +5,7 @@ package serve
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"io"
 	"log"
 	"net/http"
@@ -73,6 +74,17 @@ func TestHTTPHandlerServesIndexWithoutListener(t *testing.T) {
 	}
 	if rec.Body.Len() == 0 {
 		t.Fatal("expected index body to be non-empty")
+	}
+}
+
+func TestHTTPHandlerRejectsUnsafeConfig(t *testing.T) {
+	srv := NewServer(Config{Host: "0.0.0.0"})
+	handler, err := srv.HTTPHandler()
+	if err == nil {
+		t.Fatalf("HTTPHandler() error = nil, handler = %v; want unsafe config rejection", handler)
+	}
+	if !strings.Contains(err.Error(), "non-loopback listeners require TLS") {
+		t.Fatalf("HTTPHandler() error = %v, want non-loopback TLS rejection", err)
 	}
 }
 
@@ -212,6 +224,38 @@ func TestHTTPSHelpersRespectCertFiles(t *testing.T) {
 	}
 	if got := srv.httpScheme(); got != "https" {
 		t.Fatalf("httpScheme() = %q, want %q", got, "https")
+	}
+}
+
+func TestTLSConfigsUseExpectedProtocols(t *testing.T) {
+	info, err := GenerateSelfSignedCert("localhost")
+	if err != nil {
+		t.Fatalf("GenerateSelfSignedCert() error = %v", err)
+	}
+
+	srv := NewServer(Config{CertFile: "server.crt", KeyFile: "server.key"})
+	srv.certInfo = info
+
+	httpsCfg := srv.httpsTLSConfig()
+	if httpsCfg == nil {
+		t.Fatal("expected HTTPS TLS config")
+	}
+	if got, want := strings.Join(httpsCfg.NextProtos, ","), "h2,http/1.1"; got != want {
+		t.Fatalf("HTTPS NextProtos = %q, want %q", got, want)
+	}
+	if httpsCfg.MinVersion != tls.VersionTLS12 {
+		t.Fatalf("HTTPS MinVersion = %v, want %v", httpsCfg.MinVersion, tls.VersionTLS12)
+	}
+
+	http3Cfg := srv.http3TLSConfig()
+	if http3Cfg == nil {
+		t.Fatal("expected HTTP/3 TLS config")
+	}
+	if got, want := strings.Join(http3Cfg.NextProtos, ","), "h3"; got != want {
+		t.Fatalf("HTTP/3 NextProtos = %q, want %q", got, want)
+	}
+	if http3Cfg.MinVersion != tls.VersionTLS13 {
+		t.Fatalf("HTTP/3 MinVersion = %v, want %v", http3Cfg.MinVersion, tls.VersionTLS13)
 	}
 }
 

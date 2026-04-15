@@ -80,6 +80,12 @@ func (s *Server) SetSessionFactory(factory SessionFactory) {
 
 // HTTPHandler constructs the application HTTP handler without starting listeners.
 func (s *Server) HTTPHandler() (http.Handler, error) {
+	if err := s.validateConfig(); err != nil {
+		return nil, err
+	}
+	if err := s.configureTransport(); err != nil {
+		return nil, err
+	}
 	return s.newMux(nil)
 }
 

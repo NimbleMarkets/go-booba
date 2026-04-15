@@ -133,27 +133,17 @@ func TestWSE2E_ReadOnlyBlocksInput(t *testing.T) {
 	sess.assertNoInput(t)
 }
 
-func TestWSE2E_BasicAuthGateWorks(t *testing.T) {
+func TestWSE2E_BasicAuthWithoutTLSIsRejected(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.BasicUsername = "admin"
 	cfg.BasicPassword = "secret"
-	ts, _ := newWSE2ETestServer(t, cfg)
-
-	_, resp, err := dialWS(context.Background(), ts.URL, nil)
+	srv := NewServer(cfg)
+	_, err := srv.HTTPHandler()
 	if err == nil {
-		t.Fatal("expected websocket dial without auth to fail")
+		t.Fatal("expected HTTPHandler to reject Basic Auth without TLS")
 	}
-	if resp == nil || resp.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("status = %v, want %d", statusCode(resp), http.StatusUnauthorized)
-	}
-
-	headers := make(http.Header)
-	headers.Set("Authorization", basicAuthHeader("admin", "secret"))
-	conn, opts := mustConnectWS(t, ts.URL, headers, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
-
-	if opts.ReadOnly {
-		t.Fatal("expected readOnly=false")
+	if !strings.Contains(err.Error(), "Basic Auth requires TLS") {
+		t.Fatalf("HTTPHandler() error = %v, want Basic Auth TLS rejection", err)
 	}
 }
 
