@@ -4,6 +4,7 @@ package serve
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
 	"embed"
 	"encoding/binary"
@@ -102,7 +103,7 @@ func (s *Server) start(ctx context.Context) error {
 	if logHostName == "" {
 		logHostName = "localhost"
 	}
-	log.Printf("Starting server on http://%s:%d", logHostName, s.config.Port)
+	log.Printf("Starting server on %s://%s:%d", s.httpScheme(), logHostName, s.config.Port)
 
 	server := &http.Server{
 		Addr:        addr,
@@ -123,17 +124,12 @@ func (s *Server) start(ctx context.Context) error {
 }
 
 func (s *Server) configureTransport() error {
-	if s.config.TLSCert != "" && s.config.TLSKey != "" {
-		cert, err := tls.LoadX509KeyPair(s.config.TLSCert, s.config.TLSKey)
+	if s.config.CertFile != "" && s.config.KeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(s.config.CertFile, s.config.KeyFile)
 		if err != nil {
 			return fmt.Errorf("load TLS cert: %w", err)
 		}
-		s.certInfo = &CertInfo{
-			TLSConfig: &tls.Config{
-				Certificates: []tls.Certificate{cert},
-				NextProtos:   []string{"h3"},
-			},
-		}
+		s.certInfo = newCertInfo(cert)
 		return nil
 	}
 
@@ -178,19 +174,19 @@ func (s *Server) newMux(wtServer *webtransport.Server) (http.Handler, error) {
 }
 
 func (s *Server) newWebTransportServer() *webtransport.Server {
-	wtPort := s.config.WTPort
-	if wtPort == 0 {
-		wtPort = s.config.Port + 1
+	http3Port := s.config.HTTP3Port
+	if http3Port == 0 {
+		http3Port = s.config.Port
 	}
-	if s.certInfo == nil || wtPort <= 0 {
+	if s.certInfo == nil || http3Port < 0 {
 		return nil
 	}
 
-	wtAddr := fmt.Sprintf("%s:%d", s.config.Host, wtPort)
+	wtAddr := fmt.Sprintf("%s:%d", s.config.Host, http3Port)
 	wtServer := &webtransport.Server{
 		H3: &http3.Server{
 			Addr:            wtAddr,
-			TLSConfig:       s.certInfo.TLSConfig,
+			TLSConfig:       s.http3TLSConfig(),
 			EnableDatagrams: true,
 		},
 		CheckOrigin: s.checkOrigin,
@@ -222,7 +218,53 @@ func (s *Server) startWebTransport(ctx context.Context, wtServer *webtransport.S
 }
 
 func (s *Server) listenAndServeHTTP(server *http.Server) error {
+	if s.mainTLSEnabled() {
+		server.TLSConfig = s.httpsTLSConfig()
+		return server.ListenAndServeTLS("", "")
+	}
 	return server.ListenAndServe()
+}
+
+func newCertInfo(cert tls.Certificate) *CertInfo {
+	info := &CertInfo{Certificate: cert}
+	if len(cert.Certificate) > 0 {
+		info.DER = cert.Certificate[0]
+		info.Hash = sha256.Sum256(info.DER)
+	}
+	return info
+}
+
+func (s *Server) mainTLSEnabled() bool {
+	return s.config.CertFile != "" && s.config.KeyFile != ""
+}
+
+func (s *Server) httpScheme() string {
+	if s.mainTLSEnabled() {
+		return "https"
+	}
+	return "http"
+}
+
+func (s *Server) httpsTLSConfig() *tls.Config {
+	if s.certInfo == nil {
+		return nil
+	}
+	return &tls.Config{
+		Certificates: []tls.Certificate{s.certInfo.Certificate},
+		MinVersion:   tls.VersionTLS12,
+		NextProtos:   []string{"h2", "http/1.1"},
+	}
+}
+
+func (s *Server) http3TLSConfig() *tls.Config {
+	if s.certInfo == nil {
+		return nil
+	}
+	return &tls.Config{
+		Certificates: []tls.Certificate{s.certInfo.Certificate},
+		MinVersion:   tls.VersionTLS13,
+		NextProtos:   []string{"h3"},
+	}
 }
 
 func (s *Server) tryAcquireConnection() bool {

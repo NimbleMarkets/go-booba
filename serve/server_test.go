@@ -76,6 +76,13 @@ func TestHTTPHandlerServesIndexWithoutListener(t *testing.T) {
 	}
 }
 
+func TestDefaultConfigUsesLoopback(t *testing.T) {
+	cfg := DefaultConfig()
+	if cfg.Host != "127.0.0.1" {
+		t.Fatalf("default host = %q, want %q", cfg.Host, "127.0.0.1")
+	}
+}
+
 func TestSetSessionFactoryOverridesSessionCreation(t *testing.T) {
 	srv := NewServer(DefaultConfig())
 	want := &stubSession{
@@ -141,6 +148,42 @@ func TestTryAcquireConnectionIsAtomic(t *testing.T) {
 
 	if successes != 1 {
 		t.Fatalf("successful acquires = %d, want 1", successes)
+	}
+}
+
+func TestHTTPSHelpersRespectCertFiles(t *testing.T) {
+	srv := NewServer(DefaultConfig())
+	if srv.mainTLSEnabled() {
+		t.Fatal("expected TLS to be disabled without cert files")
+	}
+	if got := srv.httpScheme(); got != "http" {
+		t.Fatalf("httpScheme() = %q, want %q", got, "http")
+	}
+
+	srv = NewServer(Config{CertFile: "server.crt", KeyFile: "server.key"})
+	if !srv.mainTLSEnabled() {
+		t.Fatal("expected TLS to be enabled with cert files")
+	}
+	if got := srv.httpScheme(); got != "https" {
+		t.Fatalf("httpScheme() = %q, want %q", got, "https")
+	}
+}
+
+func TestNewWebTransportServerDefaultsToSamePort(t *testing.T) {
+	info, err := GenerateSelfSignedCert("localhost")
+	if err != nil {
+		t.Fatalf("GenerateSelfSignedCert() error = %v", err)
+	}
+
+	srv := NewServer(Config{Host: "127.0.0.1", Port: 8080})
+	srv.certInfo = info
+
+	wt := srv.newWebTransportServer()
+	if wt == nil {
+		t.Fatal("expected WebTransport server to be created")
+	}
+	if got := wt.H3.Addr; got != "127.0.0.1:8080" {
+		t.Fatalf("H3.Addr = %q, want %q", got, "127.0.0.1:8080")
 	}
 }
 

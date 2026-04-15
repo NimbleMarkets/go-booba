@@ -79,9 +79,7 @@
             let wtUrl = null;
 
             if (typeof WebTransport !== 'undefined') {
-                const currentPort = parseInt(window.location.port || (window.location.protocol === 'https:' ? '443' : '80'), 10);
-                const wtPort = currentPort + 1;
-                wtUrl = `https://${window.location.hostname}:${wtPort}/wt`;
+                wtUrl = `https://${window.location.host}/wt`;
             }
 
             booba.connectAuto(wsUrl, wtUrl, certHashUrl);

@@ -178,29 +178,32 @@ TODO: link to live example
 
 ## Web Frontend for BubbleTea-based service
 
-Otherwise, one might have a BubbleTea program running on a remote machine. While one might use `ssh` to access it, `booba` enables an HTTP-based interface to it. Effectively, we serve up a Ghostty terminal from an HTTP endpoint and extend the terminal via WebSockets.
+Otherwise, one might have a BubbleTea program running on a remote machine. While one might use `ssh` to access it, `booba` enables an HTTP-based interface to it. The top-level `serve` package is the single server implementation for that path, serving the embedded Ghostty frontend and bridging browser clients over WebSocket or WebTransport.
 
 Build and run the example server from the repository root:
 
 ```sh
 task build-cmd-booba-view-example-native
-./bin/booba-view-example --web :8080
+./bin/booba-view-example --listen 127.0.0.1:8080
 ```
 
-The browser page served from `http://localhost:8080/` will use WebTransport automatically when available and fall back to WebSocket otherwise.
+The browser page served from `http://127.0.0.1:8080/` will use WebTransport automatically when available and fall back to WebSocket otherwise. When you provide `--cert-file` and `--key-file`, the same public port is used for HTTPS/WSS over TCP and HTTP/3 WebTransport over UDP.
 
 Useful flags:
 
 ```sh
-./bin/booba-view-example --web :8080 --wt-port=-1
-./bin/booba-view-example --web :8080 --origin=https://app.example.com,https://*.example.net
-./bin/booba-view-example --web :8080 --username=admin --password=secret
+./bin/booba-view-example --listen 127.0.0.1:8080 --http3-port=-1
+./bin/booba-view-example --listen 127.0.0.1:8080 --origin=https://app.example.com,https://*.example.net
+./bin/booba-view-example --listen 127.0.0.1:8080 --cert-file=server.crt --key-file=server.key
+./bin/booba-view-example --listen 127.0.0.1:8080 --username=admin --password=secret
 ```
 
 Notes:
 
- * `--wt-port=-1` disables WebTransport and uses WebSocket only.
+ * `--http3-port=-1` disables WebTransport and uses WebSocket only.
+ * the default bind address is loopback (`127.0.0.1`); use a non-loopback `--listen` address only when you intend to expose the service.
  * browser origins are same-host by default; use `--origin` to allow additional cross-origin browser clients.
+ * Basic Auth should be used with `--cert-file` and `--key-file` so credentials are sent over HTTPS/WSS.
  * static frontend files are embedded with `go:embed`, so after frontend asset changes you must rebuild the Go binary you run.
 
 ## Open Collaboration

@@ -19,9 +19,9 @@ import (
 
 // CertInfo holds a self-signed TLS certificate and its metadata.
 type CertInfo struct {
-	TLSConfig *tls.Config
-	DER       []byte   // Raw DER-encoded certificate
-	Hash      [32]byte // SHA-256 hash of DER (for WebTransport pinning)
+	Certificate tls.Certificate
+	DER         []byte   // Raw DER-encoded certificate
+	Hash        [32]byte // SHA-256 hash of DER (for WebTransport pinning)
 }
 
 // GenerateSelfSignedCert creates a self-signed ECDSA P-256 certificate.
@@ -71,11 +71,8 @@ func GenerateSelfSignedCert(host string) (*CertInfo, error) {
 	}
 
 	return &CertInfo{
-		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{tlsCert},
-			NextProtos:   []string{"h3"},
-		},
-		DER:  der,
-		Hash: sha256.Sum256(der),
+		Certificate: tlsCert,
+		DER:         der,
+		Hash:        sha256.Sum256(der),
 	}, nil
 }

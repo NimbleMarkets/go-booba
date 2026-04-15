@@ -39,8 +39,8 @@ booba.focus();
 
 ```javascript
 const wsUrl = 'ws://localhost:8080/ws';
-const wtUrl = 'https://localhost:8081/wt';
-const certHashUrl = 'http://localhost:8080/cert-hash';
+const wtUrl = 'https://localhost:8080/wt';
+const certHashUrl = 'https://localhost:8080/cert-hash';
 
 await booba.init();
 booba.connectAuto(wsUrl, wtUrl, certHashUrl);

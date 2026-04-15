@@ -132,8 +132,8 @@ export class BoobaTerminal {
     /**
      * Connect with auto-detection: tries WebTransport first, falls back to WebSocket.
      * @param wsUrl WebSocket URL (e.g., 'ws://localhost:8080/ws')
-     * @param wtUrl WebTransport URL (e.g., 'https://localhost:8081/wt'), or null to skip
-     * @param certHashUrl URL to fetch cert hash (e.g., 'http://localhost:8080/cert-hash'), or null
+     * @param wtUrl WebTransport URL (e.g., 'https://localhost:8080/wt'), or null to skip
+     * @param certHashUrl URL to fetch cert hash (e.g., 'https://localhost:8080/cert-hash'), or null
      */
     connectAuto(wsUrl: string, wtUrl: string | null = null, certHashUrl: string | null = null) {
         const callbacks = {
