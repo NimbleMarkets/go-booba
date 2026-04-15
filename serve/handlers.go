@@ -22,6 +22,8 @@ const (
 
 // handleWebSocket handles a single WebSocket connection for a session.
 func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	defer func() {
 		if err := conn.CloseNow(); err != nil {
 			log.Printf("websocket close now: %v", err)
@@ -36,11 +38,21 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	}
 
 	var wg sync.WaitGroup
+	var cleanupOnce sync.Once
+	cleanup := func() {
+		cleanupOnce.Do(func() {
+			cancel()
+			if err := sess.Close(); err != nil && !errors.Is(err, io.EOF) {
+				log.Printf("session close error: %v", err)
+			}
+		})
+	}
 
 	// Stream PTY output → client
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer cleanup()
 		streamOutputWS(ctx, conn, sess)
 	}()
 
@@ -48,6 +60,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer cleanup()
 		handleInputWS(ctx, conn, sess, opts)
 	}()
 
@@ -129,6 +142,8 @@ func writeWSMessage(ctx context.Context, conn *websocket.Conn, msgType byte, pay
 
 // handleWebTransport handles a single WebTransport session.
 func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	defer stream.Close()
 
 	// Send options message
@@ -139,11 +154,21 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	}
 
 	var wg sync.WaitGroup
+	var cleanupOnce sync.Once
+	cleanup := func() {
+		cleanupOnce.Do(func() {
+			cancel()
+			if err := sess.Close(); err != nil && !errors.Is(err, io.EOF) {
+				log.Printf("session close error: %v", err)
+			}
+		})
+	}
 
 	// Stream PTY output → client
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer cleanup()
 		streamOutputWT(ctx, sess, stream)
 	}()
 
@@ -151,6 +176,7 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		defer cleanup()
 		handleInputWT(ctx, sess, stream, opts)
 	}()
 

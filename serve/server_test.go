@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 )
 
@@ -88,6 +89,55 @@ func TestSetSessionFactoryOverridesSessionCreation(t *testing.T) {
 	}
 	if got != want {
 		t.Fatal("expected injected session factory to be used")
+	}
+}
+
+func TestTryAcquireConnectionHonorsLimit(t *testing.T) {
+	srv := NewServer(Config{MaxConnections: 2})
+
+	if !srv.tryAcquireConnection() {
+		t.Fatal("expected first acquire to succeed")
+	}
+	if !srv.tryAcquireConnection() {
+		t.Fatal("expected second acquire to succeed")
+	}
+	if srv.tryAcquireConnection() {
+		t.Fatal("expected third acquire to fail")
+	}
+
+	srv.releaseConnection()
+	if !srv.tryAcquireConnection() {
+		t.Fatal("expected acquire after release to succeed")
+	}
+}
+
+func TestTryAcquireConnectionIsAtomic(t *testing.T) {
+	srv := NewServer(Config{MaxConnections: 1})
+
+	const goroutines = 16
+	results := make(chan bool, goroutines)
+	var wg sync.WaitGroup
+
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			results <- srv.tryAcquireConnection()
+		}()
+	}
+
+	wg.Wait()
+	close(results)
+
+	successes := 0
+	for ok := range results {
+		if ok {
+			successes++
+		}
+	}
+
+	if successes != 1 {
+		t.Fatalf("successful acquires = %d, want 1", successes)
 	}
 }
 

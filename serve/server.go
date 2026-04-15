@@ -222,6 +222,27 @@ func (s *Server) listenAndServeHTTP(server *http.Server) error {
 	return server.ListenAndServe()
 }
 
+func (s *Server) tryAcquireConnection() bool {
+	if s.config.MaxConnections <= 0 {
+		s.connCount.Add(1)
+		return true
+	}
+
+	for {
+		current := s.connCount.Load()
+		if int(current) >= s.config.MaxConnections {
+			return false
+		}
+		if s.connCount.CompareAndSwap(current, current+1) {
+			return true
+		}
+	}
+}
+
+func (s *Server) releaseConnection() {
+	s.connCount.Add(-1)
+}
+
 func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, error) {
 	factory := s.newSession
 	if factory == nil {
@@ -275,15 +296,11 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	if !s.checkAuth(w, r) {
 		return
 	}
-	// Connection limit check
-	if s.config.MaxConnections > 0 {
-		if int(s.connCount.Load()) >= s.config.MaxConnections {
-			http.Error(w, "max connections reached", http.StatusServiceUnavailable)
-			return
-		}
+	if !s.tryAcquireConnection() {
+		http.Error(w, "max connections reached", http.StatusServiceUnavailable)
+		return
 	}
-	s.connCount.Add(1)
-	defer s.connCount.Add(-1)
+	defer s.releaseConnection()
 
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
 		OriginPatterns: s.config.OriginPatterns,
@@ -359,14 +376,11 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	if !s.checkAuth(w, r) {
 		return
 	}
-	if s.config.MaxConnections > 0 {
-		if int(s.connCount.Load()) >= s.config.MaxConnections {
-			http.Error(w, "max connections reached", http.StatusServiceUnavailable)
-			return
-		}
+	if !s.tryAcquireConnection() {
+		http.Error(w, "max connections reached", http.StatusServiceUnavailable)
+		return
 	}
-	s.connCount.Add(1)
-	defer s.connCount.Add(-1)
+	defer s.releaseConnection()
 
 	wtSess, err := wtServer.Upgrade(w, r)
 	if err != nil {

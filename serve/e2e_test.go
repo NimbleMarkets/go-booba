@@ -195,6 +195,23 @@ func TestWSE2E_MaxConnectionsLimitWorks(t *testing.T) {
 	}
 }
 
+func TestWSE2E_ClientDisconnectClosesSession(t *testing.T) {
+	ts, created := newWSE2ETestServer(t, DefaultConfig())
+
+	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	sess := waitForSession(t, created)
+
+	if err := conn.Close(websocket.StatusNormalClosure, "test done"); err != nil {
+		t.Fatalf("websocket close error: %v", err)
+	}
+
+	select {
+	case <-sess.Done():
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for session close after client disconnect")
+	}
+}
+
 func newWSE2ETestServer(t *testing.T, cfg Config) (*httptest.Server, chan *e2eSession) {
 	t.Helper()
 
