@@ -83,6 +83,52 @@ func TestDefaultConfigUsesLoopback(t *testing.T) {
 	}
 }
 
+func TestValidateConfigRejectsPartialTLSConfig(t *testing.T) {
+	srv := NewServer(Config{CertFile: "server.crt"})
+	err := srv.validateConfig()
+	if err == nil || !strings.Contains(err.Error(), "provided together") {
+		t.Fatalf("validateConfig() error = %v, want partial TLS config rejection", err)
+	}
+}
+
+func TestValidateConfigRejectsBasicAuthWithoutTLS(t *testing.T) {
+	srv := NewServer(Config{
+		Host:          "127.0.0.1",
+		BasicUsername: "admin",
+		BasicPassword: "secret",
+	})
+	err := srv.validateConfig()
+	if err == nil || !strings.Contains(err.Error(), "Basic Auth requires TLS") {
+		t.Fatalf("validateConfig() error = %v, want Basic Auth TLS rejection", err)
+	}
+}
+
+func TestValidateConfigRejectsRemotePlaintextListener(t *testing.T) {
+	srv := NewServer(Config{Host: "0.0.0.0"})
+	err := srv.validateConfig()
+	if err == nil || !strings.Contains(err.Error(), "non-loopback listeners require TLS") {
+		t.Fatalf("validateConfig() error = %v, want remote plaintext rejection", err)
+	}
+}
+
+func TestIsLoopbackHost(t *testing.T) {
+	cases := map[string]bool{
+		"":               true,
+		"localhost":      true,
+		"127.0.0.1":      true,
+		"127.0.0.1:8080": true,
+		"::1":            true,
+		"0.0.0.0":        false,
+		"192.168.1.10":   false,
+	}
+
+	for host, want := range cases {
+		if got := isLoopbackHost(host); got != want {
+			t.Fatalf("isLoopbackHost(%q) = %v, want %v", host, got, want)
+		}
+	}
+}
+
 func TestSetSessionFactoryOverridesSessionCreation(t *testing.T) {
 	srv := NewServer(DefaultConfig())
 	want := &stubSession{
@@ -184,6 +230,16 @@ func TestNewWebTransportServerDefaultsToSamePort(t *testing.T) {
 	}
 	if got := wt.H3.Addr; got != "127.0.0.1:8080" {
 		t.Fatalf("H3.Addr = %q, want %q", got, "127.0.0.1:8080")
+	}
+}
+
+func TestConfigureTransportDisablesSelfSignedCertForRemoteHost(t *testing.T) {
+	srv := NewServer(Config{Host: "0.0.0.0"})
+	if err := srv.configureTransport(); err != nil {
+		t.Fatalf("configureTransport() error = %v", err)
+	}
+	if srv.certInfo != nil {
+		t.Fatal("expected remote plaintext config to avoid self-signed WebTransport bootstrap")
 	}
 }
 

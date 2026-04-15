@@ -84,6 +84,9 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 }
 
 func (s *Server) start(ctx context.Context) error {
+	if err := s.validateConfig(); err != nil {
+		return err
+	}
 	if err := s.configureTransport(); err != nil {
 		return err
 	}
@@ -123,6 +126,19 @@ func (s *Server) start(ctx context.Context) error {
 	return s.listenAndServeHTTP(server)
 }
 
+func (s *Server) validateConfig() error {
+	switch {
+	case (s.config.CertFile == "") != (s.config.KeyFile == ""):
+		return fmt.Errorf("CertFile and KeyFile must be provided together")
+	case s.hasBasicAuth() && !s.mainTLSEnabled():
+		return fmt.Errorf("Basic Auth requires TLS; set CertFile and KeyFile")
+	case !s.mainTLSEnabled() && !isLoopbackHost(s.config.Host):
+		return fmt.Errorf("non-loopback listeners require TLS; set CertFile and KeyFile")
+	default:
+		return nil
+	}
+}
+
 func (s *Server) configureTransport() error {
 	if s.config.CertFile != "" && s.config.KeyFile != "" {
 		cert, err := tls.LoadX509KeyPair(s.config.CertFile, s.config.KeyFile)
@@ -134,6 +150,10 @@ func (s *Server) configureTransport() error {
 	}
 
 	host := s.config.Host
+	if !isLoopbackHost(host) {
+		s.certInfo = nil
+		return nil
+	}
 	if host == "" || host == "0.0.0.0" {
 		host = "localhost"
 	}
@@ -238,6 +258,10 @@ func (s *Server) mainTLSEnabled() bool {
 	return s.config.CertFile != "" && s.config.KeyFile != ""
 }
 
+func (s *Server) hasBasicAuth() bool {
+	return s.config.BasicUsername != "" || s.config.BasicPassword != ""
+}
+
 func (s *Server) httpScheme() string {
 	if s.mainTLSEnabled() {
 		return "https"
@@ -265,6 +289,19 @@ func (s *Server) http3TLSConfig() *tls.Config {
 		MinVersion:   tls.VersionTLS13,
 		NextProtos:   []string{"h3"},
 	}
+}
+
+func isLoopbackHost(host string) bool {
+	if host == "" || host == "localhost" {
+		return true
+	}
+
+	if parsedHost, _, err := net.SplitHostPort(host); err == nil {
+		host = parsedHost
+	}
+
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 func (s *Server) tryAcquireConnection() bool {

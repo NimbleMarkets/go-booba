@@ -201,9 +201,9 @@ Useful flags:
 Notes:
 
  * `--http3-port=-1` disables WebTransport and uses WebSocket only.
- * the default bind address is loopback (`127.0.0.1`); use a non-loopback `--listen` address only when you intend to expose the service.
+ * the default bind address is loopback (`127.0.0.1`); non-loopback `--listen` addresses require `--cert-file` and `--key-file`.
  * browser origins are same-host by default; use `--origin` to allow additional cross-origin browser clients.
- * Basic Auth should be used with `--cert-file` and `--key-file` so credentials are sent over HTTPS/WSS.
+ * Basic Auth requires `--cert-file` and `--key-file`; the server refuses to start otherwise.
  * static frontend files are embedded with `go:embed`, so after frontend asset changes you must rebuild the Go binary you run.
 
 ## Open Collaboration

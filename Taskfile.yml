@@ -4,8 +4,9 @@ version: '3'
 
 tasks:
   default:
-    desc: 'Default task runs the "build" task'
+    desc: 'Default task runs the "test" and "build" tasks'
     deps:
+      - test
       - build
 
   list:

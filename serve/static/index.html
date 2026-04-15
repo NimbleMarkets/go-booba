@@ -53,6 +53,10 @@
         const dot = document.getElementById('status-dot');
         const text = document.getElementById('status-text');
 
+        function isLoopbackHost(hostname) {
+            return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+        }
+
         async function main() {
             const booba = new BoobaTerminal('terminal-container');
 
@@ -75,11 +79,13 @@
 
             const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
-            const certHashUrl = `${window.location.origin}/cert-hash`;
             let wtUrl = null;
+            let certHashUrl = null;
 
-            if (typeof WebTransport !== 'undefined') {
+            if (typeof WebTransport !== 'undefined' &&
+                (window.location.protocol === 'https:' || isLoopbackHost(window.location.hostname))) {
                 wtUrl = `https://${window.location.host}/wt`;
+                certHashUrl = `${window.location.origin}/cert-hash`;
             }
 
             booba.connectAuto(wsUrl, wtUrl, certHashUrl);
