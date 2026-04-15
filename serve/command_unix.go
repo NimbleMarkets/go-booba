@@ -5,7 +5,6 @@ package serve
 import (
 	"fmt"
 	"os/exec"
-	"syscall"
 
 	"github.com/charmbracelet/x/xpty"
 )
@@ -16,16 +15,7 @@ func startCommandInPty(cmd *exec.Cmd, sess *ptySession) error {
 		return fmt.Errorf("command mode requires Unix PTY")
 	}
 
-	slave := upty.Slave()
-	cmd.Stdin = slave
-	cmd.Stdout = slave
-	cmd.Stderr = slave
-
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setsid:  true,
-		Setctty: true,
-		Ctty:    int(slave.Fd()),
-	}
-
-	return cmd.Start()
+	// Let xpty configure the child process and controlling terminal correctly
+	// for the current Unix platform.
+	return upty.Start(cmd)
 }
