@@ -180,6 +180,25 @@ TODO: link to live example
 
 Otherwise, one might have a BubbleTea program running on a remote machine. While one might use `ssh` to access it, `booba` enables an HTTP-based interface to it. The top-level `serve` package is the single server implementation for that path, serving the embedded Ghostty frontend and bridging browser clients over WebSocket or WebTransport.
 
+## `booba` CLI Command Wrapper
+
+The `booba` command wraps any local CLI program and serves it in the browser through the same embedded terminal stack.
+
+Build and run it from the repository root:
+
+```sh
+task build-cmd-booba
+./bin/booba --listen 127.0.0.1:8080 -- htop
+```
+
+Everything after `--` is treated as the wrapped command and its arguments:
+
+```sh
+./bin/booba --listen 127.0.0.1:8080 -- bash
+./bin/booba --listen 127.0.0.1:8080 -- python3 -q
+./bin/booba --listen 127.0.0.1:8080 -- vim README.md
+```
+
 Build and run the example server from the repository root:
 
 ```sh

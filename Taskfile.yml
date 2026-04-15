@@ -85,6 +85,8 @@ tasks:
       - node_modules/ghostty-web/dist/*
     generates:
       - serve/static/booba/*.js
+      - serve/static/ghostty-web/ghostty-web.js
+      - serve/static/ghostty-web/ghostty-vt.wasm
 
   clean:
     desc: 'Clean commands'
@@ -104,8 +106,21 @@ tasks:
   build-cmds:
     desc: 'Build all commands'
     deps:
+      - build-cmd-booba
       - build-cmd-booba-view-example-native
       - build-cmd-booba-view-example-wasm
+
+  build-cmd-booba:
+    desc: 'Build booba command'
+    deps: [go-tidy, build-serve-assets]
+    cmds:
+      - go build -o bin/booba ./cmd/booba/
+    sources:
+      - cmd/booba/*.go
+      - internal/cli/*.go
+      - serve/*.go
+    generates:
+      - bin/booba
 
   build-cmd-booba-view-example-native:
     desc: 'Build booba-view-example command'
@@ -114,6 +129,7 @@ tasks:
       - go build -o bin/booba-view-example ./cmd/booba-view-example/
     sources:
       - cmd/booba-view-example/*.go
+      - internal/cli/*.go
       - serve/*.go
     generates:
       - bin/booba-view-example
@@ -132,5 +148,6 @@ tasks:
   clean-cmds:
     desc: 'Cleans all commands'
     cmds:
+      - rm -f bin/booba
       - rm -f bin/booba-view-example
       - rm -f bin/booba-view-example.wasm
