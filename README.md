@@ -37,6 +37,7 @@ const booba = new BoobaTerminal('terminal-container', {
     rows: 24,
     fontSize: 14,
     scrollback: 1000,
+    allowOSC52: true, // Enable OSC 52 clipboard access
     cursorBlink: true,
     cursorStyle: 'block',
     theme: {
@@ -52,7 +53,7 @@ booba.focus();
 
 ### Terminal Options
 
-All [ghostty-web ITerminalOptions](https://github.com/coder/ghostty-web) are supported: `fontSize`, `fontFamily`, `cols`, `rows`, `cursorBlink`, `cursorStyle`, `scrollback`, `allowTransparency`, `convertEol`, `disableStdin`, `smoothScrollDuration`, and a full `theme` with 16-color palette and cursor/selection colors.
+All [ghostty-web ITerminalOptions](https://github.com/coder/ghostty-web) are supported: `fontSize`, `fontFamily`, `cols`, `rows`, `cursorBlink`, `cursorStyle`, `scrollback`, `allowOSC52`, `allowTransparency`, `convertEol`, `disableStdin`, `smoothScrollDuration`, and a full `theme` with 16-color palette and cursor/selection colors.
 
 ### Selection & Clipboard
 
@@ -193,6 +194,7 @@ Useful flags:
 ```sh
 ./bin/booba-view-example --web :8080 --wt-port=-1
 ./bin/booba-view-example --web :8080 --origin=https://app.example.com,https://*.example.net
+./bin/booba-view-example --web :8080 --username=admin --password=secret
 ```
 
 Notes:

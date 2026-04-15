@@ -22,6 +22,8 @@ var (
 	flagReadOnly = pflag.Bool("read-only", false, "disable client input")
 	flagDebug    = pflag.Bool("debug", false, "verbose logging")
 	flagOrigins  = pflag.String("origin", "", "comma-separated additional allowed browser origins (host patterns or scheme://host)")
+	flagUsername = pflag.String("username", "", "Basic Auth username")
+	flagPassword = pflag.String("password", "", "Basic Auth password")
 )
 
 func startWebServerIfRequested() bool {
@@ -43,6 +45,9 @@ func startWebServerIfRequested() bool {
 	config.TLSKey = *flagTLSKey
 	config.ReadOnly = *flagReadOnly
 	config.Debug = *flagDebug
+	config.BasicUsername = *flagUsername
+	config.BasicPassword = *flagPassword
+
 	if *flagOrigins != "" {
 		for _, pattern := range strings.Split(*flagOrigins, ",") {
 			pattern = strings.TrimSpace(pattern)

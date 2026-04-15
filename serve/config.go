@@ -14,6 +14,8 @@ type Config struct {
 	TLSCert        string        // Optional TLS cert file path
 	TLSKey         string        // Optional TLS key file path
 	OriginPatterns []string      // Additional allowed origins for browser clients
+	BasicUsername  string        // Optional Basic Auth username
+	BasicPassword  string        // Optional Basic Auth password
 }
 
 // DefaultConfig returns a Config with sensible defaults.

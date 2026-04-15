@@ -172,6 +172,9 @@ func (s *Server) start(ctx context.Context) error {
 }
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
+	if !s.checkAuth(w, r) {
+		return
+	}
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -186,6 +189,9 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
+	if !s.checkAuth(w, r) {
+		return
+	}
 	// Connection limit check
 	if s.config.MaxConnections > 0 {
 		if int(s.connCount.Load()) >= s.config.MaxConnections {
@@ -259,6 +265,9 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
+	if !s.checkAuth(w, r) {
+		return
+	}
 	if s.certInfo == nil {
 		http.Error(w, "no certificate", http.StatusNotFound)
 		return
@@ -271,6 +280,9 @@ func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webtransport.Server) {
 	log.Printf("WebTransport handler called: %s %s %s", r.Method, r.URL.Path, r.Proto)
+	if !s.checkAuth(w, r) {
+		return
+	}
 	if s.config.MaxConnections > 0 {
 		if int(s.connCount.Load()) >= s.config.MaxConnections {
 			http.Error(w, "max connections reached", http.StatusServiceUnavailable)
@@ -344,6 +356,20 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	}()
 
 	handleWebTransport(ctx, sess, stream, opts)
+}
+
+func (s *Server) checkAuth(w http.ResponseWriter, r *http.Request) bool {
+	if s.config.BasicUsername == "" && s.config.BasicPassword == "" {
+		return true
+	}
+
+	username, password, ok := r.BasicAuth()
+	if !ok || username != s.config.BasicUsername || password != s.config.BasicPassword {
+		w.Header().Set("WWW-Authenticate", `Basic realm="booba"`)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return false
+	}
+	return true
 }
 
 func (s *Server) checkOrigin(r *http.Request) bool {

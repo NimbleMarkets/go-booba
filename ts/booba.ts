@@ -14,6 +14,7 @@ export interface BoobaTerminalOptions {
     cursorBlink?: boolean;
     cursorStyle?: 'block' | 'underline' | 'bar';
     scrollback?: number;
+    allowOSC52?: boolean;
     allowTransparency?: boolean;
     convertEol?: boolean;
     disableStdin?: boolean;
@@ -28,7 +29,7 @@ export class BoobaTerminal {
     adapter: BoobaAdapter | null = null;
     fitAddon: FitAddon | null = null;
     private _resizeHandler: (() => void) | null = null;
-    private osc52Scanner: OSC52Scanner = new OSC52Scanner();
+    private osc52Scanner: OSC52Scanner;
 
     // --- Event Callbacks ---
     onStatusChange: ((state: string, message: string) => void) | null = null;
@@ -46,12 +47,14 @@ export class BoobaTerminal {
             fontSize: 14,
             cols: 80,
             rows: 24,
+            allowOSC52: false,
             theme: {
                 background: '#1e1e1e',
                 foreground: '#d4d4d4',
             },
             ...options
         };
+        this.osc52Scanner = new OSC52Scanner(this.options.allowOSC52 ?? false);
     }
 
     async init() {

@@ -14,8 +14,11 @@ const ST_ESC = '\x1b\\';
 export class OSC52Scanner {
     private buffer = '';
 
+    constructor(private allowOSC52: boolean = false) {}
+
     /** Process a chunk of output data, extracting OSC 52 clipboard sequences. */
     scan(data: Uint8Array): void {
+        if (!this.allowOSC52) return;
         const text = new TextDecoder().decode(data);
         this.buffer += text;
 
