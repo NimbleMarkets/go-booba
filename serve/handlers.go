@@ -22,11 +22,18 @@ const (
 
 // handleWebSocket handles a single WebSocket connection for a session.
 func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage) {
-	defer conn.CloseNow()
+	defer func() {
+		if err := conn.CloseNow(); err != nil {
+			log.Printf("websocket close now: %v", err)
+		}
+	}()
 
 	// Send options message
 	optBytes, _ := json.Marshal(opts)
-	writeWSMessage(ctx, conn, MsgOptions, optBytes)
+	if err := writeWSMessage(ctx, conn, MsgOptions, optBytes); err != nil {
+		log.Printf("options message write error: %v", err)
+		return
+	}
 
 	var wg sync.WaitGroup
 
@@ -92,7 +99,9 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, msg
 	switch msgType {
 	case MsgInput:
 		if len(payload) > 0 {
-			sess.InputWriter().Write(payload)
+			if _, err := sess.InputWriter().Write(payload); err != nil {
+				log.Printf("session input write error: %v", err)
+			}
 		}
 	case MsgResize:
 		var rm ResizeMessage
@@ -100,7 +109,9 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, msg
 			sess.Resize(rm.Cols, rm.Rows)
 		}
 	case MsgPing:
-		writeWSMessage(ctx, conn, MsgPong, nil)
+		if err := writeWSMessage(ctx, conn, MsgPong, nil); err != nil {
+			log.Printf("pong write error: %v", err)
+		}
 	case MsgKittyKbd:
 		log.Printf("kitty keyboard flags: %s", payload)
 	default:
@@ -119,7 +130,10 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 
 	// Send options message
 	optBytes, _ := json.Marshal(opts)
-	writeWTMessage(stream, MsgOptions, optBytes)
+	if err := writeWTMessage(stream, MsgOptions, optBytes); err != nil {
+		log.Printf("options message write error: %v", err)
+		return
+	}
 
 	var wg sync.WaitGroup
 
@@ -196,7 +210,9 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 	switch msgType {
 	case MsgInput:
 		if len(payload) > 0 {
-			sess.InputWriter().Write(payload)
+			if _, err := sess.InputWriter().Write(payload); err != nil {
+				log.Printf("session input write error: %v", err)
+			}
 		}
 	case MsgResize:
 		var rm ResizeMessage
@@ -204,7 +220,9 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 			sess.Resize(rm.Cols, rm.Rows)
 		}
 	case MsgPing:
-		writeWTMessage(stream, MsgPong, nil)
+		if err := writeWTMessage(stream, MsgPong, nil); err != nil {
+			log.Printf("pong write error: %v", err)
+		}
 	case MsgKittyKbd:
 		log.Printf("kitty keyboard flags: %s", payload)
 	default:

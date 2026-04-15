@@ -76,7 +76,9 @@ func (s *Server) Handler(modelFactory func() tea.Model, options ...tea.ProgramOp
 		// LF (\n) as CR+LF. BubbleTea's renderer sends bare \n when
 		// mapNl is true (non-TTY output), expecting the terminal to
 		// handle the carriage return.
-		adapter.Write([]byte("\x1b[20h"))
+		if _, err := adapter.Write([]byte("\x1b[20h")); err != nil {
+			log.Printf("failed to enable LNM mode: %v", err)
+		}
 
 		// Run the program (blocks until program exits)
 		if _, err := prog.Run(); err != nil {

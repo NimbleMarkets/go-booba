@@ -185,7 +185,9 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write(data)
+	if _, err := w.Write(data); err != nil {
+		log.Printf("write index response: %v", err)
+	}
 }
 
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
@@ -216,17 +218,17 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	// Wait for initial resize from client
 	_, data, err := conn.Read(ctx)
 	if err != nil {
-		conn.CloseNow()
+		_ = conn.CloseNow()
 		return
 	}
 	msgType, payload, err := DecodeWSMessage(data)
 	if err != nil || msgType != MsgResize {
-		conn.CloseNow()
+		_ = conn.CloseNow()
 		return
 	}
 	var rm ResizeMessage
 	if err := json.Unmarshal(payload, &rm); err != nil || rm.Cols <= 0 || rm.Rows <= 0 {
-		conn.CloseNow()
+		_ = conn.CloseNow()
 		return
 	}
 
@@ -234,7 +236,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	sess, err := newPtySession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
 	if err != nil {
 		log.Printf("create session: %v", err)
-		conn.CloseNow()
+		_ = conn.CloseNow()
 		return
 	}
 	defer sess.Close()
@@ -273,9 +275,11 @@ func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"hash": hex.EncodeToString(s.certInfo.Hash[:]),
-	})
+	}); err != nil {
+		log.Printf("encode cert hash response: %v", err)
+	}
 }
 
 func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webtransport.Server) {
@@ -297,7 +301,11 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		log.Printf("webtransport upgrade: %v", err)
 		return
 	}
-	defer wtSess.CloseWithError(0, "")
+	defer func() {
+		if err := wtSess.CloseWithError(0, ""); err != nil {
+			log.Printf("webtransport session close: %v", err)
+		}
+	}()
 
 	stream, err := wtSess.AcceptStream(r.Context())
 	if err != nil {
