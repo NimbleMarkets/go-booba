@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  test_and_build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -23,14 +23,14 @@ jobs:
 
       - uses: go-task/setup-task@v2
 
-      - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-
       - name: Test
         run: task test
 
       - name: Lint
-        run: task go-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.10.1
+          args: --enable=errcheck --timeout=5m ./...
 
       - name: Build
         run: task build
