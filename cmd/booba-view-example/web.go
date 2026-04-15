@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/NimbleMarkets/booba/serve"
@@ -20,6 +21,7 @@ var (
 	flagTLSKey   = pflag.String("tls-key", "", "TLS key file path")
 	flagReadOnly = pflag.Bool("read-only", false, "disable client input")
 	flagDebug    = pflag.Bool("debug", false, "verbose logging")
+	flagOrigins  = pflag.String("origin", "", "comma-separated additional allowed browser origins (host patterns or scheme://host)")
 )
 
 func startWebServerIfRequested() bool {
@@ -41,6 +43,14 @@ func startWebServerIfRequested() bool {
 	config.TLSKey = *flagTLSKey
 	config.ReadOnly = *flagReadOnly
 	config.Debug = *flagDebug
+	if *flagOrigins != "" {
+		for _, pattern := range strings.Split(*flagOrigins, ",") {
+			pattern = strings.TrimSpace(pattern)
+			if pattern != "" {
+				config.OriginPatterns = append(config.OriginPatterns, pattern)
+			}
+		}
+	}
 
 	server := serve.NewServer(config)
 

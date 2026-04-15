@@ -4,6 +4,7 @@
 .DS_Store
 bin/
 node_modules/
+booba-view-example
 
 # This is commented to allow Antigravity to edit the JS
 assets/booba/

@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"sync"
@@ -37,7 +38,11 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	}()
 
 	// Read client input → PTY
-	handleInputWS(ctx, conn, sess)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		handleInputWS(ctx, conn, sess)
+	}()
 
 	wg.Wait()
 	conn.Close(websocket.StatusNormalClosure, "session ended")
@@ -57,7 +62,11 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 			if err != io.EOF {
 				log.Printf("pty read error: %v", err)
 			}
-			writeWSMessage(ctx, conn, MsgClose, nil)
+			if werr := writeWSMessage(ctx, conn, MsgClose, nil); werr != nil &&
+				!errors.Is(werr, context.Canceled) {
+				log.Printf("close message write error: %v", werr)
+			}
+			_ = conn.Close(websocket.StatusNormalClosure, "session ended")
 			return
 		}
 	}
@@ -122,7 +131,11 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	}()
 
 	// Read client input → PTY
-	handleInputWT(ctx, sess, stream)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		handleInputWT(ctx, sess, stream)
+	}()
 
 	wg.Wait()
 }
@@ -141,7 +154,12 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 			if err != io.EOF {
 				log.Printf("pty read error: %v", err)
 			}
-			writeWTMessage(stream, MsgClose, nil)
+			if werr := writeWTMessage(stream, MsgClose, nil); werr != nil {
+				log.Printf("close message write error: %v", werr)
+			}
+			stream.CancelRead(0)
+			stream.CancelWrite(0)
+			_ = stream.Close()
 			return
 		}
 	}

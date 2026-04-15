@@ -15,6 +15,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
+	"path"
 	"sync/atomic"
 
 	"github.com/coder/websocket"
@@ -118,8 +120,9 @@ func (s *Server) start(ctx context.Context) error {
 				TLSConfig:       s.certInfo.TLSConfig,
 				EnableDatagrams: true,
 			},
-			CheckOrigin: func(r *http.Request) bool { return true },
+			CheckOrigin: s.checkOrigin,
 		}
+		webtransport.ConfigureHTTP3Server(wtServer.H3)
 
 		wtServer.H3.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Printf("WT handler: %s %s %s proto=%s", r.Method, r.URL.Path, r.URL.String(), r.Proto)
@@ -194,7 +197,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	defer s.connCount.Add(-1)
 
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		InsecureSkipVerify: true,
+		OriginPatterns: s.config.OriginPatterns,
 	})
 	if err != nil {
 		log.Printf("websocket accept: %v", err)
@@ -341,4 +344,51 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	}()
 
 	handleWebTransport(ctx, sess, stream, opts)
+}
+
+func (s *Server) checkOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return true
+	}
+
+	parsed, err := url.Parse(origin)
+	if err != nil || parsed.Host == "" {
+		return false
+	}
+
+	if sameOriginHost(parsed.Hostname(), r.Host) {
+		return true
+	}
+
+	candidate := parsed.Host
+	if parsed.Scheme != "" {
+		candidate = parsed.Scheme + "://" + parsed.Host
+	}
+
+	for _, patternValue := range s.config.OriginPatterns {
+		ok, err := path.Match(patternValue, candidate)
+		if err == nil && ok {
+			return true
+		}
+		ok, err = path.Match(patternValue, parsed.Host)
+		if err == nil && ok {
+			return true
+		}
+	}
+
+	return false
+}
+
+func sameOriginHost(originHost, requestHost string) bool {
+	if originHost == "" || requestHost == "" {
+		return false
+	}
+
+	requestParsed := requestHost
+	if host, _, err := net.SplitHostPort(requestHost); err == nil {
+		requestParsed = host
+	}
+
+	return originHost == requestParsed
 }

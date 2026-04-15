@@ -179,8 +179,27 @@ TODO: link to live example
 
 Otherwise, one might have a BubbleTea program running on a remote machine. While one might use `ssh` to access it, `booba` enables an HTTP-based interface to it. Effectively, we serve up a Ghostty terminal from an HTTP endpoint and extend the terminal via WebSockets.
 
-TODO: instructions for doing this.
-TODO: link to live example
+Build and run the example server from the repository root:
+
+```sh
+task build-cmd-booba-view-example-native
+./bin/booba-view-example --web :8080
+```
+
+The browser page served from `http://localhost:8080/` will use WebTransport automatically when available and fall back to WebSocket otherwise.
+
+Useful flags:
+
+```sh
+./bin/booba-view-example --web :8080 --wt-port=-1
+./bin/booba-view-example --web :8080 --origin=https://app.example.com,https://*.example.net
+```
+
+Notes:
+
+ * `--wt-port=-1` disables WebTransport and uses WebSocket only.
+ * browser origins are same-host by default; use `--origin` to allow additional cross-origin browser clients.
+ * static frontend files are embedded with `go:embed`, so after frontend asset changes you must rebuild the Go binary you run.
 
 ## Open Collaboration
 

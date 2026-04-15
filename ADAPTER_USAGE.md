@@ -33,6 +33,21 @@ booba.focus();
 - `0x01` + data: User input
 - `0x02` + JSON: Terminal resize (`{"cols": N, "rows": M}`)
 
+## 1.5. Auto Mode (WebTransport with WebSocket Fallback)
+
+`connectAuto` tries WebTransport first when the browser supports it and a certificate hash endpoint is available, then falls back to WebSocket automatically.
+
+```javascript
+const wsUrl = 'ws://localhost:8080/ws';
+const wtUrl = 'https://localhost:8081/wt';
+const certHashUrl = 'http://localhost:8080/cert-hash';
+
+await booba.init();
+booba.connectAuto(wsUrl, wtUrl, certHashUrl);
+```
+
+If you disable WebTransport on the server, pass `null` for `wtUrl` and `certHashUrl` or use `connectWebSocket(...)` directly.
+
 ## 2. WASM Mode (Pure Embedding)
 
 Connect to a BubbleTea application compiled to WebAssembly and running in the browser.

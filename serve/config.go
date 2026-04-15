@@ -13,6 +13,7 @@ type Config struct {
 	Debug          bool          // Verbose logging
 	TLSCert        string        // Optional TLS cert file path
 	TLSKey         string        // Optional TLS key file path
+	OriginPatterns []string      // Additional allowed origins for browser clients
 }
 
 // DefaultConfig returns a Config with sensible defaults.
