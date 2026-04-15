@@ -1,4 +1,4 @@
-# booba - Web-based BubbleTea TUIs using libghostty
+# go-booba - Web-based BubbleTea TUIs using libghostty
 
 <p>
     <a href="https://github.com/NimbleMarkets/booba/tags"><img src="https://img.shields.io/github/tag/NimbleMarkets/booba.svg" alt="Latest Release"></a>
@@ -6,7 +6,7 @@
     <a href="https://github.com/NimbleMarkets/booba/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg"  alt="Code Of Conduct"></a>
 </p>
 
-`booba` is a Golang module that facilitates embedding [BubbleTea](https://github.com/charmbracelet/bubbletea) Terminal User Interfaces (TUIs) into a Web Browser. Generally, these are accessed via a local terminal or via SSH. This module exposes an HTTP-based terminal connection to a BubbleTea program.
+`go-booba` is a Golang module that facilitates embedding [BubbleTea](https://github.com/charmbracelet/bubbletea) Terminal User Interfaces (TUIs) into a Web Browser. Generally, these are accessed via a local terminal or via SSH. This module exposes an HTTP-based terminal connection to a BubbleTea program.
 
 There are two facets we address with this package:
 
@@ -216,11 +216,13 @@ Thanks to the [Ghostty developers](https://github.com/ghostty-org/ghostty), the 
 
 Thanks to [@BigJK](https://github.com/BigJk/bubbletea-in-wasm) for the initial inspiration when I was exploring this before `libghostty`.
 
+Thanks to [@Gaurav-Gosain](https://github.com/Gaurav-Gosain), who cotemporaneously invented `sip`.  [That `sip` tool](https://github.com/Gaurav-Gosain/sip) is similar to this library, but works with `xterm.js`.   We adopted and extended its protocol and it also inspired our CLI tool.
+
 ## License
 
 Released under the [MIT License](https://en.wikipedia.org/wiki/MIT_License), see [LICENSE.txt](./LICENSE.txt).
 
-Copyright (c) 2025 [Neomantra Corp](https://www.neomantra.com).   
+Copyright (c) 2026 [Neomantra Corp](https://www.neomantra.com).   
 
 ----
 Made with :heart: and :fire: by the team behind [Nimble.Markets](https://nimble.markets).
