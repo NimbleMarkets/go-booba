@@ -71,11 +71,21 @@ tasks:
     desc: 'Build frontend assets'
     deps: [npm-deps]
     cmds:
-      - npx tsc
+      - npm run build:embed
     sources:
       - ts/*.ts
     generates:
       - serve/static/booba/*.js
+
+  build-npm:
+    desc: 'Build npm package to dist/'
+    deps: [npm-deps]
+    cmds:
+      - npm run build
+    sources:
+      - ts/*.ts
+    generates:
+      - dist/*.js
 
   build-serve-assets:
     desc: 'Copy ghostty-web into serve/static/ for go:embed'
@@ -100,6 +110,7 @@ tasks:
   clean-assets:
     desc: 'Cleans compiled assets'
     cmds:
+      - rm -rf dist
       - rm -rf serve/static/booba
       - rm -rf serve/static/ghostty-web
 
