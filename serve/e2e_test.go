@@ -212,6 +212,24 @@ func TestWSE2E_ClientDisconnectClosesSession(t *testing.T) {
 	}
 }
 
+func TestWSE2E_IdleTimeoutClosesSession(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IdleTimeout = 50 * time.Millisecond
+	ts, created := newWSE2ETestServer(t, cfg)
+
+	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	sess := waitForSession(t, created)
+
+	select {
+	case <-sess.Done():
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for idle timeout to close session")
+	}
+
+	assertConnectionClosed(t, conn)
+}
+
 func newWSE2ETestServer(t *testing.T, cfg Config) (*httptest.Server, chan *e2eSession) {
 	t.Helper()
 

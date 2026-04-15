@@ -9,6 +9,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -18,6 +19,7 @@ import (
 	"net/url"
 	"path"
 	"sync/atomic"
+	"time"
 
 	"github.com/coder/websocket"
 	"github.com/quic-go/quic-go/http3"
@@ -103,8 +105,9 @@ func (s *Server) start(ctx context.Context) error {
 	log.Printf("Starting server on http://%s:%d", logHostName, s.config.Port)
 
 	server := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		Handler:     mux,
+		IdleTimeout: s.config.IdleTimeout,
 		BaseContext: func(l net.Listener) context.Context {
 			return ctx
 		},
@@ -146,7 +149,7 @@ func (s *Server) configureTransport() error {
 	}
 
 	s.certInfo = certInfo
-	log.Printf("Generated self-signed cert (hash: %s)", hex.EncodeToString(s.certInfo.Hash[:]))
+	s.debugf("Generated self-signed cert (hash: %s)", hex.EncodeToString(s.certInfo.Hash[:]))
 	return nil
 }
 
@@ -166,7 +169,7 @@ func (s *Server) newMux(wtServer *webtransport.Server) (http.Handler, error) {
 	}
 	if wtServer != nil {
 		mux.HandleFunc("/wt", func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("WT handler: %s %s %s proto=%s", r.Method, r.URL.Path, r.URL.String(), r.Proto)
+			s.debugf("WT handler: %s %s %s proto=%s", r.Method, r.URL.Path, r.URL.String(), r.Proto)
 			s.handleWT(w, r, wtServer)
 		})
 	}
@@ -241,6 +244,57 @@ func (s *Server) tryAcquireConnection() bool {
 
 func (s *Server) releaseConnection() {
 	s.connCount.Add(-1)
+}
+
+func (s *Server) debugf(format string, args ...any) {
+	if s.config.Debug {
+		log.Printf(format, args...)
+	}
+}
+
+func (s *Server) attachIdleTimeout(ctx context.Context, sess Session) (context.Context, context.CancelFunc, func()) {
+	if s.config.IdleTimeout <= 0 {
+		return ctx, func() {}, func() {}
+	}
+
+	idleCtx, cancel := context.WithCancel(ctx)
+	activityCh := make(chan struct{}, 1)
+
+	go func() {
+		timer := time.NewTimer(s.config.IdleTimeout)
+		defer timer.Stop()
+
+		for {
+			select {
+			case <-idleCtx.Done():
+				return
+			case <-activityCh:
+				if !timer.Stop() {
+					select {
+					case <-timer.C:
+					default:
+					}
+				}
+				timer.Reset(s.config.IdleTimeout)
+			case <-timer.C:
+				s.debugf("Closing idle session after %s", s.config.IdleTimeout)
+				cancel()
+				if err := sess.Close(); err != nil && !errors.Is(err, io.EOF) {
+					log.Printf("session close error: %v", err)
+				}
+				return
+			}
+		}
+	}()
+
+	activity := func() {
+		select {
+		case activityCh <- struct{}{}:
+		default:
+		}
+	}
+
+	return idleCtx, cancel, activity
 }
 
 func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, error) {
@@ -339,7 +393,11 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 	defer sess.Close()
 
-	log.Printf("New session: %dx%d", rm.Cols, rm.Rows)
+	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
+	defer cancel()
+	activity()
+
+	s.debugf("New session: %dx%d", rm.Cols, rm.Rows)
 
 	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
 
@@ -352,7 +410,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Handle WebSocket protocol messages (blocks until disconnect)
-	handleWebSocket(ctx, conn, sess, opts)
+	handleWebSocket(ctx, conn, sess, opts, s.config.Debug, activity)
 }
 
 func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
@@ -372,7 +430,7 @@ func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webtransport.Server) {
-	log.Printf("WebTransport handler called: %s %s %s", r.Method, r.URL.Path, r.Proto)
+	s.debugf("WebTransport handler called: %s %s %s", r.Method, r.URL.Path, r.Proto)
 	if !s.checkAuth(w, r) {
 		return
 	}
@@ -429,7 +487,11 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	}
 	defer sess.Close()
 
-	log.Printf("New WebTransport session: %dx%d", rm.Cols, rm.Rows)
+	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
+	defer cancel()
+	activity()
+
+	s.debugf("New WebTransport session: %dx%d", rm.Cols, rm.Rows)
 
 	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
 
@@ -440,7 +502,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		}
 	}()
 
-	handleWebTransport(ctx, sess, stream, opts)
+	handleWebTransport(ctx, sess, stream, opts, s.config.Debug, activity)
 }
 
 func (s *Server) checkAuth(w http.ResponseWriter, r *http.Request) bool {

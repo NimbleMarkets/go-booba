@@ -17,6 +17,7 @@ import (
 var (
 	flagWeb      = pflag.String("web", "", "start web server on this address (e.g. :8080)")
 	flagWTPort   = pflag.Int("wt-port", 0, "WebTransport port (default: web port + 1, -1 to disable)")
+	flagIdle     = pflag.Duration("idle-timeout", 0, "close idle HTTP/WebSocket sessions after this duration (0 disables)")
 	flagTLSCert  = pflag.String("tls-cert", "", "TLS certificate file path")
 	flagTLSKey   = pflag.String("tls-key", "", "TLS key file path")
 	flagReadOnly = pflag.Bool("read-only", false, "disable client input")
@@ -41,6 +42,7 @@ func startWebServerIfRequested() bool {
 	}
 
 	config.WTPort = *flagWTPort
+	config.IdleTimeout = *flagIdle
 	config.TLSCert = *flagTLSCert
 	config.TLSKey = *flagTLSKey
 	config.ReadOnly = *flagReadOnly

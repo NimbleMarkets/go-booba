@@ -6,10 +6,13 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestCheckOriginAllowsSameHost(t *testing.T) {
@@ -141,6 +144,55 @@ func TestTryAcquireConnectionIsAtomic(t *testing.T) {
 	}
 }
 
+func TestAttachIdleTimeoutClosesIdleSession(t *testing.T) {
+	srv := NewServer(Config{IdleTimeout: 50 * time.Millisecond})
+	sess := newIdleTestSession()
+
+	ctx, cancel, activity := srv.attachIdleTimeout(context.Background(), sess)
+	defer cancel()
+
+	activity()
+	time.Sleep(25 * time.Millisecond)
+	activity()
+
+	select {
+	case <-sess.Done():
+		t.Fatal("session closed before idle timeout elapsed")
+	case <-time.After(20 * time.Millisecond):
+	}
+
+	select {
+	case <-sess.Done():
+	case <-time.After(120 * time.Millisecond):
+		t.Fatal("timed out waiting for idle session close")
+	}
+
+	if err := ctx.Err(); err == nil {
+		t.Fatal("expected idle timeout context to be canceled")
+	}
+}
+
+func TestDebugfHonorsDebugFlag(t *testing.T) {
+	var buf bytes.Buffer
+	origWriter := log.Writer()
+	origFlags := log.Flags()
+	log.SetOutput(&buf)
+	log.SetFlags(0)
+	defer log.SetOutput(origWriter)
+	defer log.SetFlags(origFlags)
+
+	NewServer(DefaultConfig()).debugf("hidden %d", 1)
+	if got := buf.String(); got != "" {
+		t.Fatalf("unexpected log output with debug disabled: %q", got)
+	}
+
+	srv := NewServer(Config{Debug: true})
+	srv.debugf("visible %d", 2)
+	if got := buf.String(); !strings.Contains(got, "visible 2") {
+		t.Fatalf("log output = %q, want debug message", got)
+	}
+}
+
 type stubSession struct {
 	ctx  context.Context
 	done chan struct{}
@@ -155,3 +207,25 @@ func (s *stubSession) Resize(cols, rows int)    { s.size = WindowSize{Width: col
 func (s *stubSession) WindowSize() WindowSize   { return s.size }
 func (s *stubSession) Done() <-chan struct{}    { return s.done }
 func (s *stubSession) Close() error             { return nil }
+
+type idleTestSession struct {
+	done      chan struct{}
+	closeOnce sync.Once
+}
+
+func newIdleTestSession() *idleTestSession {
+	return &idleTestSession{done: make(chan struct{})}
+}
+
+func (s *idleTestSession) Context() context.Context { return context.Background() }
+func (s *idleTestSession) OutputReader() io.Reader  { return bytes.NewReader(nil) }
+func (s *idleTestSession) InputWriter() io.Writer   { return io.Discard }
+func (s *idleTestSession) Resize(cols, rows int)    {}
+func (s *idleTestSession) WindowSize() WindowSize   { return WindowSize{} }
+func (s *idleTestSession) Done() <-chan struct{}    { return s.done }
+func (s *idleTestSession) Close() error {
+	s.closeOnce.Do(func() {
+		close(s.done)
+	})
+	return nil
+}

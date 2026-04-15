@@ -21,7 +21,7 @@ const (
 )
 
 // handleWebSocket handles a single WebSocket connection for a session.
-func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage) {
+func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func()) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer func() {
@@ -36,6 +36,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 		log.Printf("options message write error: %v", err)
 		return
 	}
+	activity()
 
 	var wg sync.WaitGroup
 	var cleanupOnce sync.Once
@@ -53,7 +54,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		streamOutputWS(ctx, conn, sess)
+		streamOutputWS(ctx, conn, sess, activity)
 	}()
 
 	// Read client input → PTY
@@ -61,7 +62,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		handleInputWS(ctx, conn, sess, opts)
+		handleInputWS(ctx, conn, sess, opts, debug, activity)
 	}()
 
 	wg.Wait()
@@ -69,11 +70,12 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 }
 
 // streamOutputWS reads from PTY and sends as MsgOutput over WebSocket.
-func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
+func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session, activity func()) {
 	buf := make([]byte, writeBufSize)
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
+			activity()
 			if werr := writeWSMessage(ctx, conn, MsgOutput, buf[:n]); werr != nil {
 				return
 			}
@@ -93,22 +95,23 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 }
 
 // handleInputWS reads messages from WebSocket and dispatches them.
-func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage) {
+func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func()) {
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
 			return
 		}
+		activity()
 		msgType, payload, err := DecodeWSMessage(data)
 		if err != nil {
 			continue
 		}
-		processMessage(ctx, conn, sess, opts, msgType, payload)
+		processMessage(ctx, conn, sess, opts, msgType, payload, debug)
 	}
 }
 
 // processMessage dispatches a protocol message.
-func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, msgType byte, payload []byte) {
+func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool) {
 	switch msgType {
 	case MsgInput:
 		if opts.ReadOnly {
@@ -129,7 +132,9 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 			log.Printf("pong write error: %v", err)
 		}
 	case MsgKittyKbd:
-		log.Printf("kitty keyboard flags: %s", payload)
+		if debug {
+			log.Printf("kitty keyboard flags: %s", payload)
+		}
 	default:
 		// Unknown message types silently ignored (forward compatibility)
 	}
@@ -141,7 +146,7 @@ func writeWSMessage(ctx context.Context, conn *websocket.Conn, msgType byte, pay
 }
 
 // handleWebTransport handles a single WebTransport session.
-func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage) {
+func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func()) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer stream.Close()
@@ -152,6 +157,7 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 		log.Printf("options message write error: %v", err)
 		return
 	}
+	activity()
 
 	var wg sync.WaitGroup
 	var cleanupOnce sync.Once
@@ -169,7 +175,7 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		streamOutputWT(ctx, sess, stream)
+		streamOutputWT(ctx, sess, stream, activity)
 	}()
 
 	// Read client input → PTY
@@ -177,18 +183,19 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		handleInputWT(ctx, sess, stream, opts)
+		handleInputWT(ctx, sess, stream, opts, debug, activity)
 	}()
 
 	wg.Wait()
 }
 
 // streamOutputWT reads from PTY and sends as MsgOutput over WebTransport.
-func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stream) {
+func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stream, activity func()) {
 	buf := make([]byte, writeBufSize)
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
+			activity()
 			if werr := writeWTMessage(stream, MsgOutput, buf[:n]); werr != nil {
 				return
 			}
@@ -209,7 +216,7 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 }
 
 // handleInputWT reads length-prefixed messages from WebTransport stream.
-func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage) {
+func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func()) {
 	lenBuf := make([]byte, 4)
 	for {
 		// Read 4-byte length prefix
@@ -229,13 +236,14 @@ func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Strea
 
 		msgType := msgBuf[0]
 		payload := msgBuf[1:]
+		activity()
 
-		processWTMessage(ctx, stream, sess, opts, msgType, payload)
+		processWTMessage(ctx, stream, sess, opts, msgType, payload, debug)
 	}
 }
 
 // processWTMessage dispatches a WebTransport protocol message.
-func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, opts OptionsMessage, msgType byte, payload []byte) {
+func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool) {
 	switch msgType {
 	case MsgInput:
 		if opts.ReadOnly {
@@ -256,7 +264,9 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 			log.Printf("pong write error: %v", err)
 		}
 	case MsgKittyKbd:
-		log.Printf("kitty keyboard flags: %s", payload)
+		if debug {
+			log.Printf("kitty keyboard flags: %s", payload)
+		}
 	default:
 		// Unknown types silently ignored
 	}
