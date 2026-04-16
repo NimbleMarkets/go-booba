@@ -514,6 +514,16 @@ func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webtransport.Server) {
 	s.debugf("WebTransport handler called: %s %s %s", r.Method, r.URL.Path, r.Proto)
+
+	r = r.WithContext(withConfig(r.Context(), s.config))
+
+	finalR, err := runConnectChain(r, s.connectMW)
+	if err != nil {
+		writeConnectError(w, err)
+		return
+	}
+	r = finalR
+
 	if !s.checkAuth(w, r) {
 		return
 	}

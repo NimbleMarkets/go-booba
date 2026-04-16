@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/quic-go/webtransport-go"
 )
 
 func TestHandleWSRunsConnectChainAndRespectsRejection(t *testing.T) {
@@ -66,5 +68,25 @@ func TestHandleWSChainSeesConfigInContext(t *testing.T) {
 
 	if seen != 12345 {
 		t.Errorf("middleware saw MaxPasteBytes = %d; want 12345", seen)
+	}
+}
+
+func TestHandleWTRunsConnectChainAndRespectsRejection(t *testing.T) {
+	deny := func(next ConnectHandler) ConnectHandler {
+		return func(r *http.Request) error {
+			return &ConnectError{Status: 403, Body: "no-wt"}
+		}
+	}
+	srv := NewServer(DefaultConfig(), WithConnectMiddleware(deny))
+
+	rec := httptest.NewRecorder()
+	// Pass a nil wtServer — the chain rejects before Upgrade is called.
+	srv.handleWT(rec, httptest.NewRequest("CONNECT", "/wt", nil), (*webtransport.Server)(nil))
+
+	if rec.Code != 403 {
+		t.Errorf("status = %d; want 403", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "no-wt") {
+		t.Errorf("body = %q; want to contain 'no-wt'", rec.Body.String())
 	}
 }
