@@ -3,6 +3,7 @@
 package serve
 
 import (
+	"context"
 	"testing"
 	"time"
 )
@@ -39,5 +40,21 @@ func TestWindowDimsOrDefault(t *testing.T) {
 	got = windowDimsOrDefault(WindowSize{Width: 200})
 	if got.Width != 200 || got.Height != 4096 {
 		t.Errorf("windowDimsOrDefault({200,0}) = %+v; want {200,4096}", got)
+	}
+}
+
+func TestConfigFromContextRoundTrip(t *testing.T) {
+	cfg := Config{Host: "h", Port: 9999, MaxPasteBytes: 4096}
+	ctx := withConfig(context.Background(), cfg)
+	got := ConfigFromContext(ctx)
+	if got.Host != "h" || got.Port != 9999 || got.MaxPasteBytes != 4096 {
+		t.Errorf("ConfigFromContext = %+v; want host=h port=9999 paste=4096", got)
+	}
+}
+
+func TestConfigFromContextZeroValueWhenAbsent(t *testing.T) {
+	got := ConfigFromContext(context.Background())
+	if got.Host != "" || got.Port != 0 {
+		t.Errorf("ConfigFromContext(empty ctx) = %+v; want zero value", got)
 	}
 }
