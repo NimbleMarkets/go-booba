@@ -54,7 +54,9 @@ func NewServer(config Config, opts ...Option) *Server {
 		opt(s)
 	}
 	// Append built-in connect middleware so they run innermost (last).
-	if s.config.BasicUsername != "" {
+	// Install basic auth when either credential is configured — matches
+	// the checkAuth helper's "if both empty, skip auth" semantics.
+	if s.config.BasicUsername != "" || s.config.BasicPassword != "" {
 		s.connectMW = append(s.connectMW, basicAuthMiddleware(s.config.BasicUsername, s.config.BasicPassword))
 	}
 	return s
