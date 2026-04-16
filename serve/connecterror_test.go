@@ -4,6 +4,7 @@ package serve
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -95,5 +96,36 @@ func TestWriteConnectErrorPlainErrorIs500(t *testing.T) {
 	writeConnectError(rec, errors.New("boom"))
 	if rec.Code != 500 {
 		t.Errorf("status = %d; want 500", rec.Code)
+	}
+}
+
+func TestWriteConnectErrorEmptyBodyUsesWriteHeader(t *testing.T) {
+	rec := httptest.NewRecorder()
+	writeConnectError(rec, &ConnectError{Status: 418})
+	if rec.Code != 418 {
+		t.Errorf("status = %d; want 418", rec.Code)
+	}
+	if body := rec.Body.String(); body != "" {
+		t.Errorf("body = %q; want empty (no body was set)", body)
+	}
+}
+
+func TestWriteConnectErrorInvalidStatusNormalizesTo500(t *testing.T) {
+	cases := []int{0, 99, 600, 999}
+	for _, s := range cases {
+		rec := httptest.NewRecorder()
+		writeConnectError(rec, &ConnectError{Status: s})
+		if rec.Code != 500 {
+			t.Errorf("Status=%d rendered %d; want normalized to 500", s, rec.Code)
+		}
+	}
+}
+
+func TestWriteConnectErrorUnwrapsViaErrorsAs(t *testing.T) {
+	wrapped := fmt.Errorf("layer 1: %w", &ConnectError{Status: 403, Body: "nope"})
+	rec := httptest.NewRecorder()
+	writeConnectError(rec, wrapped)
+	if rec.Code != 403 {
+		t.Errorf("status = %d; want 403 (errors.As should unwrap through %%w)", rec.Code)
 	}
 }
