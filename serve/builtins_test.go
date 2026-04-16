@@ -65,3 +65,27 @@ func TestBasicAuthNotInstalledWhenUsernameEmpty(t *testing.T) {
 		}
 	}
 }
+
+func TestConnLimitMiddlewareRejectsWhenAtCapacity(t *testing.T) {
+	srv := NewServer(Config{MaxConnections: 1})
+	mw := connLimitMiddleware(srv)
+
+	// First connection acquires.
+	if err := mw(func(r *http.Request) error { return nil })(httptest.NewRequest("GET", "/ws", nil)); err != nil {
+		t.Fatalf("first conn rejected: %v", err)
+	}
+	// Second connection (without first releasing) is rejected.
+	err := mw(func(r *http.Request) error { return nil })(httptest.NewRequest("GET", "/ws", nil))
+	ce, ok := err.(*ConnectError)
+	if !ok {
+		t.Fatalf("err type = %T; want *ConnectError", err)
+	}
+	if ce.Status != 503 {
+		t.Errorf("status = %d; want 503", ce.Status)
+	}
+	// Release first, then second should succeed.
+	srv.releaseConnection()
+	if err := mw(func(r *http.Request) error { return nil })(httptest.NewRequest("GET", "/ws", nil)); err != nil {
+		t.Errorf("after release, expected success; got %v", err)
+	}
+}

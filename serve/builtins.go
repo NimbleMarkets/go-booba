@@ -35,3 +35,27 @@ func basicAuthMiddleware(username, password string) ConnectMiddleware {
 		}
 	}
 }
+
+// connLimitMiddleware returns a ConnectMiddleware that gates connections
+// against srv.config.MaxConnections. Acquires on success (tracking the
+// connection in srv.connCount even when MaxConnections <= 0 so the
+// handler's deferred srv.releaseConnection() pairs up unconditionally).
+// The caller is responsible for invoking srv.releaseConnection() when
+// the connection is closed.
+func connLimitMiddleware(srv *Server) ConnectMiddleware {
+	return func(next ConnectHandler) ConnectHandler {
+		return func(r *http.Request) error {
+			if !srv.tryAcquireConnection() {
+				return &ConnectError{
+					Status: http.StatusServiceUnavailable,
+					Body:   "max connections reached",
+				}
+			}
+			if err := next(r); err != nil {
+				srv.releaseConnection()
+				return err
+			}
+			return nil
+		}
+	}
+}

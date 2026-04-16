@@ -59,6 +59,8 @@ func NewServer(config Config, opts ...Option) *Server {
 	if s.config.BasicUsername != "" || s.config.BasicPassword != "" {
 		s.connectMW = append(s.connectMW, basicAuthMiddleware(s.config.BasicUsername, s.config.BasicPassword))
 	}
+	// Connection limit always installed (no-op when MaxConnections <= 0).
+	s.connectMW = append(s.connectMW, connLimitMiddleware(s))
 	return s
 }
 
@@ -436,10 +438,6 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 	r = finalR
 
-	if !s.tryAcquireConnection() {
-		http.Error(w, "max connections reached", http.StatusServiceUnavailable)
-		return
-	}
 	defer s.releaseConnection()
 
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
@@ -527,10 +525,6 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	}
 	r = finalR
 
-	if !s.tryAcquireConnection() {
-		http.Error(w, "max connections reached", http.StatusServiceUnavailable)
-		return
-	}
 	defer s.releaseConnection()
 
 	wtSess, err := wtServer.Upgrade(w, r)

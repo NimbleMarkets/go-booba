@@ -55,12 +55,14 @@ func TestWithConnectMiddlewareAppendsInOrder(t *testing.T) {
 		WithConnectMiddleware(mk("a"), mk("b")),
 		WithConnectMiddleware(mk("c")),
 	)
-	if got := len(srv.connectMW); got != 3 {
-		t.Fatalf("len(connectMW) = %d; want 3", got)
+	// User-installed middleware + auto-installed connLimitMiddleware
+	if got := len(srv.connectMW); got != 4 {
+		t.Fatalf("len(connectMW) = %d; want 4", got)
 	}
 	if _, err := runConnectChain(httptest.NewRequest("GET", "/ws", nil), srv.connectMW); err != nil {
 		t.Fatalf("runConnectChain err = %v", err)
 	}
+	// connLimitMiddleware runs last (innermost), so doesn't call our tracer.
 	want := []string{"a", "b", "c"}
 	if !reflect.DeepEqual(calls, want) {
 		t.Errorf("call order = %v; want %v (outermost-first across calls and args)", calls, want)
