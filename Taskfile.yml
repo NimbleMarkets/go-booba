@@ -64,6 +64,7 @@ tasks:
 
   go-test:
     desc: 'Run Go tests'
+    deps: [build-serve-assets]
     cmds:
       - go test ./...
 
