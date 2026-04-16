@@ -21,7 +21,10 @@ type liftBridge struct {
 }
 
 // statusCapturingWriter wraps http.ResponseWriter to record whether
-// WriteHeader or Write was called.
+// WriteHeader or Write was called. Unwrap returns the underlying writer
+// so http.NewResponseController (Go 1.20+) and other wrapping-aware
+// callers can reach Flush / Hijack / deadline methods on the original
+// ResponseWriter.
 type statusCapturingWriter struct {
 	http.ResponseWriter
 	wrote bool
@@ -37,6 +40,13 @@ func (s *statusCapturingWriter) Write(p []byte) (int, error) {
 	return s.ResponseWriter.Write(p)
 }
 
+// Unwrap exposes the underlying http.ResponseWriter so
+// http.NewResponseController can reach through for Flush, Hijack,
+// SetReadDeadline, SetWriteDeadline, and similar.
+func (s *statusCapturingWriter) Unwrap() http.ResponseWriter {
+	return s.ResponseWriter
+}
+
 // LiftHTTPMiddleware adapts a standard func(http.Handler) http.Handler
 // into a ConnectMiddleware so existing net/http middleware (chi,
 // gorilla, otelhttp, prometheus, tollbooth, ...) can run on the booba
@@ -50,7 +60,9 @@ func (s *statusCapturingWriter) Write(p []byte) (int, error) {
 //     without writing again.
 //
 // Lifted middleware MUST NOT inspect the response after next returns —
-// there is no response after upgrade.
+// there is no response after upgrade. The lifted middleware must call
+// next.ServeHTTP synchronously; calling it from a goroutine produces
+// undefined behavior.
 func LiftHTTPMiddleware(mw func(http.Handler) http.Handler) ConnectMiddleware {
 	return func(next ConnectHandler) ConnectHandler {
 		return func(r *http.Request) error {

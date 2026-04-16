@@ -24,6 +24,9 @@ var errChainBroken = errors.New("serve: connect chain broken: middleware approve
 // If a middleware approves the connection without invoking next, the
 // chain is broken (inner middleware's context decorations would be
 // silently lost); runConnectChain returns errChainBroken in that case.
+//
+// Note: used by unit tests only. Production handlers use runLiftedChain
+// (see lift.go) so that LiftHTTPMiddleware can write responses directly.
 func runConnectChain(r *http.Request, mws []ConnectMiddleware) (*http.Request, error) {
 	var captured *http.Request
 	terminal := func(r *http.Request) error {
