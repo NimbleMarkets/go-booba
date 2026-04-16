@@ -1935,7 +1935,7 @@ func startWebServer(addr string) {
 }
 ```
 
-Update imports to include `"context"`, `"net"`, `"strconv"`, and `"github.com/NimbleMarkets/booba/serve"`. Remove the import of `"github.com/NimbleMarkets/booba/internal/booba_server"`.
+Update imports to include `"context"`, `"net"`, `"strconv"`, and `"github.com/NimbleMarkets/go-booba/serve"`. Remove the import of `"github.com/NimbleMarkets/go-booba/internal/booba_server"`.
 
 - [ ] **Step 2: Verify it compiles**
 

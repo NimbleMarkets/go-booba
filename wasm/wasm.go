@@ -11,7 +11,7 @@
 //	//go:build js && wasm
 //	package main
 //
-//	import "github.com/NimbleMarkets/booba/wasm"
+//	import "github.com/NimbleMarkets/go-booba/wasm"
 //
 //	func main() {
 //	    wasm.Run(initialModel())

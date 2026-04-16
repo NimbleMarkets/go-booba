@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/NimbleMarkets/booba/internal/cli"
-	"github.com/NimbleMarkets/booba/serve"
+	"github.com/NimbleMarkets/go-booba/internal/cli"
+	"github.com/NimbleMarkets/go-booba/serve"
 	"github.com/spf13/pflag"
 )
 

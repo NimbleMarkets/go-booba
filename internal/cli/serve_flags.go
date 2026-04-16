@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NimbleMarkets/booba/serve"
+	"github.com/NimbleMarkets/go-booba/serve"
 	"github.com/spf13/pflag"
 )
 

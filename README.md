@@ -1,9 +1,9 @@
 # go-booba - Web-based BubbleTea TUIs using libghostty
 
 <p>
-    <a href="https://github.com/NimbleMarkets/booba/tags"><img src="https://img.shields.io/github/tag/NimbleMarkets/booba.svg" alt="Latest Release"></a>
-    <a href="https://pkg.go.dev/github.com/NimbleMarkets/booba?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
-    <a href="https://github.com/NimbleMarkets/booba/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg"  alt="Code Of Conduct"></a>
+    <a href="https://github.com/NimbleMarkets/go-booba/tags"><img src="https://img.shields.io/github/tag/NimbleMarkets/go-booba.svg" alt="Latest Release"></a>
+    <a href="https://pkg.go.dev/github.com/NimbleMarkets/go-booba?tab=doc"><img src="https://pkg.go.dev/badge/github.com/NimbleMarkets/go-booba?utm_source=godoc" alt="GoDoc"></a>
+    <a href="https://github.com/NimbleMarkets/go-booba/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg"  alt="Code Of Conduct"></a>
 </p>
 
 `go-booba` is a Golang module that facilitates embedding [BubbleTea](https://github.com/charmbracelet/bubbletea) Terminal User Interfaces (TUIs) into a Web Browser. Generally, these are accessed via a local terminal or via SSH. This module exposes an HTTP-based terminal connection to a BubbleTea program.
@@ -229,8 +229,8 @@ Notes:
 
 We welcome contributions and feedback.  Please adhere to our [Code of Conduct](./CODE_OF_CONDUCT.md) when engaging our community.
 
- * [GitHub Issues](https://github.com/NimbleMarkets/booba/issues)
- * [GitHub Pull Requests](https://github.com/NimbleMarkets/booba/pulls)
+ * [GitHub Issues](https://github.com/NimbleMarkets/go-booba/issues)
+ * [GitHub Pull Requests](https://github.com/NimbleMarkets/go-booba/pulls)
 
 ## Acknowledgements
 
