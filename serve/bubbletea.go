@@ -10,8 +10,10 @@ import (
 	"github.com/charmbracelet/x/xpty"
 )
 
-// Handler creates a tea.Model for each new session.
-type Handler func(sess Session) tea.Model
+// Handler creates a tea.Model and any additional tea.ProgramOption values
+// for each new session. The returned options are appended to the defaults
+// returned by [MakeOptions].
+type Handler func(sess Session) (tea.Model, []tea.ProgramOption)
 
 // ProgramHandler creates a fully configured tea.Program for each new session.
 type ProgramHandler func(sess Session) *tea.Program
@@ -26,9 +28,9 @@ func defaultProgSend(prog *tea.Program, msg tea.Msg) {
 	prog.Send(msg)
 }
 
-// MakeTeaOptions returns tea.ProgramOption values that wire a BubbleTea program
+// MakeOptions returns tea.ProgramOption values that wire a BubbleTea program
 // to the PTY session. Sets TERM=ghostty and COLORTERM=truecolor.
-func MakeTeaOptions(sess Session) []tea.ProgramOption {
+func MakeOptions(sess Session) []tea.ProgramOption {
 	ps, ok := sess.(*ptySession)
 	if !ok {
 		return []tea.ProgramOption{
@@ -60,9 +62,9 @@ func MakeTeaOptions(sess Session) []tea.ProgramOption {
 }
 
 // runBubbleTea starts a BubbleTea program attached to the session PTY.
-func runBubbleTea(ctx context.Context, sess Session, handler Handler, extraOpts []tea.ProgramOption) error {
-	model := handler(sess)
-	opts := MakeTeaOptions(sess)
+func runBubbleTea(ctx context.Context, sess Session, handler Handler) error {
+	model, extraOpts := handler(sess)
+	opts := MakeOptions(sess)
 	opts = append(opts, extraOpts...)
 
 	prog := tea.NewProgram(model, opts...)

@@ -173,7 +173,30 @@ For adapter usage (WebSocket, WASM, custom), see [ADAPTER_USAGE.md](./ADAPTER_US
 
 We can take entire BubbleTea applications and embed them into a Web Browser. The primary limitation is that all of its dependencies can also be compiled to WebAssembly.
 
-TODO: instructions for doing this.
+### Quickstart
+
+The top-level `booba.Run` picks the right runtime for the build target, so a single `main.go` works for both the native terminal and the browser:
+
+```go
+package main
+
+import (
+    "log"
+
+    booba "github.com/NimbleMarkets/go-booba"
+)
+
+func main() {
+    if err := booba.Run(initialModel()); err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+Build and run natively with `go run ./cmd/myapp`. Build for the browser with `go run github.com/NimbleMarkets/go-booba/cmd/booba-wasm-build -o web/app.wasm ./cmd/myapp/`.
+
+For finer control, the [`wasm`](./wasm) subpackage exposes the browser bridge directly, and native code can construct a `tea.Program` the usual way.
+
 TODO: link to live example
 
 ## Web Frontend for BubbleTea-based service

@@ -31,8 +31,8 @@ func startWebServerIfRequested() bool {
 	server := serve.NewServer(config)
 
 	ctx := context.Background()
-	if err := server.Serve(ctx, func(sess serve.Session) tea.Model {
-		return model{0, false, 3600, 0, 0, false, false}
+	if err := server.Serve(ctx, func(sess serve.Session) (tea.Model, []tea.ProgramOption) {
+		return model{0, false, 3600, 0, 0, false, false}, nil
 	}); err != nil {
 		log.Fatal("Server error:", err)
 	}

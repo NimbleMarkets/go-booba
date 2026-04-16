@@ -393,7 +393,7 @@ func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, e
 func (s *Server) runSession(ctx context.Context, sess Session) error {
 	switch {
 	case s.handler != nil:
-		return runBubbleTea(ctx, sess, s.handler, nil)
+		return runBubbleTea(ctx, sess, s.handler)
 	case s.progHandler != nil:
 		return runBubbleTeaProgram(ctx, sess, s.progHandler)
 	case s.cmdName != "":
