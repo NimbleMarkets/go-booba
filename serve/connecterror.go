@@ -3,6 +3,7 @@
 package serve
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -57,4 +58,29 @@ func (e *ConnectError) WTErrorCode() uint32 {
 	default:
 		return 0x00
 	}
+}
+
+// writeConnectError writes the appropriate HTTP response for err on the
+// WS upgrade path. *ConnectError fields are honored verbatim; any other
+// error is treated as 500 Internal Server Error.
+func writeConnectError(w http.ResponseWriter, err error) {
+	var ce *ConnectError
+	if !errors.As(err, &ce) {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	status := ce.Status
+	if status < 100 || status > 599 {
+		status = http.StatusInternalServerError
+	}
+	for k, vs := range ce.Headers {
+		for _, v := range vs {
+			w.Header().Add(k, v)
+		}
+	}
+	if ce.Body != "" {
+		http.Error(w, ce.Body, status)
+		return
+	}
+	w.WriteHeader(status)
 }

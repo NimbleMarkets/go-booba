@@ -4,6 +4,8 @@ package serve
 
 import (
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -63,5 +65,35 @@ func TestConnectErrorStringIncludesCause(t *testing.T) {
 	}
 	if !strings.Contains(got, "token expired") {
 		t.Errorf("Error() = %q; want it to include cause %q", got, "token expired")
+	}
+}
+
+func TestWriteConnectErrorWritesStatusHeadersAndBody(t *testing.T) {
+	rec := httptest.NewRecorder()
+	err := &ConnectError{
+		Status:  401,
+		Headers: http.Header{"WWW-Authenticate": []string{`Basic realm="booba"`}},
+		Body:    "Unauthorized",
+	}
+	writeConnectError(rec, err)
+	res := rec.Result()
+	defer res.Body.Close()
+	if res.StatusCode != 401 {
+		t.Errorf("status = %d; want 401", res.StatusCode)
+	}
+	if got := res.Header.Get("WWW-Authenticate"); got != `Basic realm="booba"` {
+		t.Errorf("WWW-Authenticate = %q; want Basic realm=\"booba\"", got)
+	}
+	body := rec.Body.String()
+	if body != "Unauthorized\n" && body != "Unauthorized" {
+		t.Errorf("body = %q; want Unauthorized (with or without trailing newline)", body)
+	}
+}
+
+func TestWriteConnectErrorPlainErrorIs500(t *testing.T) {
+	rec := httptest.NewRecorder()
+	writeConnectError(rec, errors.New("boom"))
+	if rec.Code != 500 {
+		t.Errorf("status = %d; want 500", rec.Code)
 	}
 }
