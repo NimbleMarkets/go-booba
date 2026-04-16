@@ -42,12 +42,18 @@ type Server struct {
 	newSession  SessionFactory
 }
 
-// NewServer creates a new server with the given config.
-func NewServer(config Config) *Server {
-	return &Server{
+// NewServer creates a new server with the given config and options.
+// Options are applied in order; later options override earlier ones for
+// non-additive settings (e.g., WithSessionFactory).
+func NewServer(config Config, opts ...Option) *Server {
+	s := &Server{
 		config:     config,
 		newSession: defaultSessionFactory,
 	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
 }
 
 // Serve starts the server with a BubbleTea handler.
