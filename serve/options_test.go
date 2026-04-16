@@ -80,6 +80,16 @@ func (r *recordingSession) OutputReader() io.Reader {
 	return r.Session.OutputReader()
 }
 
+func TestApplySessionMiddlewareNilIsIdentity(t *testing.T) {
+	base := &resizeTestSession{}
+	if got := applySessionMiddleware(base, nil); got != base {
+		t.Errorf("applySessionMiddleware(base, nil) returned a different session")
+	}
+	if got := applySessionMiddleware(base, []SessionMiddleware{}); got != base {
+		t.Errorf("applySessionMiddleware(base, empty slice) returned a different session")
+	}
+}
+
 func TestWithSessionMiddlewareWrapsOutermostFirst(t *testing.T) {
 	var calls []string
 	mk := func(tag string) SessionMiddleware {

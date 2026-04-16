@@ -400,10 +400,21 @@ func applySessionMiddleware(base Session, mws []SessionMiddleware) Session {
 }
 
 func (s *Server) runSession(ctx context.Context, sess Session) error {
-	sess = applySessionMiddleware(sess, s.sessionMW)
+	// Note: SessionMiddleware is applied only to the BubbleTea handler
+	// path. Command mode needs direct access to the underlying
+	// *ptySession for PTY control, and middleware wrapping would break
+	// the type assertion below. Also the BubbleTea-less default branch
+	// (session with no handler/cmd configured) has no handler to expose
+	// the wrapped session to, so wrapping there is unobservable.
+	//
+	// v0.3 wraps inside runSession; transport-layer goroutines in
+	// handlers.go still read from the un-wrapped session. A future task
+	// should lift the wrap to handleWS/handleWT so middleware like
+	// osc52gate (v0.4) sees transport reads too.
 	switch {
 	case s.handler != nil:
-		return runBubbleTea(ctx, sess, s.handler)
+		wrapped := applySessionMiddleware(sess, s.sessionMW)
+		return runBubbleTea(ctx, wrapped, s.handler)
 	case s.cmdName != "":
 		ptySess, ok := sess.(*ptySession)
 		if !ok {
