@@ -53,6 +53,10 @@ func NewServer(config Config, opts ...Option) *Server {
 	for _, opt := range opts {
 		opt(s)
 	}
+	// Append built-in connect middleware so they run innermost (last).
+	if s.config.BasicUsername != "" {
+		s.connectMW = append(s.connectMW, basicAuthMiddleware(s.config.BasicUsername, s.config.BasicPassword))
+	}
 	return s
 }
 
@@ -430,9 +434,6 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 	r = finalR
 
-	if !s.checkAuth(w, r) {
-		return
-	}
 	if !s.tryAcquireConnection() {
 		http.Error(w, "max connections reached", http.StatusServiceUnavailable)
 		return
@@ -524,9 +525,6 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	}
 	r = finalR
 
-	if !s.checkAuth(w, r) {
-		return
-	}
 	if !s.tryAcquireConnection() {
 		http.Error(w, "max connections reached", http.StatusServiceUnavailable)
 		return
