@@ -110,7 +110,7 @@ func TestValidateConfigRejectsBasicAuthWithoutTLS(t *testing.T) {
 		BasicPassword: "secret",
 	})
 	err := srv.validateConfig()
-	if err == nil || !strings.Contains(err.Error(), "Basic Auth requires TLS") {
+	if err == nil || !strings.Contains(err.Error(), "basic auth requires TLS") {
 		t.Fatalf("validateConfig() error = %v, want Basic Auth TLS rejection", err)
 	}
 }

@@ -5,7 +5,6 @@ package serve
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"io"
@@ -23,7 +22,7 @@ func TestWSE2E_ConnectsAfterValidResizeAndSendsOptionsFirst(t *testing.T) {
 	ts, _ := newWSE2ETestServer(t, DefaultConfig())
 
 	conn, opts := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	if opts.ReadOnly {
 		t.Fatal("expected readOnly=false")
@@ -35,7 +34,7 @@ func TestWSE2E_InvalidInitialResizeIsRejected(t *testing.T) {
 		ts, _ := newWSE2ETestServer(t, DefaultConfig())
 
 		conn := mustDialWS(t, ts.URL, nil)
-		defer conn.Close(websocket.StatusNormalClosure, "test done")
+		defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 		writeWS(t, conn, MsgInput, []byte("not-a-resize"))
 		assertConnectionClosed(t, conn)
@@ -45,7 +44,7 @@ func TestWSE2E_InvalidInitialResizeIsRejected(t *testing.T) {
 		ts, _ := newWSE2ETestServer(t, DefaultConfig())
 
 		conn := mustDialWS(t, ts.URL, nil)
-		defer conn.Close(websocket.StatusNormalClosure, "test done")
+		defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 		payload := mustJSON(t, ResizeMessage{Cols: 0, Rows: 24})
 		writeWS(t, conn, MsgResize, payload)
@@ -57,7 +56,7 @@ func TestWSE2E_RequiresInitialResizeBeforeOptions(t *testing.T) {
 	ts, _ := newWSE2ETestServer(t, DefaultConfig())
 
 	conn := mustDialWS(t, ts.URL, nil)
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 150*time.Millisecond)
 	defer cancel()
@@ -71,7 +70,7 @@ func TestWSE2E_ForwardsInputToSession(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, DefaultConfig())
 
 	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	sess := waitForSession(t, created)
 	writeWS(t, conn, MsgInput, []byte("hello"))
@@ -85,7 +84,7 @@ func TestWSE2E_EmitsOutputToClient(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, DefaultConfig())
 
 	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	sess := waitForSession(t, created)
 	sess.emitOutput(t, "ready>")
@@ -103,7 +102,7 @@ func TestWSE2E_MsgPingReturnsPong(t *testing.T) {
 	ts, _ := newWSE2ETestServer(t, DefaultConfig())
 
 	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	writeWS(t, conn, MsgPing, nil)
 
@@ -122,7 +121,7 @@ func TestWSE2E_ReadOnlyBlocksInput(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, cfg)
 
 	conn, opts := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	if !opts.ReadOnly {
 		t.Fatal("expected readOnly=true")
@@ -142,7 +141,7 @@ func TestWSE2E_BasicAuthWithoutTLSIsRejected(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected HTTPHandler to reject Basic Auth without TLS")
 	}
-	if !strings.Contains(err.Error(), "Basic Auth requires TLS") {
+	if !strings.Contains(err.Error(), "basic auth requires TLS") {
 		t.Fatalf("HTTPHandler() error = %v, want Basic Auth TLS rejection", err)
 	}
 }
@@ -165,7 +164,7 @@ func TestWSE2E_OriginChecksWorkOnHandshake(t *testing.T) {
 	goodHeaders := make(http.Header)
 	goodHeaders.Set("Origin", "https://app.example.com")
 	conn, _ := mustConnectWS(t, ts.URL, goodHeaders, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 }
 
 func TestWSE2E_MaxConnectionsLimitWorks(t *testing.T) {
@@ -174,7 +173,7 @@ func TestWSE2E_MaxConnectionsLimitWorks(t *testing.T) {
 	ts, _ := newWSE2ETestServer(t, cfg)
 
 	first := mustDialWS(t, ts.URL, nil)
-	defer first.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = first.Close(websocket.StatusNormalClosure, "test done") }()
 
 	_, resp, err := dialWS(context.Background(), ts.URL, nil)
 	if err == nil {
@@ -208,7 +207,7 @@ func TestWSE2E_IdleTimeoutClosesSession(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, cfg)
 
 	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
-	defer conn.Close(websocket.StatusNormalClosure, "test done")
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 	sess := waitForSession(t, created)
 
 	select {
@@ -357,11 +356,6 @@ func mustJSON(t *testing.T, v any) []byte {
 		t.Fatalf("json.Marshal() error = %v", err)
 	}
 	return data
-}
-
-func basicAuthHeader(username, password string) string {
-	token := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-	return "Basic " + token
 }
 
 func statusCode(resp *http.Response) any {

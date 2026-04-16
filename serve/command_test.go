@@ -15,7 +15,7 @@ func TestRunCommandStartsAttachedProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newPtySession() error = %v", err)
 	}
-	defer sess.Close()
+	defer func() { _ = sess.Close() }()
 
 	errCh := make(chan error, 1)
 	go func() {
@@ -58,7 +58,7 @@ func TestRunCommandReceivesWinchOnResize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newPtySession() error = %v", err)
 	}
-	defer sess.Close()
+	defer func() { _ = sess.Close() }()
 
 	errCh := make(chan error, 1)
 	go func() {

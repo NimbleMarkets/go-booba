@@ -126,7 +126,7 @@ func (s *Server) start(ctx context.Context) error {
 	// Graceful shutdown
 	go func() {
 		<-ctx.Done()
-		server.Close()
+		_ = server.Close()
 	}()
 
 	return s.listenAndServeHTTP(server)
@@ -137,7 +137,7 @@ func (s *Server) validateConfig() error {
 	case (s.config.CertFile == "") != (s.config.KeyFile == ""):
 		return fmt.Errorf("CertFile and KeyFile must be provided together")
 	case s.hasBasicAuth() && !s.mainTLSEnabled():
-		return fmt.Errorf("Basic Auth requires TLS; set CertFile and KeyFile")
+		return fmt.Errorf("basic auth requires TLS; set CertFile and KeyFile")
 	case !s.mainTLSEnabled() && !isLoopbackHost(s.config.Host):
 		return fmt.Errorf("non-loopback listeners require TLS; set CertFile and KeyFile")
 	default:
@@ -239,7 +239,7 @@ func (s *Server) startWebTransport(ctx context.Context, wtServer *webtransport.S
 
 	go func() {
 		<-ctx.Done()
-		wtServer.Close()
+		_ = wtServer.Close()
 	}()
 }
 
@@ -476,7 +476,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		_ = conn.CloseNow()
 		return
 	}
-	defer sess.Close()
+	defer func() { _ = sess.Close() }()
 
 	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
 	defer cancel()
@@ -488,7 +488,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 
 	// Start the session workload in a goroutine
 	go func() {
-		defer sess.Close()
+		defer func() { _ = sess.Close() }()
 		if err := s.runSession(ctx, sess); err != nil {
 			log.Printf("session error: %v", err)
 		}
@@ -570,7 +570,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		log.Printf("create session: %v", err)
 		return
 	}
-	defer sess.Close()
+	defer func() { _ = sess.Close() }()
 
 	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
 	defer cancel()
@@ -581,7 +581,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
 
 	go func() {
-		defer sess.Close()
+		defer func() { _ = sess.Close() }()
 		if err := s.runSession(ctx, sess); err != nil {
 			log.Printf("session error: %v", err)
 		}

@@ -66,7 +66,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	}()
 
 	wg.Wait()
-	conn.Close(websocket.StatusNormalClosure, "session ended")
+	_ = conn.Close(websocket.StatusNormalClosure, "session ended")
 }
 
 // streamOutputWS reads from PTY and sends as MsgOutput over WebSocket.
@@ -152,7 +152,7 @@ func writeWSMessage(ctx context.Context, conn *websocket.Conn, msgType byte, pay
 func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func()) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	defer stream.Close()
+	defer func() { _ = stream.Close() }()
 
 	// Send options message
 	optBytes, _ := json.Marshal(opts)
