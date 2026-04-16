@@ -141,15 +141,14 @@ func TestIsLoopbackHost(t *testing.T) {
 	}
 }
 
-func TestSetSessionFactoryOverridesSessionCreation(t *testing.T) {
-	srv := NewServer(DefaultConfig())
+func TestWithSessionFactoryOverridesSessionCreation(t *testing.T) {
 	want := &stubSession{
 		ctx:  context.Background(),
 		done: make(chan struct{}),
 	}
-	srv.SetSessionFactory(func(ctx context.Context, size WindowSize) (Session, error) {
+	srv := NewServer(DefaultConfig(), WithSessionFactory(func(ctx context.Context, size WindowSize) (Session, error) {
 		return want, nil
-	})
+	}))
 
 	got, err := srv.createSession(context.Background(), WindowSize{Width: 80, Height: 24})
 	if err != nil {

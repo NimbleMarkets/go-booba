@@ -75,14 +75,6 @@ func (s *Server) ServeCommand(ctx context.Context, name string, args ...string) 
 	return s.start(ctx)
 }
 
-// SetSessionFactory overrides how terminal sessions are created.
-func (s *Server) SetSessionFactory(factory SessionFactory) {
-	if factory == nil {
-		s.newSession = defaultSessionFactory
-		return
-	}
-	s.newSession = factory
-}
 
 // HTTPHandler constructs the application HTTP handler without starting listeners.
 func (s *Server) HTTPHandler() (http.Handler, error) {

@@ -223,12 +223,11 @@ func newWSE2ETestServer(t *testing.T, cfg Config) (*httptest.Server, chan *e2eSe
 	t.Helper()
 
 	created := make(chan *e2eSession, 8)
-	srv := NewServer(cfg)
-	srv.SetSessionFactory(func(ctx context.Context, size WindowSize) (Session, error) {
+	srv := NewServer(cfg, WithSessionFactory(func(ctx context.Context, size WindowSize) (Session, error) {
 		sess := newE2ESession(ctx, size)
 		created <- sess
 		return sess, nil
-	})
+	}))
 
 	handler, err := srv.HTTPHandler()
 	if err != nil {
