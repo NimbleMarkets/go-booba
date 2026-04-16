@@ -2,7 +2,10 @@
 
 package serve
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestNewServerWithNoOptionsIsUnchanged(t *testing.T) {
 	cfg := DefaultConfig()
@@ -12,6 +15,9 @@ func TestNewServerWithNoOptionsIsUnchanged(t *testing.T) {
 	}
 	if srv.newSession == nil {
 		t.Error("default session factory was not installed")
+	}
+	if !reflect.DeepEqual(srv.config, cfg) {
+		t.Errorf("srv.config = %+v; want %+v", srv.config, cfg)
 	}
 }
 

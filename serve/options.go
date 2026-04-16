@@ -2,6 +2,6 @@
 
 package serve
 
-// Option configures a Server at construction time. Options are applied
-// in the order they are passed to NewServer.
+// Option is a functional option for [NewServer]. See NewServer for how
+// options are sequenced and how additive vs. last-wins options compose.
 type Option func(*Server)
