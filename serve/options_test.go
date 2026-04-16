@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	tea "charm.land/bubbletea/v2"
 )
 
 func TestNewServerWithNoOptionsIsUnchanged(t *testing.T) {
@@ -109,6 +111,31 @@ func TestWithSessionMiddlewareWrapsOutermostFirst(t *testing.T) {
 	wrapped := applySessionMiddleware(base, srv.sessionMW)
 	_ = wrapped.OutputReader()
 	want := []string{"a", "b", "c"} // outermost first
+	if !reflect.DeepEqual(calls, want) {
+		t.Errorf("call order = %v; want %v", calls, want)
+	}
+}
+
+func TestWithMiddlewareWrapsHandlerOutermostFirst(t *testing.T) {
+	var calls []string
+	mk := func(name string) Middleware {
+		return func(next Handler) Handler {
+			return func(sess Session) (tea.Model, []tea.ProgramOption) {
+				calls = append(calls, name)
+				return next(sess)
+			}
+		}
+	}
+	base := func(sess Session) (tea.Model, []tea.ProgramOption) {
+		calls = append(calls, "base")
+		return nil, nil
+	}
+	srv := NewServer(DefaultConfig(),
+		WithMiddleware(mk("a"), mk("b"), mk("c")),
+	)
+	wrapped := applyHandlerMiddleware(base, srv.middleware)
+	_, _ = wrapped(nil)
+	want := []string{"a", "b", "c", "base"} // outermost first, then base
 	if !reflect.DeepEqual(calls, want) {
 		t.Errorf("call order = %v; want %v", calls, want)
 	}

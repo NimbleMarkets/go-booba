@@ -41,6 +41,7 @@ type Server struct {
 	newSession SessionFactory
 	connectMW  []ConnectMiddleware
 	sessionMW  []SessionMiddleware
+	middleware []Middleware
 }
 
 // NewServer creates a new server with the given config and options.
@@ -65,9 +66,11 @@ func NewServer(config Config, opts ...Option) *Server {
 	return s
 }
 
-// Serve starts the server with a BubbleTea handler.
+// Serve starts the server with a BubbleTea handler. Any Middleware
+// installed via WithMiddleware is applied to the handler once; the
+// resulting wrapped handler is what runs per session.
 func (s *Server) Serve(ctx context.Context, handler Handler) error {
-	s.handler = handler
+	s.handler = applyHandlerMiddleware(handler, s.middleware)
 	return s.start(ctx)
 }
 
@@ -393,6 +396,15 @@ func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, e
 // applySessionMiddleware wraps base with mws in outermost-first order:
 // after wrapping, mws[0] is the outermost wrapper.
 func applySessionMiddleware(base Session, mws []SessionMiddleware) Session {
+	for i := len(mws) - 1; i >= 0; i-- {
+		base = mws[i](base)
+	}
+	return base
+}
+
+// applyHandlerMiddleware wraps base with mws in outermost-first order:
+// after wrapping, mws[0] is the outermost wrapper and sees calls first.
+func applyHandlerMiddleware(base Handler, mws []Middleware) Handler {
 	for i := len(mws) - 1; i >= 0; i-- {
 		base = mws[i](base)
 	}

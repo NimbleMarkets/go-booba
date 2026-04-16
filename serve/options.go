@@ -36,3 +36,13 @@ func WithSessionMiddleware(mw ...SessionMiddleware) Option {
 		s.sessionMW = append(s.sessionMW, mw...)
 	}
 }
+
+// WithMiddleware appends layer-3 Middleware that wraps the user's
+// Handler. Multiple calls append; within a single call the order is
+// preserved. The first middleware in the chain is the outermost
+// wrapper, which sees calls first.
+func WithMiddleware(mw ...Middleware) Option {
+	return func(s *Server) {
+		s.middleware = append(s.middleware, mw...)
+	}
+}
