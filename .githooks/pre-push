@@ -1,0 +1,29 @@
+#!/bin/sh
+# Pre-push hook: if pushing a version tag (vX.Y.Z), verify that
+# package.json version matches the tag.
+# Install via: task install-hooks
+
+set -e
+
+# Read stdin: "<local-ref> <local-sha> <remote-ref> <remote-sha>" per update
+while read -r local_ref local_sha remote_ref remote_sha; do
+    case "$local_ref" in
+        refs/tags/v[0-9]*.[0-9]*.[0-9]*)
+            tag_version="${local_ref#refs/tags/v}"
+            pkg_version=$(node -p "require('./package.json').version" 2>/dev/null || \
+                          sed -n 's/.*"version":[[:space:]]*"\([^"]*\)".*/\1/p' package.json | head -1)
+
+            if [ "$tag_version" != "$pkg_version" ]; then
+                echo "pre-push: refusing to push tag $local_ref"
+                echo "  tag version:         $tag_version"
+                echo "  package.json:        $pkg_version"
+                echo ""
+                echo "Bump package.json first, e.g.:"
+                echo "  npm version --no-git-tag-version $tag_version"
+                echo "  git commit -am \"chore: bump version to $tag_version\""
+                echo "  git tag -f $local_ref"
+                exit 1
+            fi
+            ;;
+    esac
+done
