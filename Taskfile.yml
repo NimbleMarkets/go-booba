@@ -35,6 +35,7 @@ tasks:
 
   npm-deps:
     desc: 'Install npm dependencies'
+    run: once
     cmds:
       - npm ci
     sources:
@@ -78,6 +79,7 @@ tasks:
   build-assets:
     desc: 'Build frontend assets'
     deps: [npm-deps]
+    run: once
     cmds:
       - npm run build:embed
     sources:
@@ -98,6 +100,7 @@ tasks:
   build-serve-assets:
     desc: 'Copy ghostty-web into serve/static/ for go:embed'
     deps: [build-assets]
+    run: once
     cmds:
       - mkdir -p serve/static/ghostty-web
       - cp -r node_modules/ghostty-web/dist/* serve/static/ghostty-web/
