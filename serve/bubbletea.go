@@ -15,9 +15,6 @@ import (
 // returned by [MakeOptions].
 type Handler func(sess Session) (tea.Model, []tea.ProgramOption)
 
-// ProgramHandler creates a fully configured tea.Program for each new session.
-type ProgramHandler func(sess Session) *tea.Program
-
 type resizeEventSource interface {
 	ResizeEvents() <-chan WindowSize
 }
@@ -68,17 +65,6 @@ func runBubbleTea(ctx context.Context, sess Session, handler Handler) error {
 	opts = append(opts, extraOpts...)
 
 	prog := tea.NewProgram(model, opts...)
-	forwardResizeEvents(ctx, sess, prog)
-
-	if _, err := prog.Run(); err != nil {
-		return fmt.Errorf("bubbletea: %w", err)
-	}
-	return nil
-}
-
-// runBubbleTeaProgram starts a pre-configured tea.Program.
-func runBubbleTeaProgram(ctx context.Context, sess Session, handler ProgramHandler) error {
-	prog := handler(sess)
 	forwardResizeEvents(ctx, sess, prog)
 
 	if _, err := prog.Run(); err != nil {

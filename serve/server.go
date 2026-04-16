@@ -32,14 +32,13 @@ var staticFiles embed.FS
 
 // Server serves terminal sessions over WebSocket.
 type Server struct {
-	config      Config
-	handler     Handler
-	progHandler ProgramHandler
-	cmdName     string
-	cmdArgs     []string
-	connCount   atomic.Int32
-	certInfo    *CertInfo
-	newSession  SessionFactory
+	config     Config
+	handler    Handler
+	cmdName    string
+	cmdArgs    []string
+	connCount  atomic.Int32
+	certInfo   *CertInfo
+	newSession SessionFactory
 }
 
 // NewServer creates a new server with the given config and options.
@@ -59,12 +58,6 @@ func NewServer(config Config, opts ...Option) *Server {
 // Serve starts the server with a BubbleTea handler.
 func (s *Server) Serve(ctx context.Context, handler Handler) error {
 	s.handler = handler
-	return s.start(ctx)
-}
-
-// ServeWithProgram starts the server with a ProgramHandler.
-func (s *Server) ServeWithProgram(ctx context.Context, handler ProgramHandler) error {
-	s.progHandler = handler
 	return s.start(ctx)
 }
 
@@ -391,8 +384,6 @@ func (s *Server) runSession(ctx context.Context, sess Session) error {
 	switch {
 	case s.handler != nil:
 		return runBubbleTea(ctx, sess, s.handler)
-	case s.progHandler != nil:
-		return runBubbleTeaProgram(ctx, sess, s.progHandler)
 	case s.cmdName != "":
 		ptySess, ok := sess.(*ptySession)
 		if !ok {
