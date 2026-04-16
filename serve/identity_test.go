@@ -31,6 +31,9 @@ func TestIdentityFromContextAbsent(t *testing.T) {
 func TestWithIdentityNilLeavesContextUnchanged(t *testing.T) {
 	parent := context.Background()
 	got := WithIdentity(parent, nil)
+	if got != parent {
+		t.Error("WithIdentity(nil) must return the original context, not a new one")
+	}
 	if _, ok := IdentityFromContext(got); ok {
 		t.Error("WithIdentity(nil) should not store an identity")
 	}
