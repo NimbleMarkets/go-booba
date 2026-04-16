@@ -4,6 +4,7 @@ package serve
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 )
@@ -41,10 +42,11 @@ func TestNewServerOptionsApplyInOrder(t *testing.T) {
 }
 
 func TestWithConnectMiddlewareAppendsInOrder(t *testing.T) {
+	var calls []string
 	mk := func(label string) ConnectMiddleware {
 		return func(next ConnectHandler) ConnectHandler {
 			return func(r *http.Request) error {
-				_ = label
+				calls = append(calls, label)
 				return next(r)
 			}
 		}
@@ -54,6 +56,13 @@ func TestWithConnectMiddlewareAppendsInOrder(t *testing.T) {
 		WithConnectMiddleware(mk("c")),
 	)
 	if got := len(srv.connectMW); got != 3 {
-		t.Errorf("len(connectMW) = %d; want 3", got)
+		t.Fatalf("len(connectMW) = %d; want 3", got)
+	}
+	if _, err := runConnectChain(httptest.NewRequest("GET", "/ws", nil), srv.connectMW); err != nil {
+		t.Fatalf("runConnectChain err = %v", err)
+	}
+	want := []string{"a", "b", "c"}
+	if !reflect.DeepEqual(calls, want) {
+		t.Errorf("call order = %v; want %v (outermost-first across calls and args)", calls, want)
 	}
 }
