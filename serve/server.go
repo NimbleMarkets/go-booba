@@ -40,6 +40,7 @@ type Server struct {
 	certInfo   *CertInfo
 	newSession SessionFactory
 	connectMW  []ConnectMiddleware
+	sessionMW  []SessionMiddleware
 }
 
 // NewServer creates a new server with the given config and options.
@@ -389,7 +390,17 @@ func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, e
 	return factory(ctx, size)
 }
 
+// applySessionMiddleware wraps base with mws in outermost-first order:
+// after wrapping, mws[0] is the outermost wrapper.
+func applySessionMiddleware(base Session, mws []SessionMiddleware) Session {
+	for i := len(mws) - 1; i >= 0; i-- {
+		base = mws[i](base)
+	}
+	return base
+}
+
 func (s *Server) runSession(ctx context.Context, sess Session) error {
+	sess = applySessionMiddleware(sess, s.sessionMW)
 	switch {
 	case s.handler != nil:
 		return runBubbleTea(ctx, sess, s.handler)

@@ -3,6 +3,7 @@
 package serve
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -65,5 +66,40 @@ func TestWithConnectMiddlewareAppendsInOrder(t *testing.T) {
 	want := []string{"a", "b", "c"}
 	if !reflect.DeepEqual(calls, want) {
 		t.Errorf("call order = %v; want %v (outermost-first across calls and args)", calls, want)
+	}
+}
+
+type recordingSession struct {
+	Session
+	calls *[]string
+	tag   string
+}
+
+func (r *recordingSession) OutputReader() io.Reader {
+	*r.calls = append(*r.calls, r.tag)
+	return r.Session.OutputReader()
+}
+
+func TestWithSessionMiddlewareWrapsOutermostFirst(t *testing.T) {
+	var calls []string
+	mk := func(tag string) SessionMiddleware {
+		return func(s Session) Session {
+			return &recordingSession{Session: s, calls: &calls, tag: tag}
+		}
+	}
+	srv := NewServer(DefaultConfig(),
+		WithSessionMiddleware(mk("a"), mk("b")),
+		WithSessionMiddleware(mk("c")),
+	)
+	if got := len(srv.sessionMW); got != 3 {
+		t.Fatalf("len(sessionMW) = %d; want 3", got)
+	}
+	// Apply the chain to a fake base session and verify the call order on OutputReader.
+	base := &resizeTestSession{} // defined in bubbletea_test.go
+	wrapped := applySessionMiddleware(base, srv.sessionMW)
+	_ = wrapped.OutputReader()
+	want := []string{"a", "b", "c"} // outermost first
+	if !reflect.DeepEqual(calls, want) {
+		t.Errorf("call order = %v; want %v", calls, want)
 	}
 }

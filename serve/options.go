@@ -27,3 +27,12 @@ func WithConnectMiddleware(mw ...ConnectMiddleware) Option {
 		s.connectMW = append(s.connectMW, mw...)
 	}
 }
+
+// WithSessionMiddleware appends SessionMiddleware to the layer-2 chain.
+// Multiple calls append; within a single call the order is preserved.
+// The first middleware in the resulting chain is the outermost wrapper.
+func WithSessionMiddleware(mw ...SessionMiddleware) Option {
+	return func(s *Server) {
+		s.sessionMW = append(s.sessionMW, mw...)
+	}
+}
