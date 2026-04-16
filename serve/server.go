@@ -431,12 +431,24 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(withConfig(r.Context(), s.config))
 
-	finalR, err := runConnectChain(r, s.connectMW)
-	if err != nil {
-		writeConnectError(w, err)
+	var capturedR *http.Request
+	terminal := func(r *http.Request) error {
+		capturedR = r
+		return nil
+	}
+	if err := runLiftedChain(w, r, s.connectMW, terminal); err != nil {
+		if !errors.Is(err, errResponseWritten) {
+			writeConnectError(w, err)
+		}
 		return
 	}
-	r = finalR
+	if capturedR == nil {
+		// Chain approved but terminal wasn't reached — a middleware
+		// returned nil without calling next. Treat as 500.
+		writeConnectError(w, &ConnectError{Status: http.StatusInternalServerError})
+		return
+	}
+	r = capturedR
 
 	defer s.releaseConnection()
 
@@ -518,12 +530,24 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 
 	r = r.WithContext(withConfig(r.Context(), s.config))
 
-	finalR, err := runConnectChain(r, s.connectMW)
-	if err != nil {
-		writeConnectError(w, err)
+	var capturedR *http.Request
+	terminal := func(r *http.Request) error {
+		capturedR = r
+		return nil
+	}
+	if err := runLiftedChain(w, r, s.connectMW, terminal); err != nil {
+		if !errors.Is(err, errResponseWritten) {
+			writeConnectError(w, err)
+		}
 		return
 	}
-	r = finalR
+	if capturedR == nil {
+		// Chain approved but terminal wasn't reached — a middleware
+		// returned nil without calling next. Treat as 500.
+		writeConnectError(w, &ConnectError{Status: http.StatusInternalServerError})
+		return
+	}
+	r = capturedR
 
 	defer s.releaseConnection()
 
