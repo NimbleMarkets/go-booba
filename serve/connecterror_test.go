@@ -4,6 +4,7 @@ package serve
 
 import (
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -48,16 +49,19 @@ func TestConnectErrorErrorString(t *testing.T) {
 	if got == "" {
 		t.Error("Error() returned empty string")
 	}
-	if !contains(got, "401") {
+	if !strings.Contains(got, "401") {
 		t.Errorf("Error() = %q; want it to contain status 401", got)
 	}
 }
 
-func contains(s, sub string) bool {
-	for i := 0; i+len(sub) <= len(s); i++ {
-		if s[i:i+len(sub)] == sub {
-			return true
-		}
+func TestConnectErrorStringIncludesCause(t *testing.T) {
+	cause := errors.New("token expired")
+	e := &ConnectError{Status: 401, Cause: cause}
+	got := e.Error()
+	if !strings.Contains(got, "401") {
+		t.Errorf("Error() = %q; want it to contain status 401", got)
 	}
-	return false
+	if !strings.Contains(got, "token expired") {
+		t.Errorf("Error() = %q; want it to include cause %q", got, "token expired")
+	}
 }
