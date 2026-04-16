@@ -10,14 +10,17 @@ import "net/http"
 // error rejects the connection; returning *ConnectError gives full
 // control over the rejection response.
 //
+// A middleware that approves the connection MUST call next(r). The
+// framework's terminal handler captures the *http.Request as last
+// seen, which is how context updates propagate to layer 2 and layer 3.
+// Approving with `return nil` without invoking next is a contract
+// violation; the framework treats it as a rejected handshake.
+//
 // Middleware that wants to attach request-scoped values (e.g. an
 // authenticated identity) does so by replacing r before calling next:
 //
 //	r = r.WithContext(serve.WithIdentity(r.Context(), id))
 //	return next(r)
-//
-// The framework's terminal handler captures the *http.Request as last
-// seen, so context updates propagate to layer 2 and layer 3.
 type ConnectHandler func(r *http.Request) error
 
 // ConnectMiddleware decorates a ConnectHandler.

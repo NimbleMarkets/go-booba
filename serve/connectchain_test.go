@@ -53,6 +53,29 @@ func TestRunConnectChainCapturesFinalRequest(t *testing.T) {
 	}
 }
 
+func TestRunConnectChainEmptyMiddlewareList(t *testing.T) {
+	r := httptest.NewRequest("GET", "/ws", nil)
+	finalR, err := runConnectChain(r, nil)
+	if err != nil {
+		t.Fatalf("runConnectChain(r, nil) err = %v; want nil", err)
+	}
+	if finalR != r {
+		t.Error("empty chain should return the original request")
+	}
+}
+
+func TestRunConnectChainApproveWithoutCallingNextIsAnError(t *testing.T) {
+	mw := func(next ConnectHandler) ConnectHandler {
+		return func(r *http.Request) error {
+			return nil // approves but never calls next — contract violation
+		}
+	}
+	_, err := runConnectChain(httptest.NewRequest("GET", "/ws", nil), []ConnectMiddleware{mw})
+	if !errors.Is(err, errChainBroken) {
+		t.Errorf("err = %v; want errChainBroken", err)
+	}
+}
+
 func TestRunConnectChainShortCircuitOnError(t *testing.T) {
 	var calls []string
 	mw := func(name string, errToReturn error) ConnectMiddleware {
