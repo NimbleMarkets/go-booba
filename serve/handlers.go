@@ -21,7 +21,7 @@ const (
 )
 
 // handleWebSocket handles a single WebSocket connection for a session.
-func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func()) {
+func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func(), cfg Config) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer func() {
@@ -62,7 +62,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		handleInputWS(ctx, conn, sess, opts, debug, activity)
+		handleInputWS(ctx, conn, sess, opts, debug, activity, cfg)
 	}()
 
 	wg.Wait()
@@ -95,7 +95,7 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session, act
 }
 
 // handleInputWS reads messages from WebSocket and dispatches them.
-func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func()) {
+func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func(), cfg Config) {
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
@@ -106,12 +106,12 @@ func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts
 		if err != nil {
 			continue
 		}
-		processMessage(ctx, conn, sess, opts, msgType, payload, debug)
+		processMessage(ctx, conn, sess, opts, msgType, payload, debug, cfg)
 	}
 }
 
 // processMessage dispatches a protocol message.
-func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool) {
+func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool, cfg Config) {
 	switch msgType {
 	case MsgInput:
 		if opts.ReadOnly {
@@ -125,6 +125,13 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 	case MsgResize:
 		var rm ResizeMessage
 		if err := json.Unmarshal(payload, &rm); err == nil && rm.Cols > 0 && rm.Rows > 0 {
+			maxDims := windowDimsOrDefault(cfg.MaxWindowDims)
+			if rm.Cols > maxDims.Width || rm.Rows > maxDims.Height {
+				if debug {
+					log.Printf("websocket resize rejected (%dx%d > %dx%d)", rm.Cols, rm.Rows, maxDims.Width, maxDims.Height)
+				}
+				return
+			}
 			if debug {
 				log.Printf("websocket resize: %dx%d", rm.Cols, rm.Rows)
 			}
@@ -149,7 +156,7 @@ func writeWSMessage(ctx context.Context, conn *websocket.Conn, msgType byte, pay
 }
 
 // handleWebTransport handles a single WebTransport session.
-func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func()) {
+func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func(), cfg Config) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer func() { _ = stream.Close() }()
@@ -186,7 +193,7 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		handleInputWT(ctx, sess, stream, opts, debug, activity)
+		handleInputWT(ctx, sess, stream, opts, debug, activity, cfg)
 	}()
 
 	wg.Wait()
@@ -219,7 +226,7 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 }
 
 // handleInputWT reads length-prefixed messages from WebTransport stream.
-func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func()) {
+func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func(), cfg Config) {
 	lenBuf := make([]byte, 4)
 	for {
 		// Read 4-byte length prefix
@@ -241,12 +248,12 @@ func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Strea
 		payload := msgBuf[1:]
 		activity()
 
-		processWTMessage(ctx, stream, sess, opts, msgType, payload, debug)
+		processWTMessage(ctx, stream, sess, opts, msgType, payload, debug, cfg)
 	}
 }
 
 // processWTMessage dispatches a WebTransport protocol message.
-func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool) {
+func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool, cfg Config) {
 	switch msgType {
 	case MsgInput:
 		if opts.ReadOnly {
@@ -260,6 +267,13 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 	case MsgResize:
 		var rm ResizeMessage
 		if err := json.Unmarshal(payload, &rm); err == nil && rm.Cols > 0 && rm.Rows > 0 {
+			maxDims := windowDimsOrDefault(cfg.MaxWindowDims)
+			if rm.Cols > maxDims.Width || rm.Rows > maxDims.Height {
+				if debug {
+					log.Printf("webtransport resize rejected (%dx%d > %dx%d)", rm.Cols, rm.Rows, maxDims.Width, maxDims.Height)
+				}
+				return
+			}
 			if debug {
 				log.Printf("webtransport resize: %dx%d", rm.Cols, rm.Rows)
 			}

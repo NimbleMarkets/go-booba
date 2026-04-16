@@ -513,6 +513,12 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		_ = conn.CloseNow()
 		return
 	}
+	maxDims := windowDimsOrDefault(s.config.MaxWindowDims)
+	if rm.Cols > maxDims.Width || rm.Rows > maxDims.Height {
+		s.debugf("initial resize rejected (%dx%d > %dx%d)", rm.Cols, rm.Rows, maxDims.Width, maxDims.Height)
+		_ = conn.CloseNow()
+		return
+	}
 
 	// Create PTY session
 	sess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
@@ -540,7 +546,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Handle WebSocket protocol messages (blocks until disconnect)
-	handleWebSocket(ctx, conn, sess, opts, s.config.Debug, activity)
+	handleWebSocket(ctx, conn, sess, opts, s.config.Debug, activity, s.config)
 }
 
 func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
@@ -624,6 +630,11 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	if err := json.Unmarshal(msgBuf[1:], &rm); err != nil || rm.Cols <= 0 || rm.Rows <= 0 {
 		return
 	}
+	maxDims := windowDimsOrDefault(s.config.MaxWindowDims)
+	if rm.Cols > maxDims.Width || rm.Rows > maxDims.Height {
+		s.debugf("initial resize rejected (%dx%d > %dx%d)", rm.Cols, rm.Rows, maxDims.Width, maxDims.Height)
+		return
+	}
 
 	sess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
 	if err != nil {
@@ -647,7 +658,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		}
 	}()
 
-	handleWebTransport(ctx, sess, stream, opts, s.config.Debug, activity)
+	handleWebTransport(ctx, sess, stream, opts, s.config.Debug, activity, s.config)
 }
 
 func (s *Server) checkAuth(w http.ResponseWriter, r *http.Request) bool {

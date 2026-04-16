@@ -1,0 +1,38 @@
+//go:build !js
+
+package serve
+
+import (
+	"context"
+	"encoding/json"
+	"testing"
+)
+
+func TestProcessMessageRejectsResizeOverMaxWindowDims(t *testing.T) {
+	cfg := Config{MaxWindowDims: WindowSize{Width: 200, Height: 80}}
+	sess := &resizeTrackingSession{Session: &resizeTestSession{}}
+	rm, _ := json.Marshal(ResizeMessage{Cols: 5000, Rows: 5000})
+	processMessage(context.Background(), nil, sess, OptionsMessage{}, MsgResize, rm, false, cfg)
+	if sess.lastCols != 0 || sess.lastRows != 0 {
+		t.Errorf("Resize was applied (cols=%d rows=%d); want rejected", sess.lastCols, sess.lastRows)
+	}
+}
+
+func TestProcessMessageAcceptsResizeUnderMaxWindowDims(t *testing.T) {
+	cfg := Config{MaxWindowDims: WindowSize{Width: 200, Height: 80}}
+	sess := &resizeTrackingSession{Session: &resizeTestSession{}}
+	rm, _ := json.Marshal(ResizeMessage{Cols: 100, Rows: 40})
+	processMessage(context.Background(), nil, sess, OptionsMessage{}, MsgResize, rm, false, cfg)
+	if sess.lastCols != 100 || sess.lastRows != 40 {
+		t.Errorf("Resize was not applied (cols=%d rows=%d); want 100x40", sess.lastCols, sess.lastRows)
+	}
+}
+
+type resizeTrackingSession struct {
+	Session
+	lastCols, lastRows int
+}
+
+func (r *resizeTrackingSession) Resize(cols, rows int) {
+	r.lastCols, r.lastRows = cols, rows
+}
