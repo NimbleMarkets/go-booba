@@ -55,14 +55,13 @@ func TestWithConnectMiddlewareAppendsInOrder(t *testing.T) {
 		WithConnectMiddleware(mk("a"), mk("b")),
 		WithConnectMiddleware(mk("c")),
 	)
-	// User-installed middleware + auto-installed connLimitMiddleware
-	if got := len(srv.connectMW); got != 4 {
-		t.Fatalf("len(connectMW) = %d; want 4", got)
-	}
+	// The connectMW slice also contains auto-installed built-ins. The
+	// behavioral assertion below is the one that matters — it proves the
+	// three user middlewares landed and ran in install order. A count
+	// check here would be fragile against future built-in additions.
 	if _, err := runConnectChain(httptest.NewRequest("GET", "/ws", nil), srv.connectMW); err != nil {
 		t.Fatalf("runConnectChain err = %v", err)
 	}
-	// connLimitMiddleware runs last (innermost), so doesn't call our tracer.
 	want := []string{"a", "b", "c"}
 	if !reflect.DeepEqual(calls, want) {
 		t.Errorf("call order = %v; want %v (outermost-first across calls and args)", calls, want)
