@@ -2,10 +2,7 @@
 
 package serve
 
-import (
-	"context"
-	"net/http"
-)
+import "net/http"
 
 // ConnectHandler is invoked at the handshake boundary for both
 // WebSocket upgrades and WebTransport CONNECTs. It runs on the raw
@@ -39,6 +36,3 @@ type SessionMiddleware func(Session) Session
 // Middleware decorates a Handler. Matches the shape of
 // charmbracelet/wish bubbletea.Middleware.
 type Middleware func(next Handler) Handler
-
-// silence unused import on stripped builds
-var _ = context.Background
