@@ -46,9 +46,9 @@ func withConfig(ctx context.Context, cfg Config) context.Context {
 	return context.WithValue(ctx, configCtxKey{}, cfg)
 }
 
-// ConfigFromContext returns the Config attached to ctx by the framework,
-// or the zero value if none is present. Returns Config by value so callers
-// cannot mutate the framework's copy.
+// ConfigFromContext returns a read-only copy of the Config attached to
+// ctx by the framework, or the zero value if none is present. Config is
+// returned by value so middleware cannot mutate the framework's copy.
 func ConfigFromContext(ctx context.Context) Config {
 	v, _ := ctx.Value(configCtxKey{}).(Config)
 	return v

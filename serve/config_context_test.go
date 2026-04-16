@@ -58,3 +58,13 @@ func TestConfigFromContextZeroValueWhenAbsent(t *testing.T) {
 		t.Errorf("ConfigFromContext(empty ctx) = %+v; want zero value", got)
 	}
 }
+
+func TestConfigFromContextPropagatesThroughDerivedContext(t *testing.T) {
+	cfg := Config{Port: 1234}
+	ctx := withConfig(context.Background(), cfg)
+	child, cancel := context.WithCancel(ctx)
+	defer cancel()
+	if got := ConfigFromContext(child); got.Port != 1234 {
+		t.Errorf("ConfigFromContext through derived ctx = %+v; want Port=1234", got)
+	}
+}
