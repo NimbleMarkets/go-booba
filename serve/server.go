@@ -39,6 +39,7 @@ type Server struct {
 	connCount  atomic.Int32
 	certInfo   *CertInfo
 	newSession SessionFactory
+	connectMW  []ConnectMiddleware
 }
 
 // NewServer creates a new server with the given config and options.

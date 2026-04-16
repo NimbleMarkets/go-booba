@@ -3,6 +3,7 @@
 package serve
 
 import (
+	"net/http"
 	"reflect"
 	"testing"
 )
@@ -36,5 +37,23 @@ func TestNewServerOptionsApplyInOrder(t *testing.T) {
 		if calls[i] != want[i] {
 			t.Errorf("calls[%d] = %q; want %q", i, calls[i], want[i])
 		}
+	}
+}
+
+func TestWithConnectMiddlewareAppendsInOrder(t *testing.T) {
+	mk := func(label string) ConnectMiddleware {
+		return func(next ConnectHandler) ConnectHandler {
+			return func(r *http.Request) error {
+				_ = label
+				return next(r)
+			}
+		}
+	}
+	srv := NewServer(DefaultConfig(),
+		WithConnectMiddleware(mk("a"), mk("b")),
+		WithConnectMiddleware(mk("c")),
+	)
+	if got := len(srv.connectMW); got != 3 {
+		t.Errorf("len(connectMW) = %d; want 3", got)
 	}
 }
