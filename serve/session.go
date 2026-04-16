@@ -31,7 +31,10 @@ type Session interface {
 	// Done returns a channel that's closed when the session ends.
 	Done() <-chan struct{}
 
-	// Close cleans up the session.
+	// Close cleans up the session. Close MUST be idempotent: subsequent
+	// calls return nil after the first. SessionMiddleware that holds
+	// resources should override Close, release its own resources, then
+	// delegate to the embedded Session's Close.
 	Close() error
 }
 
