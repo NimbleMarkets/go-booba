@@ -122,8 +122,19 @@ tasks:
     desc: 'Build all commands'
     deps:
       - build-cmd-booba
+      - build-cmd-booba-assets
       - build-cmd-booba-view-example-native
       - build-cmd-booba-view-example-wasm
+
+  build-cmd-booba-assets:
+    desc: 'Build booba-assets command'
+    deps: [go-tidy]
+    cmds:
+      - go build -o bin/booba-assets ./cmd/booba-assets/
+    sources:
+      - cmd/booba-assets/**/*
+    generates:
+      - bin/booba-assets
 
   build-cmd-booba:
     desc: 'Build booba command'

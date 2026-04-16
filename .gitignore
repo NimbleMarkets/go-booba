@@ -8,5 +8,12 @@ bin/
 dist/
 /booba-view-example
 
-serve/static/booba/
-serve/static/ghostty-web/
+# serve/static/booba/ and serve/static/ghostty-web/ are generated but the
+# runtime artifacts (.js, .wasm) are committed so the Go module is
+# self-contained. Dev artifacts (.d.ts, .map) are excluded.
+serve/static/booba/*.d.ts
+serve/static/booba/*.d.ts.map
+serve/static/booba/*.js.map
+serve/static/ghostty-web/*
+!serve/static/ghostty-web/ghostty-web.js
+!serve/static/ghostty-web/ghostty-vt.wasm

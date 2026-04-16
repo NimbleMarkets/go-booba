@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BubbleTea on the web</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body { background: #1e1e1e; display: flex; }
+        #terminal-container { flex: 1; min-height: 0; padding: 4px; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <div id="terminal-container"></div>
+
+    <!-- Go WASM runtime support -->
+    <script src="wasm_exec.js"></script>
+
+    <script type="module">
+        import { BoobaTerminal } from './booba/booba.js';
+
+        async function main() {
+            // Load and start the Go WASM binary
+            const go = new Go();
+            const result = await WebAssembly.instantiateStreaming(
+                fetch('app.wasm'), go.importObject
+            );
+            go.run(result.instance);
+
+            // Initialize the terminal emulator
+            const booba = new BoobaTerminal('terminal-container');
+            await booba.init();
+
+            // Connect via WASM adapter (polls bubbletea_read at ~60fps)
+            booba.connectWasm();
+            booba.focus();
+        }
+
+        main().catch(console.error);
+    </script>
+</body>
+</html>
