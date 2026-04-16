@@ -75,7 +75,6 @@ func (s *Server) ServeCommand(ctx context.Context, name string, args ...string) 
 	return s.start(ctx)
 }
 
-
 // HTTPHandler constructs the application HTTP handler without starting listeners.
 func (s *Server) HTTPHandler() (http.Handler, error) {
 	if err := s.validateConfig(); err != nil {
