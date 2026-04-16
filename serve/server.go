@@ -421,6 +421,15 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
+	r = r.WithContext(withConfig(r.Context(), s.config))
+
+	finalR, err := runConnectChain(r, s.connectMW)
+	if err != nil {
+		writeConnectError(w, err)
+		return
+	}
+	r = finalR
+
 	if !s.checkAuth(w, r) {
 		return
 	}
