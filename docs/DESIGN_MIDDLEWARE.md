@@ -1,6 +1,6 @@
 # Design Note: Middleware Architecture
 
-**Status:** Design draft. As of v0.2 `serve` exposes the handler shape described below but no middleware layer. This note captures the target architecture for v0.3+.
+**Status:** Shipped in v0.3. The serve package now exposes ConnectMiddleware, SessionMiddleware, and Middleware (layer-3) with functional options on NewServer; LiftHTTPMiddleware adapts net/http middleware. See `docs/superpowers/specs/2026-04-16-v0.3-middleware-design.md` for the implementation spec and `docs/superpowers/plans/2026-04-16-v0.3-middleware-implementation.md` for the task-by-task plan that landed.
 
 **Audience:** booba maintainers and contributors planning the middleware story.
 
@@ -8,11 +8,10 @@
 
 booba's `serve` package already has a Wish-shaped handler API:
 
-- `serve.NewServer(cfg) *Server`
+- `serve.NewServer(cfg, ...Option) *Server`
 - `serve.Handler = func(Session) (tea.Model, []tea.ProgramOption)`
-- `serve.ProgramHandler = func(Session) *tea.Program`
 - `serve.MakeOptions(sess) []tea.ProgramOption`
-- `serve.SetSessionFactory(factory)`
+- `serve.WithSessionFactory(factory)` (replaced `SetSessionFactory` in v0.3)
 
 This mirrors `charmbracelet/wish`'s `bubbletea.Handler` + `wish.WithMiddleware(...)` shape, and matches `Gaurav-Gosain/sip`'s public API. What's missing compared to Wish is **composable middleware**. Wish ships `activeterm`, `logging`, `recover`, `ratelimiter`, `accesscontrol`, `elapsed`, `comment`, composed via `wish.WithMiddleware(...)`. sip has the Wish-shaped handler without the middleware layer. booba today is in the same state as sip.
 
@@ -110,6 +109,7 @@ App-level auth/authz typically lives here (not at layer 1) because it needs `Ses
 ## Sequencing
 
 - **v0.2** (shipped): `booba.Run`, `Handler` aligned to `func(Session) (tea.Model, []tea.ProgramOption)` to match Wish/sip, `MakeTeaOptions` → `MakeOptions`, README quickstart. No middleware yet.
+- **v0.3** (shipped): three-layer scaffolding. `ConnectMiddleware` + `LiftHTTPMiddleware`, `SessionMiddleware`, layer-3 `Middleware`. Functional options on `NewServer`: `WithConnectMiddleware`, `WithSessionMiddleware`, `WithMiddleware`, `WithSessionFactory`. Built-in basic-auth and connection-limit migrated to auto-installed `ConnectMiddleware`. `ProgramHandler` / `ServeWithProgram` removed. Config knobs `MaxPasteBytes` (1 MiB), `ResizeThrottle` (16ms), `MaxWindowDims` (4096×4096) with defaults on, plus `ConfigFromContext(ctx)` so middleware can read them. `Identity` interface + `WithIdentity` / `IdentityFromContext` for layer-1 → layers 2/3 propagation.
 - **v0.3**: three-layer scaffolding. Ship `ConnectMiddleware` + `LiftHTTPMiddleware`, `SessionMiddleware`, layer-3 `Middleware`. Add config knobs (`MaxPasteBytes`, `ResizeThrottle`, `MaxWindowDims`) with defaults on.
 - **v0.4**: built-in middleware — `osc52gate`, `activeterm`, `idletimeout` in main module; `sipmetrics` in a subpackage to isolate the Prometheus dep.
 
