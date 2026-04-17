@@ -45,10 +45,18 @@ func main() {
 }
 
 func run(buildArgs []string) error {
+	// Ensure dependency modules are downloaded so `go list -m` can locate
+	// them. Fresh CI environments typically need this even if setup-go ran.
+	download := exec.Command("go", "mod", "download")
+	download.Stderr = os.Stderr
+	if err := download.Run(); err != nil {
+		return fmt.Errorf("go mod download: %w", err)
+	}
+
 	// Locate bubbletea in the module cache
 	btDir, err := findModuleDir(bubbleteaModule)
 	if err != nil {
-		return fmt.Errorf("locate %s (run 'go mod download' first?): %w", bubbleteaModule, err)
+		return fmt.Errorf("locate %s: %w", bubbleteaModule, err)
 	}
 
 	// Locate the invoking project's go.mod
