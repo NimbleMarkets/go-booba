@@ -659,17 +659,12 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 }
 
 func (s *Server) checkAuth(w http.ResponseWriter, r *http.Request) bool {
-	if s.config.BasicUsername == "" && s.config.BasicPassword == "" {
+	if validateBasicAuth(r, s.config.BasicUsername, s.config.BasicPassword) {
 		return true
 	}
-
-	username, password, ok := r.BasicAuth()
-	if !ok || username != s.config.BasicUsername || password != s.config.BasicPassword {
-		w.Header().Set("WWW-Authenticate", `Basic realm="booba"`)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return false
-	}
-	return true
+	w.Header().Set("WWW-Authenticate", `Basic realm="booba"`)
+	http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	return false
 }
 
 func (s *Server) checkOrigin(r *http.Request) bool {

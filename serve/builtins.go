@@ -7,22 +7,32 @@ import (
 	"net/http"
 )
 
+// validateBasicAuth reports whether r carries credentials that match
+// the configured username and password. If both are empty, auth is
+// skipped and the result is true. Comparisons use
+// crypto/subtle.ConstantTimeCompare so response timing does not leak
+// the configured secret.
+func validateBasicAuth(r *http.Request, username, password string) bool {
+	if username == "" && password == "" {
+		return true
+	}
+	u, p, ok := r.BasicAuth()
+	if !ok {
+		return false
+	}
+	userOK := subtle.ConstantTimeCompare([]byte(u), []byte(username)) == 1
+	passOK := subtle.ConstantTimeCompare([]byte(p), []byte(password)) == 1
+	return userOK && passOK
+}
+
 // basicAuthMiddleware returns a ConnectMiddleware that performs HTTP
 // Basic Auth using the configured username and password. Returns
 // *ConnectError{Status: 401, Headers: WWW-Authenticate, Body: "Unauthorized"}
 // on failure.
-//
-// Credential comparison uses crypto/subtle.ConstantTimeCompare to avoid
-// leaking the configured secret via response timing.
 func basicAuthMiddleware(username, password string) ConnectMiddleware {
-	expectedUser := []byte(username)
-	expectedPass := []byte(password)
 	return func(next ConnectHandler) ConnectHandler {
 		return func(r *http.Request) error {
-			u, p, ok := r.BasicAuth()
-			userOK := subtle.ConstantTimeCompare([]byte(u), expectedUser) == 1
-			passOK := subtle.ConstantTimeCompare([]byte(p), expectedPass) == 1
-			if !ok || !userOK || !passOK {
+			if !validateBasicAuth(r, username, password) {
 				headers := make(http.Header)
 				headers.Add("WWW-Authenticate", `Basic realm="booba"`)
 				return &ConnectError{

@@ -8,6 +8,34 @@ import (
 	"testing"
 )
 
+func TestValidateBasicAuth(t *testing.T) {
+	cases := []struct {
+		name             string
+		user, pass       string // configured
+		reqUser, reqPass string
+		sendCreds        bool
+		want             bool
+	}{
+		{name: "both empty skips auth even without creds", want: true},
+		{name: "both empty skips auth even with creds", sendCreds: true, reqUser: "x", reqPass: "y", want: true},
+		{name: "configured + correct creds", user: "alice", pass: "secret", sendCreds: true, reqUser: "alice", reqPass: "secret", want: true},
+		{name: "configured + wrong password", user: "alice", pass: "secret", sendCreds: true, reqUser: "alice", reqPass: "nope", want: false},
+		{name: "configured + wrong user", user: "alice", pass: "secret", sendCreds: true, reqUser: "bob", reqPass: "secret", want: false},
+		{name: "configured + no creds", user: "alice", pass: "secret", want: false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			r := httptest.NewRequest("GET", "/", nil)
+			if c.sendCreds {
+				r.SetBasicAuth(c.reqUser, c.reqPass)
+			}
+			if got := validateBasicAuth(r, c.user, c.pass); got != c.want {
+				t.Errorf("validateBasicAuth = %v; want %v", got, c.want)
+			}
+		})
+	}
+}
+
 func TestBasicAuthMiddlewareRejectsWrongCreds(t *testing.T) {
 	mw := basicAuthMiddleware("alice", "secret")
 	called := false
