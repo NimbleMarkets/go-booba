@@ -5,6 +5,7 @@ package serve
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"testing"
 )
 
@@ -36,3 +37,39 @@ type resizeTrackingSession struct {
 func (r *resizeTrackingSession) Resize(cols, rows int) {
 	r.lastCols, r.lastRows = cols, rows
 }
+
+func TestHandleInputWSClosesOnOversizedPaste(t *testing.T) {
+	cfg := Config{MaxPasteBytes: 4096}
+	sess := &writeTrackingSession{Session: &resizeTestSession{}}
+	huge := make([]byte, 10000)
+	processMessage(context.Background(), nil, sess, OptionsMessage{}, MsgInput, huge, false, cfg)
+	if sess.bytesWritten != 0 {
+		t.Errorf("oversized input was written (bytes=%d); want 0", sess.bytesWritten)
+	}
+}
+
+func TestHandleInputWSAcceptsPasteUnderCap(t *testing.T) {
+	cfg := Config{MaxPasteBytes: 4096}
+	sess := &writeTrackingSession{Session: &resizeTestSession{}}
+	payload := make([]byte, 1000)
+	processMessage(context.Background(), nil, sess, OptionsMessage{}, MsgInput, payload, false, cfg)
+	if sess.bytesWritten != 1000 {
+		t.Errorf("under-cap input bytes=%d; want 1000", sess.bytesWritten)
+	}
+}
+
+type writeTrackingSession struct {
+	Session
+	bytesWritten int
+}
+
+func (w *writeTrackingSession) InputWriter() io.Writer {
+	return writeFunc(func(p []byte) (int, error) {
+		w.bytesWritten += len(p)
+		return len(p), nil
+	})
+}
+
+type writeFunc func(p []byte) (int, error)
+
+func (f writeFunc) Write(p []byte) (int, error) { return f(p) }

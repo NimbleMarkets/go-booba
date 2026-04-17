@@ -117,10 +117,18 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 		if opts.ReadOnly {
 			return
 		}
-		if len(payload) > 0 {
-			if _, err := sess.InputWriter().Write(payload); err != nil {
-				log.Printf("session input write error: %v", err)
+		if len(payload) == 0 {
+			return
+		}
+		if len(payload) > pasteMaxOrDefault(cfg.MaxPasteBytes) {
+			log.Printf("input message exceeds MaxPasteBytes (%d > %d); closing", len(payload), pasteMaxOrDefault(cfg.MaxPasteBytes))
+			if conn != nil {
+				_ = conn.CloseNow()
 			}
+			return
+		}
+		if _, err := sess.InputWriter().Write(payload); err != nil {
+			log.Printf("session input write error: %v", err)
 		}
 	case MsgResize:
 		var rm ResizeMessage
@@ -259,10 +267,20 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 		if opts.ReadOnly {
 			return
 		}
-		if len(payload) > 0 {
-			if _, err := sess.InputWriter().Write(payload); err != nil {
-				log.Printf("session input write error: %v", err)
+		if len(payload) == 0 {
+			return
+		}
+		if len(payload) > pasteMaxOrDefault(cfg.MaxPasteBytes) {
+			log.Printf("input message exceeds MaxPasteBytes (%d > %d); closing", len(payload), pasteMaxOrDefault(cfg.MaxPasteBytes))
+			if stream != nil {
+				stream.CancelRead(0)
+				stream.CancelWrite(0)
+				_ = stream.Close()
 			}
+			return
+		}
+		if _, err := sess.InputWriter().Write(payload); err != nil {
+			log.Printf("session input write error: %v", err)
 		}
 	case MsgResize:
 		var rm ResizeMessage
