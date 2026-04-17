@@ -456,7 +456,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
-	r = r.WithContext(withConfig(r.Context(), s.config))
+	r = r.WithContext(WithRemoteAddr(withConfig(r.Context(), s.config), r.RemoteAddr))
 
 	var capturedR *http.Request
 	terminal := func(r *http.Request) error {
@@ -564,7 +564,7 @@ func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webtransport.Server) {
 	s.debugf("WebTransport handler called: %s %s %s", r.Method, r.URL.Path, r.Proto)
 
-	r = r.WithContext(withConfig(r.Context(), s.config))
+	r = r.WithContext(WithRemoteAddr(withConfig(r.Context(), s.config), r.RemoteAddr))
 
 	var capturedR *http.Request
 	terminal := func(r *http.Request) error {
