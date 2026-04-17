@@ -23,7 +23,7 @@ func TestHandleWSRunsConnectChainAndRespectsRejection(t *testing.T) {
 	srv.handleWS(rec, httptest.NewRequest("GET", "/ws", nil))
 
 	res := rec.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != 403 {
 		t.Errorf("status = %d; want 403", res.StatusCode)
 	}

@@ -110,7 +110,7 @@ func TestLiftHTTPMiddlewareWritesResponseAndSkipsNext(t *testing.T) {
 		t.Error("terminal handler was called despite middleware writing a response")
 	}
 	res := rec.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != 401 {
 		t.Errorf("status = %d; want 401", res.StatusCode)
 	}

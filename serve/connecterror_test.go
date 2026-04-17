@@ -78,7 +78,7 @@ func TestWriteConnectErrorWritesStatusHeadersAndBody(t *testing.T) {
 	}
 	writeConnectError(rec, err)
 	res := rec.Result()
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != 401 {
 		t.Errorf("status = %d; want 401", res.StatusCode)
 	}
