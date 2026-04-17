@@ -411,24 +411,17 @@ func applyHandlerMiddleware(base Handler, mws []Middleware) Handler {
 	return base
 }
 
-func (s *Server) runSession(ctx context.Context, sess Session) error {
-	// Note: SessionMiddleware is applied only to the BubbleTea handler
-	// path. Command mode needs direct access to the underlying
-	// *ptySession for PTY control, and middleware wrapping would break
-	// the type assertion below. Also the BubbleTea-less default branch
-	// (session with no handler/cmd configured) has no handler to expose
-	// the wrapped session to, so wrapping there is unobservable.
-	//
-	// v0.3 wraps inside runSession; transport-layer goroutines in
-	// handlers.go still read from the un-wrapped session. A future task
-	// should lift the wrap to handleWS/handleWT so middleware like
-	// osc52gate (v0.4) sees transport reads too.
+// runSession dispatches to the handler, command, or wait-only branch.
+// sess is already wrapped with SessionMiddleware by the calling
+// handler (handleWS / handleWT); rawSess is the unwrapped session used
+// only to recover the *ptySession for command mode, which needs direct
+// PTY access.
+func (s *Server) runSession(ctx context.Context, sess, rawSess Session) error {
 	switch {
 	case s.handler != nil:
-		wrapped := applySessionMiddleware(sess, s.sessionMW)
-		return runBubbleTea(ctx, wrapped, s.handler)
+		return runBubbleTea(ctx, sess, s.handler)
 	case s.cmdName != "":
-		ptySess, ok := sess.(*ptySession)
+		ptySess, ok := rawSess.(*ptySession)
 		if !ok {
 			return fmt.Errorf("command mode requires PTY session")
 		}
@@ -520,13 +513,16 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create PTY session
-	sess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
+	// Create PTY session, then wrap with any installed SessionMiddleware
+	// so the transport goroutines see the wrapped OutputReader /
+	// InputWriter too.
+	rawSess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
 	if err != nil {
 		log.Printf("create session: %v", err)
 		_ = conn.CloseNow()
 		return
 	}
+	sess := applySessionMiddleware(rawSess, s.sessionMW)
 	defer func() { _ = sess.Close() }()
 
 	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
@@ -540,7 +536,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	// Start the session workload in a goroutine
 	go func() {
 		defer func() { _ = sess.Close() }()
-		if err := s.runSession(ctx, sess); err != nil {
+		if err := s.runSession(ctx, sess, rawSess); err != nil {
 			log.Printf("session error: %v", err)
 		}
 	}()
@@ -636,11 +632,12 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		return
 	}
 
-	sess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
+	rawSess, err := s.createSession(ctx, WindowSize{Width: rm.Cols, Height: rm.Rows})
 	if err != nil {
 		log.Printf("create session: %v", err)
 		return
 	}
+	sess := applySessionMiddleware(rawSess, s.sessionMW)
 	defer func() { _ = sess.Close() }()
 
 	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
@@ -653,7 +650,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 
 	go func() {
 		defer func() { _ = sess.Close() }()
-		if err := s.runSession(ctx, sess); err != nil {
+		if err := s.runSession(ctx, sess, rawSess); err != nil {
 			log.Printf("session error: %v", err)
 		}
 	}()

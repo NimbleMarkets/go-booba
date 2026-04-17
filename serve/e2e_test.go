@@ -66,6 +66,67 @@ func TestWSE2E_RequiresInitialResizeBeforeOptions(t *testing.T) {
 	}
 }
 
+func TestWSE2E_SessionMiddlewareSeesTransportInputAndOutput(t *testing.T) {
+	// Regression guard: SessionMiddleware must wrap the Session that the
+	// transport goroutines in handlers.go read from and write to. If the
+	// wrap is applied only inside runSession (as an earlier implementation
+	// did), the transport sees the un-wrapped session and middleware like
+	// osc52gate never runs on client input or server output.
+	var (
+		mu       sync.Mutex
+		gotIn   []byte
+		gotOut []byte
+	)
+
+	mw := func(s Session) Session {
+		return &probingSession{
+			Session: s,
+			onInput: func(p []byte) {
+				mu.Lock()
+				gotIn = append(gotIn, p...)
+				mu.Unlock()
+			},
+			onOutput: func(p []byte) {
+				mu.Lock()
+				gotOut = append(gotOut, p...)
+				mu.Unlock()
+			},
+		}
+	}
+
+	ts, created := newWSE2ETestServer(t, DefaultConfig(), WithSessionMiddleware(mw))
+
+	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
+
+	sess := waitForSession(t, created)
+
+	// Client → transport → wrapped InputWriter → e2eSession
+	writeWS(t, conn, MsgInput, []byte("hello"))
+	if got := sess.waitForInput(t); got != "hello" {
+		t.Fatalf("session saw input = %q, want %q", got, "hello")
+	}
+	mu.Lock()
+	sawIn := string(gotIn)
+	mu.Unlock()
+	if sawIn != "hello" {
+		t.Errorf("middleware saw input = %q, want %q (transport must use wrapped Session)", sawIn, "hello")
+	}
+
+	// e2eSession → wrapped OutputReader → transport → client
+	sess.emitOutput(t, "ready>")
+	msgType, payload := readWSMessage(t, conn)
+	if msgType != MsgOutput || string(payload) != "ready>" {
+		t.Fatalf("client got (type=%q, payload=%q), want (MsgOutput, %q)", msgType, payload, "ready>")
+	}
+	mu.Lock()
+	sawOut := string(gotOut)
+	mu.Unlock()
+	if sawOut != "ready>" {
+		t.Errorf("middleware saw output = %q, want %q (transport must use wrapped Session)", sawOut, "ready>")
+	}
+}
+
 func TestWSE2E_ForwardsInputToSession(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, DefaultConfig())
 
@@ -219,15 +280,16 @@ func TestWSE2E_IdleTimeoutClosesSession(t *testing.T) {
 	assertConnectionClosed(t, conn)
 }
 
-func newWSE2ETestServer(t *testing.T, cfg Config) (*httptest.Server, chan *e2eSession) {
+func newWSE2ETestServer(t *testing.T, cfg Config, extraOpts ...Option) (*httptest.Server, chan *e2eSession) {
 	t.Helper()
 
 	created := make(chan *e2eSession, 8)
-	srv := NewServer(cfg, WithSessionFactory(func(ctx context.Context, size WindowSize) (Session, error) {
+	opts := append([]Option{WithSessionFactory(func(ctx context.Context, size WindowSize) (Session, error) {
 		sess := newE2ESession(ctx, size)
 		created <- sess
 		return sess, nil
-	}))
+	})}, extraOpts...)
+	srv := NewServer(cfg, opts...)
 
 	handler, err := srv.HTTPHandler()
 	if err != nil {
@@ -449,4 +511,38 @@ type writerFunc func([]byte) (int, error)
 
 func (fn writerFunc) Write(p []byte) (int, error) {
 	return fn(p)
+}
+
+// probingSession wraps a Session with Input/Output interception hooks
+// to observe that the transport layer is in fact using the wrapped
+// Session produced by SessionMiddleware.
+type probingSession struct {
+	Session
+	onInput  func([]byte)
+	onOutput func([]byte)
+}
+
+func (p *probingSession) InputWriter() io.Writer {
+	inner := p.Session.InputWriter()
+	return writerFunc(func(b []byte) (int, error) {
+		p.onInput(b)
+		return inner.Write(b)
+	})
+}
+
+func (p *probingSession) OutputReader() io.Reader {
+	return &probingReader{inner: p.Session.OutputReader(), onRead: p.onOutput}
+}
+
+type probingReader struct {
+	inner  io.Reader
+	onRead func([]byte)
+}
+
+func (r *probingReader) Read(p []byte) (int, error) {
+	n, err := r.inner.Read(p)
+	if n > 0 {
+		r.onRead(p[:n])
+	}
+	return n, err
 }
