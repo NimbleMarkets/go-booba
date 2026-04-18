@@ -3,9 +3,14 @@
 package serve
 
 import (
+	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestValidateBasicAuth(t *testing.T) {
@@ -115,5 +120,94 @@ func TestConnLimitMiddlewareRejectsWhenAtCapacity(t *testing.T) {
 	srv.releaseConnection()
 	if err := mw(func(r *http.Request) error { return nil })(httptest.NewRequest("GET", "/ws", nil)); err != nil {
 		t.Errorf("after release, expected success; got %v", err)
+	}
+}
+
+type idleMWTestSession struct {
+	in       chan []byte
+	done     chan struct{}
+	closeErr error
+	closed   atomic.Bool
+}
+
+func newIdleMWTestSession() *idleMWTestSession {
+	return &idleMWTestSession{
+		in:   make(chan []byte, 16),
+		done: make(chan struct{}),
+	}
+}
+
+func (s *idleMWTestSession) Context() context.Context { return context.Background() }
+func (s *idleMWTestSession) OutputReader() io.Reader  { return nil }
+func (s *idleMWTestSession) InputWriter() io.Writer {
+	return idleMWTestWriter{ch: s.in}
+}
+func (s *idleMWTestSession) Resize(int, int)       {}
+func (s *idleMWTestSession) WindowSize() WindowSize { return WindowSize{Width: 80, Height: 24} }
+func (s *idleMWTestSession) Done() <-chan struct{}  { return s.done }
+func (s *idleMWTestSession) Close() error {
+	if s.closed.CompareAndSwap(false, true) {
+		close(s.done)
+	}
+	return s.closeErr
+}
+
+type idleMWTestWriter struct {
+	ch chan<- []byte
+}
+
+func (w idleMWTestWriter) Write(p []byte) (int, error) {
+	w.ch <- append([]byte(nil), p...)
+	return len(p), nil
+}
+
+func TestIdleTimeoutClosesSessionAfterDuration(t *testing.T) {
+	sess := newIdleMWTestSession()
+	_ = idleTimeoutMiddleware(50 * time.Millisecond)(sess)
+	select {
+	case <-sess.Done():
+		// closed by idle timeout; good
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("idletimeout did not close session within 500ms (expected ~50ms)")
+	}
+}
+
+func TestIdleTimeoutResetsOnInboundWrite(t *testing.T) {
+	sess := newIdleMWTestSession()
+	wrapped := idleTimeoutMiddleware(80 * time.Millisecond)(sess)
+
+	// Write inbound bytes every 30ms for 8 writes (240ms total). If
+	// writes correctly reset the timer, the session is still alive
+	// at 200ms. After writes stop, timer fires within another ~80ms.
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 8; i++ {
+			_, _ = wrapped.InputWriter().Write([]byte{'x'})
+			time.Sleep(30 * time.Millisecond)
+		}
+	}()
+	wg.Wait()
+
+	select {
+	case <-sess.Done():
+		// closed after last write + timeout; good
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("session not closed within 500ms after writes stopped")
+	}
+}
+
+func TestIdleTimeoutNoopForZeroDuration(t *testing.T) {
+	sess := newIdleMWTestSession()
+	wrapped := idleTimeoutMiddleware(0)(sess)
+	if wrapped != Session(sess) {
+		t.Error("idleTimeoutMiddleware(0) must return the session unwrapped")
+	}
+	select {
+	case <-sess.Done():
+		t.Error("session closed unexpectedly for zero-duration idletimeout")
+	case <-time.After(150 * time.Millisecond):
+		// still alive; good
 	}
 }

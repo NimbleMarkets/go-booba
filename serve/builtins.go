@@ -4,7 +4,10 @@ package serve
 
 import (
 	"crypto/subtle"
+	"io"
+	"log/slog"
 	"net/http"
+	"time"
 )
 
 // validateBasicAuth reports whether r carries credentials that match
@@ -68,4 +71,67 @@ func connLimitMiddleware(srv *Server) ConnectMiddleware {
 			return nil
 		}
 	}
+}
+
+// idleTimeoutMiddleware returns a SessionMiddleware that closes the
+// wrapped Session if no inbound bytes are received for d. Inbound
+// means client-to-session writes on InputWriter; outbound activity
+// does NOT reset the timer.
+//
+// A d <= 0 makes the middleware a no-op (returns the session
+// unwrapped) so callers can install it unconditionally.
+func idleTimeoutMiddleware(d time.Duration) SessionMiddleware {
+	return func(base Session) Session {
+		if d <= 0 {
+			return base
+		}
+		w := &idleSession{Session: base, timer: time.NewTimer(d), duration: d}
+		go w.watch()
+		return w
+	}
+}
+
+type idleSession struct {
+	Session
+	timer    *time.Timer
+	duration time.Duration
+}
+
+// InputWriter wraps the underlying writer to reset the idle timer on
+// every inbound write.
+func (s *idleSession) InputWriter() io.Writer {
+	return &idleResetWriter{inner: s.Session.InputWriter(), sess: s}
+}
+
+func (s *idleSession) watch() {
+	defer s.timer.Stop()
+	for {
+		select {
+		case <-s.Done():
+			return
+		case <-s.timer.C:
+			slog.Default().Info("idle timeout", slog.Duration("after", s.duration))
+			_ = s.Close()
+			return
+		}
+	}
+}
+
+type idleResetWriter struct {
+	inner io.Writer
+	sess  *idleSession
+}
+
+func (w *idleResetWriter) Write(p []byte) (int, error) {
+	if !w.sess.timer.Stop() {
+		// Drain if the timer already fired. Close() ran in that case,
+		// so a reset here is harmless but racey — guard via Done.
+		select {
+		case <-w.sess.Done():
+			return 0, io.ErrClosedPipe
+		default:
+		}
+	}
+	w.sess.timer.Reset(w.sess.duration)
+	return w.inner.Write(p)
 }
