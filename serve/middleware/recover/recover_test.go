@@ -61,3 +61,28 @@ func TestRecoverPassesThroughOnNoPanic(t *testing.T) {
 		t.Error("wrapped handler did not invoke the base handler")
 	}
 }
+
+// sentinelModel is a minimal tea.Model used to verify that the
+// wrapped Handler returns exactly what the base handler produced.
+type sentinelModel struct{}
+
+func (sentinelModel) Init() tea.Cmd                         { return nil }
+func (m sentinelModel) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+func (sentinelModel) View() tea.View                         { return tea.NewView("sentinel") }
+
+func TestRecoverPassesModelAndOptionsThroughUnchanged(t *testing.T) {
+	mw := recover.New()
+	wantModel := sentinelModel{}
+	wantOpts := []tea.ProgramOption{tea.WithoutRenderer()}
+	base := func(sess serve.Session) (tea.Model, []tea.ProgramOption) {
+		return wantModel, wantOpts
+	}
+	wrapped := mw(base)
+	gotModel, gotOpts := wrapped(&fakeSession{})
+	if gotModel != wantModel {
+		t.Errorf("model = %T(%v); want %T(%v)", gotModel, gotModel, wantModel, wantModel)
+	}
+	if len(gotOpts) != len(wantOpts) {
+		t.Errorf("opts len = %d; want %d", len(gotOpts), len(wantOpts))
+	}
+}
