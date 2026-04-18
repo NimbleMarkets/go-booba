@@ -123,15 +123,13 @@ type idleResetWriter struct {
 }
 
 func (w *idleResetWriter) Write(p []byte) (int, error) {
-	if !w.sess.timer.Stop() {
-		// Drain if the timer already fired. Close() ran in that case,
-		// so a reset here is harmless but racey — guard via Done.
-		select {
-		case <-w.sess.Done():
-			return 0, io.ErrClosedPipe
-		default:
-		}
-	}
+	// Go 1.23+ guarantees that calling Reset after Stop (even when
+	// Stop returned false) is safe and deterministic — the next value
+	// on the channel will correspond to the new duration, and the
+	// watcher goroutine is the sole consumer so there is no stale
+	// value to drain. If the session is already closed, the inner
+	// writer will return an error on its own.
+	w.sess.timer.Stop()
 	w.sess.timer.Reset(w.sess.duration)
 	return w.inner.Write(p)
 }
