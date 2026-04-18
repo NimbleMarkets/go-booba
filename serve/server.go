@@ -344,7 +344,6 @@ func (s *Server) debugf(format string, args ...any) {
 	}
 }
 
-
 func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, error) {
 	factory := s.newSession
 	if factory == nil {
