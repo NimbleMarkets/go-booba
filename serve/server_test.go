@@ -13,7 +13,6 @@ import (
 	"strings"
 	"sync"
 	"testing"
-	"time"
 )
 
 func TestCheckOriginAllowsSameHost(t *testing.T) {
@@ -286,33 +285,6 @@ func TestConfigureTransportDisablesSelfSignedCertForRemoteHost(t *testing.T) {
 	}
 }
 
-func TestAttachIdleTimeoutClosesIdleSession(t *testing.T) {
-	srv := NewServer(Config{IdleTimeout: 50 * time.Millisecond})
-	sess := newIdleTestSession()
-
-	ctx, cancel, activity := srv.attachIdleTimeout(context.Background(), sess)
-	defer cancel()
-
-	activity()
-	time.Sleep(25 * time.Millisecond)
-	activity()
-
-	select {
-	case <-sess.Done():
-		t.Fatal("session closed before idle timeout elapsed")
-	case <-time.After(20 * time.Millisecond):
-	}
-
-	select {
-	case <-sess.Done():
-	case <-time.After(120 * time.Millisecond):
-		t.Fatal("timed out waiting for idle session close")
-	}
-
-	if err := ctx.Err(); err == nil {
-		t.Fatal("expected idle timeout context to be canceled")
-	}
-}
 
 func TestDebugfHonorsDebugFlag(t *testing.T) {
 	var buf bytes.Buffer
@@ -350,24 +322,3 @@ func (s *stubSession) WindowSize() WindowSize   { return s.size }
 func (s *stubSession) Done() <-chan struct{}    { return s.done }
 func (s *stubSession) Close() error             { return nil }
 
-type idleTestSession struct {
-	done      chan struct{}
-	closeOnce sync.Once
-}
-
-func newIdleTestSession() *idleTestSession {
-	return &idleTestSession{done: make(chan struct{})}
-}
-
-func (s *idleTestSession) Context() context.Context { return context.Background() }
-func (s *idleTestSession) OutputReader() io.Reader  { return bytes.NewReader(nil) }
-func (s *idleTestSession) InputWriter() io.Writer   { return io.Discard }
-func (s *idleTestSession) Resize(cols, rows int)    {}
-func (s *idleTestSession) WindowSize() WindowSize   { return WindowSize{} }
-func (s *idleTestSession) Done() <-chan struct{}    { return s.done }
-func (s *idleTestSession) Close() error {
-	s.closeOnce.Do(func() {
-		close(s.done)
-	})
-	return nil
-}

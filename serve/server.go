@@ -20,7 +20,6 @@ import (
 	"net/url"
 	"path"
 	"sync/atomic"
-	"time"
 
 	"github.com/coder/websocket"
 	"github.com/quic-go/quic-go/http3"
@@ -63,6 +62,11 @@ func NewServer(config Config, opts ...Option) *Server {
 	}
 	// Connection limit always installed (no-op when MaxConnections <= 0).
 	s.connectMW = append(s.connectMW, connLimitMiddleware(s))
+
+	// Append built-in session middleware. idleTimeoutMiddleware is a
+	// no-op when cfg.IdleTimeout <= 0, so unconditional install is safe.
+	s.sessionMW = append(s.sessionMW, idleTimeoutMiddleware(s.config.IdleTimeout))
+
 	return s
 }
 
@@ -340,50 +344,6 @@ func (s *Server) debugf(format string, args ...any) {
 	}
 }
 
-func (s *Server) attachIdleTimeout(ctx context.Context, sess Session) (context.Context, context.CancelFunc, func()) {
-	if s.config.IdleTimeout <= 0 {
-		return ctx, func() {}, func() {}
-	}
-
-	idleCtx, cancel := context.WithCancel(ctx)
-	activityCh := make(chan struct{}, 1)
-
-	go func() {
-		timer := time.NewTimer(s.config.IdleTimeout)
-		defer timer.Stop()
-
-		for {
-			select {
-			case <-idleCtx.Done():
-				return
-			case <-activityCh:
-				if !timer.Stop() {
-					select {
-					case <-timer.C:
-					default:
-					}
-				}
-				timer.Reset(s.config.IdleTimeout)
-			case <-timer.C:
-				s.debugf("Closing idle session after %s", s.config.IdleTimeout)
-				cancel()
-				if err := sess.Close(); err != nil && !errors.Is(err, io.EOF) {
-					log.Printf("session close error: %v", err)
-				}
-				return
-			}
-		}
-	}()
-
-	activity := func() {
-		select {
-		case activityCh <- struct{}{}:
-		default:
-		}
-	}
-
-	return idleCtx, cancel, activity
-}
 
 func (s *Server) createSession(ctx context.Context, size WindowSize) (Session, error) {
 	factory := s.newSession
@@ -525,10 +485,6 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	sess := applySessionMiddleware(rawSess, s.sessionMW)
 	defer func() { _ = sess.Close() }()
 
-	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
-	defer cancel()
-	activity()
-
 	s.debugf("New session: %dx%d", rm.Cols, rm.Rows)
 
 	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
@@ -542,7 +498,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Handle WebSocket protocol messages (blocks until disconnect)
-	handleWebSocket(ctx, conn, sess, opts, s.config.Debug, activity, s.config)
+	handleWebSocket(ctx, conn, sess, opts, s.config.Debug, s.config)
 }
 
 func (s *Server) handleCertHash(w http.ResponseWriter, r *http.Request) {
@@ -640,10 +596,6 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	sess := applySessionMiddleware(rawSess, s.sessionMW)
 	defer func() { _ = sess.Close() }()
 
-	ctx, cancel, activity := s.attachIdleTimeout(ctx, sess)
-	defer cancel()
-	activity()
-
 	s.debugf("New WebTransport session: %dx%d", rm.Cols, rm.Rows)
 
 	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
@@ -655,7 +607,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		}
 	}()
 
-	handleWebTransport(ctx, sess, stream, opts, s.config.Debug, activity, s.config)
+	handleWebTransport(ctx, sess, stream, opts, s.config.Debug, s.config)
 }
 
 func (s *Server) checkAuth(w http.ResponseWriter, r *http.Request) bool {

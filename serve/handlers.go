@@ -21,7 +21,7 @@ const (
 )
 
 // handleWebSocket handles a single WebSocket connection for a session.
-func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func(), cfg Config) {
+func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, cfg Config) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer func() {
@@ -36,7 +36,6 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 		log.Printf("options message write error: %v", err)
 		return
 	}
-	activity()
 
 	apply, stopThrottle := newResizeApplier(sess, resizeThrottleOrDefault(cfg.ResizeThrottle))
 	defer stopThrottle()
@@ -57,7 +56,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		streamOutputWS(ctx, conn, sess, activity)
+		streamOutputWS(ctx, conn, sess)
 	}()
 
 	// Read client input → PTY
@@ -65,7 +64,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		handleInputWS(ctx, conn, sess, opts, debug, activity, cfg, apply)
+		handleInputWS(ctx, conn, sess, opts, debug, cfg, apply)
 	}()
 
 	wg.Wait()
@@ -73,12 +72,11 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 }
 
 // streamOutputWS reads from PTY and sends as MsgOutput over WebSocket.
-func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session, activity func()) {
+func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 	buf := make([]byte, writeBufSize)
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
-			activity()
 			if werr := writeWSMessage(ctx, conn, MsgOutput, buf[:n]); werr != nil {
 				return
 			}
@@ -98,13 +96,12 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session, act
 }
 
 // handleInputWS reads messages from WebSocket and dispatches them.
-func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, activity func(), cfg Config, apply func(WindowSize)) {
+func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, cfg Config, apply func(WindowSize)) {
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
 			return
 		}
-		activity()
 		msgType, payload, err := DecodeWSMessage(data)
 		if err != nil {
 			continue
@@ -167,7 +164,7 @@ func writeWSMessage(ctx context.Context, conn *websocket.Conn, msgType byte, pay
 }
 
 // handleWebTransport handles a single WebTransport session.
-func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func(), cfg Config) {
+func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, cfg Config) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer func() { _ = stream.Close() }()
@@ -178,7 +175,6 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 		log.Printf("options message write error: %v", err)
 		return
 	}
-	activity()
 
 	apply, stopThrottle := newResizeApplier(sess, resizeThrottleOrDefault(cfg.ResizeThrottle))
 	defer stopThrottle()
@@ -199,7 +195,7 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		streamOutputWT(ctx, sess, stream, activity)
+		streamOutputWT(ctx, sess, stream)
 	}()
 
 	// Read client input → PTY
@@ -207,19 +203,18 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 	go func() {
 		defer wg.Done()
 		defer cleanup()
-		handleInputWT(ctx, sess, stream, opts, debug, activity, cfg, apply)
+		handleInputWT(ctx, sess, stream, opts, debug, cfg, apply)
 	}()
 
 	wg.Wait()
 }
 
 // streamOutputWT reads from PTY and sends as MsgOutput over WebTransport.
-func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stream, activity func()) {
+func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stream) {
 	buf := make([]byte, writeBufSize)
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
-			activity()
 			if werr := writeWTMessage(stream, MsgOutput, buf[:n]); werr != nil {
 				return
 			}
@@ -240,7 +235,7 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 }
 
 // handleInputWT reads length-prefixed messages from WebTransport stream.
-func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, activity func(), cfg Config, apply func(WindowSize)) {
+func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, cfg Config, apply func(WindowSize)) {
 	lenBuf := make([]byte, 4)
 	for {
 		// Read 4-byte length prefix
@@ -260,7 +255,6 @@ func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Strea
 
 		msgType := msgBuf[0]
 		payload := msgBuf[1:]
-		activity()
 
 		processWTMessage(ctx, stream, sess, opts, msgType, payload, debug, cfg, apply)
 	}

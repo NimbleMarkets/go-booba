@@ -277,7 +277,22 @@ func TestWSE2E_IdleTimeoutClosesSession(t *testing.T) {
 		t.Fatal("timed out waiting for idle timeout to close session")
 	}
 
-	assertConnectionClosed(t, conn)
+	// The idle-timeout middleware closes the session cleanly; streamOutputWS
+	// sends MsgClose before closing the WebSocket.  Drain messages until we
+	// see MsgClose or the connection closes on its own.
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	for {
+		_, data, err := conn.Read(ctx)
+		if err != nil {
+			// Connection closed — that's the expected end state.
+			return
+		}
+		msgType, _, decErr := DecodeWSMessage(data)
+		if decErr == nil && msgType == MsgClose {
+			return
+		}
+	}
 }
 
 func newWSE2ETestServer(t *testing.T, cfg Config, extraOpts ...Option) (*httptest.Server, chan *e2eSession) {

@@ -103,8 +103,9 @@ func TestWithSessionMiddlewareWrapsOutermostFirst(t *testing.T) {
 		WithSessionMiddleware(mk("a"), mk("b")),
 		WithSessionMiddleware(mk("c")),
 	)
-	if got := len(srv.sessionMW); got != 3 {
-		t.Fatalf("len(sessionMW) = %d; want 3", got)
+	// 3 user-installed + 1 built-in (idleTimeoutMiddleware, no-op for IdleTimeout==0)
+	if got := len(srv.sessionMW); got != 4 {
+		t.Fatalf("len(sessionMW) = %d; want 4", got)
 	}
 	// Apply the chain to a fake base session and verify the call order on OutputReader.
 	base := &resizeTestSession{} // defined in bubbletea_test.go
