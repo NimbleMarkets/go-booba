@@ -37,16 +37,21 @@ func New(opts ...Option) serve.Middleware {
 		cfg.logger = slog.Default()
 	}
 	return func(next serve.Handler) serve.Handler {
-		return func(sess serve.Session) (tea.Model, []tea.ProgramOption) {
+		return func(sess serve.Session) (m tea.Model, popts []tea.ProgramOption) {
 			addr := serve.RemoteAddrFromContext(sess.Context())
 			start := time.Now()
 			cfg.logger.Info("session start", slog.String("remote_addr", addr))
-			m, opts := next(sess)
-			cfg.logger.Info("session end",
-				slog.String("remote_addr", addr),
-				slog.Int64("duration_ms", time.Since(start).Milliseconds()),
-			)
-			return m, opts
+			// "session end" fires via defer so panics in next(sess)
+			// still produce a closing log entry. The panic itself
+			// propagates; logging this middleware is not a recover.
+			defer func() {
+				cfg.logger.Info("session end",
+					slog.String("remote_addr", addr),
+					slog.Int64("duration_ms", time.Since(start).Milliseconds()),
+				)
+			}()
+			m, popts = next(sess)
+			return
 		}
 	}
 }

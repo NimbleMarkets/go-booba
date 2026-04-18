@@ -28,6 +28,31 @@ func (s *fakeSession) WindowSize() serve.WindowSize   { return serve.WindowSize{
 func (s *fakeSession) Done() <-chan struct{}          { return nil }
 func (s *fakeSession) Close() error                   { return nil }
 
+func TestLoggingEmitsEndEvenOnPanic(t *testing.T) {
+	var buf bytes.Buffer
+	logger := slog.New(slog.NewTextHandler(&buf, nil))
+	mw := logging.New(logging.WithLogger(logger))
+
+	panicking := func(sess serve.Session) (tea.Model, []tea.ProgramOption) {
+		panic("boom")
+	}
+	wrapped := mw(panicking)
+
+	ctx := serve.WithRemoteAddr(context.Background(), "203.0.113.1:9000")
+	func() {
+		defer func() { _ = recover() }() // swallow the propagated panic
+		_, _ = wrapped(&fakeSession{ctx: ctx})
+	}()
+
+	out := buf.String()
+	if !strings.Contains(out, "session start") {
+		t.Errorf("log output = %q; missing 'session start' before panic", out)
+	}
+	if !strings.Contains(out, "session end") {
+		t.Errorf("log output = %q; missing 'session end' after panic", out)
+	}
+}
+
 func TestLoggingEmitsStartAndEndWithRemoteAddr(t *testing.T) {
 	var buf bytes.Buffer
 	logger := slog.New(slog.NewTextHandler(&buf, nil))
