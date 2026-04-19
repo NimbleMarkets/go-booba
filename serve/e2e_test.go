@@ -193,6 +193,25 @@ func TestWSE2E_ReadOnlyBlocksInput(t *testing.T) {
 	sess.assertNoInput(t)
 }
 
+func TestWSE2E_InitialResizeTimeoutClosesConnection(t *testing.T) {
+	// Guard: a client that connects over WS but never sends the initial
+	// Resize must be disconnected after InitialResizeTimeout. The
+	// resolver is unit-tested; this test covers the enforcement path
+	// in handleWS.
+	cfg := DefaultConfig()
+	cfg.InitialResizeTimeout = 100 * time.Millisecond
+	ts, _ := newWSE2ETestServer(t, cfg)
+
+	conn := mustDialWS(t, ts.URL, nil)
+	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
+
+	// Do NOT send Resize. Server should close the connection after
+	// ~100ms. Give generous slack for CI jitter.
+	time.Sleep(400 * time.Millisecond)
+
+	assertConnectionClosed(t, conn)
+}
+
 func TestWSE2E_BasicAuthWithoutTLSIsRejected(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.BasicUsername = "admin"
