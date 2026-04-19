@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	defaultMaxPasteBytes  = 1 << 20 // 1 MiB
-	defaultResizeThrottle = 16 * time.Millisecond
-	defaultMaxWindowCols  = 4096
-	defaultMaxWindowRows  = 4096
+	defaultMaxPasteBytes      = 1 << 20 // 1 MiB
+	defaultResizeThrottle     = 16 * time.Millisecond
+	defaultMaxWindowCols      = 4096
+	defaultMaxWindowRows      = 4096
+	defaultInitialResizeTimeout = 10 * time.Second
 )
 
 func pasteMaxOrDefault(v int) int {
@@ -34,6 +35,13 @@ func windowDimsOrDefault(v WindowSize) WindowSize {
 	}
 	if v.Height <= 0 {
 		v.Height = defaultMaxWindowRows
+	}
+	return v
+}
+
+func initialResizeTimeoutOrDefault(v time.Duration) time.Duration {
+	if v <= 0 {
+		return defaultInitialResizeTimeout
 	}
 	return v
 }

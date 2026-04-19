@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"path"
 	"sync/atomic"
+	"time"
 
 	"github.com/coder/websocket"
 	"github.com/quic-go/quic-go/http3"
@@ -450,7 +451,9 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// Wait for initial resize from client
-	_, data, err := conn.Read(ctx)
+	deadline, cancelDeadline := context.WithTimeout(ctx, initialResizeTimeoutOrDefault(s.config.InitialResizeTimeout))
+	_, data, err := conn.Read(deadline)
+	cancelDeadline()
 	if err != nil {
 		_ = conn.CloseNow()
 		return
@@ -562,6 +565,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	ctx := r.Context()
 
 	// Read initial resize (length-prefixed)
+	_ = stream.SetReadDeadline(time.Now().Add(initialResizeTimeoutOrDefault(s.config.InitialResizeTimeout)))
 	lenBuf := make([]byte, 4)
 	if _, err := io.ReadFull(stream, lenBuf); err != nil {
 		return
@@ -574,6 +578,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 	if _, err := io.ReadFull(stream, msgBuf); err != nil {
 		return
 	}
+	_ = stream.SetReadDeadline(time.Time{}) // clear the deadline so subsequent reads don't hit it
 	if msgBuf[0] != MsgResize {
 		return
 	}

@@ -31,6 +31,11 @@ type Config struct {
 	// silently dropped). Zero or negative in either Width or Height
 	// means default for that dimension (4096 each).
 	MaxWindowDims WindowSize
+
+	// InitialResizeTimeout is the maximum time the server will wait
+	// for the client's initial Resize message after a WS upgrade or
+	// WT CONNECT. Zero or negative means default (10 seconds).
+	InitialResizeTimeout time.Duration
 }
 
 // DefaultConfig returns a Config with sensible defaults.

@@ -68,3 +68,15 @@ func TestConfigFromContextPropagatesThroughDerivedContext(t *testing.T) {
 		t.Errorf("ConfigFromContext through derived ctx = %+v; want Port=1234", got)
 	}
 }
+
+func TestInitialResizeTimeoutOrDefault(t *testing.T) {
+	if got := initialResizeTimeoutOrDefault(0); got != 10*time.Second {
+		t.Errorf("initialResizeTimeoutOrDefault(0) = %v; want 10s", got)
+	}
+	if got := initialResizeTimeoutOrDefault(3 * time.Second); got != 3*time.Second {
+		t.Errorf("initialResizeTimeoutOrDefault(3s) = %v; want 3s", got)
+	}
+	if got := initialResizeTimeoutOrDefault(-1); got != 10*time.Second {
+		t.Errorf("initialResizeTimeoutOrDefault(-1) = %v; want 10s", got)
+	}
+}
