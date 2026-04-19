@@ -211,3 +211,72 @@ func TestIdleTimeoutNoopForZeroDuration(t *testing.T) {
 		// still alive; good
 	}
 }
+
+func TestIdleTimeoutDoubleInstallIsSafe(t *testing.T) {
+	// Guard: two idleTimeoutMiddleware instances wrapped around the
+	// same session will each fire their own watchdog goroutine. When
+	// the first timer fires and calls Close, the second timer will
+	// still fire later and also call Close on the already-closed
+	// session. Session.Close must be idempotent (per the v0.3 contract)
+	// so this is safe — neither goroutine panics.
+	//
+	// Although the current API doesn't export idleTimeoutMiddleware
+	// (so external callers can't trigger the two-idletimeout scenario
+	// themselves), this test pins the safety invariant against any
+	// future refactor that exposes the constructor or otherwise
+	// enables overlapping idle-close goroutines.
+	sess := newIdleMWTestSession()
+	wrapped := idleTimeoutMiddleware(30 * time.Millisecond)(sess)
+	wrapped = idleTimeoutMiddleware(60 * time.Millisecond)(wrapped)
+	_ = wrapped
+
+	// First timer should close the session within ~30ms; allow generous
+	// slack for CI jitter.
+	select {
+	case <-sess.Done():
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("first idle timer did not close session within 500ms")
+	}
+	// Wait past the second timer's fire time. If the second Close call
+	// panicked or deadlocked, the test process would not reach the end.
+	time.Sleep(100 * time.Millisecond)
+}
+
+func TestIdleTimeoutComposesWithUserSessionMiddleware(t *testing.T) {
+	// Guard: auto-installed idleTimeoutMiddleware (via cfg.IdleTimeout)
+	// must compose cleanly with user-installed SessionMiddleware. The
+	// user middleware wraps outermost per the v0.3 outermost-first
+	// convention, and idletimeout's Close propagates through the user
+	// wrapper's embedded Session.Close().
+	cfg := DefaultConfig()
+	cfg.IdleTimeout = 30 * time.Millisecond
+
+	var userClosed atomic.Bool
+	userMW := func(base Session) Session {
+		return &closeObservingSession{Session: base, onClose: func() { userClosed.Store(true) }}
+	}
+
+	srv := NewServer(cfg, WithSessionMiddleware(userMW))
+	base := newIdleMWTestSession()
+	wrapped := applySessionMiddleware(base, srv.sessionMW)
+
+	select {
+	case <-base.Done():
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("auto-installed idletimeout did not close base session")
+	}
+	_ = wrapped.Close() // should be idempotent
+	if !userClosed.Load() {
+		t.Error("user SessionMiddleware's Close override was never called")
+	}
+}
+
+type closeObservingSession struct {
+	Session
+	onClose func()
+}
+
+func (s *closeObservingSession) Close() error {
+	s.onClose()
+	return s.Session.Close()
+}
