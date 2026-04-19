@@ -12,6 +12,7 @@
 package sipmetrics
 
 import (
+	"errors"
 	"io"
 	"time"
 
@@ -56,33 +57,48 @@ func New(opts ...Option) serve.SessionMiddleware {
 		cfg.reg = prometheus.DefaultRegisterer
 	}
 	m := &metrics{
-		active: prometheus.NewGauge(prometheus.GaugeOpts{
+		active: registerOrReuse(cfg.reg, prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: cfg.namespace, Name: "sessions_active",
 			Help: "Number of sessions currently active.",
-		}),
-		duration: prometheus.NewHistogram(prometheus.HistogramOpts{
+		})),
+		duration: registerOrReuse(cfg.reg, prometheus.NewHistogram(prometheus.HistogramOpts{
 			Namespace: cfg.namespace, Name: "session_duration_seconds",
 			Help: "Session duration in seconds.",
-		}),
-		rx: prometheus.NewCounter(prometheus.CounterOpts{
+		})),
+		rx: registerOrReuse(cfg.reg, prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: cfg.namespace, Name: "session_bytes_received_total",
 			Help: "Total bytes received from clients across all sessions.",
-		}),
-		tx: prometheus.NewCounter(prometheus.CounterOpts{
+		})),
+		tx: registerOrReuse(cfg.reg, prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: cfg.namespace, Name: "session_bytes_sent_total",
 			Help: "Total bytes sent to clients across all sessions.",
-		}),
-		errs: prometheus.NewCounter(prometheus.CounterOpts{
+		})),
+		errs: registerOrReuse(cfg.reg, prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: cfg.namespace, Name: "session_errors_total",
 			Help: "Total session Close errors observed.",
-		}),
+		})),
 	}
-	cfg.reg.MustRegister(m.active, m.duration, m.rx, m.tx, m.errs)
 
 	return func(base serve.Session) serve.Session {
 		m.active.Inc()
 		return &metricSession{Session: base, m: m, start: time.Now()}
 	}
+}
+
+// registerOrReuse attempts to register c. If c collides with an
+// already-registered collector of the same fully-qualified name, the
+// existing collector is returned instead. This lets callers invoke
+// sipmetrics.New multiple times against the same registry + namespace
+// without tripping prometheus.MustRegister's panic-on-duplicate.
+func registerOrReuse[T prometheus.Collector](reg prometheus.Registerer, c T) T {
+	if err := reg.Register(c); err != nil {
+		var are prometheus.AlreadyRegisteredError
+		if errors.As(err, &are) {
+			return are.ExistingCollector.(T)
+		}
+		panic(err)
+	}
+	return c
 }
 
 type metricSession struct {

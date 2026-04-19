@@ -46,6 +46,28 @@ func TestSessionsActiveGaugeTracksLifecycle(t *testing.T) {
 	}
 }
 
+func TestNewIsSafeToCallTwiceOnSameRegistry(t *testing.T) {
+	// Guard: calling sipmetrics.New twice against the same registry
+	// and namespace must not panic. The second call should reuse the
+	// already-registered collectors so both middleware instances share
+	// the same underlying metrics.
+	reg := prometheus.NewRegistry()
+
+	mw1 := sipmetrics.New(sipmetrics.WithRegistry(reg))
+	mw2 := sipmetrics.New(sipmetrics.WithRegistry(reg)) // must not panic
+
+	sess1 := mw1(&fakeSession{closed: make(chan struct{}), in: discardWriter{}})
+	sess2 := mw2(&fakeSession{closed: make(chan struct{}), in: discardWriter{}})
+	if got := gaugeValue(t, reg, "booba_sessions_active"); got != 2 {
+		t.Errorf("sessions_active after wrapping two sessions = %v; want 2", got)
+	}
+	_ = sess1.Close()
+	_ = sess2.Close()
+	if got := gaugeValue(t, reg, "booba_sessions_active"); got != 0 {
+		t.Errorf("sessions_active after closing both = %v; want 0", got)
+	}
+}
+
 func TestBytesCountersIncrementOnReadAndWrite(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	mw := sipmetrics.New(sipmetrics.WithRegistry(reg))
