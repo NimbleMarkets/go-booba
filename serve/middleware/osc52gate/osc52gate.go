@@ -118,41 +118,43 @@ type scanner struct {
 }
 
 func (s *scanner) Read(p []byte) (int, error) {
-	// Emit any previously-buffered output first.
-	if len(s.outBuf) > 0 {
-		n := copy(p, s.outBuf)
-		s.outBuf = s.outBuf[n:]
-		return n, nil
-	}
-	buf := make([]byte, len(p))
-	n, err := s.inner.Read(buf)
-	if n > 0 {
-		s.feed(buf[:n])
-	}
-	if len(s.outBuf) == 0 && err == nil {
-		// We consumed bytes but produced nothing yet (mid-escape); try
-		// another read rather than return (0, nil) which clients may
-		// interpret as end-of-stream.
-		return s.Read(p)
-	}
-	if len(s.outBuf) == 0 && err != nil {
-		// EOF (or error) mid-escape: flush any buffered bytes through
-		// as-is so we don't silently swallow data on malformed input.
-		if len(s.buffered) > 0 {
-			s.outBuf = append(s.outBuf, s.buffered...)
-			s.buffered = s.buffered[:0]
-			s.state = stNormal
+	for {
+		// Emit any previously-buffered output first.
+		if len(s.outBuf) > 0 {
+			n := copy(p, s.outBuf)
+			s.outBuf = s.outBuf[n:]
+			return n, nil
 		}
-	}
-	if len(s.outBuf) > 0 {
-		m := copy(p, s.outBuf)
-		s.outBuf = s.outBuf[m:]
-		if err == io.EOF && len(s.outBuf) == 0 {
-			return m, io.EOF
+		buf := make([]byte, len(p))
+		n, err := s.inner.Read(buf)
+		if n > 0 {
+			s.feed(buf[:n])
 		}
-		return m, nil
+		if len(s.outBuf) == 0 && err != nil {
+			// EOF (or error) mid-escape: flush any buffered bytes
+			// through as-is so we don't silently swallow data on
+			// malformed input.
+			if len(s.buffered) > 0 {
+				s.outBuf = append(s.outBuf, s.buffered...)
+				s.buffered = s.buffered[:0]
+				s.state = stNormal
+			}
+		}
+		if len(s.outBuf) > 0 {
+			m := copy(p, s.outBuf)
+			s.outBuf = s.outBuf[m:]
+			if err == io.EOF && len(s.outBuf) == 0 {
+				return m, io.EOF
+			}
+			return m, nil
+		}
+		if err != nil {
+			return 0, err
+		}
+		// err == nil, outBuf empty: either inner returned (0, nil) or
+		// we consumed bytes mid-escape. Loop and read more rather than
+		// recurse (unbounded for large escapes or (0, nil) inners).
 	}
-	return 0, err
 }
 
 // feed processes all bytes in b, updating state-machine fields and
@@ -220,7 +222,7 @@ func (s *scanner) step(c byte) {
 		s.selBuf = append(s.selBuf, c)
 	case stData:
 		if c == 0x07 { // BEL terminator
-			s.finishEscape()
+			s.finishEscape(false)
 			return
 		}
 		if c == 0x1b { // possible ST
@@ -233,7 +235,7 @@ func (s *scanner) step(c byte) {
 	case stMaybeST:
 		if c == '\\' {
 			s.buffered = append(s.buffered, c)
-			s.finishEscape()
+			s.finishEscape(true)
 			return
 		}
 		// Not ST — that ESC was part of data. Stay in data state and
@@ -256,30 +258,22 @@ func (s *scanner) flushBuffered() {
 }
 
 // finishEscape is called when a complete OSC 52 sequence is observed.
-// Behavior depends on mode.
-func (s *scanner) finishEscape() {
+// stTerminated is true when the sequence ended with ESC\ (ST) — in
+// that case buffered already contains the terminator bytes. When
+// false, the BEL terminator was consumed by step() without being
+// buffered, and the Allow/Audit branches must append it explicitly.
+func (s *scanner) finishEscape(stTerminated bool) {
 	switch s.mode {
-	case ModeAllow:
-		s.outBuf = append(s.outBuf, s.buffered...)
-		s.outBuf = append(s.outBuf, 0x07) // terminator was not added to buffered
-	case ModeDeny:
-		// drop everything buffered — nothing added to outBuf
-	case ModeAudit:
-		if s.audit != nil {
+	case ModeAllow, ModeAudit:
+		if s.mode == ModeAudit && s.audit != nil {
 			s.audit(string(s.selBuf), s.dataLen)
 		}
 		s.outBuf = append(s.outBuf, s.buffered...)
-		s.outBuf = append(s.outBuf, 0x07)
-	}
-	// Tail terminator correction: for ST-terminated escapes the
-	// buffered slice already ends with ESC \ (0x1b 0x5c). The Allow
-	// and Audit branches unconditionally append BEL (0x07) above,
-	// producing an incorrect trailing BEL after the ST. Trim it.
-	//
-	// Detection: last byte is 0x07 and second-to-last is '\\' means
-	// we have "...<ESC>\<BEL>" where the BEL is spurious.
-	if len(s.outBuf) >= 2 && s.outBuf[len(s.outBuf)-1] == 0x07 && s.outBuf[len(s.outBuf)-2] == '\\' {
-		s.outBuf = s.outBuf[:len(s.outBuf)-1]
+		if !stTerminated {
+			s.outBuf = append(s.outBuf, 0x07)
+		}
+	case ModeDeny:
+		// drop everything buffered — nothing added to outBuf
 	}
 	s.buffered = s.buffered[:0]
 	s.selBuf = s.selBuf[:0]

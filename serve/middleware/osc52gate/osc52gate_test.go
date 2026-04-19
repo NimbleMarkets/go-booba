@@ -101,6 +101,20 @@ func TestScannerSTTerminator(t *testing.T) {
 	}
 }
 
+func TestScannerAllowSTTerminator(t *testing.T) {
+	// Allow mode must pass an ST-terminated escape through verbatim —
+	// no spurious BEL appended after the ESC\ sequence. This pins the
+	// behavior that the earlier tail-trim heuristic implemented (and
+	// that the explicit stTerminated flag now handles cleanly).
+	payload := []byte("\x1b]52;c;SGk=\x1b\\")
+	r := newScanner(bytes.NewReader(append([]byte("a"), append(payload, 'b')...)), ModeAllow, nil)
+	got, _ := io.ReadAll(r)
+	want := append([]byte("a"), append(payload, 'b')...)
+	if !bytes.Equal(got, want) {
+		t.Errorf("allow + ST terminator: got %q; want %q", got, want)
+	}
+}
+
 // chunkedReader returns data chunkSize bytes at a time to exercise
 // split-Read handling in the scanner.
 type chunkedReader struct {
