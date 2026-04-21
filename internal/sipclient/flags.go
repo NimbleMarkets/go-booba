@@ -30,3 +30,45 @@ func ParseTargetURL(raw string) (*url.URL, error) {
 	}
 	return u, nil
 }
+
+// EscapeChar represents a parsed --escape-char value.
+// None means the escape mechanism is disabled.
+type EscapeChar struct {
+	Byte byte
+	None bool
+}
+
+// ParseEscapeChar accepts "^X" notation (where X is an uppercase letter, @,
+// [, \, ], ^, _, or ?) or the literal "none" (case-insensitive) to disable.
+func ParseEscapeChar(s string) (EscapeChar, error) {
+	if strings.EqualFold(s, "none") {
+		return EscapeChar{None: true}, nil
+	}
+	if len(s) != 2 || s[0] != '^' {
+		return EscapeChar{}, fmt.Errorf("invalid escape char %q (want ^X or 'none')", s)
+	}
+	c := s[1]
+	if c >= 'a' && c <= 'z' {
+		c -= 'a' - 'A'
+	}
+	switch {
+	case c == '@':
+		return EscapeChar{Byte: 0x00}, nil
+	case c >= 'A' && c <= 'Z':
+		return EscapeChar{Byte: c - '@'}, nil // '@' is 0x40, so 'A' - '@' = 1
+	case c == '[':
+		return EscapeChar{Byte: 0x1b}, nil
+	case c == '\\':
+		return EscapeChar{Byte: 0x1c}, nil
+	case c == ']':
+		return EscapeChar{Byte: 0x1d}, nil
+	case c == '^':
+		return EscapeChar{Byte: 0x1e}, nil
+	case c == '_':
+		return EscapeChar{Byte: 0x1f}, nil
+	case c == '?':
+		return EscapeChar{Byte: 0x7f}, nil
+	default:
+		return EscapeChar{}, fmt.Errorf("invalid escape char %q", s)
+	}
+}
