@@ -292,6 +292,7 @@ Notes:
  * Basic Auth requires `--cert-file` and `--key-file`; the server refuses to start otherwise.
  * prefer `--password-file` or `$BOOBA_PASSWORD` over `--password`: the flag form leaks the secret into argv, shell history, and `ps` listings. Precedence is flag > file > env.
  * static frontend files are embedded with `go:embed`, so after frontend asset changes you must rebuild the Go binary you run.
+ * reverse-proxy deployment: booba's `index.html` resolves every endpoint against `document.baseURI`, so hosting at a non-root path (e.g. nginx `location /terminal/`) works as long as the proxy **strips the prefix** before forwarding. For custom frontends, use the exported `resolveBoobaURLs(document.baseURI)` helper from `@nimblemarkets/booba`.
 
 ## Open Collaboration
 

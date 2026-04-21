@@ -52,7 +52,7 @@
     <div id="terminal-container"></div>
 
     <script type="module">
-        import { BoobaTerminal } from './static/booba/booba.js';
+        import { BoobaTerminal, resolveBoobaURLs } from './static/booba/booba.js';
 
         const dot = document.getElementById('status-dot');
         const text = document.getElementById('status-text');
@@ -81,18 +81,17 @@
 
             await booba.init();
 
-            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
-            let wtUrl = null;
-            let certHashUrl = null;
+            // Resolve endpoints relative to the page so booba works behind
+            // a path-prefix reverse proxy that strips the prefix.
+            const urls = resolveBoobaURLs(document.baseURI);
+            const webTransportOK = typeof WebTransport !== 'undefined' &&
+                (window.location.protocol === 'https:' || isLoopbackHost(window.location.hostname));
 
-            if (typeof WebTransport !== 'undefined' &&
-                (window.location.protocol === 'https:' || isLoopbackHost(window.location.hostname))) {
-                wtUrl = `https://${window.location.host}/wt`;
-                certHashUrl = `${window.location.origin}/cert-hash`;
-            }
-
-            booba.connectAuto(wsUrl, wtUrl, certHashUrl);
+            booba.connectAuto(
+                urls.wsUrl,
+                webTransportOK ? urls.wtUrl : null,
+                webTransportOK ? urls.certHashUrl : null,
+            );
             booba.focus();
 
             // Handle mobile keyboard showing/hiding using visualViewport API

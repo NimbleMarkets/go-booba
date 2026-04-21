@@ -346,4 +346,5 @@ export { BoobaProtocolAdapter } from './websocket_adapter.js';
 export { BoobaAutoAdapter } from './auto_adapter.js';
 export { BoobaWebTransportAdapter } from './webtransport_adapter.js';
 export { OSC52Scanner } from './clipboard.js';
+export { resolveBoobaURLs } from './urls.js';
 //# sourceMappingURL=booba.js.map
