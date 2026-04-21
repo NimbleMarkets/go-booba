@@ -31,8 +31,6 @@ func MakeOptions(sess Session) []tea.ProgramOption {
 	ps, ok := sess.(*ptySession)
 	if !ok {
 		return []tea.ProgramOption{
-			tea.WithInput(sess.OutputReader()),
-			tea.WithOutput(sess.InputWriter()),
 			tea.WithEnvironment([]string{"TERM=xterm-256color", "COLORTERM=truecolor"}),
 		}
 	}
