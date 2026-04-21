@@ -115,11 +115,23 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 		}
 	}
 
+	pumpCtx := ctx
+	if opts.DumpTimeout > 0 {
+		var cancel context.CancelFunc
+		pumpCtx, cancel = context.WithTimeout(pumpCtx, opts.DumpTimeout)
+		defer cancel()
+	}
+
 	handler := NewDumpHandler(stdout)
 	router := &Router{
 		Handler: handler,
 		Pong: func() error {
-			return conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgPong, nil))
+			// Pong is best-effort in dump mode: if the write fails, the next
+			// Read on this connection will surface the real error. Do NOT
+			// terminate the dump session just because a Pong could not be
+			// written.
+			_ = conn.Write(pumpCtx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgPong, nil))
+			return nil
 		},
 	}
 	if opts.Debug {
@@ -128,18 +140,11 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 		}
 	}
 
-	pumpCtx := ctx
-	if opts.DumpTimeout > 0 {
-		var cancel context.CancelFunc
-		pumpCtx, cancel = context.WithTimeout(pumpCtx, opts.DumpTimeout)
-		defer cancel()
-	}
-
 	for {
 		_, data, err := conn.Read(pumpCtx)
 		if err != nil {
-			if errors.Is(err, context.DeadlineExceeded) && opts.DumpTimeout > 0 {
-				return nil // timeout is a clean end for dump mode
+			if errors.Is(err, context.DeadlineExceeded) {
+				return nil // any deadline (ours or the caller's) is a clean end for dump mode
 			}
 			if errors.Is(err, context.Canceled) {
 				return nil
