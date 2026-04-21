@@ -92,7 +92,18 @@ export class BoobaWebTransportAdapter implements BoobaAdapter {
 
     private async _readLoop(readable: ReadableStream<Uint8Array>): Promise<void> {
         const reader = readable.getReader();
-        let buffer = new Uint8Array(0);
+        // Pre-allocate a growable buffer; expands by doubling when needed.
+        let buf = new Uint8Array(4096);
+        let len = 0;
+
+        const grow = (need: number) => {
+            if (buf.length >= need) return;
+            let n = buf.length * 2;
+            while (n < need) n *= 2;
+            const next = new Uint8Array(n);
+            next.set(buf.subarray(0, len));
+            buf = next;
+        };
 
         try {
             while (true) {
@@ -100,22 +111,30 @@ export class BoobaWebTransportAdapter implements BoobaAdapter {
                 if (done) break;
                 if (!value) continue;
 
-                // Append to buffer
-                const newBuf = new Uint8Array(buffer.length + value.length);
-                newBuf.set(buffer);
-                newBuf.set(value, buffer.length);
-                buffer = newBuf;
+                grow(len + value.length);
+                buf.set(value, len);
+                len += value.length;
 
-                // Parse length-prefixed messages
-                while (buffer.length >= 4) {
-                    const msgLen = new DataView(buffer.buffer, buffer.byteOffset).getUint32(0, false);
-                    if (buffer.length < 4 + msgLen) break; // Incomplete message
+                // Parse complete length-prefixed messages
+                let consumed = 0;
+                while (len - consumed >= 4) {
+                    const msgLen = new DataView(buf.buffer, buf.byteOffset + consumed).getUint32(0, false);
+                    if (len - consumed < 4 + msgLen) break; // Incomplete message
 
-                    const msgType = buffer[4];
-                    const payload = buffer.slice(5, 4 + msgLen);
-                    buffer = buffer.slice(4 + msgLen);
-
+                    const msgType = buf[consumed + 4];
+                    const payload = buf.slice(consumed + 5, consumed + 4 + msgLen);
                     this._handleMessage(msgType, payload);
+
+                    consumed += 4 + msgLen;
+                }
+
+                // Shift any unconsumed bytes to the front
+                if (consumed > 0) {
+                    const remaining = len - consumed;
+                    if (remaining > 0) {
+                        buf.set(buf.subarray(consumed, len), 0);
+                    }
+                    len = remaining;
                 }
             }
         } catch {
