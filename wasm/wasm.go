@@ -42,22 +42,24 @@ func Run(model tea.Model, opts ...tea.ProgramOption) error {
 
 	prog := tea.NewProgram(model, append(baseOpts, opts...)...)
 
-	js.Global().Set("bubbletea_write", js.FuncOf(func(_ js.Value, args []js.Value) any {
+	writeFunc := js.FuncOf(func(_ js.Value, args []js.Value) any {
 		if len(args) > 0 {
 			fromJS.Write([]byte(args[0].String()))
 		}
 		return nil
-	}))
+	})
+	js.Global().Set("bubbletea_write", writeFunc)
 
-	js.Global().Set("bubbletea_read", js.FuncOf(func(_ js.Value, _ []js.Value) any {
+	readFunc := js.FuncOf(func(_ js.Value, _ []js.Value) any {
 		data := toJS.ReadAndReset()
 		if len(data) == 0 {
 			return ""
 		}
 		return string(data)
-	}))
+	})
+	js.Global().Set("bubbletea_read", readFunc)
 
-	js.Global().Set("bubbletea_resize", js.FuncOf(func(_ js.Value, args []js.Value) any {
+	resizeFunc := js.FuncOf(func(_ js.Value, args []js.Value) any {
 		if len(args) >= 2 {
 			prog.Send(tea.WindowSizeMsg{
 				Width:  args[0].Int(),
@@ -65,7 +67,12 @@ func Run(model tea.Model, opts ...tea.ProgramOption) error {
 			})
 		}
 		return nil
-	}))
+	})
+	js.Global().Set("bubbletea_resize", resizeFunc)
+
+	defer writeFunc.Release()
+	defer readFunc.Release()
+	defer resizeFunc.Release()
 
 	_, err := prog.Run()
 	return err
