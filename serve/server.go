@@ -190,7 +190,8 @@ func (s *Server) newMux(wtServer *webtransport.Server) (http.Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("static fs: %w", err)
 	}
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
+	staticHandler := http.StripPrefix("/static/", http.FileServer(http.FS(staticFS)))
+	mux.Handle("/static/", s.authGate(staticHandler))
 	mux.HandleFunc("/", s.handleIndex)
 	mux.HandleFunc("/ws", s.handleWS)
 
@@ -621,6 +622,18 @@ func (s *Server) checkAuth(w http.ResponseWriter, r *http.Request) bool {
 	w.Header().Set("WWW-Authenticate", `Basic realm="booba"`)
 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
 	return false
+}
+
+// authGate wraps a non-session HTTP handler (e.g. the static file
+// server) so it fails closed when Basic Auth is configured. This keeps
+// static assets from leaking fingerprints to unauthenticated clients.
+func (s *Server) authGate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !s.checkAuth(w, r) {
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (s *Server) checkOrigin(r *http.Request) bool {
