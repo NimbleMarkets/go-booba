@@ -235,9 +235,6 @@ func TestTLSConfigsUseExpectedProtocols(t *testing.T) {
 	srv.certInfo = info
 
 	httpsCfg := srv.httpsTLSConfig()
-	if httpsCfg == nil {
-		t.Fatal("expected HTTPS TLS config")
-	}
 	if got, want := strings.Join(httpsCfg.NextProtos, ","), "h2,http/1.1"; got != want {
 		t.Fatalf("HTTPS NextProtos = %q, want %q", got, want)
 	}
@@ -246,9 +243,6 @@ func TestTLSConfigsUseExpectedProtocols(t *testing.T) {
 	}
 
 	http3Cfg := srv.http3TLSConfig()
-	if http3Cfg == nil {
-		t.Fatal("expected HTTP/3 TLS config")
-	}
 	if got, want := strings.Join(http3Cfg.NextProtos, ","), "h3"; got != want {
 		t.Fatalf("HTTP/3 NextProtos = %q, want %q", got, want)
 	}
@@ -285,7 +279,6 @@ func TestConfigureTransportDisablesSelfSignedCertForRemoteHost(t *testing.T) {
 	}
 }
 
-
 func TestDebugfHonorsDebugFlag(t *testing.T) {
 	var buf bytes.Buffer
 	origWriter := log.Writer()
@@ -321,4 +314,3 @@ func (s *stubSession) Resize(cols, rows int)    { s.size = WindowSize{Width: col
 func (s *stubSession) WindowSize() WindowSize   { return s.size }
 func (s *stubSession) Done() <-chan struct{}    { return s.done }
 func (s *stubSession) Close() error             { return nil }
-

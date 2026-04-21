@@ -15,9 +15,6 @@ import (
 func TestNewServerWithNoOptionsIsUnchanged(t *testing.T) {
 	cfg := DefaultConfig()
 	srv := NewServer(cfg)
-	if srv == nil {
-		t.Fatal("NewServer returned nil")
-	}
 	if srv.newSession == nil {
 		t.Error("default session factory was not installed")
 	}
