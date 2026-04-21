@@ -34,11 +34,24 @@ jobs:
       - name: Test
         run: task test
 
+      - name: gofmt
+        run: |
+          fmt_files=$(gofmt -l .)
+          if [ -n "$fmt_files" ]; then
+            echo "gofmt would reformat the following files:"
+            echo "$fmt_files"
+            exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
       - name: Lint
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.10.1
           args: --enable=errcheck --timeout=5m ./...
+          skip-cache: true
 
       - name: Build
         run: task build
