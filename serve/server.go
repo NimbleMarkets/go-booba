@@ -25,6 +25,8 @@ import (
 	"github.com/coder/websocket"
 	"github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/webtransport-go"
+
+	"github.com/NimbleMarkets/go-booba/sip"
 )
 
 //go:embed static/*
@@ -447,7 +449,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		log.Printf("websocket accept: %v", err)
 		return
 	}
-	conn.SetReadLimit(MaxMessageSize)
+	conn.SetReadLimit(sip.MaxMessageSize)
 
 	ctx := r.Context()
 
@@ -459,12 +461,12 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		_ = conn.CloseNow()
 		return
 	}
-	msgType, payload, err := DecodeWSMessage(data)
-	if err != nil || msgType != MsgResize {
+	msgType, payload, err := sip.DecodeWSMessage(data)
+	if err != nil || msgType != sip.MsgResize {
 		_ = conn.CloseNow()
 		return
 	}
-	var rm ResizeMessage
+	var rm sip.ResizeMessage
 	if err := json.Unmarshal(payload, &rm); err != nil || rm.Cols <= 0 || rm.Rows <= 0 {
 		_ = conn.CloseNow()
 		return
@@ -490,7 +492,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 
 	s.debugf("New session: %dx%d", rm.Cols, rm.Rows)
 
-	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
+	opts := sip.OptionsMessage{ReadOnly: s.config.ReadOnly}
 
 	// Start the session workload in a goroutine
 	go func() {
@@ -572,7 +574,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		return
 	}
 	msgLen := binary.BigEndian.Uint32(lenBuf)
-	if msgLen == 0 || msgLen > MaxMessageSize {
+	if msgLen == 0 || msgLen > sip.MaxMessageSize {
 		return
 	}
 	msgBuf := make([]byte, msgLen)
@@ -580,10 +582,10 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		return
 	}
 	_ = stream.SetReadDeadline(time.Time{}) // clear the deadline so subsequent reads don't hit it
-	if msgBuf[0] != MsgResize {
+	if msgBuf[0] != sip.MsgResize {
 		return
 	}
-	var rm ResizeMessage
+	var rm sip.ResizeMessage
 	if err := json.Unmarshal(msgBuf[1:], &rm); err != nil || rm.Cols <= 0 || rm.Rows <= 0 {
 		return
 	}
@@ -603,7 +605,7 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 
 	s.debugf("New WebTransport session: %dx%d", rm.Cols, rm.Rows)
 
-	opts := OptionsMessage{ReadOnly: s.config.ReadOnly}
+	opts := sip.OptionsMessage{ReadOnly: s.config.ReadOnly}
 
 	go func() {
 		defer func() { _ = sess.Close() }()

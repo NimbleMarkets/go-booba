@@ -16,12 +16,14 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
+
+	"github.com/NimbleMarkets/go-booba/sip"
 )
 
 func TestWSE2E_ConnectsAfterValidResizeAndSendsOptionsFirst(t *testing.T) {
 	ts, _ := newWSE2ETestServer(t, DefaultConfig())
 
-	conn, opts := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, opts := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	if opts.ReadOnly {
@@ -36,7 +38,7 @@ func TestWSE2E_InvalidInitialResizeIsRejected(t *testing.T) {
 		conn := mustDialWS(t, ts.URL, nil)
 		defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
-		writeWS(t, conn, MsgInput, []byte("not-a-resize"))
+		writeWS(t, conn, sip.MsgInput, []byte("not-a-resize"))
 		assertConnectionClosed(t, conn)
 	})
 
@@ -46,8 +48,8 @@ func TestWSE2E_InvalidInitialResizeIsRejected(t *testing.T) {
 		conn := mustDialWS(t, ts.URL, nil)
 		defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
-		payload := mustJSON(t, ResizeMessage{Cols: 0, Rows: 24})
-		writeWS(t, conn, MsgResize, payload)
+		payload := mustJSON(t, sip.ResizeMessage{Cols: 0, Rows: 24})
+		writeWS(t, conn, sip.MsgResize, payload)
 		assertConnectionClosed(t, conn)
 	})
 }
@@ -96,13 +98,13 @@ func TestWSE2E_SessionMiddlewareSeesTransportInputAndOutput(t *testing.T) {
 
 	ts, created := newWSE2ETestServer(t, DefaultConfig(), WithSessionMiddleware(mw))
 
-	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, _ := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	sess := waitForSession(t, created)
 
 	// Client → transport → wrapped InputWriter → e2eSession
-	writeWS(t, conn, MsgInput, []byte("hello"))
+	writeWS(t, conn, sip.MsgInput, []byte("hello"))
 	if got := sess.waitForInput(t); got != "hello" {
 		t.Fatalf("session saw input = %q, want %q", got, "hello")
 	}
@@ -116,7 +118,7 @@ func TestWSE2E_SessionMiddlewareSeesTransportInputAndOutput(t *testing.T) {
 	// e2eSession → wrapped OutputReader → transport → client
 	sess.emitOutput(t, "ready>")
 	msgType, payload := readWSMessage(t, conn)
-	if msgType != MsgOutput || string(payload) != "ready>" {
+	if msgType != sip.MsgOutput || string(payload) != "ready>" {
 		t.Fatalf("client got (type=%q, payload=%q), want (MsgOutput, %q)", msgType, payload, "ready>")
 	}
 	mu.Lock()
@@ -130,11 +132,11 @@ func TestWSE2E_SessionMiddlewareSeesTransportInputAndOutput(t *testing.T) {
 func TestWSE2E_ForwardsInputToSession(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, DefaultConfig())
 
-	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, _ := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	sess := waitForSession(t, created)
-	writeWS(t, conn, MsgInput, []byte("hello"))
+	writeWS(t, conn, sip.MsgInput, []byte("hello"))
 
 	if got := sess.waitForInput(t); got != "hello" {
 		t.Fatalf("input = %q, want %q", got, "hello")
@@ -144,15 +146,15 @@ func TestWSE2E_ForwardsInputToSession(t *testing.T) {
 func TestWSE2E_EmitsOutputToClient(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, DefaultConfig())
 
-	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, _ := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	sess := waitForSession(t, created)
 	sess.emitOutput(t, "ready>")
 
 	msgType, payload := readWSMessage(t, conn)
-	if msgType != MsgOutput {
-		t.Fatalf("message type = %q, want %q", msgType, MsgOutput)
+	if msgType != sip.MsgOutput {
+		t.Fatalf("message type = %q, want %q", msgType, sip.MsgOutput)
 	}
 	if string(payload) != "ready>" {
 		t.Fatalf("payload = %q, want %q", payload, "ready>")
@@ -162,14 +164,14 @@ func TestWSE2E_EmitsOutputToClient(t *testing.T) {
 func TestWSE2E_MsgPingReturnsPong(t *testing.T) {
 	ts, _ := newWSE2ETestServer(t, DefaultConfig())
 
-	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, _ := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
-	writeWS(t, conn, MsgPing, nil)
+	writeWS(t, conn, sip.MsgPing, nil)
 
 	msgType, payload := readWSMessage(t, conn)
-	if msgType != MsgPong {
-		t.Fatalf("message type = %q, want %q", msgType, MsgPong)
+	if msgType != sip.MsgPong {
+		t.Fatalf("message type = %q, want %q", msgType, sip.MsgPong)
 	}
 	if len(payload) != 0 {
 		t.Fatalf("payload length = %d, want 0", len(payload))
@@ -181,7 +183,7 @@ func TestWSE2E_ReadOnlyBlocksInput(t *testing.T) {
 	cfg.ReadOnly = true
 	ts, created := newWSE2ETestServer(t, cfg)
 
-	conn, opts := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, opts := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 
 	if !opts.ReadOnly {
@@ -189,7 +191,7 @@ func TestWSE2E_ReadOnlyBlocksInput(t *testing.T) {
 	}
 
 	sess := waitForSession(t, created)
-	writeWS(t, conn, MsgInput, []byte("blocked"))
+	writeWS(t, conn, sip.MsgInput, []byte("blocked"))
 	sess.assertNoInput(t)
 }
 
@@ -243,7 +245,7 @@ func TestWSE2E_OriginChecksWorkOnHandshake(t *testing.T) {
 
 	goodHeaders := make(http.Header)
 	goodHeaders.Set("Origin", "https://app.example.com")
-	conn, _ := mustConnectWS(t, ts.URL, goodHeaders, ResizeMessage{Cols: 80, Rows: 24})
+	conn, _ := mustConnectWS(t, ts.URL, goodHeaders, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 }
 
@@ -267,7 +269,7 @@ func TestWSE2E_MaxConnectionsLimitWorks(t *testing.T) {
 func TestWSE2E_ClientDisconnectClosesSession(t *testing.T) {
 	ts, created := newWSE2ETestServer(t, DefaultConfig())
 
-	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, _ := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	sess := waitForSession(t, created)
 
 	if err := conn.Close(websocket.StatusNormalClosure, "test done"); err != nil {
@@ -286,7 +288,7 @@ func TestWSE2E_IdleTimeoutClosesSession(t *testing.T) {
 	cfg.IdleTimeout = 50 * time.Millisecond
 	ts, created := newWSE2ETestServer(t, cfg)
 
-	conn, _ := mustConnectWS(t, ts.URL, nil, ResizeMessage{Cols: 80, Rows: 24})
+	conn, _ := mustConnectWS(t, ts.URL, nil, sip.ResizeMessage{Cols: 80, Rows: 24})
 	defer func() { _ = conn.Close(websocket.StatusNormalClosure, "test done") }()
 	sess := waitForSession(t, created)
 
@@ -307,8 +309,8 @@ func TestWSE2E_IdleTimeoutClosesSession(t *testing.T) {
 			// Connection closed — that's the expected end state.
 			return
 		}
-		msgType, _, decErr := DecodeWSMessage(data)
-		if decErr == nil && msgType == MsgClose {
+		msgType, _, decErr := sip.DecodeWSMessage(data)
+		if decErr == nil && msgType == sip.MsgClose {
 			return
 		}
 	}
@@ -346,18 +348,18 @@ func newWSE2ETestServer(t *testing.T, cfg Config, extraOpts ...Option) (*httptes
 	return ts, created
 }
 
-func mustConnectWS(t *testing.T, baseURL string, headers http.Header, size ResizeMessage) (*websocket.Conn, OptionsMessage) {
+func mustConnectWS(t *testing.T, baseURL string, headers http.Header, size sip.ResizeMessage) (*websocket.Conn, sip.OptionsMessage) {
 	t.Helper()
 
 	conn := mustDialWS(t, baseURL, headers)
-	writeWS(t, conn, MsgResize, mustJSON(t, size))
+	writeWS(t, conn, sip.MsgResize, mustJSON(t, size))
 
 	msgType, payload := readWSMessage(t, conn)
-	if msgType != MsgOptions {
-		t.Fatalf("message type = %q, want %q", msgType, MsgOptions)
+	if msgType != sip.MsgOptions {
+		t.Fatalf("message type = %q, want %q", msgType, sip.MsgOptions)
 	}
 
-	var opts OptionsMessage
+	var opts sip.OptionsMessage
 	if err := json.Unmarshal(payload, &opts); err != nil {
 		t.Fatalf("unmarshal options: %v", err)
 	}
@@ -387,7 +389,7 @@ func writeWS(t *testing.T, conn *websocket.Conn, msgType byte, payload []byte) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	if err := conn.Write(ctx, websocket.MessageBinary, EncodeWSMessage(msgType, payload)); err != nil {
+	if err := conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(msgType, payload)); err != nil {
 		t.Fatalf("websocket write error: %v", err)
 	}
 }
@@ -402,7 +404,7 @@ func readWSMessage(t *testing.T, conn *websocket.Conn) (byte, []byte) {
 		t.Fatalf("websocket read error: %v", err)
 	}
 
-	msgType, payload, err := DecodeWSMessage(data)
+	msgType, payload, err := sip.DecodeWSMessage(data)
 	if err != nil {
 		t.Fatalf("DecodeWSMessage() error = %v", err)
 	}
