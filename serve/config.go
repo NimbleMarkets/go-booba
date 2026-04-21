@@ -13,9 +13,25 @@ type Config struct {
 	Debug          bool          // Verbose logging
 	CertFile       string        // Optional TLS cert file path for HTTPS/WSS/WebTransport
 	KeyFile        string        // Optional TLS key file path for HTTPS/WSS/WebTransport
-	OriginPatterns []string      // Additional allowed origins for browser clients
-	BasicUsername  string        // Optional Basic Auth username
-	BasicPassword  string        // Optional Basic Auth password
+	// OriginPatterns is an optional allowlist of additional browser
+	// origins that may connect. Same-host requests (Origin host == Host
+	// header) are always permitted — patterns only extend the allowlist.
+	//
+	// Each entry is a path.Match shell glob, NOT a regex:
+	//   *      matches any run of non-'/' bytes
+	//   ?      matches one non-'/' byte
+	//   [abc]  / [a-z]  character class
+	//   \x     escapes the meta-character x
+	//
+	// Patterns are tested against both the full "scheme://host" form and
+	// the bare host, so "*.example.com" and "https://*.example.com" both
+	// match https://app.example.com.
+	//
+	// Examples: "https://app.example.com", "*.example.com",
+	// "https://*.internal".
+	OriginPatterns []string
+	BasicUsername  string // Optional Basic Auth username
+	BasicPassword  string // Optional Basic Auth password
 
 	// MaxPasteBytes caps the size of a single inbound Sip message
 	// (typically a bracketed-paste payload). Zero or negative means

@@ -288,7 +288,7 @@ Notes:
 
  * `--http3-port=-1` disables WebTransport and uses WebSocket only.
  * the default bind address is loopback (`127.0.0.1`); non-loopback `--listen` addresses require `--cert-file` and `--key-file`.
- * browser origins are same-host by default; use `--origin` to allow additional cross-origin browser clients.
+ * browser origins are same-host by default; use `--origin` to allow additional cross-origin browser clients. Patterns are Go [`path.Match`](https://pkg.go.dev/path#Match) shell globs, **not** regex — so `*.example.com` matches one subdomain level, and `[abc]` is a character class. Patterns are tested against both `scheme://host` and the bare host.
  * Basic Auth requires `--cert-file` and `--key-file`; the server refuses to start otherwise.
  * prefer `--password-file` or `$BOOBA_PASSWORD` over `--password`: the flag form leaks the secret into argv, shell history, and `ps` listings. Precedence is flag > file > env.
  * static frontend files are embedded with `go:embed`, so after frontend asset changes you must rebuild the Go binary you run.
