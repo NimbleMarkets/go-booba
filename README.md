@@ -1,6 +1,7 @@
 # go-booba - Web-based BubbleTea TUIs using libghostty
 
 <p>
+    <a href="https://nimblemarkets.github.io/go-booba/"><img src="https://img.shields.io/badge/Command%20Ref-6B2DAD" alt="Command Reference"></a>
     <a href="https://github.com/NimbleMarkets/go-booba/tags"><img src="https://img.shields.io/github/tag/NimbleMarkets/go-booba.svg" alt="Latest Release"></a>
     <a href="https://pkg.go.dev/github.com/NimbleMarkets/go-booba?tab=doc"><img src="https://pkg.go.dev/badge/github.com/NimbleMarkets/go-booba?utm_source=godoc" alt="GoDoc"></a>
     <a href="https://github.com/NimbleMarkets/go-booba/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg"  alt="Code Of Conduct"></a>
