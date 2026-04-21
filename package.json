@@ -17,7 +17,9 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:embed": "tsc -p tsconfig.embed.json && sed -i.bak -e \"s|from 'ghostty-web'|from '../ghostty-web/ghostty-web.js'|\" serve/static/booba/booba.js && rm serve/static/booba/booba.js.bak"
+    "build:embed": "tsc -p tsconfig.embed.json && sed -i.bak -e \"s|from 'ghostty-web'|from '../ghostty-web/ghostty-web.js'|\" serve/static/booba/booba.js && rm serve/static/booba/booba.js.bak",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "ghostty-web": "^0.4.0-next.14.g6a1a50d",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
   }
 }

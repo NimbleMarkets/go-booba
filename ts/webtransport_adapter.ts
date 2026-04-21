@@ -8,7 +8,7 @@ import { BoobaAdapter, BoobaConnectionState } from './adapter.js';
 import {
     MsgInput, MsgOutput, MsgResize, MsgPing, MsgPong,
     MsgTitle, MsgOptions, MsgClose,
-    encodeWTMessage, jsonPayload, parseJsonPayload,
+    encodeWTMessage, jsonPayload, parseJsonPayload, tryDecodeWTFrame,
     type OptionsMessage,
 } from './protocol.js';
 import type { WebSocketAdapterCallbacks } from './websocket_adapter.js';
@@ -117,15 +117,11 @@ export class BoobaWebTransportAdapter implements BoobaAdapter {
 
                 // Parse complete length-prefixed messages
                 let consumed = 0;
-                while (len - consumed >= 4) {
-                    const msgLen = new DataView(buf.buffer, buf.byteOffset + consumed).getUint32(0, false);
-                    if (len - consumed < 4 + msgLen) break; // Incomplete message
-
-                    const msgType = buf[consumed + 4];
-                    const payload = buf.slice(consumed + 5, consumed + 4 + msgLen);
-                    this._handleMessage(msgType, payload);
-
-                    consumed += 4 + msgLen;
+                while (true) {
+                    const frame = tryDecodeWTFrame(buf, consumed, len);
+                    if (!frame) break;
+                    this._handleMessage(frame.msgType, frame.payload);
+                    consumed += frame.consumed;
                 }
 
                 // Shift any unconsumed bytes to the front

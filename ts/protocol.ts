@@ -55,6 +55,28 @@ export function encodeWTMessage(msgType: number, payload?: Uint8Array | string):
     return msg;
 }
 
+/** One decoded WebTransport frame plus how many bytes it consumed. */
+export interface WTFrame {
+    msgType: number;
+    payload: Uint8Array;
+    consumed: number;
+}
+
+/**
+ * Try to decode a single length-prefixed WebTransport frame from
+ * buf[start..len]. Returns null when the buffer does not yet hold a
+ * complete message (caller should read more and retry).
+ */
+export function tryDecodeWTFrame(buf: Uint8Array, start: number, len: number): WTFrame | null {
+    const available = len - start;
+    if (available < 4) return null;
+    const msgLen = new DataView(buf.buffer, buf.byteOffset + start).getUint32(0, false);
+    if (available < 4 + msgLen) return null;
+    const msgType = buf[start + 4];
+    const payload = buf.slice(start + 5, start + 4 + msgLen);
+    return { msgType, payload, consumed: 4 + msgLen };
+}
+
 /** Encode a JSON payload as UTF-8 bytes */
 export function jsonPayload(obj: unknown): Uint8Array {
     return new TextEncoder().encode(JSON.stringify(obj));

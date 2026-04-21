@@ -38,6 +38,22 @@ export function encodeWTMessage(msgType, payload) {
     msg.set(payloadBytes, 5);
     return msg;
 }
+/**
+ * Try to decode a single length-prefixed WebTransport frame from
+ * buf[start..len]. Returns null when the buffer does not yet hold a
+ * complete message (caller should read more and retry).
+ */
+export function tryDecodeWTFrame(buf, start, len) {
+    const available = len - start;
+    if (available < 4)
+        return null;
+    const msgLen = new DataView(buf.buffer, buf.byteOffset + start).getUint32(0, false);
+    if (available < 4 + msgLen)
+        return null;
+    const msgType = buf[start + 4];
+    const payload = buf.slice(start + 5, start + 4 + msgLen);
+    return { msgType, payload, consumed: 4 + msgLen };
+}
 /** Encode a JSON payload as UTF-8 bytes */
 export function jsonPayload(obj) {
     return new TextEncoder().encode(JSON.stringify(obj));
