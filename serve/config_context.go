@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	defaultMaxPasteBytes      = 1 << 20 // 1 MiB
-	defaultResizeThrottle     = 16 * time.Millisecond
-	defaultMaxWindowCols      = 4096
-	defaultMaxWindowRows      = 4096
+	defaultMaxPasteBytes        = 1 << 20 // 1 MiB
+	defaultResizeThrottle       = 16 * time.Millisecond
+	defaultMaxWindowCols        = 4096
+	defaultMaxWindowRows        = 4096
 	defaultInitialResizeTimeout = 10 * time.Second
 )
 

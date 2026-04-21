@@ -68,7 +68,7 @@ type sentinelModel struct{}
 
 func (sentinelModel) Init() tea.Cmd                         { return nil }
 func (m sentinelModel) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-func (sentinelModel) View() tea.View                         { return tea.NewView("sentinel") }
+func (sentinelModel) View() tea.View                        { return tea.NewView("sentinel") }
 
 func TestRecoverPassesModelAndOptionsThroughUnchanged(t *testing.T) {
 	mw := recover.New()

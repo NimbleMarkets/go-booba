@@ -61,8 +61,8 @@ func New(opts ...Option) serve.Middleware {
 
 type panicModel struct{ msg string }
 
-func (panicModel) Init() tea.Cmd                                { return tea.Quit }
-func (m panicModel) Update(tea.Msg) (tea.Model, tea.Cmd)        { return m, tea.Quit }
+func (panicModel) Init() tea.Cmd                         { return tea.Quit }
+func (m panicModel) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, tea.Quit }
 func (m panicModel) View() tea.View {
 	return tea.NewView("session error: " + m.msg + "\n")
 }

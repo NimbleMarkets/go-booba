@@ -142,7 +142,7 @@ func (s *idleMWTestSession) OutputReader() io.Reader  { return nil }
 func (s *idleMWTestSession) InputWriter() io.Writer {
 	return idleMWTestWriter{ch: s.in}
 }
-func (s *idleMWTestSession) Resize(int, int)       {}
+func (s *idleMWTestSession) Resize(int, int)        {}
 func (s *idleMWTestSession) WindowSize() WindowSize { return WindowSize{Width: 80, Height: 24} }
 func (s *idleMWTestSession) Done() <-chan struct{}  { return s.done }
 func (s *idleMWTestSession) Close() error {

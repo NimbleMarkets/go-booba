@@ -73,8 +73,8 @@ func TestWSE2E_SessionMiddlewareSeesTransportInputAndOutput(t *testing.T) {
 	// did), the transport sees the un-wrapped session and middleware like
 	// osc52gate never runs on client input or server output.
 	var (
-		mu       sync.Mutex
-		gotIn   []byte
+		mu     sync.Mutex
+		gotIn  []byte
 		gotOut []byte
 	)
 

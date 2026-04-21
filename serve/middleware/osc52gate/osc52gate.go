@@ -90,14 +90,14 @@ func newScanner(inner io.Reader, mode Mode, audit auditFn) io.Reader {
 type scanState int
 
 const (
-	stNormal   scanState = iota
-	stEsc                // saw ESC
-	stBracket            // saw ESC ]
-	stPrefix             // consuming "52"
-	stSemi1              // saw ESC ] 52 ;
-	stSel                // consuming selection char(s) until ;
-	stData               // consuming data until terminator
-	stMaybeST            // saw ESC inside data, awaiting backslash
+	stNormal  scanState = iota
+	stEsc               // saw ESC
+	stBracket           // saw ESC ]
+	stPrefix            // consuming "52"
+	stSemi1             // saw ESC ] 52 ;
+	stSel               // consuming selection char(s) until ;
+	stData              // consuming data until terminator
+	stMaybeST           // saw ESC inside data, awaiting backslash
 )
 
 type scanner struct {

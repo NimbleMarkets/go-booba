@@ -20,13 +20,13 @@ type fakeSession struct {
 	ctx context.Context
 }
 
-func (s *fakeSession) Context() context.Context       { return s.ctx }
-func (s *fakeSession) OutputReader() io.Reader        { return nil }
-func (s *fakeSession) InputWriter() io.Writer         { return nil }
-func (s *fakeSession) Resize(int, int)                {}
-func (s *fakeSession) WindowSize() serve.WindowSize   { return serve.WindowSize{} }
-func (s *fakeSession) Done() <-chan struct{}          { return nil }
-func (s *fakeSession) Close() error                   { return nil }
+func (s *fakeSession) Context() context.Context     { return s.ctx }
+func (s *fakeSession) OutputReader() io.Reader      { return nil }
+func (s *fakeSession) InputWriter() io.Writer       { return nil }
+func (s *fakeSession) Resize(int, int)              {}
+func (s *fakeSession) WindowSize() serve.WindowSize { return serve.WindowSize{} }
+func (s *fakeSession) Done() <-chan struct{}        { return nil }
+func (s *fakeSession) Close() error                 { return nil }
 
 func TestLoggingEmitsEndEvenOnPanic(t *testing.T) {
 	var buf bytes.Buffer
