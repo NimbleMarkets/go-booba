@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           submodules: 'recursive'
 
       - uses: actions/setup-go@v6
@@ -41,3 +42,9 @@ jobs:
 
       - name: Build
         run: task build
+
+      - name: GoReleaser snapshot
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --snapshot --clean

@@ -275,3 +275,17 @@ tasks:
     desc: 'Remove generated shell completion scripts'
     cmds:
       - rm -f completions/booba.bash completions/booba.zsh completions/booba.fish
+
+###############################################################################
+# Release verification
+
+  release:check:
+    desc: 'Validate GoReleaser configuration'
+    cmds:
+      - goreleaser check
+
+  release:snapshot:
+    desc: 'Build release artifacts locally without publishing'
+    deps: [build-serve-assets]
+    cmds:
+      - goreleaser release --snapshot --clean

@@ -7,6 +7,7 @@ node_modules/
 
 bin/
 dist/
+booba.exe
 /booba-view-example
 /completions/
 /docs/man/
