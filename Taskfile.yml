@@ -76,6 +76,9 @@ tasks:
     cmds:
       - go test ./...
 
+###############################################################################
+# Assets
+
   build-assets:
     desc: 'Build frontend assets'
     deps: [npm-deps]
@@ -202,3 +205,73 @@ tasks:
       - rm -f bin/booba-wasm-build
       - rm -f bin/booba-view-example
       - rm -f bin/booba-view-example.wasm
+
+###############################################################################
+# Documentation generation (via cobra's doc subpackage)
+
+  docs:build:
+    desc: 'Regenerate man pages, markdown docs, and shell completions'
+    deps:
+      - docs:man:build
+      - docs:md:build
+      - docs:completions:build
+
+  docs:clean:
+    desc: 'Remove all generated docs and completions'
+    deps:
+      - docs:man:clean
+      - docs:md:clean
+      - docs:completions:clean
+
+  docs:man:build:
+    desc: 'Generate man pages into docs/man/'
+    deps: [build-cmd-booba]
+    cmds:
+      - ./bin/booba docs man -o docs/man
+    sources:
+      - cmd/booba/*.go
+      - internal/cli/*.go
+    generates:
+      - docs/man/booba.1
+
+  docs:man:clean:
+    desc: 'Remove generated man pages'
+    cmds:
+      - rm -rf docs/man
+
+  docs:md:build:
+    desc: 'Generate markdown docs into docs/markdown/'
+    deps: [build-cmd-booba]
+    cmds:
+      - ./bin/booba docs markdown -o docs/markdown
+    sources:
+      - cmd/booba/*.go
+      - internal/cli/*.go
+    generates:
+      - docs/markdown/booba.md
+
+  docs:md:clean:
+    desc: 'Remove generated markdown docs'
+    cmds:
+      - rm -rf docs/markdown
+
+  docs:completions:build:
+    desc: 'Regenerate shell completion scripts into completions/'
+    deps: [build-cmd-booba]
+    cmds:
+      - mkdir -p completions
+      - ./bin/booba completion bash > completions/booba.bash
+      - ./bin/booba completion zsh > completions/booba.zsh
+      - ./bin/booba completion fish > completions/booba.fish
+    sources:
+      - cmd/booba/*.go
+      - internal/cli/*.go
+    generates:
+      - completions/booba.bash
+      - completions/booba.zsh
+      - completions/booba.fish
+
+  docs:completions:clean:
+    desc: 'Remove generated shell completion scripts'
+    cmds:
+      - rm -f completions/booba.bash completions/booba.zsh completions/booba.fish

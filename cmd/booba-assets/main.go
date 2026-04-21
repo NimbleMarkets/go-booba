@@ -15,13 +15,14 @@ package main
 import (
 	"embed"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/pflag"
 )
 
 //go:embed template/index.html
@@ -30,20 +31,20 @@ var templateFS embed.FS
 const boobaModule = "github.com/NimbleMarkets/go-booba"
 
 func main() {
-	force := flag.Bool("force", false, "overwrite an existing index.html")
-	flag.Usage = func() {
+	force := pflag.Bool("force", false, "overwrite an existing index.html")
+	pflag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [--force] <output-dir>\n\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, "Populates <output-dir> with wasm_exec.js, booba/, ghostty-web/,")
 		fmt.Fprintln(os.Stderr, "and a starter index.html for hosting a BubbleTea WASM program.")
-		flag.PrintDefaults()
+		pflag.PrintDefaults()
 	}
-	flag.Parse()
+	pflag.Parse()
 
-	if flag.NArg() != 1 {
-		flag.Usage()
+	if pflag.NArg() != 1 {
+		pflag.Usage()
 		os.Exit(2)
 	}
-	if err := run(flag.Arg(0), *force); err != nil {
+	if err := run(pflag.Arg(0), *force); err != nil {
 		fmt.Fprintf(os.Stderr, "booba-assets: %v\n", err)
 		os.Exit(1)
 	}

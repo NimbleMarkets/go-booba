@@ -4,9 +4,12 @@
 .superpowers/
 .DS_Store
 node_modules/
+
 bin/
 dist/
 /booba-view-example
+/completions/
+/docs/man/
 
 # serve/static/booba/ and serve/static/ghostty-web/ are generated but the
 # runtime artifacts (.js, .wasm) are committed so the Go module is

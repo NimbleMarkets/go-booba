@@ -23,7 +23,7 @@ The primary enabling technologies of this are:
  * [`BubbleTea`](https://github.com/charmbracelet/bubbletea) - Terminal UI framework for Go
  * [`WebAssembly`](https://webassembly.org) - For running Go code in browsers
 
-The name `booba` is a portmanteau of the words Boba and Boo, the key ingredient of Bubble Tea leading to a Ghost's exclamation of joy.
+The name `booba` is a portmanteau of the words *Boba* and *Boo!*: the [key ingredient of Bubble Tea](https://github.com/charmbracelet/bubbletea#bubble-tea) evoking a [Ghost's exclamation of joy](https://ghostty.org).
 
 ## TypeScript API
 
