@@ -1,12 +1,14 @@
 # ghostty-web Full API Coverage Implementation Plan
 
+**Status:** Shipped. All 11 tasks landed in `ts/booba.ts`, `ts/types.ts`, and the example page at `serve/static/index.html`. Build output now lives at `serve/static/booba/` (the asset layout was reorganized after this plan was written; original references to `assets/index.html` and `assets/booba/` below have been updated).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Expose the full ghostty-web Terminal API surface through BoobaTerminal, adding selection, clipboard, scrollback, paste, focus, links, title, bell, cursor config, and expanded terminal options — so consumers of booba get access to everything ghostty-web offers without reaching past the abstraction.
 
 **Architecture:** BoobaTerminal remains the primary public class wrapping ghostty-web's Terminal. We expand `BoobaTerminalOptions` to cover all `ITerminalOptions` fields, add event forwarding for all Terminal events, add methods for selection/clipboard/scroll/focus/paste, and re-export relevant types. The adapter protocol (WebSocket `0x01`/`0x02` messages) is unchanged — mouse events and paste already flow as escape sequences through `onData`/`0x01`. No Go server changes needed.
 
-**Tech Stack:** TypeScript (ES2020), ghostty-web 0.4.0-next.14, compiled via `npx tsc` to `assets/booba/`
+**Tech Stack:** TypeScript (ES2020), ghostty-web 0.4.0-next.14, compiled via `npx tsc` to `serve/static/booba/`
 
 ---
 
@@ -17,7 +19,7 @@
 | `ts/booba.ts` | Main BoobaTerminal class — options, events, methods | Modify |
 | `ts/adapter.ts` | Adapter interface and implementations | No changes |
 | `ts/types.ts` | Re-exported types from ghostty-web | Create |
-| `assets/index.html` | Example page — update to demo new features | Modify |
+| `serve/static/index.html` | Example page — update to demo new features | Modify |
 
 ---
 
@@ -28,7 +30,7 @@
 
 Currently `BoobaTerminalOptions` only has `fontSize`, `cols`, `rows`, `theme`, and a catch-all index signature. We need to explicitly surface all `ITerminalOptions` fields so consumers get type safety.
 
-- [ ] **Step 1: Update BoobaTerminalOptions interface**
+- [x] **Step 1: Update BoobaTerminalOptions interface**
 
 Replace the current `BoobaTerminalOptions` and constructor in `ts/booba.ts`:
 
@@ -76,7 +78,7 @@ export interface BoobaTerminalOptions {
 }
 ```
 
-- [ ] **Step 2: Update constructor defaults**
+- [x] **Step 2: Update constructor defaults**
 
 Update the constructor to only set the minimal defaults (fontSize, cols, rows, theme background/foreground) and pass everything else through:
 
@@ -102,12 +104,12 @@ constructor(containerId: string, options: BoobaTerminalOptions = {}) {
 
 (This is the same logic, just confirming the spread covers new fields.)
 
-- [ ] **Step 3: Verify TypeScript compiles**
+- [x] **Step 3: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -123,7 +125,7 @@ git commit -m "feat: expand BoobaTerminalOptions to cover full ghostty-web ITerm
 
 ghostty-web's Terminal exposes `getSelection()`, `hasSelection()`, `clearSelection()`, `copySelection()`, `selectAll()`, `select()`, `selectLines()`, `getSelectionPosition()`. We forward all of these.
 
-- [ ] **Step 1: Add selection methods to BoobaTerminal**
+- [x] **Step 1: Add selection methods to BoobaTerminal**
 
 Add these methods to the `BoobaTerminal` class, after the `disconnect()` method:
 
@@ -171,12 +173,12 @@ getSelectionPosition(): { start: { x: number; y: number }; end: { x: number; y: 
 }
 ```
 
-- [ ] **Step 2: Verify TypeScript compiles**
+- [x] **Step 2: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -192,7 +194,7 @@ git commit -m "feat: add selection and clipboard methods to BoobaTerminal"
 
 ghostty-web's Terminal has `scrollLines()`, `scrollPages()`, `scrollToTop()`, `scrollToBottom()`, `scrollToLine()`, `getViewportY()`. We forward all of these.
 
-- [ ] **Step 1: Add scroll methods to BoobaTerminal**
+- [x] **Step 1: Add scroll methods to BoobaTerminal**
 
 Add these methods after the selection methods:
 
@@ -230,12 +232,12 @@ getViewportY(): number {
 }
 ```
 
-- [ ] **Step 2: Verify TypeScript compiles**
+- [x] **Step 2: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -249,7 +251,7 @@ git commit -m "feat: add scrollback and viewport methods to BoobaTerminal"
 **Files:**
 - Modify: `ts/booba.ts` (add methods to BoobaTerminal class)
 
-- [ ] **Step 1: Add terminal control methods**
+- [x] **Step 1: Add terminal control methods**
 
 Add after the scroll methods:
 
@@ -297,12 +299,12 @@ writeln(data: string | Uint8Array, callback?: () => void): void {
 }
 ```
 
-- [ ] **Step 2: Verify TypeScript compiles**
+- [x] **Step 2: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -318,7 +320,7 @@ git commit -m "feat: add paste, focus, clear, reset, write methods to BoobaTermi
 
 These let consumers check what the connected BubbleTea program has enabled.
 
-- [ ] **Step 1: Add mode query methods**
+- [x] **Step 1: Add mode query methods**
 
 Add after the terminal control methods:
 
@@ -346,12 +348,12 @@ getMode(mode: number, isAnsi?: boolean): boolean {
 }
 ```
 
-- [ ] **Step 2: Verify TypeScript compiles**
+- [x] **Step 2: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -367,7 +369,7 @@ git commit -m "feat: add terminal mode query methods to BoobaTerminal"
 
 ghostty-web's Terminal fires: `onData`, `onResize`, `onBell`, `onSelectionChange`, `onKey`, `onTitleChange`, `onScroll`, `onRender`, `onCursorMove`. Currently booba only uses `onData` and `onResize` internally (in `init()` and `_setupAdapter()`). We need to expose all events to consumers.
 
-- [ ] **Step 1: Add event callback properties to BoobaTerminal**
+- [x] **Step 1: Add event callback properties to BoobaTerminal**
 
 Add these properties to the class, alongside the existing `onStatusChange`:
 
@@ -383,7 +385,7 @@ onRender: ((event: { start: number; end: number }) => void) | null;
 onCursorMove: (() => void) | null;
 ```
 
-- [ ] **Step 2: Initialize new callbacks to null in constructor**
+- [x] **Step 2: Initialize new callbacks to null in constructor**
 
 In the constructor, after `this.fitAddon = null;`:
 
@@ -397,7 +399,7 @@ this.onRender = null;
 this.onCursorMove = null;
 ```
 
-- [ ] **Step 3: Wire up event forwarding in init()**
+- [x] **Step 3: Wire up event forwarding in init()**
 
 In the `init()` method, after the existing `this.term.onData(...)` block, add:
 
@@ -432,12 +434,12 @@ this.term.onCursorMove(() => {
 });
 ```
 
-- [ ] **Step 4: Verify TypeScript compiles**
+- [x] **Step 4: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -451,7 +453,7 @@ git commit -m "feat: forward all ghostty-web Terminal events through BoobaTermin
 **Files:**
 - Modify: `ts/booba.ts` (add methods to BoobaTerminal class)
 
-- [ ] **Step 1: Add link and handler methods**
+- [x] **Step 1: Add link and handler methods**
 
 Add after the mode query methods:
 
@@ -485,12 +487,12 @@ attachCustomWheelEventHandler(handler?: (event: WheelEvent) => boolean): void {
 }
 ```
 
-- [ ] **Step 2: Verify TypeScript compiles**
+- [x] **Step 2: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -506,7 +508,7 @@ git commit -m "feat: add link provider registration and custom event handlers"
 
 Consumers may need the underlying Terminal for advanced use cases. Expose it as a read-only getter alongside a proper dispose lifecycle method.
 
-- [ ] **Step 1: Add dispose and terminal access**
+- [x] **Step 1: Add dispose and terminal access**
 
 Add to the BoobaTerminal class:
 
@@ -542,12 +544,12 @@ get rows(): number {
 }
 ```
 
-- [ ] **Step 2: Verify TypeScript compiles**
+- [x] **Step 2: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ts/booba.ts
@@ -564,7 +566,7 @@ git commit -m "feat: add dispose lifecycle and direct terminal access"
 
 Provide type definitions that consumers can import without reaching into ghostty-web directly.
 
-- [ ] **Step 1: Create ts/types.ts**
+- [x] **Step 1: Create ts/types.ts**
 
 ```typescript
 /**
@@ -634,7 +636,7 @@ export interface BoobaLink {
 }
 ```
 
-- [ ] **Step 2: Re-export types from booba.ts**
+- [x] **Step 2: Re-export types from booba.ts**
 
 Add to the bottom of `ts/booba.ts`, alongside the existing re-exports:
 
@@ -642,12 +644,12 @@ Add to the bottom of `ts/booba.ts`, alongside the existing re-exports:
 export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';
 ```
 
-- [ ] **Step 3: Verify TypeScript compiles**
+- [x] **Step 3: Verify TypeScript compiles**
 
 Run: `npx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add ts/types.ts ts/booba.ts
@@ -659,13 +661,13 @@ git commit -m "feat: add booba type definitions for public API surface"
 ### Task 10: Update example page to demonstrate new features
 
 **Files:**
-- Modify: `assets/index.html`
+- Modify: `serve/static/index.html`
 
 Add title bar updating from `onTitleChange`, selection copy button, and scroll indicator to demonstrate the new API surface.
 
-- [ ] **Step 1: Update the title bar to respond to onTitleChange**
+- [x] **Step 1: Update the title bar to respond to onTitleChange**
 
-In `assets/index.html`, after `booba.onStatusChange = ...`, add:
+In `serve/static/index.html`, after `booba.onStatusChange = ...`, add:
 
 ```javascript
 booba.onTitleChange = (title) => {
@@ -680,7 +682,7 @@ booba.onBell = () => {
 };
 ```
 
-- [ ] **Step 2: Focus terminal after connection**
+- [x] **Step 2: Focus terminal after connection**
 
 After `booba.connectWebSocket(wsUrl);`, add:
 
@@ -689,14 +691,14 @@ After `booba.connectWebSocket(wsUrl);`, add:
 booba.focus();
 ```
 
-- [ ] **Step 3: Verify the HTML is valid**
+- [x] **Step 3: Verify the HTML is valid**
 
 Open in browser or visually inspect. No build step needed for HTML.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
-git add assets/index.html
+git add serve/static/index.html
 git commit -m "feat: update example page to demonstrate title, bell, and focus"
 ```
 
@@ -707,25 +709,25 @@ git commit -m "feat: update example page to demonstrate title, bell, and focus"
 **Files:**
 - All modified files
 
-- [ ] **Step 1: Full TypeScript build**
+- [x] **Step 1: Full TypeScript build**
 
 Run: `npx tsc`
-Expected: Clean build, no errors. Output files in `assets/booba/`.
+Expected: Clean build, no errors. Output files in `serve/static/booba/`.
 
-- [ ] **Step 2: Verify output files exist**
+- [x] **Step 2: Verify output files exist**
 
-Run: `ls -la assets/booba/booba.js assets/booba/booba.d.ts assets/booba/types.js assets/booba/types.d.ts`
+Run: `ls -la serve/static/booba/booba.js serve/static/booba/booba.d.ts serve/static/booba/types.js serve/static/booba/types.d.ts`
 Expected: All four files present with recent timestamps.
 
-- [ ] **Step 3: Verify the declaration file exports all new methods**
+- [x] **Step 3: Verify the declaration file exports all new methods**
 
-Run: `grep -E '(getSelection|scrollLines|paste|focus|hasMouseTracking|onBell|onTitleChange|registerLinkProvider|dispose|terminal)' assets/booba/booba.d.ts`
+Run: `grep -E '(getSelection|scrollLines|paste|focus|hasMouseTracking|onBell|onTitleChange|registerLinkProvider|dispose|terminal)' serve/static/booba/booba.d.ts`
 Expected: All new methods/properties appear in the declaration output.
 
-- [ ] **Step 4: Commit build output**
+- [x] **Step 4: Commit build output**
 
 ```bash
-git add assets/booba/
+git add serve/static/booba/
 git commit -m "build: compile TypeScript with full ghostty-web API coverage"
 ```
 

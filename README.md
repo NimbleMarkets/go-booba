@@ -203,6 +203,47 @@ TODO: link to live example
 
 Otherwise, one might have a BubbleTea program running on a remote machine. While one might use `ssh` to access it, `booba` enables an HTTP-based interface to it. The top-level `serve` package is the single server implementation for that path, serving the embedded Ghostty frontend and bridging browser clients over WebSocket or WebTransport.
 
+### Middleware
+
+The `serve` package exposes three composable middleware layers that mirror and extend the Wish/sip shape:
+
+| Layer | Type | Wraps | Install |
+|---|---|---|---|
+| 1. Handshake | `ConnectMiddleware` | `*http.Request` for both WS upgrade and WT CONNECT | `WithConnectMiddleware(...)` |
+| 2. Session I/O | `SessionMiddleware` | `Session` (transport byte streams) | `WithSessionMiddleware(...)` |
+| 3. Handler | `Middleware` | `Handler` (per-session `tea.Model` construction) | `WithMiddleware(...)` |
+
+`serve.LiftHTTPMiddleware(mw)` adapts any `func(http.Handler) http.Handler` into a `ConnectMiddleware` that runs on both the WebSocket and WebTransport handshake paths — so the full chi/gorilla/tollbooth/otelhttp ecosystem is reusable at the handshake.
+
+Built-in middleware subpackages:
+
+- `serve/middleware/osc52gate` — allow/deny/audit OSC 52 clipboard-write escapes in the outbound stream.
+- `serve/middleware/recover` — catch panics during handler construction.
+- `serve/middleware/logging` — slog-based session start/end logging.
+- `serve/sipmetrics` — Prometheus counters/gauges/histogram for session lifecycle and byte throughput (isolated behind a subpackage so the main module avoids a `prometheus/client_golang` dep).
+
+```go
+srv := serve.NewServer(cfg,
+    serve.WithConnectMiddleware(serve.LiftHTTPMiddleware(myHTTPMiddleware)),
+    serve.WithSessionMiddleware(osc52gate.New(osc52gate.ModeDeny)),
+    serve.WithMiddleware(recover.New(), logging.New()),
+)
+```
+
+Basic Auth, connection limits, and `cfg.IdleTimeout` are auto-installed by `NewServer` when the corresponding `Config` fields are set.
+
+### Config knobs
+
+Beyond the listener/TLS/auth fields, `serve.Config` exposes protocol-safety knobs with sensible defaults:
+
+- `MaxPasteBytes` (default 1 MiB) — cap bracketed-paste payloads from clients.
+- `ResizeThrottle` (default 16ms) — debounce inbound resize messages.
+- `MaxWindowDims` (default 4096×4096) — reject adversarial resize values before the PTY `ioctl`.
+- `InitialResizeTimeout` (default 10s) — deadline on the initial Resize message after the handshake.
+- `IdleTimeout` — close sessions with no inbound bytes for the given duration (0 = disabled).
+
+See `docs/DESIGN_MIDDLEWARE.md` for the design rationale.
+
 ## `booba` CLI Command Wrapper
 
 The `booba` command wraps any local CLI program and serves it in the browser through the same embedded terminal stack.

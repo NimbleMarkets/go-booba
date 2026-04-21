@@ -93,8 +93,10 @@ When upstream ghostty-web updates, check:
 
 1. **Terminal constructor options** — New options in `ITerminalOptions`
    (upstream `lib/interfaces.ts`) that `BoobaTerminalOptions` should mirror.
-   Currently booba is missing: `convertEol`, `disableStdin`,
-   `smoothScrollDuration`, `scrollback` (uses upstream default of 10000).
+   Currently booba surfaces: `fontSize`, `fontFamily`, `cols`, `rows`,
+   `cursorBlink`, `cursorStyle`, `scrollback`, `allowTransparency`,
+   `convertEol`, `disableStdin`, `smoothScrollDuration`, `theme`, plus
+   booba-specific `allowOSC52`. Watch for additions upstream.
 
 2. **Terminal API surface** — New public methods on `Terminal` (upstream
    `lib/terminal.ts`) that `BoobaTerminal` should proxy. Currently booba
