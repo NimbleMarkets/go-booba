@@ -154,7 +154,11 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 			log.Printf("kitty keyboard flags: %s", payload)
 		}
 	default:
-		// Unknown message types silently ignored (forward compatibility)
+		// Unknown types are ignored for forward compatibility; surface them
+		// under Debug so protocol regressions don't go silent in dev.
+		if debug {
+			log.Printf("websocket unknown message type 0x%02x (%d bytes)", msgType, len(payload))
+		}
 	}
 }
 
@@ -306,7 +310,11 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 			log.Printf("kitty keyboard flags: %s", payload)
 		}
 	default:
-		// Unknown types silently ignored
+		// Unknown types are ignored for forward compatibility; surface them
+		// under Debug so protocol regressions don't go silent in dev.
+		if debug {
+			log.Printf("webtransport unknown message type 0x%02x (%d bytes)", msgType, len(payload))
+		}
 	}
 }
 
