@@ -156,7 +156,10 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	defer func() { _ = in.Close() }()
-	out, err := os.Create(dst)
+	// Normalize to 0o644: assets come from the Go module cache, which can
+	// hold files with 0o755 or other perms we don't want to propagate into
+	// the user's web directory.
+	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
