@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -11,18 +12,24 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// PasswordEnvVar is the environment variable consulted as a last-resort
+// source for the Basic Auth password when neither --password nor
+// --password-file is set.
+const PasswordEnvVar = "BOOBA_PASSWORD"
+
 // ServeOptions holds CLI flags for configuring the booba HTTP/WebTransport server.
 type ServeOptions struct {
-	Listen    string
-	HTTP3Port int
-	Idle      time.Duration
-	CertFile  string
-	KeyFile   string
-	ReadOnly  bool
-	Debug     bool
-	Origins   string
-	Username  string
-	Password  string
+	Listen       string
+	HTTP3Port    int
+	Idle         time.Duration
+	CertFile     string
+	KeyFile      string
+	ReadOnly     bool
+	Debug        bool
+	Origins      string
+	Username     string
+	Password     string
+	PasswordFile string
 }
 
 // AddServeFlags registers standard booba server flags on the provided FlagSet.
@@ -36,7 +43,8 @@ func AddServeFlags(fs *pflag.FlagSet, opts *ServeOptions, defaultListen string) 
 	fs.BoolVar(&opts.Debug, "debug", false, "verbose logging")
 	fs.StringVar(&opts.Origins, "origin", "", "comma-separated additional allowed browser origins (host patterns or scheme://host)")
 	fs.StringVar(&opts.Username, "username", "", "Basic Auth username")
-	fs.StringVar(&opts.Password, "password", "", "Basic Auth password")
+	fs.StringVar(&opts.Password, "password", "", "Basic Auth password (prefer --password-file or $"+PasswordEnvVar+" to keep secrets off argv)")
+	fs.StringVar(&opts.PasswordFile, "password-file", "", "path to a file containing the Basic Auth password (trailing whitespace is trimmed)")
 }
 
 // Config converts CLI options into a serve.Config.
@@ -63,7 +71,12 @@ func (opts ServeOptions) Config() (serve.Config, error) {
 	config.ReadOnly = opts.ReadOnly
 	config.Debug = opts.Debug
 	config.BasicUsername = opts.Username
-	config.BasicPassword = opts.Password
+
+	password, err := opts.resolvePassword()
+	if err != nil {
+		return config, err
+	}
+	config.BasicPassword = password
 
 	if opts.Origins != "" {
 		for _, pattern := range strings.Split(opts.Origins, ",") {
@@ -75,4 +88,23 @@ func (opts ServeOptions) Config() (serve.Config, error) {
 	}
 
 	return config, nil
+}
+
+// resolvePassword applies the documented precedence: --password flag,
+// then --password-file contents (trimmed), then the $BOOBA_PASSWORD
+// environment variable. Missing password files are an error so a
+// misconfigured secret path doesn't silently fall through to an empty
+// password.
+func (opts ServeOptions) resolvePassword() (string, error) {
+	if opts.Password != "" {
+		return opts.Password, nil
+	}
+	if opts.PasswordFile != "" {
+		data, err := os.ReadFile(opts.PasswordFile)
+		if err != nil {
+			return "", fmt.Errorf("read --password-file: %w", err)
+		}
+		return strings.TrimRight(string(data), " \t\r\n"), nil
+	}
+	return os.Getenv(PasswordEnvVar), nil
 }

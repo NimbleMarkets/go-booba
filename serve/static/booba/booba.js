@@ -35,11 +35,15 @@ export class BoobaTerminal {
         this.osc52Scanner = new OSC52Scanner(this.options.allowOSC52 ?? false);
     }
     async init() {
+        if (!this.container) {
+            throw new Error('BoobaTerminal.init: container element is null');
+        }
         await init();
-        this.term = new Terminal(this.options);
+        const term = new Terminal(this.options);
+        this.term = term;
         this.fitAddon = new FitAddon();
-        this.term.loadAddon(this.fitAddon);
-        this.term.open(this.container);
+        term.loadAddon(this.fitAddon);
+        term.open(this.container);
         this.fitAddon.fit();
         this.fitAddon.observeResize();
         // Handle window resize as fallback
@@ -48,33 +52,33 @@ export class BoobaTerminal {
         // Watch for devicePixelRatio changes (browser zoom, display switch)
         this._dprCleanup = this._watchDevicePixelRatio();
         // Listen for resize events from the terminal (triggered by fit addon)
-        this.term.onResize((size) => {
+        term.onResize((size) => {
             this.adapter?.boobaResize(size.cols, size.rows);
         });
-        console.log('Terminal opened. Size:', this.term.cols, 'x', this.term.rows);
+        console.log('Terminal opened. Size:', term.cols, 'x', term.rows);
         // Send user input through adapter
-        this.term.onData((data) => {
+        term.onData((data) => {
             this.adapter?.boobaWrite(data);
         });
-        this.term.onBell(() => {
+        term.onBell(() => {
             this.onBell?.();
         });
-        this.term.onSelectionChange(() => {
+        term.onSelectionChange(() => {
             this.onSelectionChange?.();
         });
-        this.term.onKey((event) => {
+        term.onKey((event) => {
             this.onKey?.(event);
         });
-        this.term.onTitleChange((title) => {
+        term.onTitleChange((title) => {
             this.onTitleChange?.(title);
         });
-        this.term.onScroll((viewportY) => {
+        term.onScroll((viewportY) => {
             this.onScroll?.(viewportY);
         });
-        this.term.onRender((event) => {
+        term.onRender((event) => {
             this.onRender?.(event);
         });
-        this.term.onCursorMove(() => {
+        term.onCursorMove(() => {
             this.onCursorMove?.();
         });
     }
@@ -131,14 +135,15 @@ export class BoobaTerminal {
             if (data instanceof Uint8Array) {
                 this.osc52Scanner.scan(data);
             }
-            this.term.write(data);
+            this.term?.write(data);
         }, (state, message) => {
             this._updateStatus(state, message);
-            if (state === 'connected' && this.term) {
-                this.adapter?.boobaResize(this.term.cols, this.term.rows);
+            const term = this.term;
+            if (state === 'connected' && term) {
+                this.adapter?.boobaResize(term.cols, term.rows);
             }
             if (state === 'disconnected') {
-                this.term.write('\r\nConnection closed.\r\n');
+                term?.write('\r\nConnection closed.\r\n');
             }
         });
     }
@@ -313,10 +318,11 @@ export class BoobaTerminal {
             const newDpr = window.devicePixelRatio;
             if (newDpr !== currentDpr) {
                 currentDpr = newDpr;
-                const renderer = this.term?.renderer;
-                if (renderer) {
+                const term = this.term;
+                const renderer = term?.renderer;
+                if (term && renderer) {
                     renderer.devicePixelRatio = newDpr;
-                    renderer.resize(this.term.cols, this.term.rows);
+                    renderer.resize(term.cols, term.rows);
                 }
                 this.fitAddon?.fit();
             }

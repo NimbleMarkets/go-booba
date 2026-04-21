@@ -1,6 +1,10 @@
 package cli
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestServeOptionsConfigDefaults(t *testing.T) {
 	cfg, err := (ServeOptions{}).Config()
@@ -46,5 +50,72 @@ func TestServeOptionsConfigRejectsBadListen(t *testing.T) {
 	_, err := (ServeOptions{Listen: "bad"}).Config()
 	if err == nil {
 		t.Fatal("expected invalid listen address to fail")
+	}
+}
+
+// SEC-1: password can be supplied via --password, --password-file, or
+// $BOOBA_PASSWORD. Precedence is flag > file > env so operators can
+// override a baked-in default without editing the command line.
+
+func TestServeOptionsPasswordFromEnv(t *testing.T) {
+	t.Setenv("BOOBA_PASSWORD", "env-secret")
+	cfg, err := (ServeOptions{Username: "admin"}).Config()
+	if err != nil {
+		t.Fatalf("Config() error = %v", err)
+	}
+	if cfg.BasicPassword != "env-secret" {
+		t.Errorf("BasicPassword = %q; want %q (from $BOOBA_PASSWORD)", cfg.BasicPassword, "env-secret")
+	}
+}
+
+func TestServeOptionsPasswordFromFile(t *testing.T) {
+	t.Setenv("BOOBA_PASSWORD", "")
+	path := filepath.Join(t.TempDir(), "pass")
+	if err := os.WriteFile(path, []byte("file-secret\n"), 0o600); err != nil {
+		t.Fatalf("seed password file: %v", err)
+	}
+	cfg, err := (ServeOptions{Username: "admin", PasswordFile: path}).Config()
+	if err != nil {
+		t.Fatalf("Config() error = %v", err)
+	}
+	if cfg.BasicPassword != "file-secret" {
+		t.Errorf("BasicPassword = %q; want %q (trimmed from file)", cfg.BasicPassword, "file-secret")
+	}
+}
+
+func TestServeOptionsPasswordFlagBeatsFileAndEnv(t *testing.T) {
+	t.Setenv("BOOBA_PASSWORD", "env-secret")
+	path := filepath.Join(t.TempDir(), "pass")
+	if err := os.WriteFile(path, []byte("file-secret\n"), 0o600); err != nil {
+		t.Fatalf("seed password file: %v", err)
+	}
+	cfg, err := (ServeOptions{Username: "admin", Password: "flag-secret", PasswordFile: path}).Config()
+	if err != nil {
+		t.Fatalf("Config() error = %v", err)
+	}
+	if cfg.BasicPassword != "flag-secret" {
+		t.Errorf("BasicPassword = %q; want %q (flag must win)", cfg.BasicPassword, "flag-secret")
+	}
+}
+
+func TestServeOptionsPasswordFileBeatsEnv(t *testing.T) {
+	t.Setenv("BOOBA_PASSWORD", "env-secret")
+	path := filepath.Join(t.TempDir(), "pass")
+	if err := os.WriteFile(path, []byte("file-secret"), 0o600); err != nil {
+		t.Fatalf("seed password file: %v", err)
+	}
+	cfg, err := (ServeOptions{Username: "admin", PasswordFile: path}).Config()
+	if err != nil {
+		t.Fatalf("Config() error = %v", err)
+	}
+	if cfg.BasicPassword != "file-secret" {
+		t.Errorf("BasicPassword = %q; want %q (file must beat env)", cfg.BasicPassword, "file-secret")
+	}
+}
+
+func TestServeOptionsPasswordFileMissingFails(t *testing.T) {
+	_, err := (ServeOptions{PasswordFile: "/does/not/exist/booba-pass"}).Config()
+	if err == nil {
+		t.Fatal("expected missing --password-file to fail")
 	}
 }

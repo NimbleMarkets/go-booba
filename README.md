@@ -280,6 +280,8 @@ Useful flags:
 ./bin/booba-view-example --listen 127.0.0.1:8080 --origin=https://app.example.com,https://*.example.net
 ./bin/booba-view-example --listen 127.0.0.1:8080 --cert-file=server.crt --key-file=server.key
 ./bin/booba-view-example --listen 127.0.0.1:8080 --username=admin --password=secret
+./bin/booba-view-example --listen 127.0.0.1:8080 --username=admin --password-file=/run/secrets/booba
+BOOBA_PASSWORD=secret ./bin/booba-view-example --listen 127.0.0.1:8080 --username=admin
 ```
 
 Notes:
@@ -288,6 +290,7 @@ Notes:
  * the default bind address is loopback (`127.0.0.1`); non-loopback `--listen` addresses require `--cert-file` and `--key-file`.
  * browser origins are same-host by default; use `--origin` to allow additional cross-origin browser clients.
  * Basic Auth requires `--cert-file` and `--key-file`; the server refuses to start otherwise.
+ * prefer `--password-file` or `$BOOBA_PASSWORD` over `--password`: the flag form leaks the secret into argv, shell history, and `ps` listings. Precedence is flag > file > env.
  * static frontend files are embedded with `go:embed`, so after frontend asset changes you must rebuild the Go binary you run.
 
 ## Open Collaboration

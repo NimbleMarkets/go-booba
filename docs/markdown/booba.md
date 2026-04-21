@@ -29,7 +29,8 @@ booba [flags] -- <command> [args...]
       --key-file string         TLS key file path for HTTPS/WSS/WebTransport
       --listen string           start the web server on this address (e.g. 127.0.0.1:8080) (default "127.0.0.1:8080")
       --origin string           comma-separated additional allowed browser origins (host patterns or scheme://host)
-      --password string         Basic Auth password
+      --password string         Basic Auth password (prefer --password-file or $BOOBA_PASSWORD to keep secrets off argv)
+      --password-file string    path to a file containing the Basic Auth password (trailing whitespace is trimmed)
       --read-only               disable client input
       --username string         Basic Auth username
 ```
