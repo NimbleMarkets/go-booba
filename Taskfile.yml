@@ -83,6 +83,8 @@ tasks:
     cmds:
       - npm run build:embed
     sources:
+      - package.json
+      - tsconfig.embed.json
       - ts/*.ts
     generates:
       - serve/static/booba/*.js
