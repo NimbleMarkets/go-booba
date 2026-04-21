@@ -20,6 +20,7 @@ package wasm
 
 import (
 	"bytes"
+	"os"
 	"sync"
 	"syscall/js"
 
@@ -34,6 +35,9 @@ import (
 func Run(model tea.Model, opts ...tea.ProgramOption) error {
 	fromJS := &syncBuffer{}
 	toJS := &syncBuffer{}
+
+	os.Setenv("TERM", "xterm-256color")
+	os.Setenv("COLORTERM", "truecolor")
 
 	baseOpts := []tea.ProgramOption{
 		tea.WithInput(fromJS),

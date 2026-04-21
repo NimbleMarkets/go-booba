@@ -48,6 +48,7 @@ export class BoobaTerminal {
             cols: 80,
             rows: 24,
             allowOSC52: false,
+            convertEol: true,
             theme: {
                 background: '#1e1e1e',
                 foreground: '#d4d4d4',

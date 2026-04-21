@@ -44,21 +44,35 @@ export class BoobaWasmAdapter {
     }
     connect(onData, onStateChange) {
         this.onDataCallback = onData;
-        // Check if WASM functions are available
-        if (typeof window.bubbletea_read !== 'function') {
-            onStateChange('disconnected', 'WASM functions not available');
-            console.error('WASM BubbleTea functions not found. Ensure the WASM module is loaded.');
+        const startPolling = () => {
+            this.pollInterval = window.setInterval(() => {
+                const data = this.boobaRead();
+                if (data && data.length > 0 && this.onDataCallback) {
+                    this.onDataCallback(data);
+                }
+            }, this.pollMs);
+            onStateChange('connected', 'Connected');
+            console.log('WASM adapter connected, polling at', this.pollMs, 'ms');
+        };
+        if (typeof window.bubbletea_read === 'function') {
+            startPolling();
             return;
         }
-        // Start polling for data from WASM
-        this.pollInterval = window.setInterval(() => {
-            const data = this.boobaRead();
-            if (data && data.length > 0 && this.onDataCallback) {
-                this.onDataCallback(data);
+        // Wait for WASM module to initialize
+        let attempts = 0;
+        const checkInterval = window.setInterval(() => {
+            if (typeof window.bubbletea_read === 'function') {
+                window.clearInterval(checkInterval);
+                startPolling();
+                return;
             }
-        }, this.pollMs);
-        onStateChange('connected', 'Connected');
-        console.log('WASM adapter connected, polling at', this.pollMs, 'ms');
+            attempts++;
+            if (attempts > 100) { // 100 * 50ms = 5 seconds timeout
+                window.clearInterval(checkInterval);
+                onStateChange('disconnected', 'WASM functions not available');
+                console.error('WASM BubbleTea functions not found. Ensure the WASM module is loaded.');
+            }
+        }, 50);
     }
     disconnect() {
         if (this.pollInterval !== null) {
