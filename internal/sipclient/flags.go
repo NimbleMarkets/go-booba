@@ -3,6 +3,7 @@ package sipclient
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -71,4 +72,22 @@ func ParseEscapeChar(s string) (EscapeChar, error) {
 	default:
 		return EscapeChar{}, fmt.Errorf("invalid escape char %q", s)
 	}
+}
+
+// ParseHeaders turns repeated "Key: Value" flag values into an http.Header.
+func ParseHeaders(raws []string) (http.Header, error) {
+	h := http.Header{}
+	for _, raw := range raws {
+		i := strings.IndexByte(raw, ':')
+		if i <= 0 {
+			return nil, fmt.Errorf("invalid --header %q (want 'Key: Value')", raw)
+		}
+		key := strings.TrimSpace(raw[:i])
+		val := strings.TrimSpace(raw[i+1:])
+		if key == "" {
+			return nil, fmt.Errorf("invalid --header %q (empty key)", raw)
+		}
+		h.Add(key, val)
+	}
+	return h, nil
 }

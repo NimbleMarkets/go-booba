@@ -1,10 +1,16 @@
 package sipclient
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
+	"time"
+
+	"github.com/coder/websocket"
 )
 
 // BuildTLSConfig returns a *tls.Config suitable for the coder/websocket Dial
@@ -27,4 +33,51 @@ func BuildTLSConfig(skipVerify bool, caFile string) (*tls.Config, error) {
 		cfg.RootCAs = pool
 	}
 	return cfg, nil
+}
+
+// DialOptions groups everything Dial needs.
+type DialOptions struct {
+	Target  *url.URL
+	Origin  string // may be empty → defaults to Target scheme+host
+	Headers http.Header
+	TLS     *tls.Config
+	Timeout time.Duration
+}
+
+// Dial opens a WebSocket connection to opts.Target. The returned *websocket.Conn
+// must be closed by the caller. When ctx is canceled mid-dial, Dial returns.
+func Dial(ctx context.Context, opts DialOptions) (*websocket.Conn, error) {
+	headers := opts.Headers.Clone()
+	if headers == nil {
+		headers = http.Header{}
+	}
+	origin := opts.Origin
+	if origin == "" {
+		httpScheme := "http"
+		if opts.Target.Scheme == "wss" {
+			httpScheme = "https"
+		}
+		origin = httpScheme + "://" + opts.Target.Host
+	}
+	headers.Set("Origin", origin)
+
+	httpClient := &http.Client{}
+	if opts.Target.Scheme == "wss" {
+		httpClient.Transport = &http.Transport{TLSClientConfig: opts.TLS}
+	}
+
+	dialCtx := ctx
+	if opts.Timeout > 0 {
+		var cancel context.CancelFunc
+		dialCtx, cancel = context.WithTimeout(ctx, opts.Timeout)
+		defer cancel()
+	}
+	conn, _, err := websocket.Dial(dialCtx, opts.Target.String(), &websocket.DialOptions{
+		HTTPHeader: headers,
+		HTTPClient: httpClient,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("dial %s: %w", opts.Target, err)
+	}
+	return conn, nil
 }

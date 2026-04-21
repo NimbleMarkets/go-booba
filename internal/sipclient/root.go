@@ -3,7 +3,6 @@ package sipclient
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"time"
 
@@ -63,11 +62,22 @@ func newRootCmd() *cobra.Command {
 	return cmd
 }
 
-// run is the dispatcher called after flag parsing. Later tasks fill it in; for
-// now it returns a sentinel so the "URL accepted" test case isn't gated on a
-// completed implementation.
-func run(_ context.Context, _ io.Writer, _ io.Writer, opts *Options) error {
-	return fmt.Errorf("not implemented: url=%q", opts.URL)
+func run(ctx context.Context, stdout, stderr io.Writer, opts *Options) error {
+	// Validate --escape-char early so bad values fail fast.
+	if _, err := ParseEscapeChar(opts.EscapeCharRaw); err != nil {
+		return err
+	}
+	if opts.DumpFrames {
+		return RunDump(ctx, stdout, stderr, opts)
+	}
+	return RunInteractive(ctx, stdout, stderr, opts)
+}
+
+// RunInteractive is a temporary stub that Task 12 will replace with the real
+// interactive client. Until then, running without --dump-frames returns an
+// error so users know the feature is pending.
+func RunInteractive(ctx context.Context, stdout, stderr io.Writer, opts *Options) error {
+	return errors.New("interactive mode not implemented yet; use --dump-frames")
 }
 
 // Execute is the main entry point used by cmd/booba-sip-client/main.go.

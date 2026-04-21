@@ -1,6 +1,7 @@
 package sipclient
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -41,6 +42,56 @@ func TestParseTargetURL(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParseHeaders(t *testing.T) {
+	cases := []struct {
+		name    string
+		in      []string
+		want    http.Header
+		wantErr bool
+	}{
+		{"empty", nil, http.Header{}, false},
+		{"single", []string{"X-A: b"}, http.Header{"X-A": []string{"b"}}, false},
+		{"multi same key", []string{"X-A: 1", "X-A: 2"}, http.Header{"X-A": []string{"1", "2"}}, false},
+		{"spaces trimmed", []string{"  K  :  v  "}, http.Header{"K": []string{"v"}}, false},
+		{"no colon", []string{"nope"}, nil, true},
+		{"empty key", []string{": v"}, nil, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := ParseHeaders(c.in)
+			if c.wantErr {
+				if err == nil {
+					t.Fatal("want error")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if len(got) != len(c.want) {
+				t.Fatalf("got %v; want %v", got, c.want)
+			}
+			for k, vs := range c.want {
+				if gv := got[k]; !equalStrings(gv, vs) {
+					t.Errorf("key %q: got %v want %v", k, gv, vs)
+				}
+			}
+		})
+	}
+}
+
+func equalStrings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func TestParseEscapeChar(t *testing.T) {

@@ -1,12 +1,17 @@
 package sipclient
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
+	"os"
 	"sync"
 
 	"github.com/NimbleMarkets/go-booba/sip"
+	"github.com/coder/websocket"
 )
 
 // DumpHandler implements FrameHandler by writing one JSON line per frame to
@@ -69,3 +74,91 @@ func (h *DumpHandler) HandleClose(payload []byte) {
 
 // Static assertion that *DumpHandler satisfies FrameHandler.
 var _ FrameHandler = (*DumpHandler)(nil)
+
+// RunDump opens a connection to opts.URL and writes decoded frames as JSON
+// lines to stdout until the server closes, --dump-timeout elapses, or ctx is
+// canceled. Returns nil on clean close, non-nil on any other termination.
+func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error {
+	target, err := ParseTargetURL(opts.URL)
+	if err != nil {
+		return err
+	}
+	headers, err := ParseHeaders(opts.Headers)
+	if err != nil {
+		return err
+	}
+	tlsCfg, err := BuildTLSConfig(opts.InsecureSkipVerify, opts.CAFile)
+	if err != nil {
+		return err
+	}
+
+	conn, err := Dial(ctx, DialOptions{
+		Target:  target,
+		Origin:  opts.Origin,
+		Headers: headers,
+		TLS:     tlsCfg,
+		Timeout: opts.ConnectTimeout,
+	})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.CloseNow() }()
+
+	// Optional: send a single MsgInput from --dump-input after connect.
+	if opts.DumpInputPath != "" {
+		data, err := os.ReadFile(opts.DumpInputPath)
+		if err != nil {
+			return fmt.Errorf("read --dump-input: %w", err)
+		}
+		if err := conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgInput, data)); err != nil {
+			return fmt.Errorf("send dump-input: %w", err)
+		}
+	}
+
+	handler := NewDumpHandler(stdout)
+	router := &Router{
+		Handler: handler,
+		Pong: func() error {
+			return conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgPong, nil))
+		},
+	}
+	if opts.Debug {
+		router.Debug = func(t byte, p []byte) {
+			_, _ = fmt.Fprintf(stderr, "debug: frame type=%q len=%d\n", t, len(p))
+		}
+	}
+
+	pumpCtx := ctx
+	if opts.DumpTimeout > 0 {
+		var cancel context.CancelFunc
+		pumpCtx, cancel = context.WithTimeout(pumpCtx, opts.DumpTimeout)
+		defer cancel()
+	}
+
+	for {
+		_, data, err := conn.Read(pumpCtx)
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) && opts.DumpTimeout > 0 {
+				return nil // timeout is a clean end for dump mode
+			}
+			if errors.Is(err, context.Canceled) {
+				return nil
+			}
+			// Websocket normal close is a clean termination in dump mode.
+			if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
+				return nil
+			}
+			return fmt.Errorf("read frame: %w", err)
+		}
+		msgType, payload, derr := sip.DecodeWSMessage(data)
+		if derr != nil {
+			return fmt.Errorf("decode: %w", derr)
+		}
+		if err := router.Route(msgType, payload); err != nil {
+			if errors.Is(err, ErrSessionClosed) {
+				return nil
+			}
+			return err
+		}
+	}
+}
