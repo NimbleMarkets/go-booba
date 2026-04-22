@@ -104,6 +104,20 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 	}
 	defer func() { _ = conn.CloseNow() }()
 
+	// Send an initial Resize so servers that gate output on resize (which
+	// is most SIP-compatible servers) can start emitting frames. Use a
+	// reasonable default 80x24 — dump mode is not attached to a real
+	// terminal.
+	{
+		body, err := json.Marshal(sip.ResizeMessage{Cols: 80, Rows: 24})
+		if err != nil {
+			return fmt.Errorf("marshal resize: %w", err)
+		}
+		if err := conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgResize, body)); err != nil {
+			return fmt.Errorf("send initial resize: %w", err)
+		}
+	}
+
 	// Optional: send a single MsgInput from --dump-input after connect.
 	if opts.DumpInputPath != "" {
 		data, err := os.ReadFile(opts.DumpInputPath)

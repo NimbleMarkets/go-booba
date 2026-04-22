@@ -98,8 +98,18 @@ func TestRunDump_DumpInput(t *testing.T) {
 			return
 		}
 		defer func() { _ = conn.Close(websocket.StatusNormalClosure, "") }()
-		// Read one frame (expected: MsgInput).
+		// RunDump always sends an initial MsgResize; consume and ignore it.
 		_, data, err := conn.Read(r.Context())
+		if err != nil {
+			return
+		}
+		msgType, _, _ := sip.DecodeWSMessage(data)
+		if msgType != sip.MsgResize {
+			t.Errorf("server got type=%q as first frame; want MsgResize", msgType)
+			return
+		}
+		// Read the second frame (expected: MsgInput).
+		_, data, err = conn.Read(r.Context())
 		if err != nil {
 			return
 		}
