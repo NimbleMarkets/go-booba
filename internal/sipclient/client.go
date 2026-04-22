@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/coder/websocket"
 	"golang.org/x/term"
@@ -48,6 +49,12 @@ func (h *interactiveHandler) HandleClose(_ []byte) {
 	h.closeOnce.Do(func() { close(h.closed) })
 }
 
+// watchResize is a platform-specific hook that fires cb whenever the terminal
+// resizes. It returns when ctx is canceled. Unix implementations use SIGWINCH;
+// others poll. It is nil on unsupported platforms and runInteractive handles
+// that gracefully.
+var watchResize func(ctx context.Context, cb func())
+
 // runInteractive is the pump loop. It is called with an already-dialed
 // connection and a configured tty. It returns when either side ends the
 // session, ctx is canceled, or a pump errors.
@@ -80,6 +87,24 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 
 	ctx, cancel := context.WithCancelCause(ctx)
 	defer cancel(nil)
+
+	if watchResize != nil {
+		go func() {
+			var timer *time.Timer
+			watchResize(ctx, func() {
+				if timer != nil {
+					timer.Stop()
+				}
+				timer = time.AfterFunc(50*time.Millisecond, func() {
+					cols, rows, err := tty.Size()
+					if err != nil {
+						return
+					}
+					_ = sendResize(ctx, conn, cols, rows)
+				})
+			})
+		}()
+	}
 
 	// Server → client pump.
 	go func() {
