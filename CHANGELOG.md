@@ -1,5 +1,9 @@
 # `booba` CHANGELOG
 
+## `v0.5.1` (2026-04-22)
+
+ * Add `booba.NewProgram(model)` and `wasm.NewProgram(model)` as more idiomatic entry points
+
 ## `v0.5.0` (2026-04-22)
 
   * New companion CLI `booba-sip-client` for connecting to a running booba server from a terminal

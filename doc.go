@@ -20,6 +20,14 @@
 //	    }
 //	}
 //
+// For finer control — or to match the original Bubble Tea API during
+// porting — use [NewProgram]:
+//
+//	bp := booba.NewProgram(initialModel())
+//	if _, err := bp.Run(); err != nil {
+//	    log.Fatal(err)
+//	}
+//
 // For more granular control, subpackages are available:
 //   - [github.com/NimbleMarkets/go-booba/wasm] exposes the browser bridge directly.
 //   - [github.com/NimbleMarkets/go-booba/serve] runs a BubbleTea program as an

@@ -27,12 +27,19 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-// Run creates a BubbleTea program from the given model, registers the
-// JavaScript bridge functions, and blocks until the program exits.
-//
-// Additional tea.ProgramOption values can be passed to configure the
-// program (e.g., tea.WithMouseCellMotion(), tea.WithAltScreen()).
-func Run(model tea.Model, opts ...tea.ProgramOption) error {
+// Program wraps a BubbleTea program for the browser.
+type Program struct {
+	prog       *tea.Program
+	fromJS     *syncBuffer
+	toJS       *syncBuffer
+	writeFunc  js.Func
+	readFunc   js.Func
+	resizeFunc js.Func
+}
+
+// NewProgram creates a new BubbleTea program for the browser.
+// It sets up the JavaScript bridge functions but does not start the program.
+func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 	fromJS := newSyncBuffer()
 	toJS := newSyncBuffer()
 
@@ -46,39 +53,99 @@ func Run(model tea.Model, opts ...tea.ProgramOption) error {
 
 	prog := tea.NewProgram(model, append(baseOpts, opts...)...)
 
-	writeFunc := js.FuncOf(func(_ js.Value, args []js.Value) any {
+	p := &Program{
+		prog:   prog,
+		fromJS: fromJS,
+		toJS:   toJS,
+	}
+
+	p.writeFunc = js.FuncOf(func(_ js.Value, args []js.Value) any {
 		if len(args) > 0 {
-			fromJS.Write([]byte(args[0].String()))
+			p.fromJS.Write([]byte(args[0].String()))
 		}
 		return nil
 	})
-	js.Global().Set("bubbletea_write", writeFunc)
+	js.Global().Set("bubbletea_write", p.writeFunc)
 
-	readFunc := js.FuncOf(func(_ js.Value, _ []js.Value) any {
-		data := toJS.ReadAndReset()
+	p.readFunc = js.FuncOf(func(_ js.Value, _ []js.Value) any {
+		data := p.toJS.ReadAndReset()
 		if len(data) == 0 {
 			return ""
 		}
 		return string(data)
 	})
-	js.Global().Set("bubbletea_read", readFunc)
+	js.Global().Set("bubbletea_read", p.readFunc)
 
-	resizeFunc := js.FuncOf(func(_ js.Value, args []js.Value) any {
+	p.resizeFunc = js.FuncOf(func(_ js.Value, args []js.Value) any {
 		if len(args) >= 2 {
-			prog.Send(tea.WindowSizeMsg{
+			p.prog.Send(tea.WindowSizeMsg{
 				Width:  args[0].Int(),
 				Height: args[1].Int(),
 			})
 		}
 		return nil
 	})
-	js.Global().Set("bubbletea_resize", resizeFunc)
+	js.Global().Set("bubbletea_resize", p.resizeFunc)
 
-	defer writeFunc.Release()
-	defer readFunc.Release()
-	defer resizeFunc.Release()
+	return p
+}
 
-	_, err := prog.Run()
+// Run starts the program and blocks until it exits.
+func (p *Program) Run() (tea.Model, error) {
+	defer p.writeFunc.Release()
+	defer p.readFunc.Release()
+	defer p.resizeFunc.Release()
+
+	return p.prog.Run()
+}
+
+// Send sends a message to the program.
+func (p *Program) Send(msg tea.Msg) {
+	p.prog.Send(msg)
+}
+
+// Quit sends a quit message to the program.
+func (p *Program) Quit() {
+	p.prog.Quit()
+}
+
+// Kill immediately exits the program.
+func (p *Program) Kill() {
+	p.prog.Kill()
+}
+
+// Wait waits for the program to finish.
+func (p *Program) Wait() {
+	p.prog.Wait()
+}
+
+// ReleaseTerminal is a no-op in the browser.
+func (p *Program) ReleaseTerminal() error {
+	return nil
+}
+
+// RestoreTerminal is a no-op in the browser.
+func (p *Program) RestoreTerminal() error {
+	return nil
+}
+
+// Println prints a line above the program output.
+func (p *Program) Println(args ...any) {
+	p.prog.Println(args...)
+}
+
+// Printf prints formatted text above the program output.
+func (p *Program) Printf(template string, args ...any) {
+	p.prog.Printf(template, args...)
+}
+
+// Run creates a BubbleTea program from the given model, registers the
+// JavaScript bridge functions, and blocks until the program exits.
+//
+// Additional tea.ProgramOption values can be passed to configure the
+// program (e.g., tea.WithMouseCellMotion(), tea.WithAltScreen()).
+func Run(model tea.Model, opts ...tea.ProgramOption) error {
+	_, err := NewProgram(model, opts...).Run()
 	return err
 }
 
