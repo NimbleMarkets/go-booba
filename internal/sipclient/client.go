@@ -200,7 +200,10 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 	if websocket.CloseStatus(cause) == websocket.StatusNormalClosure {
 		return nil
 	}
-	return cause
+	if errors.Is(cause, ErrConnect) || errors.Is(cause, ErrProtocol) || errors.Is(cause, ErrTransport) {
+		return cause
+	}
+	return fmt.Errorf("%w: %v", ErrTransport, cause)
 }
 
 // indexByteAtSOL returns the index of the first occurrence of c in b where
@@ -266,15 +269,15 @@ func (r *realTTY) MakeRaw() (func() error, error) {
 func RunInteractive(ctx context.Context, _, stderr io.Writer, opts *Options) error {
 	target, err := ParseTargetURL(opts.URL)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 	headers, err := ParseHeaders(opts.Headers)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 	tlsCfg, err := BuildTLSConfig(opts.InsecureSkipVerify, opts.CAFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 	conn, err := Dial(ctx, DialOptions{
 		Target:  target,
@@ -284,7 +287,7 @@ func RunInteractive(ctx context.Context, _, stderr io.Writer, opts *Options) err
 		Timeout: opts.ConnectTimeout,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 	defer func() { _ = conn.CloseNow() }()
 

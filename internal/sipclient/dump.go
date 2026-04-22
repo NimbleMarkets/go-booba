@@ -81,15 +81,15 @@ var _ FrameHandler = (*DumpHandler)(nil)
 func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error {
 	target, err := ParseTargetURL(opts.URL)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 	headers, err := ParseHeaders(opts.Headers)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 	tlsCfg, err := BuildTLSConfig(opts.InsecureSkipVerify, opts.CAFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 
 	conn, err := Dial(ctx, DialOptions{
@@ -100,7 +100,7 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 		Timeout: opts.ConnectTimeout,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrConnect, err)
 	}
 	defer func() { _ = conn.CloseNow() }()
 
@@ -114,7 +114,7 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 			return fmt.Errorf("marshal resize: %w", err)
 		}
 		if err := conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgResize, body)); err != nil {
-			return fmt.Errorf("send initial resize: %w", err)
+			return fmt.Errorf("%w: send initial resize: %v", ErrTransport, err)
 		}
 	}
 
@@ -167,17 +167,17 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 			if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
 				return nil
 			}
-			return fmt.Errorf("read frame: %w", err)
+			return fmt.Errorf("%w: read frame: %v", ErrTransport, err)
 		}
 		msgType, payload, derr := sip.DecodeWSMessage(data)
 		if derr != nil {
-			return fmt.Errorf("decode: %w", derr)
+			return fmt.Errorf("%w: decode: %v", ErrProtocol, derr)
 		}
 		if err := router.Route(msgType, payload); err != nil {
 			if errors.Is(err, ErrSessionClosed) {
 				return nil
 			}
-			return err
+			return fmt.Errorf("%w: %v", ErrProtocol, err)
 		}
 	}
 }
