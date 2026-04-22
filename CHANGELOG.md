@@ -1,5 +1,11 @@
 # `booba` CHANGELOG
 
+## `v0.5.0` (2026-04-22)
+
+  * New companion CLI `booba-sip-client` for connecting to a running booba server from a terminal
+  * Shared `sip/` package carrying the wire protocol.
+  * Bug fixes
+
 ## `v0.4.1` (2026-04-21)
 
 Follow-up patch addressing findings from repository review. No breaking API changes.
