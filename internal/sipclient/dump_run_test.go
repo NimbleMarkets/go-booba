@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -83,5 +84,64 @@ func TestRunDump_HappyPath(t *testing.T) {
 	}
 	if stderr.Len() != 0 {
 		t.Errorf("unexpected stderr output (Debug is off): %q", stderr.String())
+	}
+}
+
+func TestRunDump_DumpInput(t *testing.T) {
+	// This server echoes back any MsgInput payload as a MsgOutput frame.
+	received := make(chan []byte, 1)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{InsecureSkipVerify: true})
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		defer func() { _ = conn.Close(websocket.StatusNormalClosure, "") }()
+		// Read one frame (expected: MsgInput).
+		_, data, err := conn.Read(r.Context())
+		if err != nil {
+			return
+		}
+		msgType, payload, _ := sip.DecodeWSMessage(data)
+		if msgType != sip.MsgInput {
+			t.Errorf("server got type=%q; want MsgInput", msgType)
+		}
+		received <- payload
+		_ = conn.Write(r.Context(), websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgOutput, payload))
+		_ = conn.Write(r.Context(), websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgClose, nil))
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+	url := "ws" + strings.TrimPrefix(srv.URL, "http") + "/ws"
+
+	abs, err := filepath.Abs("testdata/greeting.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	opts := &Options{
+		URL:            url,
+		EscapeCharRaw:  "^]",
+		DumpInputPath:  abs,
+		ConnectTimeout: 5 * time.Second,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := RunDump(ctx, &stdout, &stderr, opts); err != nil {
+		t.Fatalf("RunDump: %v", err)
+	}
+
+	select {
+	case got := <-received:
+		if string(got) != "hello-from-client\n" {
+			t.Errorf("server received %q; want %q", got, "hello-from-client\n")
+		}
+	default:
+		t.Fatalf("server never received a MsgInput")
+	}
+	if !strings.Contains(stdout.String(), `"type":"output"`) {
+		t.Errorf("stdout should contain an output frame; got %q", stdout.String())
 	}
 }
