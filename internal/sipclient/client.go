@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"sync"
+	"sync/atomic"
 
 	"github.com/coder/websocket"
 	"golang.org/x/term"
@@ -28,7 +29,7 @@ type TTY interface {
 // tty, emitting OSC 2 for titles, and signaling close via a channel.
 type interactiveHandler struct {
 	tty       TTY
-	readOnly  bool // set from MsgOptions
+	readOnly  atomic.Bool // server-asserted; OR'd with opts.ReadOnly
 	closeOnce sync.Once
 	closed    chan struct{}
 }
@@ -37,7 +38,7 @@ func (h *interactiveHandler) HandleOutput(p []byte) { _, _ = h.tty.Write(p) }
 func (h *interactiveHandler) HandleTitle(title string) {
 	_, _ = fmt.Fprintf(h.tty, "\x1b]2;%s\x07", title)
 }
-func (h *interactiveHandler) HandleOptions(o sip.OptionsMessage) { h.readOnly = o.ReadOnly }
+func (h *interactiveHandler) HandleOptions(o sip.OptionsMessage) { h.readOnly.Store(o.ReadOnly) }
 func (h *interactiveHandler) HandleKittyFlags(flags int) {
 	// Push the server-advertised flags to the local terminal so it emits
 	// keys encoded for those flags. CSI > <flags> u.
@@ -56,6 +57,7 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 		return err
 	}
 	handler := &interactiveHandler{tty: tty, closed: make(chan struct{})}
+	readOnly := func() bool { return opts.ReadOnly || handler.readOnly.Load() }
 	router := &Router{
 		Handler: handler,
 		Pong: func() error {
@@ -122,10 +124,12 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 				if idx := indexByteAtSOL(chunk, esc.Byte, sol); idx >= 0 {
 					before := chunk[:idx]
 					after := chunk[idx+1:]
-					if len(before) > 0 && !opts.ReadOnly {
-						if err := sendInput(ctx, conn, before); err != nil {
-							cancel(err)
-							return
+					if len(before) > 0 {
+						if !readOnly() {
+							if err := sendInput(ctx, conn, before); err != nil {
+								cancel(err)
+								return
+							}
 						}
 						sol.Observe(before)
 					}
@@ -145,7 +149,7 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 			if len(chunk) == 0 {
 				continue
 			}
-			if !opts.ReadOnly {
+			if !readOnly() {
 				if err := sendInput(ctx, conn, chunk); err != nil {
 					cancel(err)
 					return
@@ -186,8 +190,9 @@ func indexByteAtSOL(b []byte, c byte, sol *SOLTracker) int {
 	return -1
 }
 
-// atSOL copies the tracker state, walks it across pre bytes (which are going
-// to be forwarded), and returns whether the next byte would be at SOL.
+// atSOL reports whether the next byte of b after pre would be at start-of-line.
+// If pre is empty, it defers to sol.AtStart(); otherwise, it peeks at pre's
+// last byte (matching SOLTracker.Observe's contract).
 func atSOL(sol *SOLTracker, pre []byte) bool {
 	if len(pre) == 0 {
 		return sol.AtStart()

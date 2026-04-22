@@ -134,6 +134,38 @@ func TestRunInteractive_ForwardsInput(t *testing.T) {
 	}
 }
 
+func TestRunInteractive_EscapeCharDisconnects(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		// Drain frames from the client until it disconnects.
+		for {
+			if _, _, err := conn.Read(r.Context()); err != nil {
+				return
+			}
+		}
+	})
+	conn, cleanup := dialTest(t, mux)
+	defer cleanup()
+
+	// Input sequence: Ctrl-] (0x1d) at start-of-line, then "quit\n" for the
+	// escape prompt. Expect runInteractive to return nil cleanly.
+	tty := newFakeTTY("\x1dquit\n")
+	opts := &Options{URL: "ws://test/ws", EscapeCharRaw: "^]"}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := runInteractive(ctx, conn, tty, opts, io.Discard); err != nil {
+		t.Fatalf("runInteractive: %v", err)
+	}
+	if got := tty.Output(); !strings.Contains(got, "booba-sip-client>") {
+		t.Errorf("expected escape prompt in output; got %q", got)
+	}
+}
+
 func TestRunInteractive_InitialResize(t *testing.T) {
 	var mu sync.Mutex
 	var gotCols, gotRows int
