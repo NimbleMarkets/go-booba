@@ -74,6 +74,29 @@ func TestRunEscapePrompt(t *testing.T) {
 	}
 }
 
+func TestRunEscapePrompt_CRTerminator(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+	}{
+		{"bare CR", "quit\r"},
+		{"CRLF", "quit\r\n"},
+		{"bare LF", "quit\n"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			var out bytes.Buffer
+			got, err := RunEscapePrompt(strings.NewReader(c.input), &out, PromptInfo{})
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != ActionDisconnect {
+				t.Errorf("action = %v; want ActionDisconnect", got)
+			}
+		})
+	}
+}
+
 func TestRunEscapePrompt_EOFDisconnects(t *testing.T) {
 	var out bytes.Buffer
 	got, err := RunEscapePrompt(strings.NewReader(""), &out, PromptInfo{})

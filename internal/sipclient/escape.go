@@ -56,6 +56,7 @@ type PromptInfo struct {
 // severs the session rather than hanging).
 func RunEscapePrompt(r io.Reader, w io.Writer, info PromptInfo) (EscapeAction, error) {
 	sc := bufio.NewScanner(r)
+	sc.Split(scanLinesCROrLF)
 	for {
 		if _, err := fmt.Fprint(w, "booba-sip-client> "); err != nil {
 			return ActionDisconnect, err
@@ -83,6 +84,31 @@ func RunEscapePrompt(r io.Reader, w io.Writer, info PromptInfo) (EscapeAction, e
 			printHelp(w)
 		}
 	}
+}
+
+// scanLinesCROrLF is a bufio.SplitFunc that treats either '\r' or '\n' as
+// a line terminator. This is necessary because RunEscapePrompt runs while
+// the tty is in raw mode (where Enter produces '\r', not '\n'), but is
+// also used in tests that feed '\n'-terminated input.
+func scanLinesCROrLF(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	for i, b := range data {
+		if b == '\r' || b == '\n' {
+			// Consume an optional trailing LF after CR for \r\n terminators.
+			adv := i + 1
+			if b == '\r' && adv < len(data) && data[adv] == '\n' {
+				adv++
+			}
+			return adv, data[:i], nil
+		}
+	}
+	if atEOF {
+		return len(data), data, nil
+	}
+	// Need more data.
+	return 0, nil, nil
 }
 
 func printHelp(w io.Writer) {
