@@ -73,13 +73,6 @@ func run(ctx context.Context, stdout, stderr io.Writer, opts *Options) error {
 	return RunInteractive(ctx, stdout, stderr, opts)
 }
 
-// RunInteractive is a temporary stub that Task 12 will replace with the real
-// interactive client. Until then, running without --dump-frames returns an
-// error so users know the feature is pending.
-func RunInteractive(ctx context.Context, stdout, stderr io.Writer, opts *Options) error {
-	return errors.New("interactive mode not implemented yet; use --dump-frames")
-}
-
 // Execute is the main entry point used by cmd/booba-sip-client/main.go.
 func Execute(ctx context.Context) error {
 	return newRootCmd().ExecuteContext(ctx)
