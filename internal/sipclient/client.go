@@ -24,6 +24,7 @@ type TTY interface {
 	Write(p []byte) (int, error) // stdout
 	Size() (cols, rows int, err error)
 	MakeRaw() (restore func() error, err error)
+	Close() error // closes the read side to unblock any pending Read
 }
 
 // interactiveHandler implements FrameHandler by writing output bytes to the
@@ -106,8 +107,12 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 		}()
 	}
 
+	var wg sync.WaitGroup
+
 	// Server → client pump.
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for {
 			_, data, err := conn.Read(ctx)
 			if err != nil {
@@ -127,7 +132,9 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 	}()
 
 	// Client → server pump.
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		sol := NewSOLTracker()
 		buf := make([]byte, 4096)
 		for {
@@ -138,6 +145,10 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 					// server→client pump drive the close.
 					return
 				}
+				// Any other read error (including the "file already closed"
+				// error from tty.Close() during shutdown) terminates the pump.
+				// If ctx is already canceled, re-canceling is a no-op and the
+				// first cause is preserved.
 				cancel(err)
 				return
 			}
@@ -185,6 +196,10 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 	}()
 
 	<-ctx.Done()
+	// Unblock the client→server pump's blocking Read, then wait for both
+	// pump goroutines to exit cleanly before we interpret the cause.
+	_ = tty.Close()
+	wg.Wait()
 	cause := context.Cause(ctx)
 	select {
 	case <-handler.closed:
@@ -243,14 +258,20 @@ func sendResize(ctx context.Context, conn *websocket.Conn, cols, rows int) error
 
 // realTTY wraps os.Stdin/os.Stdout and x/term for production use.
 type realTTY struct {
-	fd int
+	fd        int
+	writeMu   sync.Mutex
+	closeOnce sync.Once
 }
 
 func newRealTTY() *realTTY { return &realTTY{fd: int(os.Stdin.Fd())} }
 
-func (r *realTTY) Read(p []byte) (int, error)  { return os.Stdin.Read(p) }
-func (r *realTTY) Write(p []byte) (int, error) { return os.Stdout.Write(p) }
-func (r *realTTY) Size() (int, int, error)     { return term.GetSize(r.fd) }
+func (r *realTTY) Read(p []byte) (int, error) { return os.Stdin.Read(p) }
+func (r *realTTY) Write(p []byte) (int, error) {
+	r.writeMu.Lock()
+	defer r.writeMu.Unlock()
+	return os.Stdout.Write(p)
+}
+func (r *realTTY) Size() (int, int, error) { return term.GetSize(r.fd) }
 func (r *realTTY) MakeRaw() (func() error, error) {
 	if !term.IsTerminal(r.fd) {
 		return func() error { return nil }, nil
@@ -260,6 +281,11 @@ func (r *realTTY) MakeRaw() (func() error, error) {
 		return nil, err
 	}
 	return func() error { return term.Restore(r.fd, state) }, nil
+}
+func (r *realTTY) Close() error {
+	var err error
+	r.closeOnce.Do(func() { err = os.Stdin.Close() })
+	return err
 }
 
 // RunInteractive is called from root.go when --dump-frames is NOT set. It

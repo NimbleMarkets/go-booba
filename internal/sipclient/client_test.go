@@ -17,6 +17,34 @@ import (
 	"github.com/NimbleMarkets/go-booba/sip"
 )
 
+// blockingTTY's Read blocks forever on the pipe until Close is called.
+type blockingTTY struct {
+	r         *io.PipeReader
+	stdout    *bytes.Buffer
+	mu        sync.Mutex
+	wasClosed bool
+}
+
+func (b *blockingTTY) Read(p []byte) (int, error) { return b.r.Read(p) }
+func (b *blockingTTY) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.stdout.Write(p)
+}
+func (b *blockingTTY) Size() (int, int, error)        { return 80, 24, nil }
+func (b *blockingTTY) MakeRaw() (func() error, error) { return func() error { return nil }, nil }
+func (b *blockingTTY) Close() error {
+	b.mu.Lock()
+	b.wasClosed = true
+	b.mu.Unlock()
+	return b.r.Close()
+}
+func (b *blockingTTY) closed() bool {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.wasClosed
+}
+
 // fakeTTY is an in-memory TTY for tests. Writes go to stdout; reads come from
 // stdin. MakeRaw is a no-op; Size returns fixed dimensions.
 type fakeTTY struct {
@@ -39,6 +67,7 @@ func (f *fakeTTY) Write(p []byte) (int, error) {
 }
 func (f *fakeTTY) Size() (int, int, error)        { return 80, 24, nil }
 func (f *fakeTTY) MakeRaw() (func() error, error) { return func() error { return nil }, nil }
+func (f *fakeTTY) Close() error                   { return nil }
 func (f *fakeTTY) Output() string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -163,6 +192,47 @@ func TestRunInteractive_EscapeCharDisconnects(t *testing.T) {
 	}
 	if got := tty.Output(); !strings.Contains(got, "booba-sip-client>") {
 		t.Errorf("expected escape prompt in output; got %q", got)
+	}
+}
+
+func TestRunInteractive_NoGoroutineLeakAfterShutdown(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		// Drain initial resize.
+		_, _, _ = conn.Read(r.Context())
+		// Immediately close so runInteractive shuts down.
+		_ = conn.Write(r.Context(), websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgClose, nil))
+		_ = conn.Close(websocket.StatusNormalClosure, "")
+	})
+	conn, cleanup := dialTest(t, mux)
+	defer cleanup()
+
+	// A blocking stdin simulates a real terminal: its Read never naturally
+	// returns. Only tty.Close() can unblock it.
+	pr, pw := io.Pipe()
+	defer func() { _ = pw.Close() }()
+	blocking := &blockingTTY{r: pr, stdout: &bytes.Buffer{}}
+
+	opts := &Options{URL: "ws://test/ws", EscapeCharRaw: "^]"}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- runInteractive(ctx, conn, blocking, opts, io.Discard) }()
+
+	select {
+	case <-done:
+		// runInteractive returned. The stdin goroutine should have exited
+		// because tty.Close() unblocked its Read.
+		if !blocking.closed() {
+			t.Errorf("tty.Close was not called on shutdown")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatalf("runInteractive did not return within 2s")
 	}
 }
 
