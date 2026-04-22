@@ -35,6 +35,19 @@ builds:
       - amd64
       - arm64
 
+  - id: booba-sip-client
+    main: ./cmd/booba-sip-client
+    binary: booba-sip-client
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
   - id: booba-wasm-build
     main: ./cmd/booba-wasm-build
     binary: booba-wasm-build
@@ -69,6 +82,7 @@ notarize:
       ids:
         - booba
         - booba-assets
+        - booba-sip-client
         - booba-wasm-build
       sign:
         certificate: "{{.Env.MACOS_SIGN_P12}}"
