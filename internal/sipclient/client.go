@@ -295,6 +295,21 @@ func RunInteractive(ctx context.Context, _, stderr io.Writer, opts *Options) err
 	}
 	defer func() { _ = restore() }()
 
+	if opts.Kitty && !opts.NoKitty {
+		flags, ok := QueryKittyFlags(os.Stdin, os.Stdout, 100*time.Millisecond)
+		if ok && flags > 0 {
+			if err := PushKittyFlags(os.Stdout, flags); err == nil {
+				defer func() { _ = PopKittyFlags(os.Stdout) }()
+				body, err := json.Marshal(sip.KittyKbdMessage{Flags: flags})
+				if err == nil {
+					_ = conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgKittyKbd, body))
+				}
+			}
+		} else if opts.Debug {
+			_, _ = fmt.Fprintln(stderr, "debug: terminal did not respond to Kitty query")
+		}
+	}
+
 	err = runInteractive(ctx, conn, tty, opts, stderr)
 	_, _ = fmt.Fprintln(stderr, "Connection closed")
 	_ = conn.Close(websocket.StatusNormalClosure, "")
