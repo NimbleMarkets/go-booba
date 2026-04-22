@@ -13,6 +13,8 @@ import (
 
 	"github.com/coder/websocket"
 	"github.com/quic-go/webtransport-go"
+
+	"github.com/NimbleMarkets/go-booba/sip"
 )
 
 const (
@@ -21,7 +23,7 @@ const (
 )
 
 // handleWebSocket handles a single WebSocket connection for a session.
-func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, cfg Config) {
+func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, opts sip.OptionsMessage, debug bool, cfg Config) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer func() {
@@ -32,7 +34,7 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 
 	// Send options message
 	optBytes, _ := json.Marshal(opts)
-	if err := writeWSMessage(ctx, conn, MsgOptions, optBytes); err != nil {
+	if err := writeWSMessage(ctx, conn, sip.MsgOptions, optBytes); err != nil {
 		log.Printf("options message write error: %v", err)
 		return
 	}
@@ -77,7 +79,7 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
-			if werr := writeWSMessage(ctx, conn, MsgOutput, buf[:n]); werr != nil {
+			if werr := writeWSMessage(ctx, conn, sip.MsgOutput, buf[:n]); werr != nil {
 				return
 			}
 		}
@@ -85,7 +87,7 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 			if err != io.EOF {
 				log.Printf("pty read error: %v", err)
 			}
-			if werr := writeWSMessage(ctx, conn, MsgClose, nil); werr != nil &&
+			if werr := writeWSMessage(ctx, conn, sip.MsgClose, nil); werr != nil &&
 				!errors.Is(werr, context.Canceled) {
 				log.Printf("close message write error: %v", werr)
 			}
@@ -96,13 +98,13 @@ func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 }
 
 // handleInputWS reads messages from WebSocket and dispatches them.
-func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, debug bool, cfg Config, apply func(WindowSize)) {
+func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts sip.OptionsMessage, debug bool, cfg Config, apply func(WindowSize)) {
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
 			return
 		}
-		msgType, payload, err := DecodeWSMessage(data)
+		msgType, payload, err := sip.DecodeWSMessage(data)
 		if err != nil {
 			continue
 		}
@@ -111,9 +113,9 @@ func handleInputWS(ctx context.Context, conn *websocket.Conn, sess Session, opts
 }
 
 // processMessage dispatches a protocol message.
-func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool, cfg Config, apply func(WindowSize)) {
+func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opts sip.OptionsMessage, msgType byte, payload []byte, debug bool, cfg Config, apply func(WindowSize)) {
 	switch msgType {
-	case MsgInput:
+	case sip.MsgInput:
 		if opts.ReadOnly {
 			return
 		}
@@ -130,8 +132,8 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 		if _, err := sess.InputWriter().Write(payload); err != nil {
 			log.Printf("session input write error: %v", err)
 		}
-	case MsgResize:
-		var rm ResizeMessage
+	case sip.MsgResize:
+		var rm sip.ResizeMessage
 		if err := json.Unmarshal(payload, &rm); err == nil && rm.Cols > 0 && rm.Rows > 0 {
 			maxDims := windowDimsOrDefault(cfg.MaxWindowDims)
 			if rm.Cols > maxDims.Width || rm.Rows > maxDims.Height {
@@ -145,11 +147,11 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 			}
 			apply(WindowSize{Width: rm.Cols, Height: rm.Rows})
 		}
-	case MsgPing:
-		if err := writeWSMessage(ctx, conn, MsgPong, nil); err != nil {
+	case sip.MsgPing:
+		if err := writeWSMessage(ctx, conn, sip.MsgPong, nil); err != nil {
 			log.Printf("pong write error: %v", err)
 		}
-	case MsgKittyKbd:
+	case sip.MsgKittyKbd:
 		if debug {
 			log.Printf("kitty keyboard flags: %s", payload)
 		}
@@ -163,19 +165,19 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 }
 
 func writeWSMessage(ctx context.Context, conn *websocket.Conn, msgType byte, payload []byte) error {
-	msg := EncodeWSMessage(msgType, payload)
+	msg := sip.EncodeWSMessage(msgType, payload)
 	return conn.Write(ctx, websocket.MessageBinary, msg)
 }
 
 // handleWebTransport handles a single WebTransport session.
-func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, cfg Config) {
+func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.Stream, opts sip.OptionsMessage, debug bool, cfg Config) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	defer func() { _ = stream.Close() }()
 
 	// Send options message
 	optBytes, _ := json.Marshal(opts)
-	if err := writeWTMessage(stream, MsgOptions, optBytes); err != nil {
+	if err := writeWTMessage(stream, sip.MsgOptions, optBytes); err != nil {
 		log.Printf("options message write error: %v", err)
 		return
 	}
@@ -219,7 +221,7 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
-			if werr := writeWTMessage(stream, MsgOutput, buf[:n]); werr != nil {
+			if werr := writeWTMessage(stream, sip.MsgOutput, buf[:n]); werr != nil {
 				return
 			}
 		}
@@ -227,7 +229,7 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 			if err != io.EOF {
 				log.Printf("pty read error: %v", err)
 			}
-			if werr := writeWTMessage(stream, MsgClose, nil); werr != nil {
+			if werr := writeWTMessage(stream, sip.MsgClose, nil); werr != nil {
 				log.Printf("close message write error: %v", werr)
 			}
 			stream.CancelRead(0)
@@ -239,7 +241,7 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 }
 
 // handleInputWT reads length-prefixed messages from WebTransport stream.
-func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts OptionsMessage, debug bool, cfg Config, apply func(WindowSize)) {
+func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Stream, opts sip.OptionsMessage, debug bool, cfg Config, apply func(WindowSize)) {
 	lenBuf := make([]byte, 4)
 	for {
 		// Read 4-byte length prefix
@@ -247,7 +249,7 @@ func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Strea
 			return
 		}
 		msgLen := binary.BigEndian.Uint32(lenBuf)
-		if msgLen == 0 || msgLen > MaxMessageSize {
+		if msgLen == 0 || msgLen > sip.MaxMessageSize {
 			return
 		}
 
@@ -265,9 +267,9 @@ func handleInputWT(ctx context.Context, sess Session, stream *webtransport.Strea
 }
 
 // processWTMessage dispatches a WebTransport protocol message.
-func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, opts OptionsMessage, msgType byte, payload []byte, debug bool, cfg Config, apply func(WindowSize)) {
+func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Session, opts sip.OptionsMessage, msgType byte, payload []byte, debug bool, cfg Config, apply func(WindowSize)) {
 	switch msgType {
-	case MsgInput:
+	case sip.MsgInput:
 		if opts.ReadOnly {
 			return
 		}
@@ -286,8 +288,8 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 		if _, err := sess.InputWriter().Write(payload); err != nil {
 			log.Printf("session input write error: %v", err)
 		}
-	case MsgResize:
-		var rm ResizeMessage
+	case sip.MsgResize:
+		var rm sip.ResizeMessage
 		if err := json.Unmarshal(payload, &rm); err == nil && rm.Cols > 0 && rm.Rows > 0 {
 			maxDims := windowDimsOrDefault(cfg.MaxWindowDims)
 			if rm.Cols > maxDims.Width || rm.Rows > maxDims.Height {
@@ -301,11 +303,11 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 			}
 			apply(WindowSize{Width: rm.Cols, Height: rm.Rows})
 		}
-	case MsgPing:
-		if err := writeWTMessage(stream, MsgPong, nil); err != nil {
+	case sip.MsgPing:
+		if err := writeWTMessage(stream, sip.MsgPong, nil); err != nil {
 			log.Printf("pong write error: %v", err)
 		}
-	case MsgKittyKbd:
+	case sip.MsgKittyKbd:
 		if debug {
 			log.Printf("kitty keyboard flags: %s", payload)
 		}
@@ -320,7 +322,7 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 
 // writeWTMessage writes a length-prefixed message to a WebTransport stream.
 func writeWTMessage(stream *webtransport.Stream, msgType byte, payload []byte) error {
-	msg := EncodeWTMessage(msgType, payload)
+	msg := sip.EncodeWTMessage(msgType, payload)
 	_, err := stream.Write(msg)
 	return err
 }

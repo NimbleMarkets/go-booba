@@ -33,8 +33,8 @@ import (
 // Additional tea.ProgramOption values can be passed to configure the
 // program (e.g., tea.WithMouseCellMotion(), tea.WithAltScreen()).
 func Run(model tea.Model, opts ...tea.ProgramOption) error {
-	fromJS := &syncBuffer{}
-	toJS := &syncBuffer{}
+	fromJS := newSyncBuffer()
+	toJS := newSyncBuffer()
 
 	os.Setenv("TERM", "xterm-256color")
 	os.Setenv("COLORTERM", "truecolor")
@@ -85,20 +85,32 @@ func Run(model tea.Model, opts ...tea.ProgramOption) error {
 // syncBuffer is a goroutine-safe buffer for bridging Go I/O with
 // JavaScript's single-threaded polling.
 type syncBuffer struct {
-	mu  sync.Mutex
-	buf bytes.Buffer
+	mu   sync.Mutex
+	cond *sync.Cond
+	buf  bytes.Buffer
+}
+
+func newSyncBuffer() *syncBuffer {
+	b := &syncBuffer{}
+	b.cond = sync.NewCond(&b.mu)
+	return b
 }
 
 func (b *syncBuffer) Read(p []byte) (int, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
+	for b.buf.Len() == 0 {
+		b.cond.Wait()
+	}
 	return b.buf.Read(p)
 }
 
 func (b *syncBuffer) Write(p []byte) (int, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	return b.buf.Write(p)
+	n, err := b.buf.Write(p)
+	b.cond.Signal()
+	return n, err
 }
 
 // ReadAndReset returns all buffered data and resets the buffer.

@@ -8,6 +8,8 @@ import (
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/NimbleMarkets/go-booba/sip"
 )
 
 // SE-9: unknown message types must be logged when Debug is enabled so
@@ -18,7 +20,7 @@ const unknownMsgType byte = 0xFE
 func TestProcessMessageLogsUnknownTypeWhenDebug(t *testing.T) {
 	buf := captureLog(t)
 	sess := &writeTrackingSession{Session: &resizeTestSession{}}
-	processMessage(context.Background(), nil, sess, OptionsMessage{}, unknownMsgType, []byte("x"), true, Config{}, func(WindowSize) {})
+	processMessage(context.Background(), nil, sess, sip.OptionsMessage{}, unknownMsgType, []byte("x"), true, Config{}, func(WindowSize) {})
 
 	if !strings.Contains(buf.String(), "unknown") {
 		t.Errorf("log output = %q; want it to mention 'unknown'", buf.String())
@@ -31,7 +33,7 @@ func TestProcessMessageLogsUnknownTypeWhenDebug(t *testing.T) {
 func TestProcessMessageSilentOnUnknownTypeWhenDebugDisabled(t *testing.T) {
 	buf := captureLog(t)
 	sess := &writeTrackingSession{Session: &resizeTestSession{}}
-	processMessage(context.Background(), nil, sess, OptionsMessage{}, unknownMsgType, []byte("x"), false, Config{}, func(WindowSize) {})
+	processMessage(context.Background(), nil, sess, sip.OptionsMessage{}, unknownMsgType, []byte("x"), false, Config{}, func(WindowSize) {})
 
 	if buf.Len() != 0 {
 		t.Errorf("log output = %q; want empty when debug=false", buf.String())
@@ -41,7 +43,7 @@ func TestProcessMessageSilentOnUnknownTypeWhenDebugDisabled(t *testing.T) {
 func TestProcessWTMessageLogsUnknownTypeWhenDebug(t *testing.T) {
 	buf := captureLog(t)
 	sess := &writeTrackingSession{Session: &resizeTestSession{}}
-	processWTMessage(context.Background(), nil, sess, OptionsMessage{}, unknownMsgType, []byte("x"), true, Config{}, func(WindowSize) {})
+	processWTMessage(context.Background(), nil, sess, sip.OptionsMessage{}, unknownMsgType, []byte("x"), true, Config{}, func(WindowSize) {})
 
 	if !strings.Contains(buf.String(), "unknown") {
 		t.Errorf("log output = %q; want it to mention 'unknown'", buf.String())

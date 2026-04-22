@@ -1,4 +1,7 @@
-package serve
+// Package sip defines the Sip-compatible wire protocol: message type
+// constants, structured message types, and WebSocket/WebTransport
+// encode/decode helpers shared by the server and any future clients.
+package sip
 
 import (
 	"encoding/binary"
