@@ -67,3 +67,25 @@ func EncodeWTMessage(msgType byte, payload []byte) []byte {
 	copy(msg[5:], payload)
 	return msg
 }
+
+// DecodeWTMessage decodes a single WebTransport protocol message from data.
+// The expected layout is [4-byte big-endian length][type][payload], where
+// length includes the type byte. Returns an error if data is malformed or
+// the declared length exceeds MaxMessageSize.
+func DecodeWTMessage(data []byte) (msgType byte, payload []byte, err error) {
+	if len(data) < 4 {
+		return 0, nil, fmt.Errorf("too short for length prefix: %d bytes", len(data))
+	}
+	length := binary.BigEndian.Uint32(data[:4])
+	if length == 0 {
+		return 0, nil, fmt.Errorf("zero length message")
+	}
+	if uint64(length) > uint64(MaxMessageSize) {
+		return 0, nil, fmt.Errorf("message length %d exceeds MaxMessageSize %d", length, MaxMessageSize)
+	}
+	if uint64(len(data)-4) < uint64(length) {
+		return 0, nil, fmt.Errorf("truncated body: have %d bytes, need %d", len(data)-4, length)
+	}
+	body := data[4 : 4+length]
+	return body[0], body[1:], nil
+}
