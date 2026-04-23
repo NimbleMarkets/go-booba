@@ -34,7 +34,7 @@ type ServeOptions struct {
 
 // AddServeFlags registers standard booba server flags on the provided FlagSet.
 func AddServeFlags(fs *pflag.FlagSet, opts *ServeOptions, defaultListen string) {
-	fs.StringVar(&opts.Listen, "listen", defaultListen, "start the web server on this address (e.g. 127.0.0.1:8080)")
+	fs.StringVarP(&opts.Listen, "listen", "l", defaultListen, "start the web server on this address (e.g. 127.0.0.1:8080)")
 	fs.IntVar(&opts.HTTP3Port, "http3-port", 0, "HTTP/3 WebTransport port (default: same as --listen, -1 to disable)")
 	fs.DurationVar(&opts.Idle, "idle-timeout", 0, "close idle HTTP/WebSocket sessions after this duration (0 disables)")
 	fs.StringVar(&opts.CertFile, "cert-file", "", "TLS certificate file path for HTTPS/WSS/WebTransport")

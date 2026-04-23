@@ -31,7 +31,7 @@ var templateFS embed.FS
 const boobaModule = "github.com/NimbleMarkets/go-booba"
 
 func main() {
-	force := pflag.Bool("force", false, "overwrite an existing index.html")
+	force := pflag.BoolP("force", "f", false, "overwrite an existing index.html")
 	pflag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [--force] <output-dir>\n\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, "Populates <output-dir> with wasm_exec.js, booba/, ghostty-web/,")
