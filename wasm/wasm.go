@@ -45,6 +45,7 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 
 	os.Setenv("TERM", "xterm-256color")
 	os.Setenv("COLORTERM", "truecolor")
+	os.Setenv("CLICOLOR_FORCE", "1")
 
 	baseOpts := []tea.ProgramOption{
 		tea.WithInput(fromJS),
