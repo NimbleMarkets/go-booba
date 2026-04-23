@@ -232,8 +232,10 @@ func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stre
 			if werr := writeWTMessage(stream, sip.MsgClose, nil); werr != nil {
 				log.Printf("close message write error: %v", werr)
 			}
+			// CancelRead stops the server from reading more input; do NOT call
+			// CancelWrite which sends RESET_STREAM and can discard the MsgClose
+			// frame before the peer reads it. Use Close for a graceful FIN.
 			stream.CancelRead(0)
-			stream.CancelWrite(0)
 			_ = stream.Close()
 			return
 		}

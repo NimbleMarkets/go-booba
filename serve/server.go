@@ -114,6 +114,10 @@ func (s *Server) start(ctx context.Context) error {
 	}
 
 	if wtServer != nil {
+		// Wire the application mux into the H3 server so that HTTP/3 CONNECT
+		// requests routed to /wt are dispatched to handleWT. Without this the
+		// H3 server falls back to http.DefaultServeMux and returns 404.
+		wtServer.H3.Handler = mux
 		s.startWebTransport(ctx, wtServer)
 	}
 
