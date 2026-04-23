@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"github.com/quic-go/webtransport-go"
 
@@ -21,7 +22,7 @@ type wtFrameConn struct {
 
 	readMu    sync.Mutex // serializes concurrent ReadFrame callers
 	closeOnce sync.Once
-	closed    bool
+	closed    atomic.Bool
 }
 
 func newWTFrameConn(session *webtransport.Session, stream *webtransport.Stream) *wtFrameConn {
@@ -62,7 +63,7 @@ func (w *wtFrameConn) readFrame() (byte, []byte, error) {
 		if errors.As(err, &sessErr) && sessErr.ErrorCode == webtransport.SessionErrorCode(StatusNormal) {
 			return 0, nil, fmt.Errorf("%w: %v", errNormalClose, err)
 		}
-		if w.closed {
+		if w.closed.Load() {
 			return 0, nil, fmt.Errorf("%w: %v", errNormalClose, err)
 		}
 		return 0, nil, err
@@ -89,7 +90,7 @@ func (w *wtFrameConn) WriteFrame(_ context.Context, msgType byte, payload []byte
 func (w *wtFrameConn) Close(status StatusCode, reason string) error {
 	var err error
 	w.closeOnce.Do(func() {
-		w.closed = true
+		w.closed.Store(true)
 		err = w.session.CloseWithError(webtransport.SessionErrorCode(status), reason)
 	})
 	return err
@@ -98,7 +99,7 @@ func (w *wtFrameConn) Close(status StatusCode, reason string) error {
 func (w *wtFrameConn) CloseNow() error {
 	var err error
 	w.closeOnce.Do(func() {
-		w.closed = true
+		w.closed.Store(true)
 		err = w.session.CloseWithError(0, "")
 	})
 	return err
