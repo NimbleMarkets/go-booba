@@ -10,6 +10,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"math/big"
 	"net"
 	"net/http"
@@ -299,5 +300,19 @@ func TestWTFrameConn_NormalCloseDetected(t *testing.T) {
 	}
 	if !IsNormalClose(err) {
 		t.Errorf("IsNormalClose(%v) = false; want true", err)
+	}
+}
+
+func TestWTFrameConn_CanceledContext(t *testing.T) {
+	if testing.Short() {
+		t.Skip("WT test requires UDP loopback; skipping in -short mode")
+	}
+	_, client, cleanup := newWTPair(t)
+	defer cleanup()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // immediately
+	_, _, err := client.ReadFrame(ctx)
+	if !errors.Is(err, context.Canceled) {
+		t.Errorf("err = %v; want context.Canceled", err)
 	}
 }
