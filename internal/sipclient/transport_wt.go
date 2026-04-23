@@ -70,10 +70,10 @@ func (w *wtFrameConn) readFrame() (byte, []byte, error) {
 	}
 	length := binary.BigEndian.Uint32(lenBuf)
 	if length == 0 {
-		return 0, nil, errors.New("zero length message")
+		return 0, nil, fmt.Errorf("%w: zero length message", ErrProtocol)
 	}
 	if uint64(length) > uint64(sip.MaxMessageSize) {
-		return 0, nil, fmt.Errorf("message length %d exceeds MaxMessageSize %d", length, sip.MaxMessageSize)
+		return 0, nil, fmt.Errorf("%w: message length %d exceeds MaxMessageSize %d", ErrProtocol, length, sip.MaxMessageSize)
 	}
 	body := make([]byte, length)
 	if _, err := io.ReadFull(w.stream, body); err != nil {
