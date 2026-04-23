@@ -32,7 +32,7 @@ func (w *wsFrameConn) ReadFrame(ctx context.Context) (byte, []byte, error) {
 	}
 	msgType, payload, derr := sip.DecodeWSMessage(data)
 	if derr != nil {
-		return 0, nil, derr
+		return 0, nil, fmt.Errorf("%w: decode: %v", ErrProtocol, derr)
 	}
 	return msgType, payload, nil
 }
