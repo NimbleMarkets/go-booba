@@ -284,7 +284,30 @@ task build-cmd-booba-view-example-native
 
 The browser page served from `http://127.0.0.1:8080/` will use WebTransport automatically when available and fall back to WebSocket otherwise. When you provide `--cert-file` and `--key-file`, the same public port is used for HTTPS/WSS over TCP and HTTP/3 WebTransport over UDP.
 
-Useful flags:
+### booba-sip-client
+
+The `booba-sip-client` command connects to a running `booba` server and provides an interactive terminal interface or dump-frames mode for diagnostics.
+
+Build and run it:
+
+```sh
+task build-cmd-booba-sip-client
+./bin/booba-sip-client ws://localhost:8080/ws
+```
+
+### WebTransport
+
+`booba-sip-client` can dial servers over WebTransport by using an
+`https://` URL:
+
+    booba-sip-client https://host:8443/wt
+
+WebTransport uses HTTP/3 over QUIC and offers lower head-of-line-blocking
+latency than WebSocket. Requires the server to have HTTP/3 enabled
+(`serve.DefaultConfig()` enables it automatically; set `HTTP3Port: -1`
+to disable). For self-signed dev certs, use `--insecure-skip-verify`.
+
+### Useful flags
 
 ```sh
 ./bin/booba-view-example --listen 127.0.0.1:8080 --http3-port=-1

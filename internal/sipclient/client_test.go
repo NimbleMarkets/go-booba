@@ -76,7 +76,7 @@ func (f *fakeTTY) Output() string {
 
 // dialTest opens a real coder/websocket connection against an httptest server
 // and returns the client-side conn plus a cleanup callback.
-func dialTest(t *testing.T, h http.Handler) (*websocket.Conn, func()) {
+func dialTest(t *testing.T, h http.Handler) (FrameConn, func()) {
 	t.Helper()
 	hs := httptest.NewServer(h)
 	wsURL := "ws" + strings.TrimPrefix(hs.URL, "http") + "/ws"
@@ -87,7 +87,8 @@ func dialTest(t *testing.T, h http.Handler) (*websocket.Conn, func()) {
 		hs.Close()
 		t.Fatalf("dial: %v", err)
 	}
-	return conn, func() { _ = conn.CloseNow(); hs.Close() }
+	fc := newWSFrameConn(conn)
+	return fc, func() { _ = fc.CloseNow(); hs.Close() }
 }
 
 func TestRunInteractive_ServerOutputThenClose(t *testing.T) {

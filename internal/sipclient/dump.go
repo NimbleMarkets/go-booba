@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"github.com/NimbleMarkets/go-booba/sip"
-	"github.com/coder/websocket"
 )
 
 // DumpHandler implements FrameHandler by writing one JSON line per frame to
@@ -113,7 +112,7 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 		if err != nil {
 			return fmt.Errorf("marshal resize: %w", err)
 		}
-		if err := conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgResize, body)); err != nil {
+		if err := conn.WriteFrame(ctx, sip.MsgResize, body); err != nil {
 			return fmt.Errorf("%w: send initial resize: %v", ErrTransport, err)
 		}
 	}
@@ -124,7 +123,7 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 		if err != nil {
 			return fmt.Errorf("read --dump-input: %w", err)
 		}
-		if err := conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgInput, data)); err != nil {
+		if err := conn.WriteFrame(ctx, sip.MsgInput, data); err != nil {
 			return fmt.Errorf("send dump-input: %w", err)
 		}
 	}
@@ -144,7 +143,7 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 			// Read on this connection will surface the real error. Do NOT
 			// terminate the dump session just because a Pong could not be
 			// written.
-			_ = conn.Write(pumpCtx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgPong, nil))
+			_ = conn.WriteFrame(pumpCtx, sip.MsgPong, nil)
 			return nil
 		},
 	}
@@ -155,7 +154,7 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 	}
 
 	for {
-		_, data, err := conn.Read(pumpCtx)
+		msgType, payload, err := conn.ReadFrame(pumpCtx)
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
 				return nil // any deadline (ours or the caller's) is a clean end for dump mode
@@ -163,15 +162,10 @@ func RunDump(ctx context.Context, stdout, stderr io.Writer, opts *Options) error
 			if errors.Is(err, context.Canceled) {
 				return nil
 			}
-			// Websocket normal close is a clean termination in dump mode.
-			if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
+			if IsNormalClose(err) {
 				return nil
 			}
 			return fmt.Errorf("%w: read frame: %v", ErrTransport, err)
-		}
-		msgType, payload, derr := sip.DecodeWSMessage(data)
-		if derr != nil {
-			return fmt.Errorf("%w: decode: %v", ErrProtocol, derr)
 		}
 		if err := router.Route(msgType, payload); err != nil {
 			if errors.Is(err, ErrSessionClosed) {

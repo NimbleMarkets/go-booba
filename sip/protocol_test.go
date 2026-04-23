@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -108,5 +109,61 @@ func TestKittyKbdMessageJSON(t *testing.T) {
 	}
 	if decoded.Flags != 3 {
 		t.Errorf("flags = %d, want 3", decoded.Flags)
+	}
+}
+
+func TestDecodeWTMessage(t *testing.T) {
+	// Normal round-trip.
+	encoded := EncodeWTMessage(MsgOutput, []byte("hello"))
+	msgType, payload, err := DecodeWTMessage(encoded)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if msgType != MsgOutput {
+		t.Errorf("msgType = %q; want %q", msgType, MsgOutput)
+	}
+	if string(payload) != "hello" {
+		t.Errorf("payload = %q; want %q", payload, "hello")
+	}
+
+	// Empty payload (length=1, just type byte).
+	encoded = EncodeWTMessage(MsgPing, nil)
+	msgType, payload, err = DecodeWTMessage(encoded)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if msgType != MsgPing {
+		t.Errorf("msgType = %q; want MsgPing", msgType)
+	}
+	if len(payload) != 0 {
+		t.Errorf("payload = %v; want empty", payload)
+	}
+}
+
+func TestDecodeWTMessage_Errors(t *testing.T) {
+	cases := []struct {
+		name    string
+		data    []byte
+		wantErr string
+	}{
+		{"too short for length", []byte{0, 0, 0}, "too short"},
+		{"length zero", []byte{0, 0, 0, 0}, "zero length"},
+		{"body shorter than length", []byte{0, 0, 0, 10, 'a'}, "truncated body"},
+		{"oversize length", func() []byte {
+			b := []byte{0, 0, 0, 0}
+			binary.BigEndian.PutUint32(b, uint32(MaxMessageSize)+1)
+			return b
+		}(), "exceeds"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, _, err := DecodeWTMessage(c.data)
+			if err == nil {
+				t.Fatalf("want error containing %q, got nil", c.wantErr)
+			}
+			if !strings.Contains(err.Error(), c.wantErr) {
+				t.Errorf("err = %q; want contains %q", err.Error(), c.wantErr)
+			}
+		})
 	}
 }

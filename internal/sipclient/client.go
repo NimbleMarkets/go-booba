@@ -11,7 +11,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/coder/websocket"
 	"golang.org/x/term"
 
 	"github.com/NimbleMarkets/go-booba/sip"
@@ -59,7 +58,7 @@ var watchResize func(ctx context.Context, cb func())
 // runInteractive is the pump loop. It is called with an already-dialed
 // connection and a configured tty. It returns when either side ends the
 // session, ctx is canceled, or a pump errors.
-func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Options, stderr io.Writer) error {
+func runInteractive(ctx context.Context, conn FrameConn, tty TTY, opts *Options, stderr io.Writer) error {
 	esc, err := ParseEscapeChar(opts.EscapeCharRaw)
 	if err != nil {
 		return err
@@ -69,7 +68,7 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 	router := &Router{
 		Handler: handler,
 		Pong: func() error {
-			_ = conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgPong, nil))
+			_ = conn.WriteFrame(ctx, sip.MsgPong, nil)
 			return nil
 		},
 	}
@@ -114,14 +113,9 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 	go func() {
 		defer wg.Done()
 		for {
-			_, data, err := conn.Read(ctx)
+			msgType, payload, err := conn.ReadFrame(ctx)
 			if err != nil {
 				cancel(err)
-				return
-			}
-			msgType, payload, derr := sip.DecodeWSMessage(data)
-			if derr != nil {
-				cancel(derr)
 				return
 			}
 			if err := router.Route(msgType, payload); err != nil {
@@ -212,7 +206,7 @@ func runInteractive(ctx context.Context, conn *websocket.Conn, tty TTY, opts *Op
 	if errors.Is(cause, ErrSessionClosed) {
 		return nil
 	}
-	if websocket.CloseStatus(cause) == websocket.StatusNormalClosure {
+	if IsNormalClose(cause) {
 		return nil
 	}
 	if errors.Is(cause, ErrConnect) || errors.Is(cause, ErrProtocol) || errors.Is(cause, ErrTransport) {
@@ -244,16 +238,16 @@ func atSOL(sol *SOLTracker, pre []byte) bool {
 	return last == '\r' || last == '\n'
 }
 
-func sendInput(ctx context.Context, conn *websocket.Conn, p []byte) error {
-	return conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgInput, p))
+func sendInput(ctx context.Context, conn FrameConn, p []byte) error {
+	return conn.WriteFrame(ctx, sip.MsgInput, p)
 }
 
-func sendResize(ctx context.Context, conn *websocket.Conn, cols, rows int) error {
+func sendResize(ctx context.Context, conn FrameConn, cols, rows int) error {
 	body, err := json.Marshal(sip.ResizeMessage{Cols: cols, Rows: rows})
 	if err != nil {
 		return err
 	}
-	return conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgResize, body))
+	return conn.WriteFrame(ctx, sip.MsgResize, body)
 }
 
 // realTTY wraps os.Stdin/os.Stdout and x/term for production use.
@@ -331,7 +325,7 @@ func RunInteractive(ctx context.Context, _, stderr io.Writer, opts *Options) err
 				defer func() { _ = PopKittyFlags(os.Stdout) }()
 				body, err := json.Marshal(sip.KittyKbdMessage{Flags: flags})
 				if err == nil {
-					_ = conn.Write(ctx, websocket.MessageBinary, sip.EncodeWSMessage(sip.MsgKittyKbd, body))
+					_ = conn.WriteFrame(ctx, sip.MsgKittyKbd, body)
 				}
 			}
 		} else if opts.Debug {
@@ -341,6 +335,6 @@ func RunInteractive(ctx context.Context, _, stderr io.Writer, opts *Options) err
 
 	err = runInteractive(ctx, conn, tty, opts, stderr)
 	_, _ = fmt.Fprintln(stderr, "Connection closed")
-	_ = conn.Close(websocket.StatusNormalClosure, "")
+	_ = conn.Close(StatusNormal, "")
 	return err
 }

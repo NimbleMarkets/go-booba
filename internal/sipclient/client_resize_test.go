@@ -88,7 +88,7 @@ func TestRunInteractive_ResizeForwarded(t *testing.T) {
 	defer cancel()
 
 	done := make(chan error, 1)
-	go func() { done <- runInteractive(ctx, conn, tty, opts, nopWriter{}) }()
+	go func() { done <- runInteractive(ctx, newWSFrameConn(conn), tty, opts, nopWriter{}) }()
 
 	// Wait for watchResize to register a callback.
 	var fired func()
