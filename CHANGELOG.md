@@ -1,5 +1,10 @@
 # `booba` CHANGELOG
 
+## `v0.5.3` (2026-04-23)
+
+ * `booba-sip-client`: add WebTransport support
+ * Two server-side WebTransport bug fixes surfaced during end-to-end development
+
 ## `v0.5.2` (2026-04-22)
 
  * fix(wasm): force color output in browser terminal emulator using `CLICOLOR_FORCE=1`
