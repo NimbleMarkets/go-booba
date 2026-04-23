@@ -21,6 +21,9 @@ func TestParseTargetURL(t *testing.T) {
 		{"no scheme rejected", "localhost:8080", "", "unsupported scheme"},
 		{"empty rejected", "", "", "url is required"},
 		{"no host rejected", "ws:///path", "", "host is required"},
+		{"https with no path defaults to /wt", "https://host:8080", "https://host:8080/wt", ""},
+		{"https with custom path preserved", "https://host:8080/custom", "https://host:8080/custom", ""},
+		{"http rejected", "http://host:8080", "", "unsupported scheme"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
+	"github.com/quic-go/webtransport-go"
 )
 
 // BuildTLSConfig returns a *tls.Config suitable for the coder/websocket Dial
@@ -45,13 +46,14 @@ type DialOptions struct {
 }
 
 // Dial opens a framed connection to opts.Target, dispatching by scheme.
-// Currently only ws/wss are supported; a future commit adds https/WT.
 func Dial(ctx context.Context, opts DialOptions) (FrameConn, error) {
 	switch opts.Target.Scheme {
 	case "ws", "wss":
 		return dialWS(ctx, opts)
+	case "https":
+		return dialWT(ctx, opts)
 	default:
-		return nil, fmt.Errorf("%w: unsupported scheme %q (want ws or wss)", ErrConnect, opts.Target.Scheme)
+		return nil, fmt.Errorf("%w: unsupported scheme %q (want ws, wss, or https)", ErrConnect, opts.Target.Scheme)
 	}
 }
 
@@ -89,4 +91,52 @@ func dialWS(ctx context.Context, opts DialOptions) (*wsFrameConn, error) {
 		return nil, fmt.Errorf("dial %s: %w", opts.Target, err)
 	}
 	return newWSFrameConn(conn), nil
+}
+
+func dialWT(ctx context.Context, opts DialOptions) (*wtFrameConn, error) {
+	headers := opts.Headers.Clone()
+	if headers == nil {
+		headers = http.Header{}
+	}
+	// Origin handling: WT expects a same-origin hint via the Origin header
+	// for some servers, but booba's server honors the --origin check; we
+	// set the same computed Origin as the WS path for consistency.
+	origin := opts.Origin
+	if origin == "" {
+		origin = "https://" + opts.Target.Host
+	}
+	headers.Set("Origin", origin)
+
+	tlsCfg := opts.TLS
+	if tlsCfg == nil {
+		tlsCfg = &tls.Config{MinVersion: tls.VersionTLS12}
+	} else {
+		tlsCfg = tlsCfg.Clone()
+	}
+	// webtransport-go requires the h3 ALPN; the library does not set it
+	// automatically.
+	if len(tlsCfg.NextProtos) == 0 {
+		tlsCfg.NextProtos = []string{"h3"}
+	}
+
+	dialer := webtransport.Dialer{
+		TLSClientConfig: tlsCfg,
+	}
+
+	dialCtx := ctx
+	if opts.Timeout > 0 {
+		var cancel context.CancelFunc
+		dialCtx, cancel = context.WithTimeout(ctx, opts.Timeout)
+		defer cancel()
+	}
+	_, session, err := dialer.Dial(dialCtx, opts.Target.String(), headers)
+	if err != nil {
+		return nil, fmt.Errorf("dial %s: %w", opts.Target, err)
+	}
+	stream, err := session.OpenStreamSync(dialCtx)
+	if err != nil {
+		_ = session.CloseWithError(1, "open stream failed")
+		return nil, fmt.Errorf("open stream %s: %w", opts.Target, err)
+	}
+	return newWTFrameConn(session, stream), nil
 }
