@@ -1,5 +1,9 @@
 # `booba` CHANGELOG
 
+## `v0.5.2` (2026-04-22)
+
+ * fix(wasm): force color output in browser terminal emulator using `CLICOLOR_FORCE=1`
+
 ## `v0.5.1` (2026-04-22)
 
  * Add `booba.NewProgram(model)` and `wasm.NewProgram(model)` as more idiomatic entry points
