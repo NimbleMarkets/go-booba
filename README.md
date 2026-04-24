@@ -7,13 +7,39 @@
     <a href="https://github.com/NimbleMarkets/go-booba/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg"  alt="Code Of Conduct"></a>
 </p>
 
-`go-booba` is a Golang module that facilitates embedding [BubbleTea](https://github.com/charmbracelet/bubbletea) Terminal User Interfaces (TUIs) into a Web Browser. Generally, these are accessed via a local terminal or via SSH. This module exposes an HTTP-based terminal connection to a BubbleTea program.
+`go-booba` is a Golang module that facilitates embedding [BubbleTea](https://github.com/charmbracelet/bubbletea) Terminal User Interfaces (TUIs) into a Web Browser, served over HTTP with a Ghostty-powered terminal frontend.
 
-There are two facets we address with this package:
+<p>
+  <table>
+    <tr>
+    <td style="border-right: 2px solid grey;">
+<p>There are three ways to use this package:
+<ul>
+ <li>Compile a BubbleTea program to WebAssembly and run it entirely in the browser.</li>
+ <li>Run a BubbleTea backend server and connect to it from the browser over WebSocket or WebTransport.</li>
+ <li>Wrap any local CLI program in a browser terminal with the `booba` command.</li>
+</ul>
+    </td>
+    <td ><img src="./etc/booba.png" alt="booba mascot" width="256"></td>
+    </tr>
+  </table>
+</p>
 
- * Running a full BubbleTea program in a Web Browser (via WebAssembly)
 
- * Running a Terminal in a browser that connects over WebSockets to a BubbleTea backend
+
+## Installation
+
+**Go** (server-side library and CLI tools):
+
+```sh
+go get github.com/NimbleMarkets/go-booba
+```
+
+**npm** (TypeScript/JavaScript frontend):
+
+```sh
+npm install @nimblemarkets/booba
+```
 
 ## How and What?
 
@@ -23,6 +49,7 @@ The primary enabling technologies of this are:
  * [`ghostty-web`](https://github.com/coder/ghostty-web) - Web-based terminal using Ghostty's VT100 parser via WebAssembly
  * [`BubbleTea`](https://github.com/charmbracelet/bubbletea) - Terminal UI framework for Go
  * [`WebAssembly`](https://webassembly.org) - For running Go code in browsers
+ * [`WebTransport`](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport_API) - HTTP/3-based low-latency browser transport (with WebSocket fallback)
 
 The name `booba` is a portmanteau of the words *Boba* and *Boo!*: the [key ingredient of Bubble Tea](https://github.com/charmbracelet/bubbletea#bubble-tea) evoking a [Ghost's exclamation of joy](https://ghostty.org).
 
@@ -34,17 +61,8 @@ The `BoobaTerminal` class wraps ghostty-web's Terminal and provides a high-level
 import { BoobaTerminal } from './booba/booba.js';
 
 const booba = new BoobaTerminal('terminal-container', {
-    cols: 80,
-    rows: 24,
-    fontSize: 14,
-    scrollback: 1000,
-    allowOSC52: true, // Enable OSC 52 clipboard access
-    cursorBlink: true,
-    cursorStyle: 'block',
-    theme: {
-        background: '#1e1e1e',
-        foreground: '#d4d4d4',
-    },
+    cols: 80, rows: 24, fontSize: 14,
+    theme: { background: '#1e1e1e', foreground: '#d4d4d4' },
 });
 
 await booba.init();
@@ -52,121 +70,7 @@ booba.connectWebSocket('ws://localhost:8080/ws');
 booba.focus();
 ```
 
-### Terminal Options
-
-All [ghostty-web ITerminalOptions](https://github.com/coder/ghostty-web) are supported: `fontSize`, `fontFamily`, `cols`, `rows`, `cursorBlink`, `cursorStyle`, `scrollback`, `allowOSC52`, `allowTransparency`, `convertEol`, `disableStdin`, `smoothScrollDuration`, and a full `theme` with 16-color palette and cursor/selection colors.
-
-### Selection & Clipboard
-
-```javascript
-booba.getSelection()       // Get selected text
-booba.hasSelection()       // Check if text is selected
-booba.copySelection()      // Copy to clipboard
-booba.selectAll()          // Select all text
-booba.clearSelection()     // Clear selection
-booba.select(col, row, len) // Select at position
-booba.selectLines(start, end)
-booba.getSelectionPosition() // Get selection range
-```
-
-### Scrollback & Viewport
-
-```javascript
-booba.scrollLines(amount)  // Scroll by lines
-booba.scrollPages(amount)  // Scroll by pages
-booba.scrollToTop()        // Scroll to top of history
-booba.scrollToBottom()     // Scroll to current output
-booba.scrollToLine(line)   // Scroll to specific line
-booba.getViewportY()       // Get current scroll position
-```
-
-### Terminal Control
-
-```javascript
-booba.paste(data)          // Paste with bracketed paste support
-booba.input(data)          // Input as if typed
-booba.focus()              // Focus terminal
-booba.blur()               // Remove focus
-booba.clear()              // Clear screen
-booba.reset()              // Reset terminal state
-booba.write(data)          // Write to display
-booba.writeln(data)        // Write with newline
-```
-
-### Terminal Mode Queries
-
-```javascript
-booba.hasMouseTracking()   // Is mouse tracking enabled?
-booba.hasBracketedPaste()  // Is bracketed paste enabled?
-booba.hasFocusEvents()     // Are focus events enabled?
-booba.getMode(mode, isAnsi) // Query arbitrary terminal mode
-```
-
-### Events
-
-```javascript
-booba.onStatusChange = (state, message) => { /* connection state */ };
-booba.onTitleChange = (title) => { /* program set window title */ };
-booba.onBell = () => { /* bell/beep fired */ };
-booba.onSelectionChange = () => { /* selection changed */ };
-booba.onKey = (event) => { /* key pressed */ };
-booba.onScroll = (viewportY) => { /* viewport scrolled */ };
-booba.onRender = ({ start, end }) => { /* rows rendered */ };
-booba.onCursorMove = () => { /* cursor moved */ };
-```
-
-### Link Detection
-
-```javascript
-const disposable = booba.registerLinkProvider({
-    provideLinks(y, callback) {
-        // Detect links on row y, call callback with results
-        callback(links);
-    }
-});
-disposable.dispose(); // Unregister when done
-```
-
-### Custom Event Handlers
-
-```javascript
-booba.attachCustomKeyEventHandler((event) => {
-    // Return true to prevent default handling
-    return false;
-});
-
-booba.attachCustomWheelEventHandler((event) => {
-    // Return true to prevent default scroll handling
-    return false;
-});
-```
-
-### Lifecycle
-
-```javascript
-booba.dispose()            // Clean up all resources
-booba.terminal             // Access underlying ghostty-web Terminal
-booba.cols                 // Current column count
-booba.rows                 // Current row count
-```
-
-### Types
-
-All types are exported for TypeScript consumers:
-
-```typescript
-import type {
-    BoobaTerminalOptions,
-    BoobaTheme,
-    BoobaBufferRange,
-    BoobaKeyEvent,
-    BoobaRenderEvent,
-    BoobaLinkProvider,
-    BoobaLink,
-    BoobaAdapter,
-    BoobaConnectionState,
-} from './booba/booba.js';
-```
+`BoobaTerminal` exposes methods for selection, scrollback, terminal control, mode queries, events, link detection, and custom key/wheel handlers. See [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md) for the full reference.
 
 For adapter usage (WebSocket, WASM, custom), see [ADAPTER_USAGE.md](./ADAPTER_USAGE.md).
 
@@ -208,8 +112,6 @@ func main() {
 Build and run natively with `go run ./cmd/myapp`. Build for the browser with `go run github.com/NimbleMarkets/go-booba/cmd/booba-wasm-build -o web/app.wasm ./cmd/myapp/`.
 
 For finer control, the [`wasm`](./wasm) subpackage exposes the browser bridge directly, and native code can construct a `tea.Program` the usual way.
-
-TODO: link to live example
 
 ## Web Frontend for BubbleTea-based service
 
@@ -284,29 +186,6 @@ task build-cmd-booba-view-example-native
 
 The browser page served from `http://127.0.0.1:8080/` will use WebTransport automatically when available and fall back to WebSocket otherwise. When you provide `--cert-file` and `--key-file`, the same public port is used for HTTPS/WSS over TCP and HTTP/3 WebTransport over UDP.
 
-### booba-sip-client
-
-The `booba-sip-client` command connects to a running `booba` server and provides an interactive terminal interface or dump-frames mode for diagnostics.
-
-Build and run it:
-
-```sh
-task build-cmd-booba-sip-client
-./bin/booba-sip-client ws://localhost:8080/ws
-```
-
-### WebTransport
-
-`booba-sip-client` can dial servers over WebTransport by using an
-`https://` URL:
-
-    booba-sip-client https://host:8443/wt
-
-WebTransport uses HTTP/3 over QUIC and offers lower head-of-line-blocking
-latency than WebSocket. Requires the server to have HTTP/3 enabled
-(`serve.DefaultConfig()` enables it automatically; set `HTTP3Port: -1`
-to disable). For self-signed dev certs, use `--insecure-skip-verify`.
-
 ### Useful flags
 
 ```sh
@@ -327,6 +206,25 @@ Notes:
  * prefer `--password-file` or `$BOOBA_PASSWORD` over `--password`: the flag form leaks the secret into argv, shell history, and `ps` listings. Precedence is flag > file > env.
  * static frontend files are embedded with `go:embed`, so after frontend asset changes you must rebuild the Go binary you run.
  * reverse-proxy deployment: booba's `index.html` resolves every endpoint against `document.baseURI`, so hosting at a non-root path (e.g. nginx `location /terminal/`) works as long as the proxy **strips the prefix** before forwarding. For custom frontends, use the exported `resolveBoobaURLs(document.baseURI)` helper from `@nimblemarkets/booba`.
+
+## `booba-sip-client`
+
+The `booba-sip-client` command connects to a running `booba` server and provides an interactive terminal session or dump-frames mode for diagnostics. The name comes from [sip](https://github.com/Gaurav-Gosain/sip), a tool by [@Gaurav-Gosain](https://github.com/Gaurav-Gosain) that pioneered a similar wire protocol; `go-booba` adopted and extended that protocol.
+
+Build and run it:
+
+```sh
+task build-cmd-booba-sip-client
+./bin/booba-sip-client ws://localhost:8080/ws
+```
+
+### WebTransport
+
+`booba-sip-client` can dial servers over WebTransport by using an `https://` URL:
+
+    booba-sip-client https://host:8443/wt
+
+WebTransport uses HTTP/3 over QUIC and offers lower head-of-line-blocking latency than WebSocket. Requires the server to have HTTP/3 enabled (`serve.DefaultConfig()` enables it automatically; set `HTTP3Port: -1` to disable). For self-signed dev certs, use `--insecure-skip-verify`.
 
 ## Open Collaboration
 

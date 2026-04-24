@@ -1,6 +1,6 @@
 # Booba Adapter Usage Guide
 
-The BubbleTea adapter abstraction allows you to connect to Booba-based BubbleTea programs in multiple ways. For the full `BoobaTerminal` API reference, see [README.md](./README.md).
+The BubbleTea adapter abstraction allows you to connect to Booba-based BubbleTea programs in multiple ways. For the full `BoobaTerminal` API reference, see [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md).
 
 ## 1. WebSocket Mode (Backend Server)
 
@@ -61,44 +61,18 @@ await booba.init();
 booba.connectWasm(16); // Poll every 16ms (~60fps)
 ```
 
-**Requirements**: The Go WASM code must expose these global functions:
+**Go side**: Use `booba.Run` or `booba.NewProgram` (from `github.com/NimbleMarkets/go-booba`) as the entry point — these wire up the JS bridge automatically when compiled with `GOARCH=wasm GOOS=js`. Build with `booba-wasm-build`:
+
+```sh
+go run github.com/NimbleMarkets/go-booba/cmd/booba-wasm-build -o web/app.wasm ./cmd/myapp/
+```
+
+For advanced use cases that need direct control over the JS bridge (custom `js.FuncOf` callbacks, manual buffer management, etc.), the [`wasm`](./wasm) subpackage exposes the low-level API.
+
+**Required JS globals** (registered automatically by `booba.Run` / `booba.NewProgram`):
 - `window.bubbletea_write(data: string): void`
 - `window.bubbletea_read(): string`
 - `window.bubbletea_resize(cols: number, rows: number): void`
-
-**Go WASM Example**:
-```go
-func createTeaForJS(model tea.Model, option ...tea.ProgramOption) *tea.Program {
-    fromJs := &MinReadBuffer{buf: bytes.NewBuffer(nil)}
-    fromGo := bytes.NewBuffer(nil)
-
-    prog := tea.NewProgram(model, append([]tea.ProgramOption{
-        tea.WithInput(fromJs), 
-        tea.WithOutput(fromGo)
-    }, option...)...)
-
-    js.Global().Set("bubbletea_write", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-        fromJs.Write([]byte(args[0].String()))
-        return nil
-    }))
-
-    js.Global().Set("bubbletea_read", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-        b := make([]byte, fromGo.Len())
-        fromGo.Read(b)
-        fromGo.Reset()
-        return string(b)
-    }))
-
-    js.Global().Set("bubbletea_resize", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-        width := args[0].Int()
-        height := args[1].Int()
-        prog.Send(tea.WindowSizeMsg{Width: width, Height: height})
-        return nil
-    }))
-
-    return prog
-}
-```
 
 ## 3. Custom Adapter
 
