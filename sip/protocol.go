@@ -24,10 +24,15 @@ const (
 // MaxMessageSize is the maximum allowed message size (1MB).
 const MaxMessageSize = 1 << 20
 
-// ResizeMessage carries terminal dimensions.
+// ResizeMessage carries terminal dimensions. WidthPx and HeightPx are the
+// optional canvas dimensions in pixels. When non-zero the server populates
+// the PTY's TIOCGWINSZ ws_xpixel/ws_ypixel fields, which kitty graphics tools
+// (e.g. kitten icat) read to size images. Older clients omit the fields.
 type ResizeMessage struct {
-	Cols int `json:"cols"`
-	Rows int `json:"rows"`
+	Cols     int `json:"cols"`
+	Rows     int `json:"rows"`
+	WidthPx  int `json:"widthPx,omitempty"`
+	HeightPx int `json:"heightPx,omitempty"`
 }
 
 // OptionsMessage carries session configuration sent on connect.

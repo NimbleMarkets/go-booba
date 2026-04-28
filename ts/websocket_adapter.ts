@@ -41,10 +41,12 @@ export class BoobaProtocolAdapter implements BoobaAdapter {
         this.ws.send(encodeWSMessage(MsgInput, bytes));
     }
 
-    boobaResize(cols: number, rows: number): void {
+    boobaResize(cols: number, rows: number, widthPx?: number, heightPx?: number): void {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-        const payload = jsonPayload({ cols, rows } as ResizeMessage);
-        this.ws.send(encodeWSMessage(MsgResize, payload));
+        const msg: ResizeMessage = { cols, rows };
+        if (widthPx && widthPx > 0) msg.widthPx = widthPx;
+        if (heightPx && heightPx > 0) msg.heightPx = heightPx;
+        this.ws.send(encodeWSMessage(MsgResize, jsonPayload(msg)));
     }
 
     connect(

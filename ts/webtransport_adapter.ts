@@ -35,8 +35,11 @@ export class BoobaWebTransportAdapter implements BoobaAdapter {
         this._write(MsgInput, bytes);
     }
 
-    boobaResize(cols: number, rows: number): void {
-        this._write(MsgResize, jsonPayload({ cols, rows }));
+    boobaResize(cols: number, rows: number, widthPx?: number, heightPx?: number): void {
+        const msg: { cols: number; rows: number; widthPx?: number; heightPx?: number } = { cols, rows };
+        if (widthPx && widthPx > 0) msg.widthPx = widthPx;
+        if (heightPx && heightPx > 0) msg.heightPx = heightPx;
+        this._write(MsgResize, jsonPayload(msg));
     }
 
     async connect(

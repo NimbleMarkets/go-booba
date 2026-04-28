@@ -5,10 +5,24 @@ import (
 	"io"
 )
 
-// WindowSize represents terminal dimensions.
+// WindowSize represents terminal dimensions. WidthPx and HeightPx are the
+// canvas dimensions in pixels and are optional. When non-zero on a resize
+// they're forwarded to the PTY's TIOCSWINSZ ws_xpixel/ws_ypixel fields, which
+// kitty graphics tools (e.g. kitten icat) read to size images.
 type WindowSize struct {
-	Width  int
-	Height int
+	Width    int
+	Height   int
+	WidthPx  int
+	HeightPx int
+}
+
+// WindowResizer is an optional capability for Sessions that can apply pixel
+// dimensions in addition to character dimensions. The Sip protocol's resize
+// message carries optional widthPx/heightPx; when present and the session
+// implements this interface, the pixel size is forwarded to the underlying
+// PTY so TIOCGWINSZ returns real values to client tools.
+type WindowResizer interface {
+	ResizeWindow(size WindowSize)
 }
 
 // Session represents a single terminal session.

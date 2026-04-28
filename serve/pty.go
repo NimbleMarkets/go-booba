@@ -56,8 +56,17 @@ func (s *ptySession) WindowSize() WindowSize {
 }
 
 func (s *ptySession) Resize(cols, rows int) {
-	size := WindowSize{Width: cols, Height: rows}
+	s.applyResize(WindowSize{Width: cols, Height: rows})
+}
 
+// ResizeWindow applies a full WindowSize including any pixel dimensions to the
+// underlying PTY, so TIOCGWINSZ on the slave side reports ws_xpixel/ws_ypixel
+// matching the client's canvas. Implements WindowResizer.
+func (s *ptySession) ResizeWindow(size WindowSize) {
+	s.applyResize(size)
+}
+
+func (s *ptySession) applyResize(size WindowSize) {
 	s.mu.Lock()
 	s.winSize = size
 	s.mu.Unlock()
@@ -72,7 +81,16 @@ func (s *ptySession) Resize(cols, rows int) {
 		s.resize <- size
 	}
 
-	_ = s.pty.Resize(cols, rows)
+	// Use the pixel-aware setWinsize when the underlying PTY supports it
+	// (UnixPty does), otherwise fall back to character-only Resize.
+	type pixelResizer interface {
+		SetWinsize(width, height, x, y int) error
+	}
+	if pr, ok := s.pty.(pixelResizer); ok {
+		_ = pr.SetWinsize(size.Width, size.Height, size.WidthPx, size.HeightPx)
+		return
+	}
+	_ = s.pty.Resize(size.Width, size.Height)
 }
 
 // Pty returns the underlying PTY for attaching to processes.

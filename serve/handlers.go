@@ -76,11 +76,20 @@ func handleWebSocket(ctx context.Context, conn *websocket.Conn, sess Session, op
 // streamOutputWS reads from PTY and sends as MsgOutput over WebSocket.
 func streamOutputWS(ctx context.Context, conn *websocket.Conn, sess Session) {
 	buf := make([]byte, writeBufSize)
+	transcoder := &kittyGfxTranscoder{}
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
-			if werr := writeWSMessage(ctx, conn, sip.MsgOutput, buf[:n]); werr != nil {
-				return
+			out := transcoder.Filter(buf[:n])
+			for len(out) > 0 {
+				chunk := out
+				if len(chunk) > writeBufSize {
+					chunk = chunk[:writeBufSize]
+				}
+				if werr := writeWSMessage(ctx, conn, sip.MsgOutput, chunk); werr != nil {
+					return
+				}
+				out = out[len(chunk):]
 			}
 		}
 		if err != nil {
@@ -143,9 +152,9 @@ func processMessage(ctx context.Context, conn *websocket.Conn, sess Session, opt
 				return
 			}
 			if debug {
-				log.Printf("websocket resize: %dx%d", rm.Cols, rm.Rows)
+				log.Printf("websocket resize: %dx%d (%dx%d px)", rm.Cols, rm.Rows, rm.WidthPx, rm.HeightPx)
 			}
-			apply(WindowSize{Width: rm.Cols, Height: rm.Rows})
+			apply(WindowSize{Width: rm.Cols, Height: rm.Rows, WidthPx: rm.WidthPx, HeightPx: rm.HeightPx})
 		}
 	case sip.MsgPing:
 		if err := writeWSMessage(ctx, conn, sip.MsgPong, nil); err != nil {
@@ -218,11 +227,20 @@ func handleWebTransport(ctx context.Context, sess Session, stream *webtransport.
 // streamOutputWT reads from PTY and sends as MsgOutput over WebTransport.
 func streamOutputWT(ctx context.Context, sess Session, stream *webtransport.Stream) {
 	buf := make([]byte, writeBufSize)
+	transcoder := &kittyGfxTranscoder{}
 	for {
 		n, err := sess.OutputReader().Read(buf)
 		if n > 0 {
-			if werr := writeWTMessage(stream, sip.MsgOutput, buf[:n]); werr != nil {
-				return
+			out := transcoder.Filter(buf[:n])
+			for len(out) > 0 {
+				chunk := out
+				if len(chunk) > writeBufSize {
+					chunk = chunk[:writeBufSize]
+				}
+				if werr := writeWTMessage(stream, sip.MsgOutput, chunk); werr != nil {
+					return
+				}
+				out = out[len(chunk):]
 			}
 		}
 		if err != nil {
@@ -301,9 +319,9 @@ func processWTMessage(ctx context.Context, stream *webtransport.Stream, sess Ses
 				return
 			}
 			if debug {
-				log.Printf("webtransport resize: %dx%d", rm.Cols, rm.Rows)
+				log.Printf("webtransport resize: %dx%d (%dx%d px)", rm.Cols, rm.Rows, rm.WidthPx, rm.HeightPx)
 			}
-			apply(WindowSize{Width: rm.Cols, Height: rm.Rows})
+			apply(WindowSize{Width: rm.Cols, Height: rm.Rows, WidthPx: rm.WidthPx, HeightPx: rm.HeightPx})
 		}
 	case sip.MsgPing:
 		if err := writeWTMessage(stream, sip.MsgPong, nil); err != nil {

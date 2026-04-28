@@ -49,7 +49,11 @@ func newResizeApplier(sess Session, throttle time.Duration) (apply func(WindowSi
 				have = true
 			case <-ticker.C:
 				if have {
-					sess.Resize(latest.Width, latest.Height)
+					if wr, ok := sess.(WindowResizer); ok {
+						wr.ResizeWindow(latest)
+					} else {
+						sess.Resize(latest.Width, latest.Height)
+					}
 					have = false
 				}
 			}

@@ -15,6 +15,8 @@ export const MsgKittyKbd  = 0x38; // '8'
 export interface ResizeMessage {
     cols: number;
     rows: number;
+    widthPx?: number;
+    heightPx?: number;
 }
 
 export interface OptionsMessage {

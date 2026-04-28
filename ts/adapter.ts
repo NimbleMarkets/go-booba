@@ -24,8 +24,10 @@ export interface BoobaAdapter {
      * Notify the BubbleTea program of a terminal resize
      * @param cols Number of columns
      * @param rows Number of rows
+     * @param widthPx Optional canvas width in pixels (forwarded to PTY for kitty graphics tools)
+     * @param heightPx Optional canvas height in pixels
      */
-    boobaResize(cols: number, rows: number): void;
+    boobaResize(cols: number, rows: number, widthPx?: number, heightPx?: number): void;
 
     /**
      * Set up the connection and start listening for data
@@ -75,7 +77,7 @@ export class BoobaWasmAdapter implements BoobaAdapter {
         (window as any).bubbletea_write(dataStr);
     }
 
-    boobaResize(cols: number, rows: number): void {
+    boobaResize(cols: number, rows: number, _widthPx?: number, _heightPx?: number): void {
         if (typeof (window as any).bubbletea_resize !== 'function') {
             console.warn('bubbletea_resize not available');
             return;

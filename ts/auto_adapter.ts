@@ -25,8 +25,8 @@ export class BoobaAutoAdapter implements BoobaAdapter {
         this.adapter?.boobaWrite(data);
     }
 
-    boobaResize(cols: number, rows: number): void {
-        this.adapter?.boobaResize(cols, rows);
+    boobaResize(cols: number, rows: number, widthPx?: number, heightPx?: number): void {
+        this.adapter?.boobaResize(cols, rows, widthPx, heightPx);
     }
 
     connect(
