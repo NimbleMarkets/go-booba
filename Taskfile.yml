@@ -57,6 +57,7 @@ tasks:
 
   go-tidy:
     desc: 'Go tidy all the things'
+    run: once
     cmds:
       - go mod tidy
 
@@ -172,6 +173,7 @@ tasks:
       - cmd/booba/*.go
       - internal/cli/*.go
       - serve/*.go
+      - serve/static/**/*
     generates:
       - bin/booba
 
@@ -196,6 +198,7 @@ tasks:
       - cmd/booba-view-example/*.go
       - internal/cli/*.go
       - serve/*.go
+      - serve/static/**/*
     generates:
       - bin/booba-view-example
 
