@@ -18,8 +18,13 @@ export class BoobaWebTransportAdapter {
         const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
         this._write(MsgInput, bytes);
     }
-    boobaResize(cols, rows) {
-        this._write(MsgResize, jsonPayload({ cols, rows }));
+    boobaResize(cols, rows, widthPx, heightPx) {
+        const msg = { cols, rows };
+        if (widthPx && widthPx > 0)
+            msg.widthPx = widthPx;
+        if (heightPx && heightPx > 0)
+            msg.heightPx = heightPx;
+        this._write(MsgResize, jsonPayload(msg));
     }
     async connect(onData, onStateChange) {
         this.onDataCallback = onData;

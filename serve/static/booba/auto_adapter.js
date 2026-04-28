@@ -16,8 +16,8 @@ export class BoobaAutoAdapter {
     boobaWrite(data) {
         this.adapter?.boobaWrite(data);
     }
-    boobaResize(cols, rows) {
-        this.adapter?.boobaResize(cols, rows);
+    boobaResize(cols, rows, widthPx, heightPx) {
+        this.adapter?.boobaResize(cols, rows, widthPx, heightPx);
     }
     connect(onData, onStateChange) {
         this.onDataCallback = onData;

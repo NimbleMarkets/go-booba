@@ -54,7 +54,8 @@ export class BoobaTerminal {
         this._dprCleanup = this._watchDevicePixelRatio();
         // Listen for resize events from the terminal (triggered by fit addon)
         term.onResize((size) => {
-            this.adapter?.boobaResize(size.cols, size.rows);
+            const px = this._pixelDims(size.cols, size.rows);
+            this.adapter?.boobaResize(size.cols, size.rows, px.widthPx, px.heightPx);
         });
         console.log('Terminal opened. Size:', term.cols, 'x', term.rows);
         // Send user input through adapter
@@ -141,7 +142,8 @@ export class BoobaTerminal {
             this._updateStatus(state, message);
             const term = this.term;
             if (state === 'connected' && term) {
-                this.adapter?.boobaResize(term.cols, term.rows);
+                const px = this._pixelDims(term.cols, term.rows);
+                this.adapter?.boobaResize(term.cols, term.rows, px.widthPx, px.heightPx);
             }
             if (state === 'disconnected') {
                 term?.write('\r\nConnection closed.\r\n');
@@ -307,6 +309,21 @@ export class BoobaTerminal {
         if (this.onStatusChange) {
             this.onStatusChange(state, message);
         }
+    }
+    /**
+     * Compute the canvas pixel dimensions corresponding to a (cols, rows) grid.
+     * Returns zeros when the renderer hasn't measured yet so the server-side
+     * resize falls back to character-only dimensions.
+     */
+    _pixelDims(cols, rows) {
+        const renderer = this.term?.renderer;
+        if (!renderer)
+            return { widthPx: 0, heightPx: 0 };
+        const m = renderer.getMetrics();
+        return {
+            widthPx: Math.max(0, Math.round(m.width * cols)),
+            heightPx: Math.max(0, Math.round(m.height * rows)),
+        };
     }
     /**
      * Watch for devicePixelRatio changes (browser zoom, moving between displays).

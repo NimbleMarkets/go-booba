@@ -34,7 +34,7 @@ export class BoobaWasmAdapter {
         const dataStr = typeof data === 'string' ? data : new TextDecoder().decode(data);
         window.bubbletea_write(dataStr);
     }
-    boobaResize(cols, rows) {
+    boobaResize(cols, rows, _widthPx, _heightPx) {
         if (typeof window.bubbletea_resize !== 'function') {
             console.warn('bubbletea_resize not available');
             return;

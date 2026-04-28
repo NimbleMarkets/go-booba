@@ -22,11 +22,15 @@ export class BoobaProtocolAdapter {
         const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
         this.ws.send(encodeWSMessage(MsgInput, bytes));
     }
-    boobaResize(cols, rows) {
+    boobaResize(cols, rows, widthPx, heightPx) {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN)
             return;
-        const payload = jsonPayload({ cols, rows });
-        this.ws.send(encodeWSMessage(MsgResize, payload));
+        const msg = { cols, rows };
+        if (widthPx && widthPx > 0)
+            msg.widthPx = widthPx;
+        if (heightPx && heightPx > 0)
+            msg.heightPx = heightPx;
+        this.ws.send(encodeWSMessage(MsgResize, jsonPayload(msg)));
     }
     connect(onData, onStateChange) {
         this.onDataCallback = onData;
