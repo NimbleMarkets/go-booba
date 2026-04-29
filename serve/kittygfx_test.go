@@ -151,8 +151,10 @@ func TestTranscoder_SplitAcrossReads(t *testing.T) {
 	}
 }
 
-func TestTranscoder_DropsUnicodePlaceholderTransmissions(t *testing.T) {
-	// Single-chunk U=1 transmission: should produce no output.
+func TestTranscoder_PassesThroughUnicodePlaceholderTransmissions(t *testing.T) {
+	// ghostty-web's renderer substitutes U+10EEEE cells with kitty graphics
+	// image slices, so U=1 transmissions must reach the wasm — transcoded
+	// from PNG (f=100) to raw RGBA (f=32) like any other PNG transmission.
 	pngBytes := makePNG(t, 8, 8)
 	encoded := base64.StdEncoding.EncodeToString(pngBytes)
 	in := []byte("before\x1b_Ga=T,U=1,f=100,t=d,i=42;" + encoded + "\x1b\\after")
@@ -160,15 +162,21 @@ func TestTranscoder_DropsUnicodePlaceholderTransmissions(t *testing.T) {
 	tr := &kittyGfxTranscoder{}
 	out := tr.Filter(in)
 
-	if bytes.Contains(out, []byte("\x1b_G")) {
-		t.Fatalf("U=1 transmission was not dropped: %q", out)
+	if !bytes.Contains(out, []byte("\x1b_G")) {
+		t.Fatalf("U=1 transmission was dropped: %q", out)
+	}
+	if !bytes.Contains(out, []byte("f=32")) {
+		t.Fatalf("U=1 transmission was not transcoded to f=32: %q", out)
+	}
+	if !bytes.Contains(out, []byte("U=1")) {
+		t.Fatalf("U=1 metadata was stripped: %q", out)
 	}
 	if !bytes.Contains(out, []byte("before")) || !bytes.Contains(out, []byte("after")) {
 		t.Fatalf("surrounding bytes lost: %q", out)
 	}
 }
 
-func TestTranscoder_DropsUnicodePlaceholderMultichunk(t *testing.T) {
+func TestTranscoder_PassesThroughUnicodePlaceholderMultichunk(t *testing.T) {
 	pngBytes := makePNG(t, 16, 16)
 	encoded := base64.StdEncoding.EncodeToString(pngBytes)
 	third := len(encoded) / 3
@@ -187,8 +195,11 @@ func TestTranscoder_DropsUnicodePlaceholderMultichunk(t *testing.T) {
 	tr := &kittyGfxTranscoder{}
 	out := tr.Filter([]byte(in.String()))
 
-	if bytes.Contains(out, []byte("\x1b_G")) {
-		t.Fatalf("multi-chunk U=1 transmission leaked APC framing: %q", out)
+	if !bytes.Contains(out, []byte("\x1b_G")) {
+		t.Fatalf("multi-chunk U=1 transmission was dropped: %q", out)
+	}
+	if !bytes.Contains(out, []byte("f=32")) {
+		t.Fatalf("multi-chunk U=1 transmission was not transcoded: %q", out)
 	}
 	if !bytes.HasSuffix(out, []byte("TAIL")) {
 		t.Fatalf("trailing bytes lost: %q", out)

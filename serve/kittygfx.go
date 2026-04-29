@@ -46,10 +46,6 @@ type pngLoading struct {
 	// protocol, callers split the base64 string at arbitrary byte boundaries —
 	// so chunks aren't individually decodable; we concat and decode once.
 	encoded bytes.Buffer
-	// drop is true when the entire multi-chunk transmission should be silently
-	// suppressed (e.g. U=1 virtual-placement transmissions that ghostty-web
-	// can't render).
-	drop bool
 }
 
 // kittyEmitChunkSize bounds the base64 payload size in each emitted APC
@@ -165,29 +161,9 @@ func (t *kittyGfxTranscoder) flushAPC(out *bytes.Buffer) {
 	// If we're already mid-load, every subsequent APC contributes payload
 	// regardless of its declared format — only the first chunk has metadata.
 	if t.loading != nil {
-		if t.loading.drop {
-			// Continuation of a transmission we're suppressing; skip.
-		} else {
-			t.appendChunk(payload)
-		}
+		t.appendChunk(payload)
 		if isFinalChunk(meta) {
-			if !t.loading.drop {
-				t.emitDecoded(out)
-			}
-			t.loading = nil
-		}
-		return
-	}
-
-	// Drop kitty graphics transmissions with U=1 (Unicode placeholder mode).
-	// ghostty-web's renderer doesn't draw virtual placements, so transmitting
-	// (potentially many MB of) image data the browser can't display only
-	// pumps wasm memory and causes OOB during rapid redraws on resize.
-	// Without this drop, ntcharts-style demos accumulate image state and
-	// eventually crash the renderer.
-	if meta["U"] == "1" {
-		t.loading = &pngLoading{meta: meta, drop: true}
-		if isFinalChunk(meta) {
+			t.emitDecoded(out)
 			t.loading = nil
 		}
 		return
