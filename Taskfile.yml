@@ -82,7 +82,10 @@ tasks:
 
   build-assets:
     desc: 'Build frontend assets'
-    deps: [npm-deps]
+    # build-ghostty-web must produce dist/index.d.ts before tsc runs here,
+    # otherwise `import ... from 'ghostty-web'` fails type resolution. Task
+    # runs deps in parallel, so listing it explicitly is required.
+    deps: [npm-deps, build-ghostty-web]
     run: once
     cmds:
       - npm run build:embed
@@ -95,7 +98,7 @@ tasks:
 
   build-npm:
     desc: 'Build npm package to dist/'
-    deps: [npm-deps]
+    deps: [npm-deps, build-ghostty-web]
     cmds:
       - npm run build
     sources:
