@@ -1,0 +1,93 @@
+name: rebuild-static
+
+# Rebuilds serve/static/booba/* and serve/static/ghostty-web/* from source
+# (third_party/ghostty-web submodule + ts/*) on every push, and force-commits
+# the result back to the branch if it diverges from what was committed.
+#
+# This makes CI the canonical builder of the embedded artifacts, so the bytes
+# in any branch's HEAD are always traceable to a CI run + a submodule SHA.
+# Maintainers never commit locally-built statics.
+#
+# Bypass: include `[skip ci]` in the commit message.
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild-static-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.15.2
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - uses: go-task/setup-task@v2
+
+      - name: Build everything (ghostty-web wasm + lib, embed JS, copy statics)
+        # Wipe committed outputs first so Task can't false-positive "up to date"
+        # against stale committed artifacts. The build-serve-assets task uses
+        # source/generates timestamp checks; without this, divergence between
+        # committed bytes and submodule build outputs would silently persist.
+        run: |
+          rm -rf serve/static/booba serve/static/ghostty-web
+          task build-serve-assets
+
+      - name: Detect divergence
+        id: diff
+        # Same pathspec as the commit step below, so we don't trip on
+        # ignored side outputs (e.g. fresh .d.ts.map) and create empty commits.
+        run: |
+          if git diff --exit-code -- \
+              'serve/static/booba/*.js' \
+              'serve/static/ghostty-web/ghostty-web.js' \
+              'serve/static/ghostty-web/ghostty-vt.wasm'; then
+            echo "needs-commit=false" >> "$GITHUB_OUTPUT"
+            echo "Embedded statics match HEAD."
+          else
+            echo "needs-commit=true" >> "$GITHUB_OUTPUT"
+            echo "Embedded statics diverged — will commit rebuilt bytes."
+          fi
+
+      - name: Commit + push rebuilt statics
+        if: steps.diff.outputs.needs-commit == 'true'
+        env:
+          REF: ${{ github.ref_name }}
+          SOURCE_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # Explicit whitelist matching the tracked files in .gitignore.
+          # Don't use -f: it would override .gitignore and add .d.ts /
+          # .d.ts.map / .js.map / .umd.cjs / Vite helpers we don't track.
+          git add -A -- \
+            'serve/static/booba/*.js' \
+            'serve/static/ghostty-web/ghostty-web.js' \
+            'serve/static/ghostty-web/ghostty-vt.wasm'
+          git commit -m "ci: rebuild embedded statics" \
+                     -m "Source: ${SOURCE_SHA}" \
+                     -m "CI: ${RUN_URL}" \
+                     -m "[skip ci]"
+          git push origin "HEAD:${REF}"

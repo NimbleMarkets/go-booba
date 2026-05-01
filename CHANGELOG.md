@@ -1,5 +1,20 @@
 # `booba` CHANGELOG
 
+## `v0.6.0` (2026-04-29)
+
+End-to-end kitty graphics support — `kitten icat`, [ntcharts image demos](https://nimblemarkets.github.io/ntcharts), and other libraries that emit Unicode placeholder cells (`a=T,U=1,…` + `U+10EEEE`) now render correctly in the browser.
+
+   * `feat(serve)`: server-side kitty graphics PNG → RGBA transcoder. The wasm has no PNG decoder (wuffs needs libc, `wasm32-freestanding` doesn't have it). The transcoder sits in `kittyGfxTranscoder` between the PTY and the WS/WT writer, intercepting `f=100` APC sequences and re-emitting them as chunked `f=32`
+  raw NRGBA.
+   * `feat(sip)`: pixel dimensions plumbed through resize. `widthPx`/`heightPx` extend the Sip resize message; `WindowSize` / `xpty.UnixPty.SetWinsize` populate `ws_xpixel`/`ws_ypixel` so kittens see non-zero `TIOCGWINSZ` pixel fields.
+   * `fix(serve)`: stop dropping U=1 kitty graphics transmissions. Earlier defensive guard against an older ghostty-web that couldn't render virtual placements; with the new renderer, the drop was silently breaking ntcharts-style demos.
+   * `fix(task)`: `serve/static` assets tracked in build sources so embedded JS/WASM regenerate when source changes.
+   * Docs: improved README and added project mascot.
+
+  **Note:** kitty graphics rendering requires a `ghostty-web` build with virtual-placement support. If pinning to a specific `ghostty-web` version, ensure it includes the `Substitute U+10EEEE cells with kitty graphics image slices` change.
+
+To achieve this, we are maintaining a [NimbleMarkets fork of ghostty-web](https://github.com/NimbleMarkets/ghostty-web/tree/nm-kitty-meow) in the `nm-kitty-meow` branch.
+
 ## `v0.5.3` (2026-04-23)
 
  * `booba-sip-client`: add WebTransport support

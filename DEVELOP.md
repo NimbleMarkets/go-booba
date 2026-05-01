@@ -1,5 +1,19 @@
 # Development Guide
 
+## Building from Source
+
+booba vendors [`ghostty-web`](https://github.com/NimbleMarkets/ghostty-web) (NimbleMarkets fork) as a git submodule at `third_party/ghostty-web`. Clone with submodules:
+
+```sh
+git clone --recurse-submodules https://github.com/NimbleMarkets/go-booba.git
+# or after a regular clone:
+git submodule update --init --recursive
+```
+
+Then `task build` builds everything: the wasm + JS inside the submodule, the booba TypeScript embed, copies the artifacts into `serve/static/` for `go:embed`, and produces `bin/booba`. The build needs `bun` and `zig 0.15.2`; locally `task` will use `nix develop` from `third_party/ghostty-web/flake.nix` if `nix` is on PATH (recommended), otherwise it expects both to be available directly. See `Taskfile.yml:build-ghostty-web`.
+
+The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so `go install github.com/NimbleMarkets/go-booba/cmd/booba` works without a JS toolchain. CI rebuilds them on every push and force-commits the result back to the branch (`.github/workflows/rebuild-static.yml`), so the bytes in HEAD are always traceable to a CI run plus the submodule SHA. To verify locally: clone with submodules, run `task build`, and inspect any diff in `serve/static/` — bytes may differ from the CI-built ones due to build-environment determinism, but the *source* should be identical.
+
 ## Command Documentation
 
 The `booba` CLI is built on [spf13/cobra](https://github.com/spf13/cobra) and ships generated documentation alongside the binary:

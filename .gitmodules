@@ -1,0 +1,4 @@
+[submodule "third_party/ghostty-web"]
+	path = third_party/ghostty-web
+	url = https://github.com/NimbleMarkets/ghostty-web.git
+	branch = nm-kitty-meow

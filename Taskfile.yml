@@ -103,16 +103,46 @@ tasks:
     generates:
       - dist/*.js
 
+  init-submodules:
+    desc: 'Initialize git submodules (third_party/ghostty-web + nested ghostty)'
+    run: once
+    cmds:
+      - git submodule update --init --recursive
+    status:
+      - test -e third_party/ghostty-web/.git
+      - test -e third_party/ghostty-web/ghostty/.git
+
+  build-ghostty-web:
+    desc: 'Build wasm + lib inside third_party/ghostty-web. Uses nix locally (pinned zig 0.15.2); in CI assumes zig + bun are already on PATH.'
+    deps: [init-submodules]
+    run: once
+    cmds:
+      - |
+        cd third_party/ghostty-web
+        if command -v nix >/dev/null 2>&1 && [ -z "$CI" ]; then
+          nix --extra-experimental-features 'nix-command flakes' develop --command bun run build
+        else
+          bun run build
+        fi
+    sources:
+      - third_party/ghostty-web/lib/**/*.ts
+      - third_party/ghostty-web/scripts/build-wasm.sh
+      - third_party/ghostty-web/patches/*.patch
+      - third_party/ghostty-web/package.json
+    generates:
+      - third_party/ghostty-web/dist/ghostty-web.js
+      - third_party/ghostty-web/ghostty-vt.wasm
+
   build-serve-assets:
     desc: 'Copy ghostty-web into serve/static/ for go:embed'
-    deps: [build-assets]
+    deps: [build-assets, build-ghostty-web]
     run: once
     cmds:
       - mkdir -p serve/static/ghostty-web
-      - cp -r node_modules/ghostty-web/dist/* serve/static/ghostty-web/
+      - cp -r third_party/ghostty-web/dist/* serve/static/ghostty-web/
     sources:
       - serve/static/booba/*.js
-      - node_modules/ghostty-web/dist/*
+      - third_party/ghostty-web/dist/*
     generates:
       - serve/static/booba/*.js
       - serve/static/ghostty-web/ghostty-web.js
