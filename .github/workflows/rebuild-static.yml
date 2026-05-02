@@ -90,4 +90,25 @@ jobs:
                      -m "Source: ${SOURCE_SHA}" \
                      -m "CI: ${RUN_URL}" \
                      -m "[skip ci]"
-          git push origin "HEAD:${REF}"
+
+          # Push with one rebase-and-retry on race. If a human pushed to REF
+          # while we were building, the first push fails as non-fast-forward;
+          # we rebase our single artifact commit on top of the new remote
+          # HEAD and try once more. Beyond that, give up — eventual
+          # consistency comes from the next push triggering a fresh run.
+          for attempt in 1 2; do
+            if [ "$attempt" -gt 1 ]; then
+              echo "Push race detected — rebasing on origin/${REF} and retrying..."
+              git fetch origin "${REF}"
+              git rebase "origin/${REF}" || {
+                echo "Rebase failed (likely a conflict on serve/static/*)."
+                echo "Bailing out; the next push will trigger another rebuild."
+                exit 1
+              }
+            fi
+            if git push origin "HEAD:${REF}"; then
+              exit 0
+            fi
+          done
+          echo "Push still failing after rebase + retry; giving up."
+          exit 1

@@ -25,20 +25,11 @@ jobs:
         with:
           node-version: 20
 
-      - uses: oven-sh/setup-bun@v2
-
-      - uses: mlugg/setup-zig@v2
-        with:
-          version: 0.15.2
-
-      - uses: go-task/setup-task@v2
-
-      - name: Build assets
-        # Wipe committed outputs first so Task's source/generates check
-        # rebuilds rather than false-positively reusing stale committed bytes.
-        run: |
-          rm -rf serve/static/booba serve/static/ghostty-web
-          task build-serve-assets
+      # No bun/zig/task setup needed: release-binaries trusts the committed
+      # serve/static/booba/* and serve/static/ghostty-web/* (canonicalised by
+      # rebuild-static.yml on push). Rebuilding here would (a) leave a
+      # .zig-cache/ behind and (b) produce env-specific bytes that diverge
+      # from HEAD — both of which break GoReleaser's clean-tree check.
 
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@v7
