@@ -117,7 +117,11 @@ tasks:
 
   build-ghostty-web:
     desc: 'Build wasm + lib inside third_party/ghostty-web. Uses nix locally (pinned zig 0.15.2); in CI assumes zig + bun are already on PATH.'
-    deps: [init-submodules]
+    # npm-deps must finish before bun install runs in the submodule. They
+    # both write into node_modules — booba's npm ci reaches through the
+    # `file:./third_party/ghostty-web` symlink and clobbers bun-installed
+    # .bin entries (e.g. vite) mid-build when run in parallel.
+    deps: [init-submodules, npm-deps]
     run: once
     cmds:
       - |
