@@ -52,3 +52,5 @@ require (
 	golang.org/x/text v0.36.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
+
+replace charm.land/bubbletea/v2 => ../bubbletea
