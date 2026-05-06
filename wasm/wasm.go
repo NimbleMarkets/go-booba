@@ -29,6 +29,7 @@ import (
 
 // Program wraps a BubbleTea program for the browser.
 type Program struct {
+	tea *tea.Program
 	*tea.Program
 	fromJS     *syncBuffer
 	toJS       *syncBuffer
@@ -52,8 +53,11 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 		tea.WithOutput(toJS),
 	}
 
+	teaProg := tea.NewProgram(model, append(baseOpts, opts...)...)
+
 	p := &Program{
-		Program: tea.NewProgram(model, append(baseOpts, opts...)...),
+		tea:     teaProg,
+		Program: teaProg,
 		fromJS:  fromJS,
 		toJS:    toJS,
 	}
@@ -96,6 +100,12 @@ func (p *Program) Run() (tea.Model, error) {
 	defer p.resizeFunc.Release()
 
 	return p.Program.Run()
+}
+
+// TeaProgram returns the underlying *tea.Program for use with functions
+// expecting the tea.Program type.
+func (p *Program) TeaProgram() *tea.Program {
+	return p.tea
 }
 
 // ReleaseTerminal is a no-op in the browser.
