@@ -48,19 +48,6 @@ builds:
       - amd64
       - arm64
 
-  - id: booba-wasm-build
-    main: ./cmd/booba-wasm-build
-    binary: booba-wasm-build
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - arm64
-
 archives:
   - id: default
     formats: [tar.gz]
@@ -83,7 +70,6 @@ notarize:
         - booba
         - booba-assets
         - booba-sip-client
-        - booba-wasm-build
       sign:
         certificate: "{{.Env.MACOS_SIGN_P12}}"
         password: "{{.Env.MACOS_SIGN_PASSWORD}}"
