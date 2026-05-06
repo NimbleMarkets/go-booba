@@ -177,7 +177,6 @@ tasks:
       - build-cmd-booba
       - build-cmd-booba-assets
       - build-cmd-booba-sip-client
-      - build-cmd-booba-wasm-build
       - build-cmd-booba-view-example-native
       - build-cmd-booba-view-example-wasm
 
@@ -190,16 +189,6 @@ tasks:
       - cmd/booba-assets/**/*
     generates:
       - bin/booba-assets
-
-  build-cmd-booba-wasm-build:
-    desc: 'Build booba-wasm-build command'
-    deps: [go-tidy]
-    cmds:
-      - go build -o bin/booba-wasm-build ./cmd/booba-wasm-build/
-    sources:
-      - cmd/booba-wasm-build/**/*
-    generates:
-      - bin/booba-wasm-build
 
   build-cmd-booba:
     desc: 'Build booba command'
@@ -241,12 +230,11 @@ tasks:
 
   build-cmd-booba-view-example-wasm:
     desc: 'Build booba-view-example command in WASM'
-    deps: [go-tidy, build-cmd-booba-wasm-build]
+    deps: [go-tidy]
     cmds:
       - bin/booba-wasm-build -o bin/booba-view-example.wasm ./cmd/booba-view-example/
     sources:
       - cmd/booba-view-example/*.go
-      - cmd/booba-wasm-build/**/*
     generates:
       - bin/booba-view-example.wasm
 
