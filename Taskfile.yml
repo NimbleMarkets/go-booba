@@ -232,7 +232,7 @@ tasks:
     desc: 'Build booba-view-example command in WASM'
     deps: [go-tidy]
     cmds:
-      - bin/booba-wasm-build -o bin/booba-view-example.wasm ./cmd/booba-view-example/
+      - GOOS=js GOARCH=wasm go build -o bin/booba-view-example.wasm ./cmd/booba-view-example/
     sources:
       - cmd/booba-view-example/*.go
     generates:
@@ -244,7 +244,6 @@ tasks:
       - rm -f bin/booba
       - rm -f bin/booba-assets
       - rm -f bin/booba-sip-client
-      - rm -f bin/booba-wasm-build
       - rm -f bin/booba-view-example
       - rm -f bin/booba-view-example.wasm
 
