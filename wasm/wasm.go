@@ -29,7 +29,7 @@ import (
 
 // Program wraps a BubbleTea program for the browser.
 type Program struct {
-	prog       *tea.Program
+	*tea.Program
 	fromJS     *syncBuffer
 	toJS       *syncBuffer
 	writeFunc  js.Func
@@ -52,12 +52,10 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 		tea.WithOutput(toJS),
 	}
 
-	prog := tea.NewProgram(model, append(baseOpts, opts...)...)
-
 	p := &Program{
-		prog:   prog,
-		fromJS: fromJS,
-		toJS:   toJS,
+		Program: tea.NewProgram(model, append(baseOpts, opts...)...),
+		fromJS:  fromJS,
+		toJS:    toJS,
 	}
 
 	p.writeFunc = js.FuncOf(func(_ js.Value, args []js.Value) any {
@@ -79,7 +77,7 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 
 	p.resizeFunc = js.FuncOf(func(_ js.Value, args []js.Value) any {
 		if len(args) >= 2 {
-			p.prog.Send(tea.WindowSizeMsg{
+			p.Send(tea.WindowSizeMsg{
 				Width:  args[0].Int(),
 				Height: args[1].Int(),
 			})
@@ -91,33 +89,13 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 	return p
 }
 
-// Run starts the program and blocks until it exits.
+// Run starts the program and blocks until it exits, cleaning up JS functions.
 func (p *Program) Run() (tea.Model, error) {
 	defer p.writeFunc.Release()
 	defer p.readFunc.Release()
 	defer p.resizeFunc.Release()
 
-	return p.prog.Run()
-}
-
-// Send sends a message to the program.
-func (p *Program) Send(msg tea.Msg) {
-	p.prog.Send(msg)
-}
-
-// Quit sends a quit message to the program.
-func (p *Program) Quit() {
-	p.prog.Quit()
-}
-
-// Kill immediately exits the program.
-func (p *Program) Kill() {
-	p.prog.Kill()
-}
-
-// Wait waits for the program to finish.
-func (p *Program) Wait() {
-	p.prog.Wait()
+	return p.Program.Run()
 }
 
 // ReleaseTerminal is a no-op in the browser.
@@ -128,16 +106,6 @@ func (p *Program) ReleaseTerminal() error {
 // RestoreTerminal is a no-op in the browser.
 func (p *Program) RestoreTerminal() error {
 	return nil
-}
-
-// Println prints a line above the program output.
-func (p *Program) Println(args ...any) {
-	p.prog.Println(args...)
-}
-
-// Printf prints formatted text above the program output.
-func (p *Program) Printf(template string, args ...any) {
-	p.prog.Printf(template, args...)
 }
 
 // Run creates a BubbleTea program from the given model, registers the
