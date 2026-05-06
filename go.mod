@@ -53,4 +53,4 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
-replace charm.land/bubbletea/v2 => ../bubbletea
+replace charm.land/bubbletea/v2 => github.com/neomantra/bubbletea/v2 v2.0.0-20260506185856-6506c47fa2f3
