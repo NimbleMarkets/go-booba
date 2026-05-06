@@ -1,5 +1,20 @@
 # Development Guide
 
+## BubbleTea Integration
+
+booba uses a patched version of BubbleTea with WebAssembly support. The patched fork is at [neomantra/bubbletea:nm-wasm](https://github.com/neomantra/bubbletea/tree/nm-wasm) and is referenced locally via a `replace` directive in `go.mod`:
+
+```
+replace charm.land/bubbletea/v2 => ../bubbletea
+```
+
+This means:
+- Clone both `booba` and `bubbletea` (nm-wasm branch) in sibling directories
+- The replace directive automatically uses the local bubbletea for builds
+- No separate build tool or monkeypatching needed
+
+The patches include WASM-specific signal handling and TTY initialization that aren't in upstream BubbleTea yet. Once merged upstream, the replace directive can be removed.
+
 ## Building from Source
 
 booba vendors [`ghostty-web`](https://github.com/NimbleMarkets/ghostty-web) (NimbleMarkets fork) as a git submodule at `third_party/ghostty-web`. Clone with submodules:
@@ -13,6 +28,33 @@ git submodule update --init --recursive
 Then `task build` builds everything: the wasm + JS inside the submodule, the booba TypeScript embed, copies the artifacts into `serve/static/` for `go:embed`, and produces `bin/booba`. The build needs `bun` and `zig 0.15.2`; locally `task` will use `nix develop` from `third_party/ghostty-web/flake.nix` if `nix` is on PATH (recommended), otherwise it expects both to be available directly. See `Taskfile.yml:build-ghostty-web`.
 
 The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so `go install github.com/NimbleMarkets/go-booba/cmd/booba` works without a JS toolchain. CI rebuilds them on every push and force-commits the result back to the branch (`.github/workflows/rebuild-static.yml`), so the bytes in HEAD are always traceable to a CI run plus the submodule SHA. To verify locally: clone with submodules, run `task build`, and inspect any diff in `serve/static/` — bytes may differ from the CI-built ones due to build-environment determinism, but the *source* should be identical.
+
+## Building WASM Applications with booba
+
+To compile a BubbleTea application to WebAssembly for use in the browser:
+
+```sh
+GOOS=js GOARCH=wasm go build -o app.wasm ./cmd/myapp/
+```
+
+The patched BubbleTea (via the `replace` directive) provides all necessary WASM stubs (signal handling, TTY initialization) automatically. No custom build tool or additional configuration is needed.
+
+**Requirements:**
+- Go 1.21+ (WebAssembly support is stable and built-in)
+- Both `booba` and `bubbletea` (nm-wasm branch) cloned locally in sibling directories
+- The replace directive in booba's `go.mod` points to the local bubbletea
+
+**Runtime:**
+The generated `.wasm` file needs a host environment that provides:
+- A way to accept input (keyboard, resize events)
+- A way to render output (terminal emulator frontend)
+
+The booba library provides:
+- `booba.Run()` — automatically picks native or WASM runtime based on build target
+- `booba.NewProgram()` — for more control, returns a `booba.Program` that wraps `*tea.Program`
+- `wasm` subpackage — low-level browser bridge for custom implementations
+
+See the example at `cmd/booba-view-example/` for a full working application that builds for both native and WASM targets.
 
 ## Command Documentation
 

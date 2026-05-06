@@ -109,7 +109,11 @@ func main() {
 }
 ```
 
-Build and run natively with `go run ./cmd/myapp`. Build for the browser with `go run github.com/NimbleMarkets/go-booba/cmd/booba-wasm-build -o web/app.wasm ./cmd/myapp/`.
+Build and run natively with `go run ./cmd/myapp`. Build for the browser with:
+
+```sh
+GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
+```
 
 For finer control, the [`wasm`](./wasm) subpackage exposes the browser bridge directly, and native code can construct a `tea.Program` the usual way.
 
