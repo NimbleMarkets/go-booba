@@ -136,9 +136,15 @@ tasks:
       - third_party/ghostty-web/scripts/build-wasm.sh
       - third_party/ghostty-web/patches/*.patch
       - third_party/ghostty-web/package.json
+      - third_party/ghostty-web/bun.lock
+      - third_party/ghostty-web/tsconfig.json
+      - third_party/ghostty-web/vite.config.js
     generates:
-      - third_party/ghostty-web/dist/ghostty-web.js
       - third_party/ghostty-web/ghostty-vt.wasm
+      - third_party/ghostty-web/dist/ghostty-web.js
+      - third_party/ghostty-web/dist/ghostty-web.umd.cjs
+      - third_party/ghostty-web/dist/ghostty-vt.wasm
+      - third_party/ghostty-web/dist/index.d.ts
 
   build-serve-assets:
     desc: 'Copy ghostty-web into serve/static/ for go:embed'
@@ -148,12 +154,12 @@ tasks:
       - mkdir -p serve/static/ghostty-web
       - cp -r third_party/ghostty-web/dist/* serve/static/ghostty-web/
     sources:
-      - serve/static/booba/*.js
       - third_party/ghostty-web/dist/*
     generates:
-      - serve/static/booba/*.js
       - serve/static/ghostty-web/ghostty-web.js
+      - serve/static/ghostty-web/ghostty-web.umd.cjs
       - serve/static/ghostty-web/ghostty-vt.wasm
+      - serve/static/ghostty-web/index.d.ts
 
   clean:
     desc: 'Clean commands'
@@ -199,6 +205,8 @@ tasks:
       - cmd/booba/*.go
       - internal/cli/*.go
       - serve/*.go
+      - serve/middleware/**/*.go
+      - sip/*.go
       - serve/static/**/*
     generates:
       - bin/booba
@@ -224,6 +232,8 @@ tasks:
       - cmd/booba-view-example/*.go
       - internal/cli/*.go
       - serve/*.go
+      - serve/middleware/**/*.go
+      - sip/*.go
       - serve/static/**/*
     generates:
       - bin/booba-view-example
