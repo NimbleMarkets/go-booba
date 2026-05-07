@@ -25,9 +25,9 @@ git clone --recurse-submodules https://github.com/NimbleMarkets/go-booba.git
 git submodule update --init --recursive
 ```
 
-Then `task build` builds everything: the wasm + JS inside the submodule, the booba TypeScript embed, copies the artifacts into `serve/static/` for `go:embed`, and produces `bin/booba`. The build needs `bun` and `zig 0.15.2`; locally `task` will use `nix develop` from `third_party/ghostty-web/flake.nix` if `nix` is on PATH (recommended), otherwise it expects both to be available directly. See `Taskfile.yml:build-ghostty-web`.
+The submodule is pinned to the `nm-kitty-built` branch, which ships the prebuilt `dist/` (wasm + JS + .d.ts) committed alongside the source by ghostty-web's CI. `task build` then just copies `third_party/ghostty-web/dist/*` into `serve/static/` for `go:embed`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally.
 
-The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so `go install github.com/NimbleMarkets/go-booba/cmd/booba` works without a JS toolchain. CI rebuilds them on every push and force-commits the result back to the branch (`.github/workflows/rebuild-static.yml`), so the bytes in HEAD are always traceable to a CI run plus the submodule SHA. To verify locally: clone with submodules, run `task build`, and inspect any diff in `serve/static/` — bytes may differ from the CI-built ones due to build-environment determinism, but the *source* should be identical.
+The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so `go install github.com/NimbleMarkets/go-booba/cmd/booba` works without a JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built` tip and re-running `task build-serve-assets` locally before committing.
 
 ## Building WASM Applications with booba
 

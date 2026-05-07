@@ -26,17 +26,13 @@ jobs:
         with:
           node-version: 24
 
-      - uses: oven-sh/setup-bun@v2
-
-      - uses: mlugg/setup-zig@v2
-        with:
-          version: 0.15.2
-
       - uses: go-task/setup-task@v2
 
       - name: Build assets
-        # Wipe committed outputs first so Task's source/generates check
-        # rebuilds rather than false-positively reusing stale committed bytes.
+        # ghostty-web ships prebuilt dist/ on the nm-kitty-built submodule
+        # branch; no zig/bun toolchain needed here. We still wipe committed
+        # outputs first so Task's source/generates check actually re-copies
+        # rather than false-positively reusing stale committed bytes.
         run: |
           rm -rf serve/static/booba serve/static/ghostty-web
           task build-serve-assets

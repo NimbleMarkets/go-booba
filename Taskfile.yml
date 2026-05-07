@@ -82,10 +82,11 @@ tasks:
 
   build-assets:
     desc: 'Build frontend assets'
-    # build-ghostty-web must produce dist/index.d.ts before tsc runs here,
-    # otherwise `import ... from 'ghostty-web'` fails type resolution. Task
-    # runs deps in parallel, so listing it explicitly is required.
-    deps: [npm-deps, build-ghostty-web]
+    # init-submodules must populate third_party/ghostty-web/dist/index.d.ts
+    # (shipped on the nm-kitty-built branch) before tsc runs here, otherwise
+    # `import ... from 'ghostty-web'` fails type resolution. Task runs deps
+    # in parallel, so listing it explicitly is required.
+    deps: [npm-deps, init-submodules]
     run: once
     cmds:
       - npm run build:embed
@@ -98,7 +99,7 @@ tasks:
 
   build-npm:
     desc: 'Build npm package to dist/'
-    deps: [npm-deps, build-ghostty-web]
+    deps: [npm-deps, init-submodules]
     cmds:
       - npm run build
     sources:
@@ -107,48 +108,17 @@ tasks:
       - dist/*.js
 
   init-submodules:
-    desc: 'Initialize git submodules (third_party/ghostty-web + nested ghostty)'
+    desc: 'Initialize git submodules (third_party/ghostty-web on nm-kitty-built ships prebuilt dist/)'
     run: once
     cmds:
       - git submodule update --init --recursive
     status:
       - test -e third_party/ghostty-web/.git
-      - test -e third_party/ghostty-web/ghostty/.git
-
-  build-ghostty-web:
-    desc: 'Build wasm + lib inside third_party/ghostty-web. Uses nix locally (pinned zig 0.15.2); in CI assumes zig + bun are already on PATH.'
-    # npm-deps must finish before bun install runs in the submodule. They
-    # both write into node_modules — booba's npm ci reaches through the
-    # `file:./third_party/ghostty-web` symlink and clobbers bun-installed
-    # .bin entries (e.g. vite) mid-build when run in parallel.
-    deps: [init-submodules, npm-deps]
-    run: once
-    cmds:
-      - |
-        cd third_party/ghostty-web
-        if command -v nix >/dev/null 2>&1 && [ -z "$CI" ]; then
-          nix --extra-experimental-features 'nix-command flakes' develop --command bun run build
-        else
-          bun run build
-        fi
-    sources:
-      - third_party/ghostty-web/lib/**/*.ts
-      - third_party/ghostty-web/scripts/build-wasm.sh
-      - third_party/ghostty-web/patches/*.patch
-      - third_party/ghostty-web/package.json
-      - third_party/ghostty-web/bun.lock
-      - third_party/ghostty-web/tsconfig.json
-      - third_party/ghostty-web/vite.config.js
-    generates:
-      - third_party/ghostty-web/ghostty-vt.wasm
-      - third_party/ghostty-web/dist/ghostty-web.js
-      - third_party/ghostty-web/dist/ghostty-web.umd.cjs
-      - third_party/ghostty-web/dist/ghostty-vt.wasm
-      - third_party/ghostty-web/dist/index.d.ts
+      - test -e third_party/ghostty-web/dist/index.d.ts
 
   build-serve-assets:
-    desc: 'Copy ghostty-web into serve/static/ for go:embed'
-    deps: [build-assets, build-ghostty-web]
+    desc: 'Copy prebuilt ghostty-web/dist/ into serve/static/ for go:embed'
+    deps: [build-assets, init-submodules]
     run: once
     cmds:
       - mkdir -p serve/static/ghostty-web
