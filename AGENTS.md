@@ -26,25 +26,35 @@ shipped with libghostty-vt (ghostty-web). These demos show how to wire
 ghostty-web's WASM-based terminal emulator to WebSocket and WebTransport
 backends using the Sip protocol.
 
-We do **not** vendor or directly include the upstream source. Instead, we
-took the ghostty-web build artifacts (WASM + JS + types) and adapted the
-demo's terminal initialization patterns into our own TypeScript wrapper.
-The transport protocol (Sip-compatible binary framing, WebTransport, etc.)
-is entirely booba's own — the upstream demo uses raw strings over WebSocket.
+We vendor ghostty-web as a git submodule at `third_party/ghostty-web`,
+pinned to the prebuilt `nm-kitty-built` branch of our long-term fork at
+`github.com/NimbleMarkets/ghostty-web`. That branch carries dist/ +
+ghostty-vt.wasm committed by the fork's CI, so booba doesn't run a
+zig/bun toolchain — `task build-serve-assets` just copies the prebuilt
+files into `serve/static/ghostty-web/`. We adapted the demo's terminal
+initialization patterns into our own TypeScript wrapper; the transport
+protocol (Sip-compatible binary framing, WebTransport, etc.) is entirely
+booba's own — the upstream demo uses raw strings over WebSocket.
 
-As ghostty-web evolves (new Terminal API, bug fixes, renderer improvements),
-we should periodically update our build artifacts and adjust our wrapper
-code for API changes.
+As ghostty-web evolves (new Terminal API, bug fixes, renderer
+improvements), we should periodically refresh the submodule pointer and
+adjust our wrapper code for API changes.
 
 ### Upstream tracking
 
-- **Upstream repo:** `~/projects/ghostty-web`
-- **No automated tracking.** Parity checks are manual.
-- **Last checked:** 2026-04-15
+- **Fork repo (consumed):** `github.com/NimbleMarkets/ghostty-web`,
+  branch `nm-kitty-built` (auto-rebuilt daily at 07:00 UTC from
+  `nm-kitty-meow` source via the fork's `build-nm-kitty-built` workflow;
+  also `workflow_dispatch`-able).
+- **Pristine source branch:** `nm-kitty-meow` — our patch series, kept
+  PR-able to `coder/ghostty-web` upstream.
+- **Coder upstream:** `github.com/coder/ghostty-web`. Parity checks for
+  the Terminal API surface are manual.
+- **Last upstream API parity check:** 2026-04-15
 
 ### What comes from upstream
 
-#### Pre-built ghostty-web distribution (used as-is)
+#### Pre-built ghostty-web distribution (vendored via submodule)
 
 | File | Description |
 |------|-------------|
@@ -53,7 +63,14 @@ code for API changes.
 | `serve/static/ghostty-web/ghostty-vt.wasm` | WASM binary for VT100 parsing |
 | `serve/static/ghostty-web/index.d.ts` | TypeScript definitions for ghostty-web API |
 
-Update by replacing with newer builds from ghostty-web (`bun run build`).
+These are copies of `third_party/ghostty-web/dist/*` from the
+`nm-kitty-built` submodule pointer; we commit them so
+`go install .../cmd/booba` works without a JS toolchain.
+
+To update: bump the submodule pointer (after triggering the fork's
+`build-nm-kitty-built` workflow if the latest source isn't yet built —
+otherwise wait for the daily run), then run `task build-serve-assets`
+to refresh the embedded copies. Commit pointer + statics together.
 
 #### Terminal initialization pattern (adapted from demo)
 
@@ -111,8 +128,10 @@ When upstream ghostty-web updates, check:
    onCursorMove. Watch for new events upstream.
 
 5. **Build artifacts** — When `ghostty-web.js`, `ghostty-vt.wasm`, or
-   `index.d.ts` change, replace the files in `serve/static/ghostty-web/`
-   and verify our TypeScript still compiles against the new types.
+   `index.d.ts` change upstream, refresh by bumping the
+   `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built`
+   tip and running `task build-serve-assets`. Verify our TypeScript
+   still compiles against the new types (`task build-assets`).
 
 6. **Mobile viewport handling** — Both booba and upstream use a
    `visualViewport` handler for mobile keyboards. Keep in sync.

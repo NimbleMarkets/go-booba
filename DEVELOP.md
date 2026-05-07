@@ -56,6 +56,28 @@ The booba library provides:
 
 See the example at `cmd/booba-view-example/` for a full working application that builds for both native and WASM targets.
 
+## Renderer Configuration
+
+The booba frontend supports multiple rendering backends:
+- **WebGPU** — Modern hardware-accelerated rendering (requires compatible browser)
+- **Canvas2D** — Fallback canvas-based rendering
+- **Auto** — Automatically selects WebGPU if available, falls back to Canvas2D
+
+Configure the default renderer via the `--renderer` CLI flag:
+
+```sh
+booba serve --renderer webgpu    # Force WebGPU
+booba serve --renderer canvas2d  # Force Canvas2D
+booba serve --renderer auto      # Auto-select (default)
+```
+
+Clients can override the server's default via the `?renderer=` query parameter:
+- `http://localhost:8080/?renderer=canvas2d` — Force Canvas2D
+- `http://localhost:8080/?renderer=webgpu` — Force WebGPU
+- `http://localhost:8080/?renderer=auto` — Auto-select
+
+In the browser, press **Alt+Shift+R** to toggle between WebGPU and Canvas2D.
+
 ## Command Documentation
 
 The `booba` CLI is built on [spf13/cobra](https://github.com/spf13/cobra) and ships generated documentation alongside the binary:
