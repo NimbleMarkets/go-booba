@@ -30,6 +30,7 @@ type ServeOptions struct {
 	Username     string
 	Password     string
 	PasswordFile string
+	Renderer     string
 }
 
 // AddServeFlags registers standard booba server flags on the provided FlagSet.
@@ -45,6 +46,7 @@ func AddServeFlags(fs *pflag.FlagSet, opts *ServeOptions, defaultListen string) 
 	fs.StringVar(&opts.Username, "username", "", "Basic Auth username")
 	fs.StringVar(&opts.Password, "password", "", "Basic Auth password (prefer --password-file or $"+PasswordEnvVar+" to keep secrets off argv)")
 	fs.StringVar(&opts.PasswordFile, "password-file", "", "path to a file containing the Basic Auth password (trailing whitespace is trimmed)")
+	fs.StringVar(&opts.Renderer, "renderer", "auto", "default renderer backend (webgpu, canvas2d, or auto)")
 }
 
 // Config converts CLI options into a serve.Config.
@@ -85,6 +87,10 @@ func (opts ServeOptions) Config() (serve.Config, error) {
 				config.OriginPatterns = append(config.OriginPatterns, pattern)
 			}
 		}
+	}
+
+	if opts.Renderer != "" {
+		config.Renderer = opts.Renderer
 	}
 
 	return config, nil

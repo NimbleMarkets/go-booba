@@ -78,7 +78,11 @@
         function parseRendererBackend() {
             const params = new URLSearchParams(window.location.search);
             const renderer = params.get('renderer');
-            return renderer === 'canvas2d' || renderer === 'webgpu' ? renderer : undefined;
+            if (renderer === 'canvas2d' || renderer === 'webgpu' || renderer === 'auto') {
+                return renderer;
+            }
+            // Fall back to server's default renderer preference (set by server in handleIndex)
+            return window.__boobaDefaultRenderer || 'auto';
         }
 
         async function main() {

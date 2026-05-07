@@ -40,7 +40,12 @@ export class BoobaTerminal {
             throw new Error('BoobaTerminal.init: container element is null');
         }
         await init();
-        const term = new Terminal(this.options);
+        // Extract renderer option and pass it to Terminal constructor
+        const termOptions = { ...this.options };
+        if (termOptions.renderer === undefined) {
+            termOptions.renderer = 'auto';
+        }
+        const term = new Terminal(termOptions);
         this.term = term;
         this.fitAddon = new FitAddon();
         term.loadAddon(this.fitAddon);

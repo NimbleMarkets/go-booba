@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -416,8 +417,15 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "index not found", http.StatusInternalServerError)
 		return
 	}
+
+	html := string(data)
+	// Inject the server's renderer preference as a global variable
+	// The client-side code will use this as a fallback if no query parameter is provided
+	injectedScript := `<script>window.__boobaDefaultRenderer = "` + s.config.Renderer + `";</script>`
+	html = strings.Replace(html, "<script type=\"module\">", injectedScript+"\n    <script type=\"module\">", 1)
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if _, err := w.Write(data); err != nil {
+	if _, err := w.Write([]byte(html)); err != nil {
 		log.Printf("write index response: %v", err)
 	}
 }

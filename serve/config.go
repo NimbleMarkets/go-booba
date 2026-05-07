@@ -52,12 +52,17 @@ type Config struct {
 	// for the client's initial Resize message after a WS upgrade or
 	// WT CONNECT. Zero or negative means default (10 seconds).
 	InitialResizeTimeout time.Duration
+
+	// Renderer is the default renderer backend ("webgpu", "canvas2d", or "auto").
+	// Query parameter ?renderer=... overrides this.
+	Renderer string
 }
 
 // DefaultConfig returns a Config with sensible defaults.
 func DefaultConfig() Config {
 	return Config{
-		Host: "127.0.0.1",
-		Port: 8080,
+		Host:     "127.0.0.1",
+		Port:     8080,
+		Renderer: "auto",
 	}
 }
