@@ -19,6 +19,7 @@ export interface BoobaTerminalOptions {
     disableStdin?: boolean;
     smoothScrollDuration?: number;
     theme?: BoobaTheme;
+    renderer?: 'auto' | 'webgpu' | 'canvas2d';
 }
 
 export class BoobaTerminal {
