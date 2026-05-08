@@ -40,12 +40,7 @@ export class BoobaTerminal {
             throw new Error('BoobaTerminal.init: container element is null');
         }
         await init();
-        // Extract renderer option and pass it to Terminal constructor
-        const termOptions = { ...this.options };
-        if (termOptions.renderer === undefined) {
-            termOptions.renderer = 'auto';
-        }
-        const term = new Terminal(termOptions);
+        const term = new Terminal(this.options);
         this.term = term;
         this.fitAddon = new FitAddon();
         term.loadAddon(this.fitAddon);
@@ -370,4 +365,6 @@ export { BoobaAutoAdapter } from './auto_adapter.js';
 export { BoobaWebTransportAdapter } from './webtransport_adapter.js';
 export { OSC52Scanner } from './clipboard.js';
 export { resolveBoobaURLs } from './urls.js';
+// HUD utilities (optional, treeshakeable)
+export { installRendererHud, parseRendererFromURL } from './hud.js';
 //# sourceMappingURL=booba.js.map
