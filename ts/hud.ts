@@ -65,13 +65,12 @@ export function installRendererHud(
     const badge = document.createElement('div');
     badge.id = 'booba-renderer-hud';
 
-    // Inject style block once (idempotent via id)
+    // Inject default styles once (idempotent, position excluded)
     if (!document.getElementById('booba-renderer-hud-styles')) {
         const style = document.createElement('style');
         style.id = 'booba-renderer-hud-styles';
         style.textContent = `
             #booba-renderer-hud {
-                position: ${position};
                 bottom: 12px;
                 right: 12px;
                 font-family: monospace;
@@ -87,7 +86,10 @@ export function installRendererHud(
         document.head.appendChild(style);
     }
 
-    // Apply optional className (now wins via CSS cascade)
+    // Position is instance-specific: set as inline style
+    badge.style.position = position;
+
+    // Apply optional className (now wins via CSS cascade for other properties)
     if (className) {
         badge.className = className;
     }
