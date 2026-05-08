@@ -2,17 +2,24 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { parseRendererFromURL } from './hud';
 
 describe('parseRendererFromURL', () => {
+    let originalLocation: PropertyDescriptor | undefined;
     let originalBoobaDefaultRenderer: any;
 
     beforeEach(() => {
-        // Save original state
+        // Save original location descriptor for proper restoration
+        originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
         originalBoobaDefaultRenderer = (window as any).__boobaDefaultRenderer;
-        // Reset global state
         delete (window as any).__boobaDefaultRenderer;
     });
 
     afterEach(() => {
-        // Restore
+        // Restore original location
+        if (originalLocation) {
+            Object.defineProperty(window, 'location', originalLocation);
+        } else {
+            delete (window as any).location;
+        }
+        // Restore original __boobaDefaultRenderer
         (window as any).__boobaDefaultRenderer = originalBoobaDefaultRenderer;
     });
 
@@ -57,12 +64,12 @@ describe('parseRendererFromURL', () => {
         expect(parseRendererFromURL()).toBe('auto');
     });
 
-    it('should fall back to auto if both param and __boobaDefaultRenderer are missing', () => {
+    it('should ignore invalid __boobaDefaultRenderer and fall back to auto', () => {
         Object.defineProperty(window, 'location', {
-            value: new URL('https://example.com'),
+            value: new URL('https://example.com?renderer=invalid'),
             writable: true,
         });
-        delete (window as any).__boobaDefaultRenderer;
+        (window as any).__boobaDefaultRenderer = 'badvalue';
         expect(parseRendererFromURL()).toBe('auto');
     });
 });
