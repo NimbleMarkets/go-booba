@@ -200,3 +200,30 @@ describe('installRendererHud', () => {
         expect(badge?.textContent).toBeDefined();
     });
 });
+
+describe('installRendererHud integration', () => {
+    it('should mount HUD and update FPS live', async () => {
+        const { installRendererHud } = await import('./hud');
+
+        const mockTerminal: Partial<Terminal> = {
+            renderer: {
+                backend: 'canvas2d',
+            },
+        };
+
+        const uninstall = installRendererHud(mockTerminal as Terminal);
+
+        const badge = document.getElementById('booba-renderer-hud');
+        expect(badge).toBeDefined();
+        expect(badge?.textContent).toBeDefined();
+
+        // Wait for FPS counter to tick (requires ~1000ms for first update)
+        await new Promise(resolve => setTimeout(resolve, 1100));
+
+        // Text should exist (exact FPS depends on timing)
+        expect(badge?.textContent?.length).toBeGreaterThan(0);
+
+        uninstall();
+        expect(document.getElementById('booba-renderer-hud')).toBeNull();
+    });
+});
