@@ -96,16 +96,18 @@ func run(outDir string, force bool) error {
 	if err := os.MkdirAll(ghDst, 0o755); err != nil {
 		return err
 	}
-	for _, name := range []string{"ghostty-web.js", "ghostty-vt.wasm"} {
-		src := filepath.Join(ghSrc, name)
-		if _, err := os.Stat(src); err != nil {
-			return fmt.Errorf("ghostty-web asset missing at %s: %w", src, err)
-		}
-		if err := copyFile(src, filepath.Join(ghDst, name)); err != nil {
-			return fmt.Errorf("copy %s: %w", name, err)
-		}
+	n, err = copyBrowserAssets(ghSrc, ghDst)
+	if err != nil {
+		return fmt.Errorf("copy ghostty-web assets: %w", err)
 	}
-	fmt.Printf("  ghostty-web/          → %s\n", ghDst)
+	if n == 0 {
+		return fmt.Errorf("no browser assets found in %s", ghSrc)
+	}
+	// Sanity check: ensure all __vite- references are resolved
+	if err := checkViteReferences(filepath.Join(ghDst, "ghostty-web.js"), ghDst); err != nil {
+		return fmt.Errorf("ghostty-web.js contains unresolved Vite references: %w", err)
+	}
+	fmt.Printf("  ghostty-web/ (%d files) → %s\n", n, ghDst)
 
 	// index.html (only if missing or --force)
 	htmlDst := filepath.Join(outDir, "index.html")
@@ -188,4 +190,78 @@ func copyJSFiles(srcDir, dstDir string) (int, error) {
 		count++
 	}
 	return count, nil
+}
+
+// copyBrowserAssets copies all .js and .wasm files from srcDir to dstDir,
+// skipping type definitions, source maps, and UMD bundles.
+func copyBrowserAssets(srcDir, dstDir string) (int, error) {
+	entries, err := os.ReadDir(srcDir)
+	if err != nil {
+		return 0, err
+	}
+	count := 0
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		// Skip type definitions, source maps, and UMD bundles
+		if strings.HasSuffix(name, ".d.ts") ||
+			strings.HasSuffix(name, ".d.ts.map") ||
+			strings.HasSuffix(name, ".js.map") ||
+			strings.HasSuffix(name, ".cjs") {
+			continue
+		}
+		// Include only .js and .wasm files
+		if !strings.HasSuffix(name, ".js") && !strings.HasSuffix(name, ".wasm") {
+			continue
+		}
+		src := filepath.Join(srcDir, name)
+		dst := filepath.Join(dstDir, name)
+		if err := copyFile(src, dst); err != nil {
+			return count, err
+		}
+		count++
+	}
+	return count, nil
+}
+
+// checkViteReferences verifies that all __vite- references in jsFile are resolved
+// (i.e., the referenced files exist in dstDir). This catches regressions where
+// Vite-generated filenames change after a rebuild.
+func checkViteReferences(jsFile, dstDir string) error {
+	content, err := os.ReadFile(jsFile)
+	if err != nil {
+		return err
+	}
+	jsText := string(content)
+
+	// Find all __vite- references
+	parts := strings.Split(jsText, "__vite-")
+	if len(parts) == 1 {
+		// No __vite- references, all good
+		return nil
+	}
+
+	for i := 1; i < len(parts); i++ {
+		// Extract the filename (alphanumeric, dots, hyphens until quote or closing paren)
+		rest := parts[i]
+		end := 0
+		for end < len(rest) && (isAlphanumeric(rest[end]) || rest[end] == '.' || rest[end] == '-') {
+			end++
+		}
+		if end == 0 {
+			continue // Malformed, skip
+		}
+		filename := "__vite-" + rest[:end]
+		checkPath := filepath.Join(dstDir, filename)
+		if _, err := os.Stat(checkPath); err != nil {
+			return fmt.Errorf("referenced file not found: %s", filename)
+		}
+	}
+	return nil
+}
+
+func isAlphanumeric(b byte) bool {
+	return (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9')
 }
