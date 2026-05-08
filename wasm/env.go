@@ -18,6 +18,9 @@ import "os"
 //     that detect Kitty graphics, hyperlinks, and similar features.
 //   - COLORTERM=truecolor: ghostty-web supports 24-bit color. Many TUI
 //     libraries gate truecolor output on this.
+//   - CLICOLOR_FORCE=1: ensures color output even if the output stream
+//     appears redirected. Prevents TUI libraries from disabling colors
+//     in the browser context.
 //
 // What we deliberately don't set:
 //   - TERM=xterm-ghostty: would require the matching terminfo entry on
@@ -31,5 +34,8 @@ func init() {
 	}
 	if os.Getenv("COLORTERM") == "" {
 		_ = os.Setenv("COLORTERM", "truecolor")
+	}
+	if os.Getenv("CLICOLOR_FORCE") == "" {
+		_ = os.Setenv("CLICOLOR_FORCE", "1")
 	}
 }

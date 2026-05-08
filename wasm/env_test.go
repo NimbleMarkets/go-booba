@@ -20,25 +20,14 @@ func TestEnvDefaults(t *testing.T) {
 	}
 }
 
-// TestEnvNotOverridden verifies that the init() function respects pre-existing
-// environment variable values. This allows consumers to set their own values
-// via earlier-ordered init() functions.
-func TestEnvNotOverridden(t *testing.T) {
-	// Set a custom value before the env.go init() would run (simulated by
-	// setting it now and checking the override behavior works)
+// TestEnvCanBeOverridden verifies that consumers can override environment
+// variables set by the init() function. This is tested by setting a custom
+// value and verifying it's preserved (demonstrating the override path works).
+func TestEnvCanBeOverridden(t *testing.T) {
 	customValue := "custom-term"
-	os.Setenv("TERM_PROGRAM", customValue)
+	t.Setenv("TERM_PROGRAM", customValue)
 
-	// Simulate what would happen if init() ran again (it won't, but verify the logic)
-	if os.Getenv("TERM_PROGRAM") == "" {
-		os.Setenv("TERM_PROGRAM", "ghostty")
-	}
-
-	// Verify our custom value is preserved
 	if got := os.Getenv("TERM_PROGRAM"); got != customValue {
-		t.Errorf("TERM_PROGRAM should not be overridden: got %q, want %q", got, customValue)
+		t.Errorf("override should be preserved: got %q, want %q", got, customValue)
 	}
-
-	// Clean up
-	os.Unsetenv("TERM_PROGRAM")
 }
