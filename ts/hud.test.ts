@@ -208,7 +208,11 @@ describe('installRendererHud', () => {
 
     it('should toggle canvas2d to webgpu on Alt+Shift+R', () => {
         // Set initial backend to canvas2d
-        mockTerminal.renderer.backend = 'canvas2d';
+        mockTerminal = {
+            renderer: {
+                backend: 'canvas2d',
+            },
+        };
         const originalHref = window.location.href;
         const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
 
