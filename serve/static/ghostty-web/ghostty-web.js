@@ -6835,10 +6835,16 @@ class eg {
           visibility: GPUShaderStage.FRAGMENT,
           texture: { sampleType: "float" }
         })),
-        { binding: 21, visibility: GPUShaderStage.FRAGMENT, sampler: { type: "filtering" } }
+        {
+          binding: 21,
+          visibility: GPUShaderStage.FRAGMENT,
+          sampler: { type: "filtering" }
+        }
       ]
     });
-    const B = this.device.createShaderModule({ code: vi, label: "textShader" }), I = this.device.createPipelineLayout({ bindGroupLayouts: [this.textBindGroupLayout] });
+    const B = this.device.createShaderModule({ code: vi, label: "textShader" }), I = this.device.createPipelineLayout({
+      bindGroupLayouts: [this.textBindGroupLayout]
+    });
     this.textPipeline = this.device.createRenderPipeline({
       layout: I,
       vertex: { module: B, entryPoint: "vsMain" },
@@ -8155,10 +8161,7 @@ class so {
         opacity: this.scrollbarOpacity
       }), this.renderer.setOnRequestRender(() => this.requestRender()), this.renderer && this.renderer.backend === "webgpu" && this.renderer.onDeviceLost(async (o) => {
         var w;
-        this.isDisposed || (console.warn(
-          "[ghostty-web] GPU device lost; falling back to Canvas2D:",
-          o.reason
-        ), this.canvas && ((w = this.renderer) == null || w.destroy(), this.renderer = await lI("canvas2d", this.canvas, {
+        this.isDisposed || (console.warn("[ghostty-web] GPU device lost; falling back to Canvas2D:", o.reason), this.canvas && ((w = this.renderer) == null || w.destroy(), this.renderer = await lI("canvas2d", this.canvas, {
           fontSize: this.options.fontSize,
           fontFamily: this.options.fontFamily,
           cursorStyle: this.options.cursorStyle,
