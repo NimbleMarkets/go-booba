@@ -161,7 +161,6 @@ describe('installRendererHud', () => {
 
     it('should bind Alt+Shift+R hotkey by default', async () => {
         const { installRendererHud } = await import('./hud');
-        const originalLocation = window.location.href;
 
         installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
 
