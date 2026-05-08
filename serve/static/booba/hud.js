@@ -22,27 +22,51 @@ export function parseRendererFromURL() {
  * Returns an uninstall function.
  */
 export function installRendererHud(terminal, opts) {
+    // Guard against double-install
+    const existing = document.getElementById('booba-renderer-hud');
+    if (existing) {
+        console.warn('installRendererHud: HUD already installed. Uninstall first if you need to reinstall.');
+        return () => { }; // Return no-op uninstall
+    }
+    if (!terminal) {
+        throw new Error('installRendererHud: terminal is null — make sure to call after booba.init()');
+    }
     const parent = opts?.parent ?? document.body;
     const className = opts?.className;
-    const bindToggleHotkey = opts?.bindToggleHotkey !== false;
+    const position = opts?.position ?? 'fixed';
     // Create badge element
     const badge = document.createElement('div');
     badge.id = 'booba-renderer-hud';
-    // Apply inline styles (exact from reference)
-    badge.style.position = 'fixed';
-    badge.style.bottom = '12px';
-    badge.style.right = '12px';
-    badge.style.fontFamily = 'monospace';
-    badge.style.fontSize = '11px';
-    badge.style.color = 'rgb(102, 102, 102)';
-    badge.style.background = 'rgba(0, 0, 0, 0.4)';
-    badge.style.padding = '2px 6px';
-    badge.style.borderRadius = '3px';
-    badge.style.pointerEvents = 'none';
-    badge.style.zIndex = '10';
+    // Inject default styles once (idempotent, position excluded)
+    if (!document.getElementById('booba-renderer-hud-styles')) {
+        const style = document.createElement('style');
+        style.id = 'booba-renderer-hud-styles';
+        style.textContent = `
+            :where(#booba-renderer-hud) {
+                bottom: 12px;
+                right: 12px;
+                font-family: monospace;
+                font-size: 11px;
+                color: #666;
+                background: rgba(0, 0, 0, 0.4);
+                padding: 2px 6px;
+                border-radius: 3px;
+                pointer-events: auto;
+                cursor: pointer;
+                user-select: none;
+                z-index: 10;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    // Position is instance-specific: set as inline style
+    badge.style.position = position;
+    // Apply optional className (now wins via CSS cascade for other properties)
     if (className) {
         badge.className = className;
     }
+    // Set title for discoverability
+    badge.title = 'Click to toggle renderer';
     parent.appendChild(badge);
     // rAF loop for FPS counter
     let frames = 0;
@@ -60,27 +84,22 @@ export function installRendererHud(terminal, opts) {
         rafId = requestAnimationFrame(updateRendererInfo);
     };
     rafId = requestAnimationFrame(updateRendererInfo);
-    // Alt+Shift+R hotkey handler
-    const handleKeyDown = (e) => {
-        if (!bindToggleHotkey)
-            return;
-        if (e.altKey && e.shiftKey && (e.key === 'R' || e.key === 'r')) {
-            e.preventDefault();
-            const cur = terminal.renderer?.backend;
-            const next = cur === 'webgpu' ? 'canvas2d' : 'webgpu';
-            const url = new URL(window.location.href);
-            url.searchParams.set('renderer', next);
-            window.location.href = url.toString();
-        }
+    // Click handler to toggle renderer
+    const handleClick = () => {
+        const cur = terminal.renderer?.backend;
+        const next = cur === 'webgpu' ? 'canvas2d' : 'webgpu';
+        const url = new URL(window.location.href);
+        url.searchParams.set('renderer', next);
+        window.location.href = url.toString();
     };
-    document.addEventListener('keydown', handleKeyDown);
+    badge.addEventListener('click', handleClick);
     // Uninstall function
     return () => {
         if (rafId !== null) {
             cancelAnimationFrame(rafId);
         }
         badge.remove();
-        document.removeEventListener('keydown', handleKeyDown);
+        badge.removeEventListener('click', handleClick);
     };
 }
 //# sourceMappingURL=hud.js.map
