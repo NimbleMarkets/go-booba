@@ -1,7 +1,12 @@
 import type { Terminal } from 'ghostty-web';
-import './types.js'; // Ensure global declarations are loaded
 
 export type BoobaRenderer = 'auto' | 'webgpu' | 'canvas2d';
+
+declare global {
+  interface Window {
+    __boobaDefaultRenderer?: BoobaRenderer;
+  }
+}
 
 /**
  * Parse ?renderer= query parameter from the current URL.

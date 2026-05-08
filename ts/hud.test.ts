@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { parseRendererFromURL } from './hud';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { parseRendererFromURL, installRendererHud } from './hud';
 
 describe('parseRendererFromURL', () => {
     let originalLocation: PropertyDescriptor | undefined;
@@ -95,35 +95,37 @@ describe('installRendererHud', () => {
     afterEach(() => {
         const element = document.getElementById('booba-renderer-hud');
         element?.remove();
+
+        // Clear any previous HUD style element
+        const styleElement = document.getElementById('booba-renderer-hud-styles');
+        styleElement?.remove();
     });
 
-    it('should create and append badge element to parent', async () => {
-        const { installRendererHud } = await import('./hud');
+    it('should create and append badge element to parent', () => {
         const parent = document.createElement('div');
         document.body.appendChild(parent);
 
-        installRendererHud(mockTerminal as Terminal, { parent });
+        const uninstall = installRendererHud(mockTerminal as Terminal, { parent });
 
         const badge = document.getElementById('booba-renderer-hud');
         expect(badge).toBeDefined();
         expect(badge?.parentElement).toBe(parent);
 
+        uninstall();
         parent.remove();
     });
 
-    it('should append to document.body by default', async () => {
-        const { installRendererHud } = await import('./hud');
-
-        installRendererHud(mockTerminal as Terminal);
+    it('should append to document.body by default', () => {
+        const uninstall = installRendererHud(mockTerminal as Terminal);
 
         const badge = document.getElementById('booba-renderer-hud');
         expect(badge?.parentElement).toBe(document.body);
+
+        uninstall();
     });
 
-    it('should apply inline styles', async () => {
-        const { installRendererHud } = await import('./hud');
-
-        installRendererHud(mockTerminal as Terminal);
+    it('should apply inline styles', () => {
+        const uninstall = installRendererHud(mockTerminal as Terminal);
 
         const badge = document.getElementById('booba-renderer-hud');
         const computed = window.getComputedStyle(badge!);
@@ -134,20 +136,20 @@ describe('installRendererHud', () => {
         expect(computed.fontSize).toBe('11px');
         expect(computed.pointerEvents).toBe('none');
         expect(computed.zIndex).toBe('10');
+
+        uninstall();
     });
 
-    it('should apply optional className', async () => {
-        const { installRendererHud } = await import('./hud');
-
-        installRendererHud(mockTerminal as Terminal, { className: 'my-custom-class' });
+    it('should apply optional className', () => {
+        const uninstall = installRendererHud(mockTerminal as Terminal, { className: 'my-custom-class' });
 
         const badge = document.getElementById('booba-renderer-hud');
         expect(badge?.classList.contains('my-custom-class')).toBe(true);
+
+        uninstall();
     });
 
-    it('should return an uninstall function that removes element', async () => {
-        const { installRendererHud } = await import('./hud');
-
+    it('should return an uninstall function that removes element', () => {
         const uninstall = installRendererHud(mockTerminal as Terminal);
 
         const badge = document.getElementById('booba-renderer-hud');
@@ -159,52 +161,123 @@ describe('installRendererHud', () => {
         expect(badgeAfter).toBeNull();
     });
 
-    it('should bind Alt+Shift+R hotkey by default', async () => {
-        const { installRendererHud } = await import('./hud');
+    it('should bind Alt+Shift+R hotkey and toggle renderer', () => {
+        const originalHref = window.location.href;
 
-        installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
+        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
 
+        // Mock window.location.href setter
+        let navigatedUrl = '';
+        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
+        Object.defineProperty(window, 'location', {
+            value: {
+                href: originalHref,
+            },
+            writable: true,
+        });
+
+        // Track navigation
+        Object.defineProperty(window.location, 'href', {
+            set: (url: string) => {
+                navigatedUrl = url;
+            },
+            get: () => originalHref,
+        });
+
+        // Dispatch Alt+Shift+R
         const event = new KeyboardEvent('keydown', {
             altKey: true,
             shiftKey: true,
             key: 'R',
         });
 
-        // Note: Full navigation test is hard without actual reload;
-        // this verifies the listener is attached (no error)
         document.dispatchEvent(event);
+
+        // Assert URL changed to toggle renderer
+        expect(navigatedUrl).toContain('renderer=canvas2d'); // webgpu toggles to canvas2d
+
+        // Cleanup
+        uninstall();
+
+        // Restore location
+        if (originalLocation) {
+            Object.defineProperty(window, 'location', originalLocation);
+        }
     });
 
-    it('should not bind hotkey if bindToggleHotkey is false', async () => {
-        const { installRendererHud } = await import('./hud');
+    it('should not bind hotkey if bindToggleHotkey is false', () => {
+        const originalHref = window.location.href;
 
-        installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: false });
+        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: false });
 
+        // Mock window.location.href to track if it changes
+        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
+        let navigationAttempted = false;
+
+        // Create a fresh location mock to capture any navigation attempts
+        const mockLocation = {
+            href: originalHref,
+            search: '',
+        };
+
+        const hrefDescriptor = {
+            set: (url: string) => {
+                navigationAttempted = true;
+            },
+            get: () => originalHref,
+            configurable: true,
+        };
+
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: mockLocation,
+        });
+
+        Object.defineProperty(window.location, 'href', hrefDescriptor);
+
+        // Dispatch Alt+Shift+R
         const event = new KeyboardEvent('keydown', {
             altKey: true,
             shiftKey: true,
             key: 'R',
         });
 
-        // Should not throw
         document.dispatchEvent(event);
+
+        // When bindToggleHotkey is false, the handler should return early
+        // and not attempt navigation
+        expect(navigationAttempted).toBe(false);
+
+        // Cleanup
+        uninstall();
+
+        // Restore location
+        if (originalLocation) {
+            Object.defineProperty(window, 'location', originalLocation);
+        }
     });
 
-    it('should display backend and fps in text content', async () => {
-        const { installRendererHud } = await import('./hud');
+    it('should display backend and fps in text content', () => {
+        vi.useFakeTimers();
+        const mockNow = vi.fn(() => 0);
+        vi.stubGlobal('performance', { now: mockNow });
 
-        installRendererHud(mockTerminal as Terminal);
+        const uninstall = installRendererHud(mockTerminal as Terminal);
+
+        // Advance 1100ms to trigger one FPS update
+        mockNow.mockReturnValue(1100);
+        vi.advanceTimersByTime(1100);
 
         const badge = document.getElementById('booba-renderer-hud');
-        // Text may be updated asynchronously via rAF, so just check it exists
-        expect(badge?.textContent).toBeDefined();
+        expect(badge?.textContent).toMatch(/^(webgpu|canvas2d|\?) \d+ fps$/);
+
+        uninstall();
+        vi.useRealTimers();
     });
 });
 
 describe('installRendererHud integration', () => {
     it('should mount HUD and update FPS live', async () => {
-        const { installRendererHud } = await import('./hud');
-
         const mockTerminal: Partial<Terminal> = {
             renderer: {
                 backend: 'canvas2d',
@@ -220,8 +293,8 @@ describe('installRendererHud integration', () => {
         // Wait for FPS counter to tick (requires ~1000ms for first update)
         await new Promise(resolve => setTimeout(resolve, 1100));
 
-        // Text should exist (exact FPS depends on timing)
-        expect(badge?.textContent?.length).toBeGreaterThan(0);
+        // Text should match the format
+        expect(badge?.textContent).toMatch(/^(canvas2d) \d+ fps$/);
 
         uninstall();
         expect(document.getElementById('booba-renderer-hud')).toBeNull();
