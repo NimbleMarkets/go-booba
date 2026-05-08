@@ -42,19 +42,6 @@
         .status-dot.connected { background: #27c93f; }
         .status-dot.disconnected { background: #dc3545; }
         .status-dot.connecting, .status-dot.reconnecting { background: #e6b800; }
-        #renderer-info {
-            position: fixed;
-            bottom: 12px;
-            right: 12px;
-            font-family: monospace;
-            font-size: 11px;
-            color: #666;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 2px 6px;
-            border-radius: 3px;
-            pointer-events: none;
-            z-index: 10;
-        }
     </style>
 </head>
 <body>
@@ -62,11 +49,10 @@
         <span class="status-dot connecting" id="status-dot"></span>
         <span id="status-text">Connecting...</span>
     </div>
-    <div id="renderer-info"></div>
     <div id="terminal-container"></div>
 
     <script type="module">
-        import { BoobaTerminal, resolveBoobaURLs } from './static/booba/booba.js';
+        import { BoobaTerminal, resolveBoobaURLs, installRendererHud, parseRendererFromURL } from './static/booba/booba.js';
 
         const dot = document.getElementById('status-dot');
         const text = document.getElementById('status-text');
@@ -75,19 +61,9 @@
             return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
         }
 
-        function parseRendererBackend() {
-            const params = new URLSearchParams(window.location.search);
-            const renderer = params.get('renderer');
-            if (renderer === 'canvas2d' || renderer === 'webgpu' || renderer === 'auto') {
-                return renderer;
-            }
-            // Fall back to server's default renderer preference (set by server in handleIndex)
-            return window.__boobaDefaultRenderer || 'auto';
-        }
-
         async function main() {
             const booba = new BoobaTerminal('terminal-container', {
-                renderer: parseRendererBackend(),
+                renderer: parseRendererFromURL(),
             });
 
             booba.onStatusChange = (state, message) => {
@@ -106,6 +82,9 @@
             };
 
             await booba.init();
+
+            // Install renderer HUD (shows backend + FPS in bottom-right corner)
+            installRendererHud(booba.terminal, { bindToggleHotkey: true });
 
             // Resolve endpoints relative to the page so booba works behind
             // a path-prefix reverse proxy that strips the prefix.
@@ -133,35 +112,6 @@
                     booba.fitAddon?.fit();
                 });
             }
-
-            // Install renderer info display (backend + FPS)
-            const rendererInfoEl = document.getElementById('renderer-info');
-            let frames = 0;
-            let lastTick = performance.now();
-            const updateRendererInfo = () => {
-                frames++;
-                const now = performance.now();
-                if (now - lastTick >= 1000) {
-                    const backend = booba.terminal?.renderer?.backend || '?';
-                    rendererInfoEl.textContent = `${backend} ${frames} fps`;
-                    frames = 0;
-                    lastTick = now;
-                }
-                requestAnimationFrame(updateRendererInfo);
-            };
-            requestAnimationFrame(updateRendererInfo);
-
-            // Alt+Shift+R: toggle between WebGPU and Canvas2D
-            document.addEventListener('keydown', (e) => {
-                if (e.altKey && e.shiftKey && (e.key === 'R' || e.key === 'r')) {
-                    e.preventDefault();
-                    const cur = booba.terminal?.renderer?.backend;
-                    const next = cur === 'webgpu' ? 'canvas2d' : 'webgpu';
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('renderer', next);
-                    window.location.href = url.toString();
-                }
-            });
         }
 
         main().catch(console.error);
