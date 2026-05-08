@@ -70,7 +70,12 @@ export class BoobaTerminal {
         this.fitAddon = new FitAddon();
         term.loadAddon(this.fitAddon);
 
-        term.open(this.container);
+        // CRITICAL: term.open() is async and must be awaited. Without the await,
+        // callers that call init() then immediately connectWasm() will race the
+        // renderer's async initialization. If WebGPU adapter is slow (cold cache),
+        // term.write() will call assertOpen() before isOpen flips true, causing
+        // "Terminal must be opened" error. See ghostty-web.js:8055-8067 for details.
+        await term.open(this.container);
         this.fitAddon.fit();
         this.fitAddon.observeResize();
 
