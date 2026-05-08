@@ -218,10 +218,8 @@ describe('installRendererHud', () => {
             search: '',
         };
 
-        let navigationUrl = '';
         const hrefDescriptor = {
-            set: (url: string) => {
-                navigationUrl = url;
+            set: () => {
                 navigationAttempted = true;
             },
             get: () => window.location.href,
