@@ -1,3 +1,5 @@
+import type { Terminal } from 'ghostty-web';
+
 /**
  * Parse ?renderer= query parameter from the current URL.
  * Falls back to window.__boobaDefaultRenderer, then 'auto'.
@@ -18,4 +20,26 @@ export function parseRendererFromURL(): 'auto' | 'webgpu' | 'canvas2d' {
     }
 
     return 'auto';
+}
+
+export interface BoobaRendererHudOptions {
+    /** Where to mount the badge (default: document.body) */
+    parent?: HTMLElement;
+    /** CSS class for custom styling (applied to badge element) */
+    className?: string;
+    /** Bind Alt+Shift+R to toggle webgpu↔canvas2d. Default: true. */
+    bindToggleHotkey?: boolean;
+}
+
+/**
+ * Install a corner HUD showing active renderer backend and live FPS.
+ * Must be called after booba.init() so terminal.renderer exists.
+ * Returns an uninstall function.
+ */
+export function installRendererHud(
+    terminal: Terminal,
+    opts?: BoobaRendererHudOptions
+): () => void {
+    // Implemented in Task 6
+    throw new Error('Not implemented');
 }
