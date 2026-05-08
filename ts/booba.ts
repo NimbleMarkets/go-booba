@@ -462,4 +462,4 @@ export { resolveBoobaURLs, type BoobaURLs } from './urls.js';
 export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';
 
 // HUD utilities (optional, treeshakeable)
-export { installRendererHud, parseRendererFromURL, type BoobaRendererHudOptions } from './hud.js';
+export { installRendererHud, parseRendererFromURL, type BoobaRendererHudOptions, type BoobaRenderer } from './hud.js';

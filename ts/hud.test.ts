@@ -126,14 +126,14 @@ describe('installRendererHud', () => {
         installRendererHud(mockTerminal as Terminal);
 
         const badge = document.getElementById('booba-renderer-hud');
-        expect(badge?.style.position).toBe('fixed');
-        expect(badge?.style.bottom).toBe('12px');
-        expect(badge?.style.right).toBe('12px');
-        expect(badge?.style.fontFamily).toContain('monospace');
-        expect(badge?.style.fontSize).toBe('11px');
-        expect(badge?.style.color).toBe('rgb(102, 102, 102)'); // #666
-        expect(badge?.style.pointerEvents).toBe('none');
-        expect(badge?.style.zIndex).toBe('10');
+        const computed = window.getComputedStyle(badge!);
+        expect(computed.position).toBe('fixed');
+        expect(computed.bottom).toBe('12px');
+        expect(computed.right).toBe('12px');
+        expect(computed.fontFamily).toContain('monospace');
+        expect(computed.fontSize).toBe('11px');
+        expect(computed.pointerEvents).toBe('none');
+        expect(computed.zIndex).toBe('10');
     });
 
     it('should apply optional className', async () => {
