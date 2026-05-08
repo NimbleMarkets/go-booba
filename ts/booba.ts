@@ -460,3 +460,6 @@ export { BoobaWebTransportAdapter } from './webtransport_adapter.js';
 export { OSC52Scanner } from './clipboard.js';
 export { resolveBoobaURLs, type BoobaURLs } from './urls.js';
 export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';
+
+// HUD utilities (optional, treeshakeable)
+export { installRendererHud, parseRendererFromURL, type BoobaRendererHudOptions } from './hud.js';
