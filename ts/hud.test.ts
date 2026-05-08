@@ -206,8 +206,6 @@ describe('installRendererHud', () => {
     });
 
     it('should not bind hotkey if bindToggleHotkey is false', () => {
-        const originalHref = window.location.href;
-
         const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: false });
 
         // Mock window.location.href to track if it changes
@@ -216,7 +214,7 @@ describe('installRendererHud', () => {
 
         // Create a fresh location mock to capture any navigation attempts
         const mockLocation = {
-            href: originalHref,
+            href: window.location.href,
             search: '',
         };
 
@@ -224,7 +222,7 @@ describe('installRendererHud', () => {
             set: (url: string) => {
                 navigationAttempted = true;
             },
-            get: () => originalHref,
+            get: () => window.location.href,
             configurable: true,
         };
 
