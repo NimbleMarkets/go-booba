@@ -10,6 +10,11 @@
 
 ### Added
 - Badge is now clickable to toggle between renderers (simpler UX than hidden hotkey)
+- WASM builds now synthesize environment variables for terminal capability detection:
+  - `TERM_PROGRAM=ghostty` signals ghostty-web as the terminal renderer
+  - `COLORTERM=truecolor` advertises 24-bit color support
+  - Libraries that probe `os.Getenv` for capability detection (e.g., Kitty graphics support) now see positive signals in browser WASM environments
+  - Can be overridden by consumers via `os.Setenv` before calling `wasm.Run()`
 
 ## `v0.6.1` (2026-05-07)
 

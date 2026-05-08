@@ -6,6 +6,16 @@
 // bubbletea_resize) that booba's BoobaWasmAdapter polls to shuttle data between
 // the ghostty-web terminal emulator and the Go program.
 //
+// Environment synthesis:
+//
+// During package initialization (before any consumer code runs), this package
+// sets TERM_PROGRAM=ghostty and COLORTERM=truecolor in the Go environment,
+// unless they're already set. This allows libraries that detect terminal
+// capabilities via environment variables to discover that the rendering target
+// (ghostty-web) supports advanced features like Kitty graphics protocol and
+// truecolor output. Consumers can override these values with os.Setenv before
+// calling Run if needed.
+//
 // Usage:
 //
 //	//go:build js && wasm
@@ -44,7 +54,11 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 	fromJS := newSyncBuffer()
 	toJS := newSyncBuffer()
 
-	os.Setenv("TERM", "xterm-256color")
+	// COLORTERM and CLICOLOR_FORCE are set here for TUI rendering; COLORTERM is
+	// also set via env.go init() before consumer code runs (with conditional logic
+	// to avoid clobbering if already set). CLICOLOR_FORCE ensures color even if
+	// output is redirected. TERM is not set here as it would require terminfo
+	// entries that don't exist in the WASM filesystem.
 	os.Setenv("COLORTERM", "truecolor")
 	os.Setenv("CLICOLOR_FORCE", "1")
 
