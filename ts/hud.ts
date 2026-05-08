@@ -70,7 +70,7 @@ export function installRendererHud(
         const style = document.createElement('style');
         style.id = 'booba-renderer-hud-styles';
         style.textContent = `
-            #booba-renderer-hud {
+            :where(#booba-renderer-hud) {
                 bottom: 12px;
                 right: 12px;
                 font-family: monospace;
