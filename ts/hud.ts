@@ -1,4 +1,5 @@
 import type { Terminal } from 'ghostty-web';
+import './types.js'; // Ensure global declarations are loaded
 
 export type BoobaRenderer = 'auto' | 'webgpu' | 'canvas2d';
 
