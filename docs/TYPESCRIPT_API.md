@@ -132,6 +132,49 @@ booba.cols        // Current column count
 booba.rows        // Current row count
 ```
 
+## Renderer HUD (Optional Dev Feature)
+
+Display active renderer backend and live FPS in a corner badge. Useful for debugging which renderer is active and monitoring performance.
+
+```javascript
+import { BoobaTerminal, installRendererHud, parseRendererFromURL } from '@nimblemarkets/booba';
+
+const booba = new BoobaTerminal('container', {
+  renderer: parseRendererFromURL(), // respects ?renderer= query param
+  cols: 80,
+  rows: 24,
+});
+
+await booba.init();
+booba.connectAuto(wsUrl, wtUrl, certHashUrl);
+
+// Show HUD in bottom-right corner (viewport-fixed)
+installRendererHud(booba.terminal, { bindToggleHotkey: true });
+```
+
+### Options
+
+- **`parent`** (HTMLElement): Where to mount the badge. Defaults to `document.body` with fixed positioning. Pass a container element for different placement.
+- **`bindToggleHotkey`** (boolean): If true (default), Alt+Shift+R cycles `?renderer=` between `webgpu` and `canvas2d` and reloads.
+- **`className`** (string): Optional CSS class name to apply (does not override inline styles; use for additional customization).
+
+### Custom Placement
+
+Mount the badge in your own DOM:
+
+```javascript
+const header = document.getElementById('my-header');
+installRendererHud(booba.terminal, { parent: header, bindToggleHotkey: false });
+```
+
+### Query Parameters
+
+`parseRendererFromURL()` reads `?renderer=` from the URL:
+- Valid values: `auto`, `webgpu`, `canvas2d`
+- Invalid values fall back to `window.__boobaDefaultRenderer` (set by the server), then `auto`
+
+Use this to respect renderer preference across page reloads.
+
 ## Types
 
 All types are exported for TypeScript consumers:
