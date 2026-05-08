@@ -11,6 +11,11 @@ export function parseRendererFromURL(): 'auto' | 'webgpu' | 'canvas2d' {
         return renderer;
     }
 
-    // Fall back to server's default renderer preference
-    return (window as any).__boobaDefaultRenderer || 'auto';
+    // Validate server-injected default before using it
+    const fallback = (window as any).__boobaDefaultRenderer;
+    if (fallback === 'canvas2d' || fallback === 'webgpu' || fallback === 'auto') {
+        return fallback;
+    }
+
+    return 'auto';
 }
