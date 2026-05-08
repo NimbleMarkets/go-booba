@@ -99,6 +99,11 @@ export function installRendererHud(
         badge.className = className;
     }
 
+    // Show hotkey hint on hover if hotkey is enabled
+    if (bindToggleHotkey) {
+        badge.title = 'Alt+Shift+R: toggle renderer';
+    }
+
     parent.appendChild(badge);
 
     // rAF loop for FPS counter

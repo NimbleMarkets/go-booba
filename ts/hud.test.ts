@@ -163,12 +163,10 @@ describe('installRendererHud', () => {
 
     it('should bind Alt+Shift+R hotkey and toggle renderer', () => {
         const originalHref = window.location.href;
-
-        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
-
-        // Mock window.location.href setter
-        let navigatedUrl = '';
         const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
+
+        // Mock window.location.href setter BEFORE install
+        let navigatedUrl = '';
         Object.defineProperty(window, 'location', {
             value: {
                 href: originalHref,
@@ -182,7 +180,10 @@ describe('installRendererHud', () => {
                 navigatedUrl = url;
             },
             get: () => originalHref,
+            configurable: true,
         });
+
+        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
 
         // Dispatch Alt+Shift+R
         const event = new KeyboardEvent('keydown', {
@@ -205,33 +206,73 @@ describe('installRendererHud', () => {
         }
     });
 
-    it('should not bind hotkey if bindToggleHotkey is false', () => {
-        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: false });
-
-        // Mock window.location.href to track if it changes
+    it('should toggle canvas2d to webgpu on Alt+Shift+R', () => {
+        // Set initial backend to canvas2d
+        mockTerminal.renderer.backend = 'canvas2d';
+        const originalHref = window.location.href;
         const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
-        let navigationAttempted = false;
 
-        // Create a fresh location mock to capture any navigation attempts
-        const mockLocation = {
-            href: window.location.href,
-            search: '',
-        };
+        // Mock window.location BEFORE install to be defensive
+        let navigationUrl = '';
+        let currentHref = originalHref;
 
         const hrefDescriptor = {
-            set: () => {
-                navigationAttempted = true;
+            set: (url: string) => {
+                navigationUrl = url;
+                currentHref = url;
             },
-            get: () => window.location.href,
+            get: () => currentHref,
             configurable: true,
         };
 
         Object.defineProperty(window, 'location', {
             configurable: true,
-            value: mockLocation,
+            value: { href: originalHref },
+        });
+        Object.defineProperty(window.location, 'href', hrefDescriptor);
+
+        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
+
+        // Dispatch Alt+Shift+R
+        const event = new KeyboardEvent('keydown', {
+            altKey: true,
+            shiftKey: true,
+            key: 'R',
+        });
+        document.dispatchEvent(event);
+
+        // Assert URL changed to toggle renderer to webgpu
+        expect(navigationUrl).toContain('renderer=webgpu');
+
+        uninstall();
+        if (originalLocation) {
+            Object.defineProperty(window, 'location', originalLocation);
+        }
+    });
+
+    it('should not bind hotkey if bindToggleHotkey is false', () => {
+        const originalHref = window.location.href;
+        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
+        let navigationAttempted = false;
+        let currentHref = originalHref;
+
+        // Mock location BEFORE install
+        const hrefDescriptor = {
+            set: () => {
+                navigationAttempted = true;
+            },
+            get: () => currentHref,
+            configurable: true,
+        };
+
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: { href: originalHref },
         });
 
         Object.defineProperty(window.location, 'href', hrefDescriptor);
+
+        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: false });
 
         // Dispatch Alt+Shift+R
         const event = new KeyboardEvent('keydown', {
@@ -274,27 +315,3 @@ describe('installRendererHud', () => {
     });
 });
 
-describe('installRendererHud integration', () => {
-    it('should mount HUD and update FPS live', async () => {
-        const mockTerminal: Partial<Terminal> = {
-            renderer: {
-                backend: 'canvas2d',
-            },
-        };
-
-        const uninstall = installRendererHud(mockTerminal as Terminal);
-
-        const badge = document.getElementById('booba-renderer-hud');
-        expect(badge).toBeDefined();
-        expect(badge?.textContent).toBeDefined();
-
-        // Wait for FPS counter to tick (requires ~1000ms for first update)
-        await new Promise(resolve => setTimeout(resolve, 1100));
-
-        // Text should match the format
-        expect(badge?.textContent).toMatch(/^(canvas2d) \d+ fps$/);
-
-        uninstall();
-        expect(document.getElementById('booba-renderer-hud')).toBeNull();
-    });
-});

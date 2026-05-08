@@ -156,7 +156,7 @@ installRendererHud(booba.terminal, { bindToggleHotkey: true });
 
 - **`parent`** (HTMLElement): Where to mount the badge. Defaults to `document.body` with fixed positioning. Pass a container element for different placement.
 - **`bindToggleHotkey`** (boolean): If true (default), Alt+Shift+R cycles `?renderer=` between `webgpu` and `canvas2d` and reloads. **Note:** Toggling reloads the page, which discards the current terminal session. This is fine for demos; live sessions should avoid the toggle or implement a stateful renderer switch.
-- **`className`** (string): Optional CSS class name to apply (does not override inline styles; use for additional customization).
+- **`className`** (string): Optional CSS class for custom styling. Wins over default styles via the cascade (defaults use `:where(...)` for zero specificity). Note: the `position` option is set as an inline style and cannot be overridden via className.
 
 ### Custom Placement
 
