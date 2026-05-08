@@ -149,23 +149,18 @@ await booba.init();
 booba.connectAuto(wsUrl, wtUrl, certHashUrl);
 
 // Show HUD in bottom-right corner (viewport-fixed)
-installRendererHud(booba.terminal, { bindToggleHotkey: true });
+installRendererHud(booba.terminal);
 ```
+
+Click the badge to cycle between `webgpu` and `canvas2d` renderers via the `?renderer=` query parameter and reload.
+
+**Note:** Toggling reloads the page, which discards the current terminal session. This is fine for demos; live sessions should avoid the toggle.
 
 ### Options
 
 - **`parent`** (HTMLElement): Where to mount the badge. Defaults to `document.body` with fixed positioning. Pass a container element for different placement.
-- **`bindToggleHotkey`** (boolean): If true (default), Alt+Shift+R cycles `?renderer=` between `webgpu` and `canvas2d` and reloads. **Note:** Toggling reloads the page, which discards the current terminal session. This is fine for demos; live sessions should avoid the toggle or implement a stateful renderer switch.
+- **`position`** ('fixed' | 'absolute'): Position mode. Default 'fixed' (viewport); use 'absolute' for container-relative placement.
 - **`className`** (string): Optional CSS class for custom styling. Wins over default styles via the cascade (defaults use `:where(...)` for zero specificity). Note: the `position` option is set as an inline style and cannot be overridden via className.
-
-### Custom Placement
-
-Mount the badge in your own DOM:
-
-```javascript
-const header = document.getElementById('my-header');
-installRendererHud(booba.terminal, { parent: header, bindToggleHotkey: false });
-```
 
 ### Query Parameters
 

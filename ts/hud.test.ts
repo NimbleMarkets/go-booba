@@ -134,7 +134,7 @@ describe('installRendererHud', () => {
         expect(computed.right).toBe('12px');
         expect(computed.fontFamily).toContain('monospace');
         expect(computed.fontSize).toBe('11px');
-        expect(computed.pointerEvents).toBe('none');
+        expect(computed.pointerEvents).toBe('auto');
         expect(computed.zIndex).toBe('10');
 
         uninstall();
@@ -149,6 +149,84 @@ describe('installRendererHud', () => {
         uninstall();
     });
 
+    it('should toggle renderer on badge click', () => {
+        const originalHref = window.location.href;
+        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
+
+        // Mock window.location BEFORE install
+        let navigatedUrl = '';
+        Object.defineProperty(window, 'location', {
+            value: {
+                href: originalHref,
+            },
+            writable: true,
+        });
+
+        Object.defineProperty(window.location, 'href', {
+            set: (url: string) => {
+                navigatedUrl = url;
+            },
+            get: () => originalHref,
+            configurable: true,
+        });
+
+        const uninstall = installRendererHud(mockTerminal as Terminal);
+
+        const badge = document.getElementById('booba-renderer-hud');
+        expect(badge).toBeDefined();
+
+        // Click the badge
+        badge?.click();
+
+        // Assert URL changed to toggle renderer
+        expect(navigatedUrl).toContain('renderer=canvas2d'); // webgpu toggles to canvas2d
+
+        // Cleanup
+        uninstall();
+        if (originalLocation) {
+            Object.defineProperty(window, 'location', originalLocation);
+        }
+    });
+
+    it('should toggle from canvas2d to webgpu on click', () => {
+        mockTerminal = {
+            renderer: {
+                backend: 'canvas2d',
+            },
+        };
+
+        const originalHref = window.location.href;
+        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
+
+        let navigatedUrl = '';
+        Object.defineProperty(window, 'location', {
+            value: {
+                href: originalHref,
+            },
+            writable: true,
+        });
+
+        Object.defineProperty(window.location, 'href', {
+            set: (url: string) => {
+                navigatedUrl = url;
+            },
+            get: () => originalHref,
+            configurable: true,
+        });
+
+        const uninstall = installRendererHud(mockTerminal as Terminal);
+
+        const badge = document.getElementById('booba-renderer-hud');
+        badge?.click();
+
+        expect(navigatedUrl).toContain('renderer=webgpu'); // canvas2d toggles to webgpu
+
+        uninstall();
+        if (originalLocation) {
+            Object.defineProperty(window, 'location', originalLocation);
+        }
+    });
+
     it('should return an uninstall function that removes element', () => {
         const uninstall = installRendererHud(mockTerminal as Terminal);
 
@@ -159,145 +237,6 @@ describe('installRendererHud', () => {
 
         const badgeAfter = document.getElementById('booba-renderer-hud');
         expect(badgeAfter).toBeNull();
-    });
-
-    it('should bind Alt+Shift+R hotkey and toggle renderer', () => {
-        const originalHref = window.location.href;
-        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
-
-        // Mock window.location.href setter BEFORE install
-        let navigatedUrl = '';
-        Object.defineProperty(window, 'location', {
-            value: {
-                href: originalHref,
-            },
-            writable: true,
-        });
-
-        // Track navigation
-        Object.defineProperty(window.location, 'href', {
-            set: (url: string) => {
-                navigatedUrl = url;
-            },
-            get: () => originalHref,
-            configurable: true,
-        });
-
-        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
-
-        // Dispatch Alt+Shift+R
-        const event = new KeyboardEvent('keydown', {
-            altKey: true,
-            shiftKey: true,
-            key: 'R',
-        });
-
-        document.dispatchEvent(event);
-
-        // Assert URL changed to toggle renderer
-        expect(navigatedUrl).toContain('renderer=canvas2d'); // webgpu toggles to canvas2d
-
-        // Cleanup
-        uninstall();
-
-        // Restore location
-        if (originalLocation) {
-            Object.defineProperty(window, 'location', originalLocation);
-        }
-    });
-
-    it('should toggle canvas2d to webgpu on Alt+Shift+R', () => {
-        // Set initial backend to canvas2d
-        mockTerminal = {
-            renderer: {
-                backend: 'canvas2d',
-            },
-        };
-        const originalHref = window.location.href;
-        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
-
-        // Mock window.location BEFORE install to be defensive
-        let navigationUrl = '';
-        let currentHref = originalHref;
-
-        const hrefDescriptor = {
-            set: (url: string) => {
-                navigationUrl = url;
-                currentHref = url;
-            },
-            get: () => currentHref,
-            configurable: true,
-        };
-
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: { href: originalHref },
-        });
-        Object.defineProperty(window.location, 'href', hrefDescriptor);
-
-        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: true });
-
-        // Dispatch Alt+Shift+R
-        const event = new KeyboardEvent('keydown', {
-            altKey: true,
-            shiftKey: true,
-            key: 'R',
-        });
-        document.dispatchEvent(event);
-
-        // Assert URL changed to toggle renderer to webgpu
-        expect(navigationUrl).toContain('renderer=webgpu');
-
-        uninstall();
-        if (originalLocation) {
-            Object.defineProperty(window, 'location', originalLocation);
-        }
-    });
-
-    it('should not bind hotkey if bindToggleHotkey is false', () => {
-        const originalHref = window.location.href;
-        const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
-        let navigationAttempted = false;
-        let currentHref = originalHref;
-
-        // Mock location BEFORE install
-        const hrefDescriptor = {
-            set: () => {
-                navigationAttempted = true;
-            },
-            get: () => currentHref,
-            configurable: true,
-        };
-
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: { href: originalHref },
-        });
-
-        Object.defineProperty(window.location, 'href', hrefDescriptor);
-
-        const uninstall = installRendererHud(mockTerminal as Terminal, { bindToggleHotkey: false });
-
-        // Dispatch Alt+Shift+R
-        const event = new KeyboardEvent('keydown', {
-            altKey: true,
-            shiftKey: true,
-            key: 'R',
-        });
-
-        document.dispatchEvent(event);
-
-        // When bindToggleHotkey is false, the handler should return early
-        // and not attempt navigation
-        expect(navigationAttempted).toBe(false);
-
-        // Cleanup
-        uninstall();
-
-        // Restore location
-        if (originalLocation) {
-            Object.defineProperty(window, 'location', originalLocation);
-        }
     });
 
     it('should display backend and fps in text content', () => {

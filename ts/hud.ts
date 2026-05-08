@@ -37,8 +37,6 @@ export interface BoobaRendererHudOptions {
     className?: string;
     /** Position mode. 'fixed' (viewport, default) or 'absolute' (relative to parent). */
     position?: 'fixed' | 'absolute';
-    /** Bind Alt+Shift+R to toggle webgpu↔canvas2d. Default: true. */
-    bindToggleHotkey?: boolean;
 }
 
 /**
@@ -64,7 +62,6 @@ export function installRendererHud(
     const parent = opts?.parent ?? document.body;
     const className = opts?.className;
     const position = opts?.position ?? 'fixed';
-    const bindToggleHotkey = opts?.bindToggleHotkey !== false;
 
     // Create badge element
     const badge = document.createElement('div');
@@ -84,7 +81,9 @@ export function installRendererHud(
                 background: rgba(0, 0, 0, 0.4);
                 padding: 2px 6px;
                 border-radius: 3px;
-                pointer-events: none;
+                pointer-events: auto;
+                cursor: pointer;
+                user-select: none;
                 z-index: 10;
             }
         `;
@@ -99,10 +98,8 @@ export function installRendererHud(
         badge.className = className;
     }
 
-    // Show hotkey hint on hover if hotkey is enabled
-    if (bindToggleHotkey) {
-        badge.title = 'Alt+Shift+R: toggle renderer';
-    }
+    // Set title for discoverability
+    badge.title = 'Click to toggle renderer';
 
     parent.appendChild(badge);
 
@@ -125,20 +122,16 @@ export function installRendererHud(
 
     rafId = requestAnimationFrame(updateRendererInfo);
 
-    // Alt+Shift+R hotkey handler
-    const handleKeyDown = (e: KeyboardEvent) => {
-        if (!bindToggleHotkey) return;
-        if (e.altKey && e.shiftKey && (e.key === 'R' || e.key === 'r')) {
-            e.preventDefault();
-            const cur = terminal.renderer?.backend;
-            const next = cur === 'webgpu' ? 'canvas2d' : 'webgpu';
-            const url = new URL(window.location.href);
-            url.searchParams.set('renderer', next);
-            window.location.href = url.toString();
-        }
+    // Click handler to toggle renderer
+    const handleClick = () => {
+        const cur = terminal.renderer?.backend;
+        const next = cur === 'webgpu' ? 'canvas2d' : 'webgpu';
+        const url = new URL(window.location.href);
+        url.searchParams.set('renderer', next);
+        window.location.href = url.toString();
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    badge.addEventListener('click', handleClick);
 
     // Uninstall function
     return () => {
@@ -146,6 +139,6 @@ export function installRendererHud(
             cancelAnimationFrame(rafId);
         }
         badge.remove();
-        document.removeEventListener('keydown', handleKeyDown);
+        badge.removeEventListener('click', handleClick);
     };
 }

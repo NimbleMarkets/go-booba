@@ -1,5 +1,31 @@
 # `booba` CHANGELOG
 
+## [1.0.0] - 2026-05-08
+
+### Changed
+- **BREAKING:** Renderer HUD API changed from Alt+Shift+R hotkey to clickable badge
+  - Removed `bindToggleHotkey` option from `BoobaRendererHudOptions`
+  - Badge is now always interactive (clickable to toggle renderer)
+  - Badge displays title "Click to toggle renderer" for discoverability
+
+### Added
+- Badge is now clickable to toggle between renderers (simpler UX than hidden hotkey)
+
+## `v0.6.1` (2026-05-07)
+
+This release cleans up the CI/CD for syncing `NimbleMarkets/ghostty-Web`...
+where we recently fixed horrible render loop performance and also added a WebGPU backend (experimental)!
+
+   * `chore`: switch ghostty-web consumption from local-build to prebuilt
+     `nm-kitty-built` branch. The submodule now ships dist/* committed by
+     ghostty-web's CI; booba no longer needs zig/bun/nix to build. Removed
+     `task build-ghostty-web` and `.github/workflows/rebuild-static.yml`.
+
+   * Picks up upstream ghostty-web renderer changes: block-element fillRect
+     (fixes grid artifacts at dpr=1), event-driven render scheduler (lower
+     idle CPU), kitty placeholder tile-edge seam fix, default fg/bg vs
+     explicit RGB(0,0,0) distinction.
+
 ## `v0.6.0` (2026-04-29)
 
 End-to-end kitty graphics support — `kitten icat`, [ntcharts image demos](https://nimblemarkets.github.io/ntcharts), and other libraries that emit Unicode placeholder cells (`a=T,U=1,…` + `U+10EEEE`) now render correctly in the browser.

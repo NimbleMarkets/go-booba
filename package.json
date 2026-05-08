@@ -1,6 +1,6 @@
 {
   "name": "@nimblemarkets/booba",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Terminal wrapper for BubbleTea programs using ghostty-web",
   "main": "dist/booba.js",
