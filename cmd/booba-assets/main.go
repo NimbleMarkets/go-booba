@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -237,31 +238,14 @@ func checkViteReferences(jsFile, dstDir string) error {
 	jsText := string(content)
 
 	// Find all __vite- references
-	parts := strings.Split(jsText, "__vite-")
-	if len(parts) == 1 {
-		// No __vite- references, all good
-		return nil
-	}
+	viteRe := regexp.MustCompile(`__vite-[A-Za-z0-9.\-]+`)
+	matches := viteRe.FindAllString(jsText, -1)
 
-	for i := 1; i < len(parts); i++ {
-		// Extract the filename (alphanumeric, dots, hyphens until quote or closing paren)
-		rest := parts[i]
-		end := 0
-		for end < len(rest) && (isAlphanumeric(rest[end]) || rest[end] == '.' || rest[end] == '-') {
-			end++
-		}
-		if end == 0 {
-			continue // Malformed, skip
-		}
-		filename := "__vite-" + rest[:end]
+	for _, filename := range matches {
 		checkPath := filepath.Join(dstDir, filename)
 		if _, err := os.Stat(checkPath); err != nil {
 			return fmt.Errorf("referenced file not found: %s", filename)
 		}
 	}
 	return nil
-}
-
-func isAlphanumeric(b byte) bool {
-	return (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9')
 }
