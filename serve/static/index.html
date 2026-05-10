@@ -84,7 +84,7 @@
             await booba.init();
 
             // Install renderer HUD (shows backend + FPS in bottom-right corner)
-            installRendererHud(booba.terminal, { bindToggleHotkey: true });
+            installRendererHud(booba.terminal);
 
             // Resolve endpoints relative to the page so booba works behind
             // a path-prefix reverse proxy that strips the prefix.

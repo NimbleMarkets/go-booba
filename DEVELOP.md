@@ -76,7 +76,7 @@ Clients can override the server's default via the `?renderer=` query parameter:
 - `http://localhost:8080/?renderer=webgpu` — Force WebGPU
 - `http://localhost:8080/?renderer=auto` — Auto-select
 
-In the browser, press **Alt+Shift+R** to toggle between WebGPU and Canvas2D.
+In the browser, click the renderer badge in the bottom-right corner to toggle between WebGPU and Canvas2D.
 
 ## Command Documentation
 

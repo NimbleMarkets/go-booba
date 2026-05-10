@@ -1,5 +1,26 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { parseRendererFromURL, installRendererHud } from './hud';
+import type { Renderer } from 'ghostty-web';
+
+const createMockRenderer = (backend: 'webgpu' | 'canvas2d'): Partial<Renderer> => ({
+    backend,
+    canvas: document.createElement('canvas'),
+    getMetrics: () => ({ width: 8, height: 16, baseline: 12 }),
+    resize: vi.fn(),
+    render: vi.fn(),
+    setTheme: vi.fn(),
+    setFontSize: vi.fn(),
+    setFontFamily: vi.fn(),
+    setCursorStyle: vi.fn(),
+    setCursorBlink: vi.fn(),
+    setOnRequestRender: vi.fn(),
+    setSelectionManager: vi.fn(),
+    setHoveredHyperlinkId: vi.fn(),
+    setHoveredLinkRange: vi.fn(),
+    invalidate: vi.fn(),
+    remeasureFont: vi.fn(),
+    destroy: vi.fn(),
+});
 
 describe('parseRendererFromURL', () => {
     let originalLocation: PropertyDescriptor | undefined;
@@ -86,9 +107,7 @@ describe('installRendererHud', () => {
 
         // Create a simple mock Terminal
         mockTerminal = {
-            renderer: {
-                backend: 'webgpu',
-            },
+            renderer: createMockRenderer('webgpu') as Renderer,
         };
     });
 
@@ -190,9 +209,7 @@ describe('installRendererHud', () => {
 
     it('should toggle from canvas2d to webgpu on click', () => {
         mockTerminal = {
-            renderer: {
-                backend: 'canvas2d',
-            },
+            renderer: createMockRenderer('canvas2d') as Renderer,
         };
 
         const originalHref = window.location.href;
