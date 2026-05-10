@@ -20,6 +20,8 @@ This release is dedicated to all the Mother's past and present.  Thank you for y
 
 - Add submodule HEAD verification to Taskfile to prevent stale checkouts
 
+- Embed bundle no longer references source maps. Eliminates the nine "Source Map loading errors" DevTools warnings consumers saw when loading booba's JS. In-repo development workflow is unchanged (`npm run build` still emits maps via `tsconfig.json`)
+
 
 ## `v0.6.1` (2026-05-07)
 
