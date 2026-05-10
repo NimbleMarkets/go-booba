@@ -49,6 +49,20 @@ export declare class CanvasRenderer implements Renderer {
      */
     private lastKittyDirectSigs;
     /**
+     * Last frame's virtual-placement image-byte signatures, keyed by image
+     * id. Virtual placements aren't composited by renderKittyImages — they
+     * paint via per-cell renderPlaceholderCell substitution — so cells only
+     * repaint when the row is otherwise dirty (cursor, selection, text
+     * change). When the application transmits new bytes for the same
+     * image_id, the placeholder cells themselves stay clean and Canvas2D
+     * would skip them. Tracking these signatures lets us flag the whole
+     * viewport as damaged on bytes-change so the per-cell substitution
+     * runs and picks up the new (already re-decoded by getOrDecodeKittyImage)
+     * bitmap. WebGPU/WebGL don't need this because they re-encode the cell
+     * grid and re-sample the kitty atlas every frame.
+     */
+    private lastKittyVirtualSigs;
+    /**
      * Rows whose image footprint changed since last frame (placement added,
      * removed, moved, resized, or re-decoded under the same id). Added to
      * rowsToRender so the underlying text repaints — which clears stale
@@ -61,6 +75,12 @@ export declare class CanvasRenderer implements Renderer {
      * through every helper. Set at the top of render(), cleared at the end.
      */
     private currentRenderBuffer;
+    /* Excluded from this release type: _testGetKittyDamagedRows */
+    /* Excluded from this release type: _testPrecomputeKittyState */
+    private lastCursorVisible;
+    private lastCursorBlinkVisible;
+    private lastSelectionSig;
+    private lastKittyPlacementSig;
     private currentKittyGraphics;
     private selectionManager?;
     private currentSelectionCoords;
@@ -84,6 +104,12 @@ export declare class CanvasRenderer implements Renderer {
     /**
      * Render the terminal buffer to canvas
      */
+    /** See WebGPURenderer.bufferAnyDirty. */
+    private bufferAnyDirty;
+    /** See WebGPURenderer.computeSelectionSig. */
+    private computeSelectionSig;
+    /** See WebGPURenderer.computeKittyPlacementSig. */
+    private computeKittyPlacementSig;
     render(buffer: IRenderable, viewportY?: number, scrollbackProvider?: IScrollbackProvider): void;
     /**
      * Render a single line using two-pass approach:
@@ -2033,7 +2059,8 @@ export declare class ScrollbarOverlay {
  * renderer's surface.
  *
  * Thumb size and position match the logic that lived in CanvasRenderer
- * before commit history (see git log lib/renderer.ts for renderScrollbar).
+ * before commit history (see git log lib/renderer-canvas2d.ts — formerly
+ * lib/renderer.ts — for renderScrollbar).
  */
 declare interface ScrollbarRenderInput {
     viewportY: number;
@@ -2730,6 +2757,13 @@ export declare class WebGPURenderer implements Renderer {
     private kittyAtlas?;
     private kittyAtlasUBO?;
     private kittyAtlasRects;
+    private lastCursorX;
+    private lastCursorY;
+    private lastCursorVisible;
+    private lastCursorBlinkVisible;
+    private lastViewportYRendered;
+    private lastSelectionSig;
+    private lastKittyPlacementSig;
     /**
      * Create a WebGPURenderer.
      *
@@ -2757,6 +2791,22 @@ export declare class WebGPURenderer implements Renderer {
     private encodeCells;
     getMetrics(): FontMetrics;
     resize(cols: number, rows: number): void;
+    /**
+     * True when no buffer row reports dirty AND no full-redraw is pending.
+     * Cheap (one needsFullRedraw call + one isRowDirty per row, both backed
+     * by an O(1) cache after the first call per snapshot).
+     */
+    private bufferAnyDirty;
+    private computeSelectionSig;
+    /**
+     * Fingerprint every visible kitty placement (direct + virtual). Detects
+     * placement add/remove/move/resize and per-image bytes-change. Called
+     * before encodeCells, which itself walks iterPlacements again — for the
+     * common case (0-2 placements) the extra ~30 boundary crossings per
+     * frame are negligible compared to the GPU work this gate avoids.
+     * Returns null when no placements are visible.
+     */
+    private computeKittyPlacementSig;
     render(buffer: IRenderable, viewportY?: number, sb?: IScrollbackProvider): void;
     private parseHexColor;
     setTheme(theme: ITheme): void;
