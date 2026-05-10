@@ -421,7 +421,8 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	html := string(data)
 	// Inject the server's renderer preference as a global variable
 	// The client-side code will use this as a fallback if no query parameter is provided
-	injectedScript := `<script>window.__boobaDefaultRenderer = "` + s.config.Renderer + `";</script>`
+	rendererJSON, _ := json.Marshal(s.config.Renderer)
+	injectedScript := `<script>window.__boobaDefaultRenderer = ` + string(rendererJSON) + `;</script>`
 	html = strings.Replace(html, "<script type=\"module\">", injectedScript+"\n    <script type=\"module\">", 1)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

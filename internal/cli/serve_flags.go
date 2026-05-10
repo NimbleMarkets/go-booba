@@ -90,7 +90,12 @@ func (opts ServeOptions) Config() (serve.Config, error) {
 	}
 
 	if opts.Renderer != "" {
-		config.Renderer = opts.Renderer
+		switch opts.Renderer {
+		case "auto", "webgpu", "canvas2d":
+			config.Renderer = opts.Renderer
+		default:
+			return config, fmt.Errorf("invalid --renderer: %q (must be 'auto', 'webgpu', or 'canvas2d')", opts.Renderer)
+		}
 	}
 
 	return config, nil

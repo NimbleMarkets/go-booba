@@ -119,3 +119,31 @@ func TestServeOptionsPasswordFileMissingFails(t *testing.T) {
 		t.Fatal("expected missing --password-file to fail")
 	}
 }
+
+func TestServeOptionsRendererValidation(t *testing.T) {
+	tests := []struct {
+		renderer string
+		wantErr  bool
+	}{
+		{"auto", false},
+		{"webgpu", false},
+		{"canvas2d", false},
+		{"", false}, // empty uses default
+		{"invalid", true},
+		{"webgpu'; alert('xss", true}, // XSS attempt
+		{"canvas2d\"", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.renderer, func(t *testing.T) {
+			cfg, err := (ServeOptions{Renderer: tt.renderer}).Config()
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("Config() error = %v; wantErr %v", err, tt.wantErr)
+			}
+			if err == nil && tt.renderer != "" {
+				if cfg.Renderer != tt.renderer {
+					t.Errorf("Renderer = %q; want %q", cfg.Renderer, tt.renderer)
+				}
+			}
+		})
+	}
+}
