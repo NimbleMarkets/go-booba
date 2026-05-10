@@ -56,4 +56,3 @@ export class OSC52Scanner {
         }
     }
 }
-//# sourceMappingURL=clipboard.js.map

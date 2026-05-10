@@ -62,4 +62,3 @@ export function jsonPayload(obj) {
 export function parseJsonPayload(data) {
     return JSON.parse(new TextDecoder().decode(data));
 }
-//# sourceMappingURL=protocol.js.map

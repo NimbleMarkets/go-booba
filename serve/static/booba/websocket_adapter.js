@@ -112,4 +112,3 @@ export class BoobaProtocolAdapter {
         this.onDataCallback = null;
     }
 }
-//# sourceMappingURL=websocket_adapter.js.map

@@ -51,4 +51,3 @@ export class BoobaAutoAdapter {
         this.adapter = null;
     }
 }
-//# sourceMappingURL=auto_adapter.js.map

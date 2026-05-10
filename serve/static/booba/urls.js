@@ -22,4 +22,3 @@ export function resolveBoobaURLs(baseURI) {
         certHashUrl: `${base.origin}${base.pathname}cert-hash`,
     };
 }
-//# sourceMappingURL=urls.js.map

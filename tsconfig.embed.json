@@ -1,6 +1,9 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "./serve/static/booba"
+        "outDir": "./serve/static/booba",
+        "sourceMap": false,
+        "inlineSourceMap": false,
+        "inlineSources": false
     }
 }

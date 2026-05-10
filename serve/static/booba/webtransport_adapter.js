@@ -166,4 +166,3 @@ export class BoobaWebTransportAdapter {
         this.onDataCallback = null;
     }
 }
-//# sourceMappingURL=webtransport_adapter.js.map

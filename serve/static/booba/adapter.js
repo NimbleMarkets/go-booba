@@ -82,4 +82,3 @@ export class BoobaWasmAdapter {
         this.onDataCallback = null;
     }
 }
-//# sourceMappingURL=adapter.js.map

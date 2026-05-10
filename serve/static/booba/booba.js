@@ -372,4 +372,3 @@ export { OSC52Scanner } from './clipboard.js';
 export { resolveBoobaURLs } from './urls.js';
 // HUD utilities (optional, treeshakeable) — re-exported from ghostty-web
 export { installRendererHud, parseRendererFromURL } from '../ghostty-web/ghostty-web.js';
-//# sourceMappingURL=booba.js.map
