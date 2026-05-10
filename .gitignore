@@ -22,5 +22,7 @@ serve/static/booba/*.d.ts.map
 serve/static/booba/*.js.map
 serve/static/ghostty-web/*
 !serve/static/ghostty-web/ghostty-web.js
+!serve/static/ghostty-web/ghostty-web.umd.cjs
 !serve/static/ghostty-web/ghostty-vt.wasm
+!serve/static/ghostty-web/index.d.ts
 !serve/static/ghostty-web/__vite-*.js

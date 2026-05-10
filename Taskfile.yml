@@ -115,6 +115,7 @@ tasks:
     status:
       - test -e third_party/ghostty-web/.git
       - test -e third_party/ghostty-web/dist/index.d.ts
+      - test "$(cd third_party/ghostty-web && git rev-parse HEAD)" = "$(git ls-files -s third_party/ghostty-web | awk '{print $2}')"
 
   build-serve-assets:
     desc: 'Copy prebuilt ghostty-web/dist/ into serve/static/ for go:embed'
