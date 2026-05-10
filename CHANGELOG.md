@@ -1,20 +1,25 @@
 # `booba` CHANGELOG
 
-## [1.0.0] - 2026-05-08
+## [0.7.0] - 2026-05-10
 
-### Changed
-- **BREAKING:** Renderer HUD API changed from Alt+Shift+R hotkey to clickable badge
+This release is dedicated to all the Mother's past and present.  Thank you for you love and nurturing.
+
+- **Latest ghostty-web with expanded renderer support:**
+  - WebGPU renderer (modern hardware-accelerated)
+  - WebGL renderer (fallback for older hardware)
+  - Canvas2D renderer (universal fallback)
+  - Auto-detection to select best available renderer per browser
+
+- **BREAKING:** Renderer HUD now uses clickable badge instead of Alt+Shift+R hotkey
   - Removed `bindToggleHotkey` option from `BoobaRendererHudOptions`
-  - Badge is now always interactive (clickable to toggle renderer)
-  - Badge displays title "Click to toggle renderer" for discoverability
+  - Badge displays active renderer backend + live FPS in bottom-right corner
+  - Click to toggle between available renderers
 
-### Added
-- Badge is now clickable to toggle between renderers (simpler UX than hidden hotkey)
-- WASM builds now synthesize environment variables for terminal capability detection:
-  - `TERM_PROGRAM=ghostty` signals ghostty-web as the terminal renderer
-  - `COLORTERM=truecolor` advertises 24-bit color support
-  - Libraries that probe `os.Getenv` for capability detection (e.g., Kitty graphics support) now see positive signals in browser WASM environments
-  - Can be overridden by consumers via `os.Setenv` before calling `wasm.Run()`
+- Validate `--renderer` CLI flag against whitelist (auto|webgpu|webgl|canvas2d)
+- Safe HTML injection using JSON encoding to prevent XSS via renderer parameter
+
+- Add submodule HEAD verification to Taskfile to prevent stale checkouts
+
 
 ## `v0.6.1` (2026-05-07)
 

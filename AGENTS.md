@@ -58,7 +58,7 @@ adjust our wrapper code for API changes.
 
 | File | Description |
 |------|-------------|
-| `serve/static/ghostty-web/ghostty-web.js` | Terminal emulation engine compiled from libghostty |
+| `serve/static/ghostty-web/ghostty-web.js` | Terminal emulation engine + public API (including `installRendererHud`, `parseRendererFromURL`) compiled from libghostty |
 | `serve/static/ghostty-web/ghostty-web.umd.cjs` | UMD build of the same |
 | `serve/static/ghostty-web/ghostty-vt.wasm` | WASM binary for VT100 parsing |
 | `serve/static/ghostty-web/index.d.ts` | TypeScript definitions for ghostty-web API |
@@ -133,5 +133,9 @@ When upstream ghostty-web updates, check:
    tip and running `task build-serve-assets`. Verify our TypeScript
    still compiles against the new types (`task build-assets`).
 
-6. **Mobile viewport handling** — Both booba and upstream use a
+6. **Renderer HUD API** — Booba re-exports `installRendererHud`, `parseRendererFromURL`,
+   and `RendererHudOptions` from ghostty-web. Watch for new options (e.g., `cycle`,
+   `clickToToggle`, `bindToggleHotkey`) and sync changes if breaking.
+
+7. **Mobile viewport handling** — Both booba and upstream use a
    `visualViewport` handler for mobile keyboards. Keep in sync.

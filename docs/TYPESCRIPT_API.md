@@ -134,7 +134,7 @@ booba.rows        // Current row count
 
 ## Renderer HUD (Optional Dev Feature)
 
-Display active renderer backend and live FPS in a corner badge. Useful for debugging which renderer is active and monitoring performance.
+Display active renderer backend and live FPS in a corner badge. Booba re-exports ghostty-web's renderer HUD for convenience.
 
 ```javascript
 import { BoobaTerminal, installRendererHud, parseRendererFromURL } from '@nimblemarkets/booba';
@@ -152,23 +152,35 @@ booba.connectAuto(wsUrl, wtUrl, certHashUrl);
 installRendererHud(booba.terminal);
 ```
 
-Click the badge to cycle between `webgpu` and `canvas2d` renderers via the `?renderer=` query parameter and reload.
+Click the badge to cycle through available renderers: WebGPU (modern hardware-accelerated), WebGL (fallback), and Canvas2D (universal fallback).
 
-**Note:** Toggling reloads the page, which discards the current terminal session. This is fine for demos; live sessions should avoid the toggle.
+**Note:** The `parseRendererFromURL()` function respects the server-injected `window.__boobaDefaultRenderer` global as a deprecated alias for backward compatibility.
 
-### Options
+### Options & Behavior
 
-- **`parent`** (HTMLElement): Where to mount the badge. Defaults to `document.body` with fixed positioning. Pass a container element for different placement.
-- **`position`** ('fixed' | 'absolute'): Position mode. Default 'fixed' (viewport); use 'absolute' for container-relative placement.
-- **`className`** (string): Optional CSS class for custom styling. Wins over default styles via the cascade (defaults use `:where(...)` for zero specificity). Note: the `position` option is set as an inline style and cannot be overridden via className.
+For complete option documentation (including `cycle`, `clickToToggle`, `bindToggleHotkey`), see [ghostty-web's renderer HUD documentation](https://github.com/NimbleMarkets/ghostty-web/blob/nm-kitty-meow/lib/renderer-hud.ts).
+
+Key options:
+- **`parent`** (HTMLElement): Where to mount the badge. Defaults to `document.body`.
+- **`position`** ('fixed' | 'absolute'): Position mode. Default 'fixed' (viewport-relative).
+- **`className`** (string): CSS class for custom styling.
+- **`clickToToggle`** (boolean): Click badge to cycle renderer. Default `true`.
+- **`bindToggleHotkey`** (boolean): Alt+Shift+R to cycle. Default `true`.
+- **`cycle`** (array): Override the cycle order. Default: `['webgpu', 'webgl', 'canvas2d']`.
 
 ### Query Parameters
 
 `parseRendererFromURL()` reads `?renderer=` from the URL:
-- Valid values: `auto`, `webgpu`, `canvas2d`
-- Invalid values fall back to `window.__boobaDefaultRenderer` (set by the server), then `auto`
+- Valid values: `'auto'` (auto-detect), `'webgpu'`, `'webgl'`, `'canvas2d'`
+- Invalid or missing: falls back to `window.__boobaDefaultRenderer` (set by the server), then `'auto'`
 
-Use this to respect renderer preference across page reloads.
+### Deprecated Aliases
+
+For source compatibility, booba re-exports deprecated type aliases:
+- `BoobaRendererHudOptions` → `RendererHudOptions`
+- `BoobaRenderer` → `RendererBackend`
+
+These will be removed in a future major version.
 
 ## Types
 

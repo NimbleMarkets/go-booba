@@ -58,19 +58,28 @@ The name `booba` is a portmanteau of the words *Boba* and *Boo!*: the [key ingre
 The `BoobaTerminal` class wraps ghostty-web's Terminal and provides a high-level API for embedding BubbleTea programs:
 
 ```javascript
-import { BoobaTerminal } from './booba/booba.js';
+import { BoobaTerminal, installRendererHud, parseRendererFromURL } from './booba/booba.js';
 
 const booba = new BoobaTerminal('terminal-container', {
     cols: 80, rows: 24, fontSize: 14,
+    renderer: parseRendererFromURL(), // respects ?renderer= query param
     theme: { background: '#1e1e1e', foreground: '#d4d4d4' },
 });
 
 await booba.init();
 booba.connectWebSocket('ws://localhost:8080/ws');
+
+// Optional: install a renderer badge showing active backend + FPS
+installRendererHud(booba.terminal);
+
 booba.focus();
 ```
 
-`BoobaTerminal` exposes methods for selection, scrollback, terminal control, mode queries, events, link detection, and custom key/wheel handlers. See [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md) for the full reference.
+`BoobaTerminal` exposes methods for selection, scrollback, terminal control, mode queries, events, link detection, and custom key/wheel handlers. 
+
+**Renderer Selection:** Booba ships with WebGPU (modern hardware-accelerated), WebGL (fallback), and Canvas2D (universal) renderers. The `renderer` option and `installRendererHud()` let users select and monitor the active backend.
+
+See [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md) for the full reference.
 
 For adapter usage (WebSocket, WASM, custom), see [ADAPTER_USAGE.md](./ADAPTER_USAGE.md).
 
