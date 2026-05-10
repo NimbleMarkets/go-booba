@@ -1300,11 +1300,19 @@ export declare class InputHandler {
 }
 
 /**
+ * Install a corner HUD showing the active renderer backend and live FPS.
+ * Returns an uninstall function that removes the badge, the injected style
+ * block, the rAF loop, and any listeners.
+ */
+export declare function installRendererHud(terminal: Terminal, opts?: RendererHudOptions): () => void;
+
+/**
  * Buffer adapter consumed by renderers. CanvasRenderer and WebGPURenderer
  * both read cells through this surface; the GhosttyTerminal implements it.
  */
 export declare interface IRenderable {
     getLine(y: number): GhosttyCell[] | null;
+    getViewport(): GhosttyCell[];
     getCursor(): {
         x: number;
         y: number;
@@ -1885,6 +1893,14 @@ export declare class OSC8LinkProvider implements ILinkProvider {
     dispose(): void;
 }
 
+/**
+ * Parse `?renderer=` from `window.location`, validating against
+ * `RendererBackend`. Falls back to `window.__ghosttyDefaultRenderer`, then
+ * `window.__boobaDefaultRenderer` (deprecated alias for backwards compat
+ * with go-booba's existing servers), then `'auto'`.
+ */
+export declare function parseRendererFromURL(): RendererBackend;
+
 export declare function pickRenderer(backend: RendererBackend, canvas: HTMLCanvasElement, opts: RendererOptions): Promise<Renderer>;
 
 /**
@@ -1917,6 +1933,21 @@ export declare interface Renderer {
 }
 
 export declare type RendererBackend = 'webgpu' | 'webgl' | 'canvas2d' | 'auto';
+
+export declare interface RendererHudOptions {
+    /** Where to mount the badge. Default: `document.body`. */
+    parent?: HTMLElement;
+    /** `'fixed'` (viewport, default) or `'absolute'` (relative to parent). */
+    position?: 'fixed' | 'absolute';
+    /** CSS class applied to the badge for custom styling. */
+    className?: string;
+    /** Default `true`. When `true`, clicking the badge cycles the renderer. */
+    clickToToggle?: boolean;
+    /** Default `true`. When `true`, Alt+Shift+R cycles the renderer. */
+    bindToggleHotkey?: boolean;
+    /** Override the cycle order. Default: `['webgpu', 'webgl', 'canvas2d']`. */
+    cycle?: ReadonlyArray<Exclude<RendererBackend, 'auto'>>;
+}
 
 export declare interface RendererOptions {
     fontSize?: number;

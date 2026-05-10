@@ -52,7 +52,8 @@
     <div id="terminal-container"></div>
 
     <script type="module">
-        import { BoobaTerminal, resolveBoobaURLs, installRendererHud, parseRendererFromURL } from './static/booba/booba.js';
+        import { BoobaTerminal, resolveBoobaURLs } from './static/booba/booba.js';
+        import { installRendererHud, parseRendererFromURL } from './static/ghostty-web/ghostty-web.js';
 
         const dot = document.getElementById('status-dot');
         const text = document.getElementById('status-text');

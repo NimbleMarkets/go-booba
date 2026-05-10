@@ -5,6 +5,8 @@ import { BoobaAutoAdapter } from './auto_adapter.js';
 import { OSC52Scanner } from './clipboard.js';
 import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js';
 
+import type { RendererBackend } from 'ghostty-web';
+
 export interface BoobaTerminalOptions {
     fontSize?: number;
     fontFamily?: string;
@@ -19,7 +21,7 @@ export interface BoobaTerminalOptions {
     disableStdin?: boolean;
     smoothScrollDuration?: number;
     theme?: BoobaTheme;
-    renderer?: 'auto' | 'webgpu' | 'canvas2d';
+    renderer?: RendererBackend;
 }
 
 export class BoobaTerminal {
@@ -466,5 +468,21 @@ export { OSC52Scanner } from './clipboard.js';
 export { resolveBoobaURLs, type BoobaURLs } from './urls.js';
 export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';
 
-// HUD utilities (optional, treeshakeable)
-export { installRendererHud, parseRendererFromURL, type BoobaRendererHudOptions, type BoobaRenderer } from './hud.js';
+// HUD utilities (optional, treeshakeable) — re-exported from ghostty-web
+export { installRendererHud, parseRendererFromURL, type RendererHudOptions, type RendererBackend } from 'ghostty-web';
+
+// Deprecated aliases for source compatibility
+import type { RendererHudOptions, RendererBackend as _RendererBackend } from 'ghostty-web';
+
+/**
+ * @deprecated Renamed to RendererHudOptions when the HUD moved to ghostty-web.
+ * This alias will be removed in a future major version.
+ */
+export type BoobaRendererHudOptions = RendererHudOptions;
+
+/**
+ * @deprecated Renamed to RendererBackend when the HUD moved to ghostty-web.
+ * This alias also expanded to include 'webgl', so behavior is wider than the
+ * old name implied.
+ */
+export type BoobaRenderer = _RendererBackend;

@@ -5,14 +5,6 @@
  * plus booba-specific types.
  */
 
-import type { BoobaRenderer } from './hud.js';
-
-declare global {
-  interface Window {
-    __boobaDefaultRenderer?: BoobaRenderer;
-  }
-}
-
 /** Terminal theme colors */
 export interface BoobaTheme {
     foreground?: string;
