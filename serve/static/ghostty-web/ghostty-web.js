@@ -2228,7 +2228,7 @@ var ri = EB, ki = kg, ni = Gi, Mi = kg, Ni = QB, li = {
   ungzip: Mi,
   constants: Ni
 };
-const { Inflate: yi, inflate: Fi, inflateRaw: zt, ungzip: Wt } = li;
+const { Inflate: yi, inflate: Fi, inflateRaw: Pt, ungzip: _t } = li;
 var cI = yi, Ji = Fi;
 const MQ = [];
 for (let A = 0; A < 256; A++) {
@@ -5904,6 +5904,13 @@ class TQ {
     this.cache.clear();
   }
 }
+const Mt = 8192;
+function Nt(A) {
+  let B = 1;
+  for (; B < A; )
+    B <<= 1;
+  return B;
+}
 class jQ {
   constructor(B = 1024) {
     this.nextX = 0, this.nextY = 0, this.rowHeight = 0, this.cache = /* @__PURE__ */ new Map(), this.size = B;
@@ -5911,8 +5918,10 @@ class jQ {
   /**
    * Add (or refresh) the image for `imageId`. On signature match returns the
    * cached entry. On miss converts to RGBA, shelf-packs into the atlas, and
-   * uploads. Returns null if conversion fails or the image doesn't fit even
-   * after one clearAndReset retry.
+   * uploads. If the image doesn't fit (even after a clearAndReset retry) the
+   * atlas grows to the next power of two large enough to hold it (subject to
+   * MAX_ATLAS_SIZE) and retries once more. Returns null only when the image
+   * is fundamentally too large or RGBA conversion failed.
    */
   addOrUpdate(B, g) {
     const I = this.cache.get(B);
@@ -5922,8 +5931,11 @@ class jQ {
     if (!C)
       return null;
     let E = this.tryPack(g.width, g.height);
-    if (!E && (this.clearAndReset(), E = this.tryPack(g.width, g.height), !E))
-      return null;
+    if (E || (this.clearAndReset(), E = this.tryPack(g.width, g.height)), !E) {
+      const e = Math.max(g.width, g.height), t = Nt(e);
+      if (t > Mt || t <= this.size || (this.size = t, this.clearAndReset(), this.growTexture(t), E = this.tryPack(g.width, g.height), !E))
+        return null;
+    }
     this.uploadRegion(E, C, g.width, g.height);
     const i = {
       slot: E,
@@ -6736,7 +6748,7 @@ layout(std140) uniform PaletteUBO {
   vec4 linkUnderlineColor;
   vec4 _pad;
 } pal;
-`, Mt = `#version 300 es
+`, lt = `#version 300 es
 precision highp float;
 precision highp int;
 ${HB}
@@ -6760,7 +6772,7 @@ void main() {
   vUv = local;
   vCellIdx = gl_InstanceID;
 }
-`, Nt = `#version 300 es
+`, yt = `#version 300 es
 precision highp float;
 precision highp int;
 precision highp usampler2D;
@@ -6846,7 +6858,7 @@ void main() {
   }
   fragColor = vec4(outRgb, 1.0);
 }
-`, lt = `#version 300 es
+`, Ft = `#version 300 es
 precision highp float;
 precision highp int;
 ${HB}
@@ -6864,7 +6876,7 @@ void main() {
   gl_Position = vec4((cssX / canvasW) * 2.0 - 1.0, 1.0 - (cssY / canvasH) * 2.0, 0.0, 1.0);
   vUv = local;
 }
-`, yt = `#version 300 es
+`, Jt = `#version 300 es
 precision highp float;
 precision highp int;
 ${HB}
@@ -6884,7 +6896,7 @@ void main() {
   }
   fragColor = vec4(0.0);
 }
-`, Ft = `#version 300 es
+`, Ht = `#version 300 es
 precision highp float;
 precision highp int;
 layout(std140) uniform KittyParamsUBO {
@@ -6911,7 +6923,7 @@ void main() {
   );
   vUv = (kp.srcOrigin + local * kp.srcSize) / kp.imgSize;
 }
-`, Jt = `#version 300 es
+`, St = `#version 300 es
 precision highp float;
 precision highp int;
 uniform highp sampler2D uKittyImg;
@@ -6921,7 +6933,7 @@ void main() {
   fragColor = texture(uKittyImg, vUv);
 }
 `;
-class Ht extends uQ {
+class Yt extends uQ {
   constructor(B, g, I, Q, C) {
     super(g, I, Q, C), this.gl = B;
     const E = this.createBackingTexture(this.size);
@@ -6957,7 +6969,7 @@ class Ht extends uQ {
     (Q = (I = this.gl).deleteTexture) == null || Q.call(I, this.texture), this.texture = g;
   }
 }
-class St extends TQ {
+class Rt extends TQ {
   constructor(B) {
     super(), this.gl = B;
   }
@@ -6977,7 +6989,7 @@ class St extends TQ {
     this.gl.deleteTexture(B);
   }
 }
-class Yt extends jQ {
+class Lt extends jQ {
   constructor(B, g = 1024) {
     super(g), this.gl = B;
     const I = B.createTexture();
@@ -7000,6 +7012,12 @@ class Yt extends jQ {
     ), C.texSubImage2D(C.TEXTURE_2D, 0, B.u, B.v, I, Q, C.RGBA, C.UNSIGNED_BYTE, g);
   }
   growTexture(B) {
+    const g = this.gl;
+    g.deleteTexture(this.texture);
+    const I = g.createTexture();
+    if (!I)
+      throw new Error("GLKittyAtlas: createTexture failed on grow");
+    this.texture = I, g.bindTexture(g.TEXTURE_2D, I), g.texStorage2D(g.TEXTURE_2D, 1, g.RGBA8, B, B), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MIN_FILTER, g.LINEAR), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MAG_FILTER, g.LINEAR), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_S, g.CLAMP_TO_EDGE), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_T, g.CLAMP_TO_EDGE);
   }
 }
 class Fg {
@@ -7023,7 +7041,7 @@ class Fg {
     });
     if (!B)
       throw new Error("WebGL2Renderer: failed to acquire webgl2 context");
-    if (this.gl = B, this.kittyTextures = new St(this.gl), this.paletteUBO = B.createBuffer() ?? void 0, !this.paletteUBO)
+    if (this.gl = B, this.kittyTextures = new Rt(this.gl), this.paletteUBO = B.createBuffer() ?? void 0, !this.paletteUBO)
       throw new Error("WebGL2Renderer: createBuffer failed (paletteUBO)");
     if (B.bindBuffer(B.UNIFORM_BUFFER, this.paletteUBO), B.bufferData(B.UNIFORM_BUFFER, 384, B.DYNAMIC_DRAW), this.gridUBO = B.createBuffer() ?? void 0, !this.gridUBO)
       throw new Error("WebGL2Renderer: createBuffer failed (gridUBO)");
@@ -7068,7 +7086,7 @@ class Fg {
     return Q.deleteShader(C), Q.deleteShader(E), i;
   }
   setupTextProgram() {
-    const B = this.gl, g = this.buildProgram(Mt, Nt, "text");
+    const B = this.gl, g = this.buildProgram(lt, yt, "text");
     this.textProgram = g;
     const I = B.getUniformBlockIndex(g, "GridUBO"), Q = B.getUniformBlockIndex(g, "PaletteUBO");
     B.uniformBlockBinding(g, I, 0), B.uniformBlockBinding(g, Q, 1), B.uniformBlockBinding(g, B.getUniformBlockIndex(g, "KittyAtlasUBO"), 2), this.textProgramUniforms.cellTex = B.getUniformLocation(g, "uCellTex"), this.textProgramUniforms.atlasTex = B.getUniformLocation(g, "uAtlasTex"), B.useProgram(g), B.uniform1i(this.textProgramUniforms.cellTex, 0), B.uniform1i(this.textProgramUniforms.atlasTex, 1);
@@ -7076,11 +7094,11 @@ class Fg {
     B.uniform1i(C, 2);
   }
   setupCursorProgram() {
-    const B = this.gl, g = this.buildProgram(lt, yt, "cursor");
+    const B = this.gl, g = this.buildProgram(Ft, Jt, "cursor");
     this.cursorProgram = g, B.uniformBlockBinding(g, B.getUniformBlockIndex(g, "GridUBO"), 0), B.uniformBlockBinding(g, B.getUniformBlockIndex(g, "PaletteUBO"), 1);
   }
   setupKittyProgram() {
-    const B = this.gl, g = this.buildProgram(Ft, Jt, "kitty");
+    const B = this.gl, g = this.buildProgram(Ht, St, "kitty");
     this.kittyProgram = g, B.uniformBlockBinding(g, B.getUniformBlockIndex(g, "KittyParamsUBO"), 0), this.kittyProgramUniforms.kittyImg = B.getUniformLocation(g, "uKittyImg"), B.useProgram(g), B.uniform1i(this.kittyProgramUniforms.kittyImg, 0);
   }
   ensureKittyRingSize(B) {
@@ -7146,13 +7164,13 @@ class Fg {
     const I = B * this.metrics.width, Q = g * this.metrics.height;
     this.canvas.style.width = `${I}px`, this.canvas.style.height = `${Q}px`, this.canvas.width = Math.round(I * this.dpr), this.canvas.height = Math.round(Q * this.dpr), this.invalidateNext = !0;
     const C = Math.max(1, B * g * YA);
-    this.cellArray.length !== C && (this.cellArray = new Uint32Array(C)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new Ht(
+    this.cellArray.length !== C && (this.cellArray = new Uint32Array(C)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new Yt(
       this.gl,
       this.metrics.width,
       this.metrics.height,
       this.fontSize,
       this.fontFamily
-    ), this.kittyAtlas || (this.kittyAtlas = new Yt(this.gl));
+    ), this.kittyAtlas || (this.kittyAtlas = new Lt(this.gl));
     const E = Math.max(1, B * 2), i = Math.max(1, g);
     if (!this.cellTex || this.cellTexW !== E || this.cellTexH !== i) {
       this.cellTex && this.gl.deleteTexture(this.cellTex);
@@ -7315,7 +7333,7 @@ class Fg {
     this.contextLostListeners.push(B);
   }
 }
-const Rt = (
+const dt = (
   /* wgsl */
   `
 struct GridUBO {
@@ -7551,7 +7569,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
   return vec4<f32>(outRgb, 1.0);
 }
 `
-), Lt = (
+), Kt = (
   /* wgsl */
   `
 struct GridUBO {
@@ -7619,7 +7637,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
   return vec4<f32>(0.0);
 }
 `
-), dt = (
+), Ut = (
   /* wgsl */
   `
 struct KittyParams {
@@ -7665,7 +7683,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
 }
 `
 );
-class Kt extends TQ {
+class qt extends TQ {
   constructor(B) {
     super(), this.device = B;
   }
@@ -7689,7 +7707,7 @@ class Kt extends TQ {
     B.destroy();
   }
 }
-class Ut extends jQ {
+class ft extends jQ {
   constructor(B, g = 1024) {
     super(g), this.device = B, this.texture = B.createTexture({
       size: { width: g, height: g },
@@ -7713,9 +7731,15 @@ class Ut extends jQ {
     );
   }
   growTexture(B) {
+    this.texture.destroy(), this.texture = this.device.createTexture({
+      size: { width: B, height: B },
+      format: "rgba8unorm",
+      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+      label: "kittyAtlas"
+    });
   }
 }
-class qt extends uQ {
+class pt extends uQ {
   constructor(B, g, I, Q, C) {
     super(g, I, Q, C), this.device = B, this.texture = this.createBackingTexture(this.size);
   }
@@ -7748,7 +7772,7 @@ class qt extends uQ {
 }
 class Jg {
   constructor(B, g, I, Q) {
-    this.backend = "webgpu", this.theme = wA, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new Ng(), this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = B, this.device = g, this.kittyTextures = new Kt(g), this.fontSize = I.fontSize ?? 15, this.fontFamily = I.fontFamily ?? "monospace", this.cursorStyle = I.cursorStyle ?? "block", this.dpr = I.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...wA, ...I.theme }, this.cursorBlink_.setEnabled(I.cursorBlink ?? !1), this.ownsDevice = Q;
+    this.backend = "webgpu", this.theme = wA, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new Ng(), this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = B, this.device = g, this.kittyTextures = new qt(g), this.fontSize = I.fontSize ?? 15, this.fontFamily = I.fontFamily ?? "monospace", this.cursorStyle = I.cursorStyle ?? "block", this.dpr = I.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...wA, ...I.theme }, this.cursorBlink_.setEnabled(I.cursorBlink ?? !1), this.ownsDevice = Q;
   }
   /**
    * Create a WebGPURenderer.
@@ -7825,7 +7849,7 @@ class Jg {
         }
       ]
     });
-    const g = this.device.createShaderModule({ code: Rt, label: "textShader" }), I = this.device.createPipelineLayout({
+    const g = this.device.createShaderModule({ code: dt, label: "textShader" }), I = this.device.createPipelineLayout({
       bindGroupLayouts: [this.textBindGroupLayout]
     });
     this.textPipeline = this.device.createRenderPipeline({
@@ -7857,7 +7881,7 @@ class Jg {
       ]
     });
     const Q = this.device.createShaderModule({
-      code: Lt,
+      code: Kt,
       label: "cursorShader"
     }), C = this.device.createPipelineLayout({
       bindGroupLayouts: [this.cursorBindGroupLayout]
@@ -7898,7 +7922,7 @@ class Jg {
       ]
     });
     const E = this.device.createShaderModule({
-      code: dt,
+      code: Ut,
       label: "kittyShader"
     }), i = this.device.createPipelineLayout({
       bindGroupLayouts: [this.kittyBindGroupLayout]
@@ -8017,13 +8041,13 @@ class Jg {
       size: C,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       label: "cellBuffer"
-    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(B * g * YA)) : this.cellArray.length !== B * g * YA && (this.cellArray = new Uint32Array(B * g * YA)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new qt(
+    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(B * g * YA)) : this.cellArray.length !== B * g * YA && (this.cellArray = new Uint32Array(B * g * YA)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new pt(
       this.device,
       this.metrics.width,
       this.metrics.height,
       this.fontSize,
       this.fontFamily
-    ), this.kittyAtlas || (this.kittyAtlas = new Ut(this.device)), this.rebuildBindGroup();
+    ), this.kittyAtlas || (this.kittyAtlas = new ft(this.device)), this.rebuildBindGroup();
   }
   /**
    * True when no buffer row reports dirty AND no full-redraw is pending.
@@ -8266,7 +8290,7 @@ async function WB(A, B, g) {
   return Q || new UI(B, g);
 }
 const xA = 8, AA = 4;
-class ft {
+class Ot {
   constructor(B, g) {
     this.canvas = B, this.dpr = g;
     const I = B.getContext("2d", { alpha: !0 });
@@ -8779,7 +8803,7 @@ SB.AUTO_SCROLL_EDGE_SIZE = 30;
 SB.AUTO_SCROLL_SPEED = 3;
 SB.AUTO_SCROLL_INTERVAL = 50;
 let xI = SB;
-class Pt {
+class Vt {
   // 200ms fade animation
   constructor(B = {}) {
     this.unicode = {
@@ -8889,7 +8913,7 @@ class Pt {
       }
     }, this.handleMouseUp = () => {
       this.isDraggingScrollbar && (this.isDraggingScrollbar = !1, this.scrollbarDragStart = null, this.canvas && (this.canvas.style.userSelect = "", this.canvas.style.webkitUserSelect = ""), this.scrollbarVisible && this.getScrollbackLength() > 0 && this.showScrollbar());
-    }, this.ghostty = B.ghostty ?? Xt();
+    }, this.ghostty = B.ghostty ?? zt();
     const g = {
       cols: B.cols ?? 80,
       rows: B.rows ?? 24,
@@ -9047,7 +9071,7 @@ class Pt {
       const g = this.buildWasmConfig();
       this.wasmTerm = this.ghostty.createTerminal(this.cols, this.rows, g), this.canvas = document.createElement("canvas"), this.canvas.style.display = "block", this.canvas.style.cursor = "text", B.appendChild(this.canvas), this.textarea = document.createElement("textarea"), this.textarea.setAttribute("autocorrect", "off"), this.textarea.setAttribute("autocapitalize", "off"), this.textarea.setAttribute("spellcheck", "false"), this.textarea.setAttribute("tabindex", "0"), this.textarea.setAttribute("aria-label", "Terminal input"), this.textarea.style.position = "absolute", this.textarea.style.left = "0", this.textarea.style.top = "0", this.textarea.style.width = "1px", this.textarea.style.height = "1px", this.textarea.style.padding = "0", this.textarea.style.border = "none", this.textarea.style.margin = "0", this.textarea.style.opacity = "0", this.textarea.style.clipPath = "inset(50%)", this.textarea.style.overflow = "hidden", this.textarea.style.whiteSpace = "nowrap", this.textarea.style.resize = "none", B.appendChild(this.textarea), this.attachCanvasFocusListeners(this.canvas, this.textarea);
       const I = document.createElement("canvas");
-      I.style.position = "absolute", I.style.left = "0", I.style.top = "0", I.style.pointerEvents = "none", I.style.zIndex = "2", B.style.position = B.style.position || "relative", B.appendChild(I), this.scrollbarCanvas = I, this.scrollbarOverlay = new ft(I, window.devicePixelRatio || 1), this.renderer = await WB(this.options.renderer ?? "auto", this.canvas, {
+      I.style.position = "absolute", I.style.left = "0", I.style.top = "0", I.style.pointerEvents = "none", I.style.zIndex = "2", B.style.position = B.style.position || "relative", B.appendChild(I), this.scrollbarCanvas = I, this.scrollbarOverlay = new Ot(I, window.devicePixelRatio || 1), this.renderer = await WB(this.options.renderer ?? "auto", this.canvas, {
         fontSize: this.options.fontSize,
         fontFamily: this.options.fontFamily,
         cursorStyle: this.options.cursorStyle,
@@ -9759,8 +9783,8 @@ class Pt {
     return this.assertOpen(), this.wasmTerm.hasMouseTracking();
   }
 }
-const pt = 2, Ot = 1, xt = 15, ut = 100;
-class _t {
+const xt = 2, ut = 1, bt = 15, mt = 100;
+class $t {
   constructor() {
     this._isResizing = !1;
   }
@@ -9827,7 +9851,7 @@ class _t {
     const C = window.getComputedStyle(Q), E = Number.parseInt(C.getPropertyValue("padding-top")) || 0, i = Number.parseInt(C.getPropertyValue("padding-bottom")) || 0, e = Number.parseInt(C.getPropertyValue("padding-left")) || 0, t = Number.parseInt(C.getPropertyValue("padding-right")) || 0, o = Q.clientWidth, D = Q.clientHeight;
     if (o === 0 || D === 0)
       return;
-    const w = o - e - t - xt, s = D - E - i, a = Math.max(pt, Math.floor(w / I.width)), k = Math.max(Ot, Math.floor(s / I.height));
+    const w = o - e - t - bt, s = D - E - i, a = Math.max(xt, Math.floor(w / I.width)), k = Math.max(ut, Math.floor(s / I.height));
     return { cols: a, rows: k };
   }
   /**
@@ -9844,22 +9868,22 @@ class _t {
     (B = this._terminal) != null && B.element && (this._resizeObserver || (this._resizeObserver = new ResizeObserver((g) => {
       this._isResizing || !g[0] || (this._resizeDebounceTimer && clearTimeout(this._resizeDebounceTimer), this._resizeDebounceTimer = setTimeout(() => {
         this.fit();
-      }, ut));
+      }, mt));
     }), this._resizeObserver.observe(this._terminal.element)));
   }
 }
-const kB = "ghostty-renderer-hud", sg = "ghostty-renderer-hud-styles", bt = [
+const kB = "ghostty-renderer-hud", sg = "ghostty-renderer-hud-styles", Tt = [
   "webgpu",
   "webgl",
   "canvas2d"
 ];
-function mt(A) {
+function jt(A) {
   return A === "webgpu" || A === "webgl" || A === "canvas2d";
 }
 function PB(A) {
-  return A === "auto" || mt(A);
+  return A === "auto" || jt(A);
 }
-function Vt() {
+function Ao() {
   const B = new URLSearchParams(window.location.search).get("renderer");
   if (PB(B))
     return B;
@@ -9869,7 +9893,7 @@ function Vt() {
   const I = window.__boobaDefaultRenderer;
   return PB(I) ? I : "auto";
 }
-function Tt() {
+function vt() {
   if (document.getElementById(sg))
     return;
   const A = document.createElement("style");
@@ -9888,15 +9912,15 @@ function Tt() {
     }
   `, document.head.appendChild(A);
 }
-function jt(A, B) {
+function Xt(A, B) {
   const g = A === void 0 ? -1 : B.indexOf(A);
   return g < 0 ? B[0] : B[(g + 1) % B.length];
 }
-function vt(A) {
+function Zt(A) {
   const B = new URL(window.location.href);
   B.searchParams.set("renderer", A), window.location.href = B.toString();
 }
-function $t(A, B = {}) {
+function Bo(A, B = {}) {
   if (!A)
     throw new Error(
       "installRendererHud: terminal is null/undefined — call after term.open() so terminal.renderer exists."
@@ -9906,8 +9930,8 @@ function $t(A, B = {}) {
       `installRendererHud: a HUD with id "${kB}" is already installed. Uninstall first if you need to reinstall.`
     ), () => {
     };
-  const g = B.parent ?? document.body, I = B.position ?? "fixed", Q = B.clickToToggle ?? !0, C = B.bindToggleHotkey ?? !0, E = B.cycle && B.cycle.length > 0 ? B.cycle : bt;
-  Tt();
+  const g = B.parent ?? document.body, I = B.position ?? "fixed", Q = B.clickToToggle ?? !0, C = B.bindToggleHotkey ?? !0, E = B.cycle && B.cycle.length > 0 ? B.cycle : Tt;
+  vt();
   const i = document.createElement("div");
   i.id = kB, i.style.position = I, B.className && (i.className = B.className), Q && C ? i.title = "Click or Alt+Shift+R: cycle renderer" : Q ? i.title = "Click: cycle renderer" : C && (i.title = "Alt+Shift+R: cycle renderer"), Q ? (i.style.cursor = "pointer", i.style.pointerEvents = "auto") : i.style.pointerEvents = "none", g.appendChild(i);
   let e = 0, t = performance.now(), o = null;
@@ -9924,8 +9948,8 @@ function $t(A, B = {}) {
   o = requestAnimationFrame(D);
   const w = () => {
     var n;
-    const k = jt((n = A.renderer) == null ? void 0 : n.backend, E);
-    vt(k);
+    const k = Xt((n = A.renderer) == null ? void 0 : n.backend, E);
+    Zt(k);
   }, s = () => w();
   Q && i.addEventListener("click", s);
   const a = (k) => {
@@ -9937,10 +9961,10 @@ function $t(A, B = {}) {
   };
 }
 let lB = null;
-async function Ao() {
+async function go() {
   lB || (lB = await zA.load());
 }
-function Xt() {
+function zt() {
   if (!lB)
     throw new Error(
       `ghostty-web not initialized. Call init() before creating Terminal instances.
@@ -9962,7 +9986,7 @@ export {
   Ng as CursorBlink,
   GB as DirtyState,
   z as EventEmitter,
-  _t as FitAddon,
+  $t as FitAddon,
   zA as Ghostty,
   Bt as GhosttyTerminal,
   Et as InputHandler,
@@ -9973,14 +9997,14 @@ export {
   it as LinkDetector,
   BA as Mods,
   tt as OSC8LinkProvider,
-  ft as ScrollbarOverlay,
+  Ot as ScrollbarOverlay,
   xI as SelectionManager,
-  Pt as Terminal,
+  Vt as Terminal,
   ot as UrlRegexProvider,
   Jg as WebGPURenderer,
-  Xt as getGhostty,
-  Ao as init,
-  $t as installRendererHud,
-  Vt as parseRendererFromURL,
+  zt as getGhostty,
+  go as init,
+  Bo as installRendererHud,
+  Ao as parseRendererFromURL,
   WB as pickRenderer
 };
