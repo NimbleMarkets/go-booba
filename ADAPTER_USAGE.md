@@ -29,9 +29,18 @@ booba.connectWebSocket('ws://localhost:8080/ws');
 booba.focus();
 ```
 
-**Protocol**: Uses a custom binary protocol
-- `0x01` + data: User input
-- `0x02` + JSON: Terminal resize (`{"cols": N, "rows": M}`)
+**Protocol**: Uses the Sip-compatible binary protocol (v2). Each message is `[type byte][payload]`, where the type byte is an ASCII digit:
+- `0x30` `'0'` — Input (user input data)
+- `0x31` `'1'` — Output (program output data)
+- `0x32` `'2'` — Resize, JSON payload `{"cols": N, "rows": M, "widthPx": W, "heightPx": H}` (`widthPx`/`heightPx` optional)
+- `0x33` `'3'` — Ping
+- `0x34` `'4'` — Pong
+- `0x35` `'5'` — Title
+- `0x36` `'6'` — Options, JSON payload `{"readOnly": bool}`
+- `0x37` `'7'` — Close
+- `0x38` `'8'` — Kitty keyboard, JSON payload `{"flags": N}`
+
+WebTransport frames the same messages with a 4-byte big-endian length prefix: `[length][type byte][payload]`.
 
 ## 1.5. Auto Mode (WebTransport with WebSocket Fallback)
 
@@ -61,11 +70,20 @@ await booba.init();
 booba.connectWasm(16); // Poll every 16ms (~60fps)
 ```
 
-**Go side**: Use `booba.Run` or `booba.NewProgram` (from `github.com/NimbleMarkets/go-booba`) as the entry point — these wire up the JS bridge automatically when compiled with `GOARCH=wasm GOOS=js`. Build with `booba-wasm-build`:
+**Go side**: Use `booba.Run` or `booba.NewProgram` (from `github.com/NimbleMarkets/go-booba`) as the entry point — these wire up the JS bridge automatically when compiled with `GOARCH=wasm GOOS=js`. Build with a standard Go build:
 
 ```sh
-go run github.com/NimbleMarkets/go-booba/cmd/booba-wasm-build -o web/app.wasm ./cmd/myapp/
+GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
+
+**Scaffolding the `web/` directory**: The compiled `app.wasm` needs supporting files alongside it — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ghostty-web/` emulator assets, and an `index.html` host page. The `booba-assets` tool populates all of these:
+
+```sh
+go run github.com/NimbleMarkets/go-booba/cmd/booba-assets web/
+GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
+```
+
+This produces a `web/` directory ready to serve with any static file server. The generated `index.html` is a starter template — it is left untouched on re-runs unless you pass `--force`, so your customizations survive. Re-run `booba-assets` (without `--force`) after upgrading the go-booba dependency to refresh `wasm_exec.js`, `booba/`, and `ghostty-web/`.
 
 For advanced use cases that need direct control over the JS bridge (custom `js.FuncOf` callbacks, manual buffer management, etc.), the [`wasm`](./wasm) subpackage exposes the low-level API.
 
@@ -90,7 +108,7 @@ class MyCustomAdapter implements BoobaAdapter {
         // Your implementation
     }
     
-    boobaResize(cols: number, rows: number): void {
+    boobaResize(cols: number, rows: number, widthPx?: number, heightPx?: number): void {
         // Your implementation
     }
     
@@ -126,8 +144,8 @@ Read output from the BubbleTea program. Returns `null` if no data is available.
 ### `boobaWrite(data: string | Uint8Array): void`
 Send user input to the BubbleTea program.
 
-### `boobaResize(cols: number, rows: number): void`
-Notify the BubbleTea program of a terminal resize event.
+### `boobaResize(cols: number, rows: number, widthPx?: number, heightPx?: number): void`
+Notify the BubbleTea program of a terminal resize event. `widthPx`/`heightPx` are the optional canvas pixel dimensions, forwarded to the PTY for kitty graphics support.
 
 ### `connect(onData, onStateChange): void`
 Set up the connection and register callbacks for received data and connection state changes.

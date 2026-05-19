@@ -1,35 +1,41 @@
 // booba-assets sets up a web/ directory with everything needed to host
 // a BubbleTea program compiled to WebAssembly.
 //
-// It copies:
-//   - wasm_exec.js from GOROOT (Go WASM runtime support)
-//   - booba/*.js from the go-booba module (terminal wrapper)
-//   - ghostty-web/ghostty-web.js and ghostty-vt.wasm (terminal emulator)
-//   - index.html (an embedded starter template, unless one already exists)
+// It writes:
+//   - wasm_exec.js  — copied from GOROOT (Go's WASM runtime shim)
+//   - booba/*.js    — the terminal wrapper (embedded in this binary)
+//   - ghostty-web/* — the ghostty-web terminal emulator (embedded)
+//   - index.html    — a starter template (embedded), unless one exists
+//
+// Every asset except wasm_exec.js is embedded at compile time via the
+// go-booba serve/static package, so the tool needs no module context,
+// network access, or particular working directory — it runs anywhere.
+// wasm_exec.js is copied from the active Go toolchain because it must
+// match the compiler that builds the user's app.wasm.
 //
 // Usage:
 //
-//	go run github.com/NimbleMarkets/go-booba/cmd/booba-assets [--force] <output-dir>
+//	booba-assets [--force] <output-dir>
 package main
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
-	"io"
+	"io/fs"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/spf13/pflag"
+
+	"github.com/NimbleMarkets/go-booba/serve/static"
 )
 
 //go:embed template/index.html
 var templateFS embed.FS
-
-const boobaModule = "github.com/NimbleMarkets/go-booba"
 
 func main() {
 	force := pflag.BoolP("force", "f", false, "overwrite an existing index.html")
@@ -56,55 +62,33 @@ func run(outDir string, force bool) error {
 		return fmt.Errorf("create output dir: %w", err)
 	}
 
-	boobaDir, err := findModuleDir(boobaModule)
-	if err != nil {
-		return fmt.Errorf("locate %s (run 'go mod download' first?): %w", boobaModule, err)
-	}
-
-	goroot, err := goEnv("GOROOT")
-	if err != nil {
-		return fmt.Errorf("locate GOROOT: %w", err)
-	}
-
-	// wasm_exec.js (Go runtime)
-	wasmExec := filepath.Join(goroot, "lib", "wasm", "wasm_exec.js")
-	if _, err := os.Stat(wasmExec); err != nil {
-		return fmt.Errorf("wasm_exec.js not found at %s: %w", wasmExec, err)
-	}
-	if err := copyFile(wasmExec, filepath.Join(outDir, "wasm_exec.js")); err != nil {
-		return fmt.Errorf("copy wasm_exec.js: %w", err)
-	}
-	fmt.Printf("  wasm_exec.js          → %s\n", filepath.Join(outDir, "wasm_exec.js"))
-
-	// booba/*.js (terminal wrapper)
-	boobaSrc := filepath.Join(boobaDir, "serve", "static", "booba")
-	boobaDst := filepath.Join(outDir, "booba")
-	if err := os.MkdirAll(boobaDst, 0o755); err != nil {
+	// wasm_exec.js — copied from the active Go toolchain so it matches
+	// the compiler that builds the user's app.wasm.
+	if err := copyWasmExec(outDir); err != nil {
 		return err
 	}
-	n, err := copyJSFiles(boobaSrc, boobaDst)
+
+	// booba/*.js (terminal wrapper) — embedded
+	boobaDst := filepath.Join(outDir, "booba")
+	n, err := copyEmbedded("booba", boobaDst, isJS)
 	if err != nil {
-		return fmt.Errorf("copy booba assets: %w", err)
+		return fmt.Errorf("write booba assets: %w", err)
 	}
 	if n == 0 {
-		return fmt.Errorf("no .js files found in %s — module may be incomplete", boobaSrc)
+		return fmt.Errorf("no embedded booba/*.js assets found — booba-assets build is corrupt")
 	}
 	fmt.Printf("  booba/ (%d files)      → %s\n", n, boobaDst)
 
-	// ghostty-web (terminal emulator)
-	ghSrc := filepath.Join(boobaDir, "serve", "static", "ghostty-web")
+	// ghostty-web (terminal emulator) — embedded
 	ghDst := filepath.Join(outDir, "ghostty-web")
-	if err := os.MkdirAll(ghDst, 0o755); err != nil {
-		return err
-	}
-	n, err = copyBrowserAssets(ghSrc, ghDst)
+	n, err = copyEmbedded("ghostty-web", ghDst, isBrowserAsset)
 	if err != nil {
-		return fmt.Errorf("copy ghostty-web assets: %w", err)
+		return fmt.Errorf("write ghostty-web assets: %w", err)
 	}
 	if n == 0 {
-		return fmt.Errorf("no browser assets found in %s", ghSrc)
+		return fmt.Errorf("no embedded ghostty-web assets found — booba-assets build is corrupt")
 	}
-	// Sanity check: ensure all __vite- references are resolved
+	// Sanity check: ensure all __vite- references are resolved.
 	if err := checkViteReferences(filepath.Join(ghDst, "ghostty-web.js"), ghDst); err != nil {
 		return fmt.Errorf("ghostty-web.js contains unresolved Vite references: %w", err)
 	}
@@ -128,21 +112,66 @@ func run(outDir string, force bool) error {
 	return nil
 }
 
-func findModuleDir(path string) (string, error) {
-	out, err := exec.Command("go", "list", "-m", "-json", path).Output()
+// copyWasmExec copies wasm_exec.js from the active Go toolchain's GOROOT
+// into outDir. It must come from the toolchain (not an embedded copy) so
+// it matches the compiler that builds the user's app.wasm.
+func copyWasmExec(outDir string) error {
+	goroot, err := goEnv("GOROOT")
 	if err != nil {
-		return "", err
+		return fmt.Errorf("locate GOROOT: %w", err)
 	}
-	var info struct {
-		Dir string
+	src := filepath.Join(goroot, "lib", "wasm", "wasm_exec.js")
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return fmt.Errorf("read wasm_exec.js (expected at %s): %w", src, err)
 	}
-	if err := json.Unmarshal(out, &info); err != nil {
-		return "", err
+	dst := filepath.Join(outDir, "wasm_exec.js")
+	if err := os.WriteFile(dst, data, 0o644); err != nil {
+		return fmt.Errorf("write wasm_exec.js: %w", err)
 	}
-	if info.Dir == "" {
-		return "", fmt.Errorf("module %s not in module cache", path)
+	fmt.Printf("  wasm_exec.js          → %s\n", dst)
+	return nil
+}
+
+// copyEmbedded writes every file in the embedded directory subdir for
+// which keep(name) reports true into dstDir, returning the count written.
+func copyEmbedded(subdir, dstDir string, keep func(name string) bool) (int, error) {
+	entries, err := fs.ReadDir(static.FS, subdir)
+	if err != nil {
+		return 0, err
 	}
-	return info.Dir, nil
+	if err := os.MkdirAll(dstDir, 0o755); err != nil {
+		return 0, err
+	}
+	count := 0
+	for _, e := range entries {
+		if e.IsDir() || !keep(e.Name()) {
+			continue
+		}
+		data, err := static.FS.ReadFile(path.Join(subdir, e.Name()))
+		if err != nil {
+			return count, err
+		}
+		if err := os.WriteFile(filepath.Join(dstDir, e.Name()), data, 0o644); err != nil {
+			return count, err
+		}
+		count++
+	}
+	return count, nil
+}
+
+func isJS(name string) bool { return strings.HasSuffix(name, ".js") }
+
+// isBrowserAsset keeps the runtime .js and .wasm files, skipping type
+// definitions, source maps, and the UMD bundle.
+func isBrowserAsset(name string) bool {
+	if strings.HasSuffix(name, ".d.ts") ||
+		strings.HasSuffix(name, ".d.ts.map") ||
+		strings.HasSuffix(name, ".js.map") ||
+		strings.HasSuffix(name, ".cjs") {
+		return false
+	}
+	return strings.HasSuffix(name, ".js") || strings.HasSuffix(name, ".wasm")
 }
 
 func goEnv(name string) (string, error) {
@@ -153,97 +182,18 @@ func goEnv(name string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = in.Close() }()
-	// Normalize to 0o644: assets come from the Go module cache, which can
-	// hold files with 0o755 or other perms we don't want to propagate into
-	// the user's web directory.
-	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
-	if err != nil {
-		return err
-	}
-	if _, err := io.Copy(out, in); err != nil {
-		_ = out.Close()
-		return err
-	}
-	return out.Close()
-}
-
-func copyJSFiles(srcDir, dstDir string) (int, error) {
-	entries, err := os.ReadDir(srcDir)
-	if err != nil {
-		return 0, err
-	}
-	count := 0
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".js") {
-			continue
-		}
-		src := filepath.Join(srcDir, e.Name())
-		dst := filepath.Join(dstDir, e.Name())
-		if err := copyFile(src, dst); err != nil {
-			return count, err
-		}
-		count++
-	}
-	return count, nil
-}
-
-// copyBrowserAssets copies all .js and .wasm files from srcDir to dstDir,
-// skipping type definitions, source maps, and UMD bundles.
-func copyBrowserAssets(srcDir, dstDir string) (int, error) {
-	entries, err := os.ReadDir(srcDir)
-	if err != nil {
-		return 0, err
-	}
-	count := 0
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		name := e.Name()
-		// Skip type definitions, source maps, and UMD bundles
-		if strings.HasSuffix(name, ".d.ts") ||
-			strings.HasSuffix(name, ".d.ts.map") ||
-			strings.HasSuffix(name, ".js.map") ||
-			strings.HasSuffix(name, ".cjs") {
-			continue
-		}
-		// Include only .js and .wasm files
-		if !strings.HasSuffix(name, ".js") && !strings.HasSuffix(name, ".wasm") {
-			continue
-		}
-		src := filepath.Join(srcDir, name)
-		dst := filepath.Join(dstDir, name)
-		if err := copyFile(src, dst); err != nil {
-			return count, err
-		}
-		count++
-	}
-	return count, nil
-}
-
-// checkViteReferences verifies that all __vite- references in jsFile are resolved
-// (i.e., the referenced files exist in dstDir). This catches regressions where
-// Vite-generated filenames change after a rebuild.
+// checkViteReferences verifies that all __vite- references in jsFile are
+// resolved (i.e., the referenced files exist in dstDir). This catches
+// regressions where Vite-generated filenames change after a rebuild.
 func checkViteReferences(jsFile, dstDir string) error {
 	content, err := os.ReadFile(jsFile)
 	if err != nil {
 		return err
 	}
-	jsText := string(content)
 
-	// Find all __vite- references
 	viteRe := regexp.MustCompile(`__vite-[A-Za-z0-9.\-]+`)
-	matches := viteRe.FindAllString(jsText, -1)
-
-	for _, filename := range matches {
-		checkPath := filepath.Join(dstDir, filename)
-		if _, err := os.Stat(checkPath); err != nil {
+	for _, filename := range viteRe.FindAllString(string(content), -1) {
+		if _, err := os.Stat(filepath.Join(dstDir, filename)); err != nil {
 			return fmt.Errorf("referenced file not found: %s", filename)
 		}
 	}

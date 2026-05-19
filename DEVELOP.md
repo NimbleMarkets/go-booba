@@ -29,6 +29,8 @@ The submodule is pinned to the `nm-kitty-built` branch, which ships the prebuilt
 
 The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so `go install github.com/NimbleMarkets/go-booba/cmd/booba` works without a JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built` tip and re-running `task build-serve-assets` locally before committing.
 
+The `serve/static` package (`serve/static/embed.go`) `go:embed`s these same files, so both the `serve` package and the `booba-assets` scaffolding tool ship them inside their binaries. The embed patterns use the `all:` prefix — `go:embed` otherwise skips the underscore-prefixed `__vite-*.js` chunks Vite emits.
+
 ## Building WASM Applications with booba
 
 To compile a BubbleTea application to WebAssembly for use in the browser:
@@ -38,6 +40,15 @@ GOOS=js GOARCH=wasm go build -o app.wasm ./cmd/myapp/
 ```
 
 The patched BubbleTea (via the `replace` directive) provides all necessary WASM stubs (signal handling, TTY initialization) automatically. No custom build tool or additional configuration is needed.
+
+`app.wasm` needs supporting files alongside it to run in a browser. The `booba-assets` tool scaffolds a complete `web/` directory (`wasm_exec.js`, `booba/`, `ghostty-web/`, starter `index.html`):
+
+```sh
+go run github.com/NimbleMarkets/go-booba/cmd/booba-assets web/
+GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
+```
+
+See [ADAPTER_USAGE.md](./ADAPTER_USAGE.md) for the full WASM embedding workflow.
 
 **Requirements:**
 - Go 1.21+ (WebAssembly support is stable and built-in)

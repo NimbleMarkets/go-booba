@@ -98,7 +98,7 @@ These files implement booba-specific functionality with no upstream equivalent:
 | `ts/adapter.ts` | `BoobaAdapter` interface + WASM polling adapter |
 | `ts/clipboard.ts` | OSC 52 clipboard sequence scanner |
 | `ts/types.ts` | Booba-specific type re-exports and definitions |
-| `serve/protocol.go` | Go-side Sip protocol encode/decode |
+| `sip/protocol.go` | Go-side Sip protocol encode/decode |
 | `serve/handlers.go` | Go-side WebSocket + WebTransport session handling |
 
 The upstream demo uses raw UTF-8 strings for I/O and JSON

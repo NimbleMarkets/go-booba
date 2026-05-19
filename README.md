@@ -124,6 +124,15 @@ Build and run natively with `go run ./cmd/myapp`. Build for the browser with:
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
 
+The compiled `app.wasm` needs supporting files alongside it. The `booba-assets` tool scaffolds a complete `web/` directory — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ghostty-web/` emulator assets, and a starter `index.html`:
+
+```sh
+go run github.com/NimbleMarkets/go-booba/cmd/booba-assets web/
+GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
+```
+
+Serve the resulting `web/` directory with any static file server. `booba-assets` leaves an existing `index.html` untouched unless you pass `--force`, so re-running it after a go-booba upgrade safely refreshes the asset files while preserving your host page.
+
 For finer control, the [`wasm`](./wasm) subpackage exposes the browser bridge directly, and native code can construct a `tea.Program` the usual way.
 
 ## Web Frontend for BubbleTea-based service
