@@ -83,6 +83,7 @@ export declare class CanvasRenderer implements Renderer {
     private lastKittyPlacementSig;
     private currentKittyGraphics;
     private selectionManager?;
+    private bidiMapper;
     private currentSelectionCoords;
     private hoveredHyperlinkId;
     private previousHoveredHyperlinkId;
@@ -238,6 +239,7 @@ export declare class CanvasRenderer implements Renderer {
      * Set selection manager (for rendering selection)
      */
     setSelectionManager(manager: SelectionManager): void;
+    setBidiMapper(mapper: RowBidiMapper): void;
     /**
      * Check if a cell at (x, y) is within the current selection.
      * Uses cached selection coordinates for performance.
@@ -1905,6 +1907,14 @@ declare interface MouseTrackingConfig {
         left: number;
         top: number;
     };
+    /**
+     * Map a visual (screen) column to the logical column on BiDi-reordered
+     * rows. Both 0-based. Identity when absent. Mouse reports must carry the
+     * LOGICAL column — the app knows nothing about visual reordering, and a
+     * raw visual column makes clicks land on the wrong widget with nothing
+     * looking wrong on screen.
+     */
+    visualToLogicalCol?: (col: number, row: number) => number;
 }
 
 /**
@@ -1960,6 +1970,11 @@ export declare interface Renderer {
     setCursorBlink(enabled: boolean): void;
     setOnRequestRender(fn: (() => void) | null): void;
     setSelectionManager(mgr: SelectionManager): void;
+    /**
+     * Provide the shared BiDi row mapper. Optional: renderers without it
+     * paint logical order (pre-BiDi behavior).
+     */
+    setBidiMapper?(mapper: RowBidiMapper): void;
     setHoveredHyperlinkId(id: number): void;
     setHoveredLinkRange(range: LinkRange | null): void;
     /** Force a full repaint on next render() (e.g. after font change). */
@@ -2027,6 +2042,37 @@ export declare interface RGB {
     b: number;
 }
 
+declare interface RowBidiMap {
+    /**
+     * True when the row needs no bidi work at all: identity permutation and
+     * nothing to mirror. Consumers may skip map lookups entirely.
+     */
+    isIdentity: boolean;
+    /** Visual column → logical column. Length === row length. */
+    visualToLogical: Uint16Array;
+    /** Logical column → visual column. Inverse of visualToLogical. */
+    logicalToVisual: Uint16Array;
+    /**
+     * Logical column → replacement codepoint for UBA rule L4 glyph mirroring
+     * (e.g. "(" inside an RTL run paints as ")"). Null when nothing mirrors.
+     * Applies to PAINTING only — copy reads the logical cell untouched.
+     */
+    mirror: Map<number, number> | null;
+}
+
+declare class RowBidiMapper {
+    private bidi;
+    private identityByLen;
+    /** FNV-1a-hashed, content-verified LRU. ~512 entries ≈ several screens of
+     *  distinct RTL rows; maps are cheap to recompute on miss. */
+    private static readonly CACHE_MAX;
+    private cache;
+    constructor();
+    getMap(line: GhosttyCell[]): RowBidiMap;
+    private identity;
+    private compute;
+}
+
 export declare class ScrollbarOverlay {
     private canvas;
     private ctx;
@@ -2081,6 +2127,7 @@ export declare class SelectionManager {
     private renderer;
     private wasmTerm;
     private textarea;
+    private bidiMapper;
     private selectionStart;
     private selectionEnd;
     private isSelecting;
@@ -2112,7 +2159,7 @@ export declare class SelectionManager {
     private absoluteRowToViewport;
     private static readonly AUTO_SCROLL_SPEED;
     private static readonly AUTO_SCROLL_INTERVAL;
-    constructor(terminal: Terminal, renderer: Renderer, wasmTerm: GhosttyTerminal, textarea: HTMLTextAreaElement);
+    constructor(terminal: Terminal, renderer: Renderer, wasmTerm: GhosttyTerminal, textarea: HTMLTextAreaElement, bidiMapper: RowBidiMapper);
     /**
      * Get the selected text as a string
      */
@@ -2258,6 +2305,7 @@ export declare class Terminal implements ITerminalCore {
     private previousHoveredHyperlinkId;
     private inputHandler?;
     private selectionManager?;
+    private bidiMapper;
     private canvas?;
     private scrollbarCanvas?;
     private scrollbarOverlay?;
@@ -2730,6 +2778,7 @@ export declare class WebGPURenderer implements Renderer {
     private rows;
     private cursorBlink_;
     private selectionManager?;
+    private bidiMapper;
     private hoveredHyperlinkId;
     private hoveredLinkRange;
     private onRequestRender;
@@ -2816,6 +2865,7 @@ export declare class WebGPURenderer implements Renderer {
     setCursorBlink(enabled: boolean): void;
     setOnRequestRender(fn: (() => void) | null): void;
     setSelectionManager(mgr: SelectionManager): void;
+    setBidiMapper(mapper: RowBidiMapper): void;
     setHoveredHyperlinkId(id: number): void;
     setHoveredLinkRange(range: LinkRange | null): void;
     invalidate(): void;
