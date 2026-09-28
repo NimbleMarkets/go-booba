@@ -149,7 +149,7 @@ func newWTPair(t *testing.T) (server, client FrameConn, cleanup func()) {
 	dialCtx, dialCancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	wtURL := "https://127.0.0.1:" + itoa(addr.Port) + "/wt"
-	dialer := &webtransport.Dialer{
+	dialer := &webtransport.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true, //nolint:gosec // intentional for loopback test
 			NextProtos:         []string{"h3"},

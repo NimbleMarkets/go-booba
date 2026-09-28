@@ -119,7 +119,7 @@ func dialWT(ctx context.Context, opts DialOptions) (*wtFrameConn, error) {
 		tlsCfg.NextProtos = []string{"h3"}
 	}
 
-	dialer := webtransport.Dialer{
+	dialer := webtransport.Transport{
 		TLSClientConfig: tlsCfg,
 	}
 

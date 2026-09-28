@@ -9,11 +9,13 @@ Browser WASM programs now build with standard Go commands, and `booba-assets` wo
 
 ### Upgrading from 0.6.x
 
+Go 1.26 or newer is now required.
+
 `booba-wasm-build` has been removed. Add the pinned BubbleTea fork to your
 application's `go.mod`, then build with Go directly:
 
 ```sh
-go mod edit -replace charm.land/bubbletea/v2=github.com/neomantra/bubbletea/v2@v2.0.0-20260506185856-6506c47fa2f3
+go mod edit -replace charm.land/bubbletea/v2=github.com/neomantra/bubbletea/v2@v2.0.0-20260928192001-1b36865b418a
 go mod tidy
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
@@ -40,6 +42,7 @@ browser files.
 ### Go and WASM integration
 
 - Use the patched BubbleTea dependency instead of a separate WASM build tool.
+  Refresh the `nm-wasm` fork to `1b36865`, based on BubbleTea v2.0.10.
 - Expose BubbleTea methods directly and add `TeaProgram()` to access the underlying
   program when an API requires `*tea.Program`.
 - Set browser terminal capability defaults for `TERM_PROGRAM`, `COLORTERM`, and
