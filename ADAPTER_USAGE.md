@@ -70,7 +70,7 @@ await booba.init();
 booba.connectWasm(16); // Poll every 16ms (~60fps)
 ```
 
-**Go side**: Use `booba.Run` or `booba.NewProgram` (from `github.com/NimbleMarkets/go-booba`) as the entry point — these wire up the JS bridge automatically when compiled with `GOARCH=wasm GOOS=js`. Build with a standard Go build:
+**Go side**: Use `booba.Run` or `booba.NewProgram` (from `github.com/NimbleMarkets/go-booba`) as the entry point — these wire up the JS bridge automatically when compiled with `GOARCH=wasm GOOS=js`. Your module's `go.mod` needs the patched-bubbletea `replace` directive first (see the README's browser-embedding section — replace directives don't propagate from booba's `go.mod`). Then build with a standard Go build:
 
 ```sh
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/

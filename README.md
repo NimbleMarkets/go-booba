@@ -118,11 +118,22 @@ func main() {
 }
 ```
 
-Build and run natively with `go run ./cmd/myapp`. Build for the browser with:
+Build and run natively with `go run ./cmd/myapp`. Building for the browser needs one extra step: booba depends on a [patched BubbleTea fork](https://github.com/neomantra/bubbletea/tree/nm-wasm) that adds `GOOS=js` support (not yet merged upstream), and Go `replace` directives don't propagate to consumers — so add the replace to *your* module's `go.mod` first:
+
+```sh
+go mod edit -replace charm.land/bubbletea/v2=github.com/neomantra/bubbletea/v2@nm-wasm
+go mod tidy
+```
+
+For reproducible builds, prefer copying the exact pinned `replace` line from [booba's own `go.mod`](./go.mod) instead of the branch name. Once the patch lands upstream, this step goes away.
+
+Then build for the browser with:
 
 ```sh
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
+
+> **Troubleshooting:** compile errors inside `charm.land/bubbletea/v2` such as `p.listenForResize undefined`, `undefined: suspendProcess`, or `p.initInput undefined` mean the replace directive is missing from your module — upstream BubbleTea has no `js/wasm` implementations of these.
 
 The compiled `app.wasm` needs supporting files alongside it. The `booba-assets` tool scaffolds a complete `web/` directory — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ghostty-web/` emulator assets, and a starter `index.html`:
 

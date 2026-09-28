@@ -2,18 +2,26 @@
 
 ## BubbleTea Integration
 
-booba uses a patched version of BubbleTea with WebAssembly support. The patched fork is at [neomantra/bubbletea:nm-wasm](https://github.com/neomantra/bubbletea/tree/nm-wasm) and is referenced locally via a `replace` directive in `go.mod`:
+booba uses a patched version of BubbleTea with WebAssembly support. The patched fork is at [neomantra/bubbletea:nm-wasm](https://github.com/neomantra/bubbletea/tree/nm-wasm) and is pinned by pseudo-version via a `replace` directive in `go.mod`:
 
 ```
-replace charm.land/bubbletea/v2 => ../bubbletea
+replace charm.land/bubbletea/v2 => github.com/neomantra/bubbletea/v2 v2.0.0-20260506185856-6506c47fa2f3
 ```
 
 This means:
-- Clone both `booba` and `bubbletea` (nm-wasm branch) in sibling directories
-- The replace directive automatically uses the local bubbletea for builds
-- No separate build tool or monkeypatching needed
+- Contributors need no special setup — a plain clone builds; Go fetches the fork like any other module
+- **Consumers of booba must copy this replace directive into their own `go.mod`** to build for WASM — Go replace directives do not propagate to downstream modules (see the README's browser-embedding section for the consumer-facing instructions and troubleshooting)
 
-The patches include WASM-specific signal handling and TTY initialization that aren't in upstream BubbleTea yet. Once merged upstream, the replace directive can be removed.
+The patches add `js && wasm` (and `wasip1`) build-tagged implementations of signal handling, TTY initialization, and termios that aren't in upstream BubbleTea yet. Once merged upstream, the replace directive can be removed.
+
+To bump the pin to the fork branch tip:
+
+```sh
+go mod edit -replace charm.land/bubbletea/v2=github.com/neomantra/bubbletea/v2@nm-wasm
+go mod tidy
+```
+
+then commit `go.mod` and `go.sum` — `go mod tidy` resolves the branch name back to a pinned pseudo-version.
 
 ## Building from Source
 
@@ -39,7 +47,7 @@ To compile a BubbleTea application to WebAssembly for use in the browser:
 GOOS=js GOARCH=wasm go build -o app.wasm ./cmd/myapp/
 ```
 
-The patched BubbleTea (via the `replace` directive) provides all necessary WASM stubs (signal handling, TTY initialization) automatically. No custom build tool or additional configuration is needed.
+The patched BubbleTea (via the `replace` directive — see [BubbleTea Integration](#bubbletea-integration)) provides all necessary WASM stubs (signal handling, TTY initialization) automatically. No custom build tool is needed, but builds outside this repository must carry the replace directive in their own `go.mod`.
 
 `app.wasm` needs supporting files alongside it to run in a browser. The `booba-assets` tool scaffolds a complete `web/` directory (`wasm_exec.js`, `booba/`, `ghostty-web/`, starter `index.html`):
 
@@ -51,9 +59,9 @@ GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 See [ADAPTER_USAGE.md](./ADAPTER_USAGE.md) for the full WASM embedding workflow.
 
 **Requirements:**
-- Go 1.21+ (WebAssembly support is stable and built-in)
-- Both `booba` and `bubbletea` (nm-wasm branch) cloned locally in sibling directories
-- The replace directive in booba's `go.mod` points to the local bubbletea
+- Go 1.25+ (matching the `go` directive in `go.mod`; WebAssembly support is built-in)
+- In-repo builds: nothing else — the `replace` directive in `go.mod` pulls the patched bubbletea fork automatically
+- Out-of-repo (consumer) builds: copy the replace directive into your module's `go.mod` (see the README)
 
 **Runtime:**
 The generated `.wasm` file needs a host environment that provides:
