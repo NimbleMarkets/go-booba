@@ -25,6 +25,12 @@ then commit `go.mod` and `go.sum` — `go mod tidy` resolves the branch name bac
 
 ## Building from Source
 
+The pre-commit hook and `task go-lint` select the Go version declared in
+`go.mod`, matching CI. This prevents a newer system Go from causing the
+installed golangci-lint binary to panic while analyzing the standard library.
+The hook also uses that toolchain's `gofmt`. Go downloads the selected toolchain
+automatically if it is not already installed.
+
 booba vendors [`ghostty-web`](https://github.com/NimbleMarkets/ghostty-web) (NimbleMarkets fork) as a git submodule at `third_party/ghostty-web`. Clone with submodules:
 
 ```sh

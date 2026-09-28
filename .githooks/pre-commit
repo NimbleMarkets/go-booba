@@ -9,12 +9,23 @@
 
 set -e
 
+# Match CI's go-version-file selection. A newer system Go can otherwise
+# expose standard-library syntax that the installed linter cannot analyze.
+project_go_version=$(awk '$1 == "go" { print $2; exit }' go.mod)
+if [ -z "$project_go_version" ]; then
+    echo "pre-commit: missing go version in go.mod"
+    exit 1
+fi
+export GOTOOLCHAIN="go${project_go_version}"
+project_goroot=$(go env GOROOT)
+echo "pre-commit: using $GOTOOLCHAIN from go.mod"
+
 # --- gofmt ---
 # Check all Go files for formatting issues, not just staged ones.
 # Staged-only checking misses cases where an edit uncovers a pre-existing
 # formatting problem in the same file.
 echo "pre-commit: checking gofmt..."
-fmt_files=$(gofmt -l .)
+fmt_files=$("$project_goroot/bin/gofmt" -l .)
 if [ -n "$fmt_files" ]; then
     echo "pre-commit: gofmt would reformat the following files:"
     echo "$fmt_files"
@@ -29,7 +40,7 @@ go vet ./...
 # --- golangci-lint ---
 if ! command -v golangci-lint >/dev/null 2>&1; then
     echo "pre-commit: golangci-lint not found. Install with:"
-    echo "  go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest"
+    echo "  task dev-deps"
     exit 1
 fi
 

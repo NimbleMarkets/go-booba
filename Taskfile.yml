@@ -80,6 +80,9 @@ tasks:
 
   go-lint:
     desc: Run golangci-lint with errcheck
+    env:
+      GOTOOLCHAIN:
+        sh: "awk '$1 == \"go\" { print \"go\" $2; exit }' go.mod"
     cmds:
       - golangci-lint run --enable=errcheck --timeout=5m ./...
 
