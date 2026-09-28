@@ -5,7 +5,7 @@
 Booba 0.7.0 improves browser terminal rendering with GPU backends, bidirectional
 text support, and faster input echo. 
 
-Browser WASM programs now build with standard Go commands, and `booba-assets` works without a local module checkout. Embedded assets are smaller, and development dependencies have been updated.
+Browser WASM programs now build with standard Go commands, and `booba-assets` embeds its browser assets. Embedded assets are smaller, and development dependencies have been updated.
 
 ### Upgrading from 0.6.x
 
@@ -47,8 +47,11 @@ browser files.
   program when an API requires `*tea.Program`.
 - Set browser terminal capability defaults for `TERM_PROGRAM`, `COLORTERM`, and
   `CLICOLOR_FORCE`, preserving values already supplied by the host.
-- Embed the scaffolding files in `booba-assets`, so it can run outside a Go module
-  without downloading assets.
+- Embed the scaffolding files in `booba-assets`, so the built binary can run
+  outside a Go module without downloading assets. A matching Go toolchain is
+  still needed for `wasm_exec.js`. Version-suffixed `go run` and `go install`
+  are blocked by the module's BubbleTea `replace` directive; use a release
+  binary or register the command with `go get -tool` in a consumer module.
 
 ### Packaging and development
 

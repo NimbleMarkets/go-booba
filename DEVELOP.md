@@ -41,7 +41,7 @@ git submodule update --init --recursive
 
 The submodule is pinned to the `nm-kitty-built` branch, which ships the prebuilt `dist/` (wasm + JS + .d.ts) committed alongside the source by ghostty-web's CI. `task build` copies only the browser runtime `.js` and `.wasm` files into `serve/static/ghostty-web/`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally. The copy script prunes obsolete chunks and non-runtime artifacts. Upstream declarations remain available through the installed npm package.
 
-The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so `go install github.com/NimbleMarkets/go-booba/cmd/booba` works without a JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built` tip and re-running `task build-serve-assets` locally before committing.
+The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so Go builds need no JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built` tip and re-running `task build-serve-assets` locally before committing.
 
 The `serve/static` package (`serve/static/embed.go`) `go:embed`s these same files, so both the `serve` package and the `booba-assets` scaffolding tool ship them inside their binaries. Explicit `*.js` and `*.wasm` patterns include underscore-prefixed Vite chunks while excluding CJS bundles, declarations, and maps left over from older builds. The embed build emits JavaScript only; `npm run build` still emits declarations and source maps into `dist/` for npm consumers.
 
@@ -84,14 +84,21 @@ The patched BubbleTea (via the `replace` directive — see [BubbleTea Integratio
 `app.wasm` needs supporting files alongside it to run in a browser. The `booba-assets` tool scaffolds a complete `web/` directory (`wasm_exec.js`, `booba/`, `ghostty-web/`, starter `index.html`):
 
 ```sh
-go run github.com/NimbleMarkets/go-booba/cmd/booba-assets web/
+go get -tool github.com/NimbleMarkets/go-booba/cmd/booba-assets@v0.7.0
+go tool booba-assets web/
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
+
+Run these commands in the consumer module with the BubbleTea replacement above.
+Version-suffixed `go run` and `go install` commands are rejected because booba's
+module contains a `replace` directive. The tool directive uses the consumer's
+module configuration instead. Alternatively, use a release binary; its assets
+are embedded, but it still needs the matching Go toolchain for `wasm_exec.js`.
 
 See [ADAPTER_USAGE.md](./ADAPTER_USAGE.md) for the full WASM embedding workflow.
 
 **Requirements:**
-- Go 1.25+ (matching the `go` directive in `go.mod`; WebAssembly support is built-in)
+- Go 1.26.8+ (matching the `go` directive in `go.mod`; WebAssembly support is built-in)
 - In-repo builds: nothing else — the `replace` directive in `go.mod` pulls the patched bubbletea fork automatically
 - Out-of-repo (consumer) builds: copy the replace directive into your module's `go.mod` (see the README)
 

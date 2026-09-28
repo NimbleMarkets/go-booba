@@ -138,9 +138,19 @@ GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 The compiled `app.wasm` needs supporting files alongside it. The `booba-assets` tool scaffolds a complete `web/` directory — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ghostty-web/` emulator assets, and a starter `index.html`:
 
 ```sh
-go run github.com/NimbleMarkets/go-booba/cmd/booba-assets web/
+go get -tool github.com/NimbleMarkets/go-booba/cmd/booba-assets@v0.7.0
+go tool booba-assets web/
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
+
+Run these commands in your application's Go module, with the BubbleTea replacement above.
+The tool directive records the scaffolder as a project dependency; no booba source
+checkout is needed. `go run .../cmd/booba-assets@v0.7.0` and
+`go install .../cmd/booba-assets@v0.7.0` are rejected by Go because booba's
+module contains a `replace` directive. You can also use the `booba-assets`
+binary from the [release archives](https://github.com/NimbleMarkets/go-booba/releases).
+The binary embeds its browser assets but still needs the Go toolchain used to
+build `app.wasm` to supply the matching `wasm_exec.js`.
 
 Serve the resulting `web/` directory with any static file server. `booba-assets` leaves an existing `index.html` untouched unless you pass `--force`, so re-running it after a go-booba upgrade safely refreshes the asset files while preserving your host page.
 
