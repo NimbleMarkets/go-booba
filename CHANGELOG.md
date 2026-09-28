@@ -1,44 +1,71 @@
 # `booba` CHANGELOG
 
-## [0.7.0] - UNRELEASED
+## [0.7.0] - 2026-09-28
 
-This release is dedicated to all the Mother's past and present.  Thank you for you love and nurturing.
+Booba 0.7.0 improves browser terminal rendering with GPU backends, bidirectional
+text support, and faster input echo. 
 
-- **Latest ghostty-web with expanded renderer support:**
-  - WebGPU renderer (modern hardware-accelerated)
-  - WebGL renderer (fallback for older hardware)
-  - Canvas2D renderer (universal fallback)
-  - Auto-detection to select best available renderer per browser
+Browser WASM programs now build with standard Go commands, and `booba-assets` works without a local module checkout. Embedded assets are smaller, and development dependencies have been updated.
 
-- **BREAKING:** Renderer HUD now uses clickable badge instead of Alt+Shift+R hotkey
-  - Removed `bindToggleHotkey` option from `BoobaRendererHudOptions`
-  - Badge displays active renderer backend + live FPS in bottom-right corner
-  - Click to toggle between available renderers
+### Upgrading from 0.6.x
 
-- Validate `--renderer` CLI flag against whitelist (auto|webgpu|webgl|canvas2d)
-- Safe HTML injection using JSON encoding to prevent XSS via renderer parameter
+`booba-wasm-build` has been removed. Add the pinned BubbleTea fork to your
+application's `go.mod`, then build with Go directly:
 
-- Add submodule HEAD verification to Taskfile to prevent stale checkouts
+```sh
+go mod edit -replace charm.land/bubbletea/v2=github.com/neomantra/bubbletea/v2@v2.0.0-20260506185856-6506c47fa2f3
+go mod tidy
+GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
+```
 
-- Embed bundle no longer references source maps. Eliminates the nine "Source Map loading errors" DevTools warnings consumers saw when loading booba's JS. In-repo development workflow is unchanged (`npm run build` still emits maps via `tsconfig.json`)
-- `booba-assets` now embeds its scaffolded assets
+Go does not propagate dependency `replace` directives, so each consumer building
+for the browser needs this entry. Use `booba-assets web/` to generate the supporting
+browser files.
 
+### Terminal rendering
 
+- Update ghostty-web to `c51504e` (source `10a023d`), with WebGPU, WebGL, and
+  Canvas2D renderers and automatic fallback.
+- Add bidirectional text ordering, with matching selection, copy, link detection,
+  and mouse-coordinate handling. Arabic/Persian cursive shaping remains unsupported.
+- Support browser Kitty shared-memory images, reduce input echo latency, and fix
+  stale cells appearing after scrolling.
+- Expose renderer selection and HUD utilities through the TypeScript API. The HUD
+  shows the active backend and FPS; click the badge or press Alt+Shift+R to switch.
+- Add `--renderer auto|webgpu|canvas2d` to set the server default. The browser's
+  `?renderer=` option takes precedence and also supports `webgl`.
+- Validate the CLI renderer option and safely encode it into the served page.
+- Wait for asynchronous terminal initialization before connecting a backend.
 
-## `v0.6.1` (2026-05-07)
+### Go and WASM integration
 
-This release cleans up the CI/CD for syncing `NimbleMarkets/ghostty-Web`...
-where we recently fixed horrible render loop performance and also added a WebGPU backend (experimental)!
+- Use the patched BubbleTea dependency instead of a separate WASM build tool.
+- Expose BubbleTea methods directly and add `TeaProgram()` to access the underlying
+  program when an API requires `*tea.Program`.
+- Set browser terminal capability defaults for `TERM_PROGRAM`, `COLORTERM`, and
+  `CLICOLOR_FORCE`, preserving values already supplied by the host.
+- Embed the scaffolding files in `booba-assets`, so it can run outside a Go module
+  without downloading assets.
 
-   * `chore`: switch ghostty-web consumption from local-build to prebuilt
-     `nm-kitty-built` branch. The submodule now ships dist/* committed by
-     ghostty-web's CI; booba no longer needs zig/bun/nix to build. Removed
-     `task build-ghostty-web` and `.github/workflows/rebuild-static.yml`.
+### Packaging and development
 
-   * Picks up upstream ghostty-web renderer changes: block-element fillRect
-     (fixes grid artifacts at dpr=1), event-driven render scheduler (lower
-     idle CPU), kitty placeholder tile-edge seam fix, default fg/bg vs
-     explicit RGB(0,0,0) distinction.
+- Consume prebuilt ghostty-web artifacts; building Booba no longer requires Zig,
+  Bun, or Nix.
+- Remove about 1.2 MB of unused CJS and declaration files from the embedded assets.
+  Copy only browser JavaScript and WASM, prune obsolete chunks, and exclude leftover
+  development files from Go binaries.
+- Keep declarations and source maps in the npm package, without emitting them into
+  the embedded browser files.
+- Update Happy DOM to 20.14.5, Vitest to 4.1.11, and affected transitive dependencies.
+  Install the ghostty-web package without its development toolchain.
+- Run TypeScript tests and check committed assets in CI. Add JavaScript/WASM
+  compatibility tests and a manual RTL rendering harness.
+- Preserve intentional submodule updates during builds, track embedded assets when
+  rebuilding `booba-assets`, and use the project's Go toolchain for commit checks
+  and linting.
+
+This release is dedicated to all the mothers, past and present. Thank you for your
+love and nurturing.
 
 ## `v0.6.0` (2026-04-29)
 
