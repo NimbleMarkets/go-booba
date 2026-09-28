@@ -39,11 +39,11 @@ git clone --recurse-submodules https://github.com/NimbleMarkets/go-booba.git
 git submodule update --init --recursive
 ```
 
-The submodule is pinned to the `nm-kitty-built` branch, which ships the prebuilt `dist/` (wasm + JS + .d.ts) committed alongside the source by ghostty-web's CI. `task build` then just copies `third_party/ghostty-web/dist/*` into `serve/static/` for `go:embed`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally.
+The submodule is pinned to the `nm-kitty-built` branch, which ships the prebuilt `dist/` (wasm + JS + .d.ts) committed alongside the source by ghostty-web's CI. `task build` copies only the browser runtime `.js` and `.wasm` files into `serve/static/ghostty-web/`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally. The copy script prunes obsolete chunks and non-runtime artifacts. Upstream declarations remain available through the installed npm package.
 
 The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so `go install github.com/NimbleMarkets/go-booba/cmd/booba` works without a JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built` tip and re-running `task build-serve-assets` locally before committing.
 
-The `serve/static` package (`serve/static/embed.go`) `go:embed`s these same files, so both the `serve` package and the `booba-assets` scaffolding tool ship them inside their binaries. The embed patterns use the `all:` prefix — `go:embed` otherwise skips the underscore-prefixed `__vite-*.js` chunks Vite emits.
+The `serve/static` package (`serve/static/embed.go`) `go:embed`s these same files, so both the `serve` package and the `booba-assets` scaffolding tool ship them inside their binaries. Explicit `*.js` and `*.wasm` patterns include underscore-prefixed Vite chunks while excluding CJS bundles, declarations, and maps left over from older builds. The embed build emits JavaScript only; `npm run build` still emits declarations and source maps into `dist/` for npm consumers.
 
 ### Updating ghostty-web
 

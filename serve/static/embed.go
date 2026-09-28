@@ -12,9 +12,9 @@ import "embed"
 // FS holds the embedded browser assets, rooted at this directory.
 // Paths within it are "booba/...", "ghostty-web/...", and "index.html".
 //
-// The all: prefix is required so Vite's "__vite-*.js" chunks — whose
-// names begin with an underscore — are embedded; go:embed excludes
-// "_"- and "."-prefixed files by default.
+// Match runtime files explicitly, including underscore-prefixed Vite chunks.
+// Directory patterns would also embed leftover declarations, maps, and CJS
+// bundles from older builds.
 //
-//go:embed all:booba all:ghostty-web index.html
+//go:embed booba/*.js ghostty-web/*.js ghostty-web/*.wasm index.html
 var FS embed.FS

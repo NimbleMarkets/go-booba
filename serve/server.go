@@ -30,11 +30,10 @@ import (
 	"github.com/NimbleMarkets/go-booba/sip"
 )
 
-// Explicit entries (not static/*) so the static package's embed.go
-// source file is not embedded and served. The all: prefix keeps the
-// underscore-prefixed Vite chunks ("__vite-*.js") included.
+// Match runtime files explicitly so development artifacts and Go source are
+// never served. The *.js globs also match underscore-prefixed Vite chunks.
 //
-//go:embed all:static/booba all:static/ghostty-web static/index.html
+//go:embed static/booba/*.js static/ghostty-web/*.js static/ghostty-web/*.wasm static/index.html
 var staticFiles embed.FS
 
 // Server serves terminal sessions over WebSocket.

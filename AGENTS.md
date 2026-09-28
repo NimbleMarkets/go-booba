@@ -60,13 +60,17 @@ adjust our wrapper code for API changes.
 | File | Description |
 |------|-------------|
 | `serve/static/ghostty-web/ghostty-web.js` | Terminal emulation engine + public API (including `installRendererHud`, `parseRendererFromURL`) compiled from libghostty |
-| `serve/static/ghostty-web/ghostty-web.umd.cjs` | UMD build of the same |
 | `serve/static/ghostty-web/ghostty-vt.wasm` | WASM binary for VT100 parsing |
-| `serve/static/ghostty-web/index.d.ts` | TypeScript definitions for ghostty-web API |
+| `serve/static/ghostty-web/__vite-*.js` | Runtime chunks imported by the ESM bundle |
 
-These are copies of `third_party/ghostty-web/dist/*` from the
+These are copies of the browser runtime files in `third_party/ghostty-web/dist/` from the
 `nm-kitty-built` submodule pointer; we commit them so
 `go install .../cmd/booba` works without a JS toolchain.
+`scripts/copy-ghostty-assets.mjs` copies only `.js` and `.wasm` files and
+prunes obsolete copies. The UMD/CJS bundle, declarations, and source maps are
+not embedded. TypeScript resolves upstream declarations through the installed
+ghostty-web npm package; `npm run build` still emits booba's own declarations
+and source maps into `dist/` for npm consumers.
 
 To update: bump the submodule pointer (after triggering the fork's
 `build-nm-kitty-built` workflow if the latest source isn't yet built —

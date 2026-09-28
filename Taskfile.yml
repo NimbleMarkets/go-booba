@@ -138,19 +138,18 @@ tasks:
       - test -e third_party/ghostty-web/dist/index.d.ts
 
   build-serve-assets:
-    desc: 'Copy prebuilt ghostty-web/dist/ into serve/static/ for go:embed'
+    desc: 'Copy prebuilt ghostty-web browser runtime assets for go:embed'
     deps: [build-assets, init-submodules]
     run: once
     cmds:
-      - mkdir -p serve/static/ghostty-web
-      - cp -r third_party/ghostty-web/dist/* serve/static/ghostty-web/
+      - node scripts/copy-ghostty-assets.mjs
     sources:
+      - scripts/copy-ghostty-assets.mjs
       - third_party/ghostty-web/dist/*
     generates:
       - serve/static/ghostty-web/ghostty-web.js
-      - serve/static/ghostty-web/ghostty-web.umd.cjs
+      - serve/static/ghostty-web/__vite-*.js
       - serve/static/ghostty-web/ghostty-vt.wasm
-      - serve/static/ghostty-web/index.d.ts
 
   clean:
     desc: 'Clean commands'
@@ -184,6 +183,7 @@ tasks:
       - go build -o bin/booba-assets ./cmd/booba-assets/
     sources:
       - cmd/booba-assets/**/*
+      - serve/static/**/*
     generates:
       - bin/booba-assets
 
