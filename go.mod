@@ -1,6 +1,6 @@
 module github.com/NimbleMarkets/go-booba
 
-go 1.26.0
+go 1.26.8
 
 require (
 	charm.land/bubbletea/v2 v2.0.10
