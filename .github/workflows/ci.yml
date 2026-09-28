@@ -37,6 +37,9 @@ jobs:
           rm -rf serve/static/booba serve/static/ghostty-web
           task build-serve-assets
 
+      - name: Verify committed assets
+        run: git diff --exit-code -- serve/static/booba serve/static/ghostty-web
+
       - name: Test
         run: task test
 

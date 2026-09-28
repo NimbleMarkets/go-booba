@@ -39,6 +39,32 @@ The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files ar
 
 The `serve/static` package (`serve/static/embed.go`) `go:embed`s these same files, so both the `serve` package and the `booba-assets` scaffolding tool ship them inside their binaries. The embed patterns use the `all:` prefix — `go:embed` otherwise skips the underscore-prefixed `__vite-*.js` chunks Vite emits.
 
+### Updating ghostty-web
+
+```sh
+git -C third_party/ghostty-web fetch origin nm-kitty-built
+git -C third_party/ghostty-web checkout --detach origin/nm-kitty-built
+npm install --package-lock-only --ignore-scripts
+task build-serve-assets
+task build-npm
+task test
+```
+
+Commit the submodule pointer, lockfile, and embedded assets together. The lockfile
+refresh picks up changes to the fork's npm dependencies. CI rebuilds the assets
+and checks that the committed copies match, and `task test` runs both Go and
+TypeScript tests.
+
+The project's `.npmrc` uses `install-links=true` to install the prebuilt
+ghostty-web package without its development dependencies. Booba declares its
+own test tools, including Happy DOM. Run `npm ci` after changing the submodule
+checkout to refresh the installed copy; Task tracks the upstream distribution
+and does this automatically.
+
+Build tasks preserve an initialized submodule checkout so testing an unstaged
+dependency update does not reset it. After switching booba branches, run
+`git submodule update --init --recursive` to synchronize the pinned dependencies.
+
 ## Building WASM Applications with booba
 
 To compile a BubbleTea application to WebAssembly for use in the browser:

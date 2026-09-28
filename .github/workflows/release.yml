@@ -62,8 +62,8 @@ jobs:
       - run: npm ci
 
       # ghostty-web ships prebuilt dist/ on the nm-kitty-built submodule
-      # branch, so the `file:./third_party/ghostty-web` link in package.json
-      # already exposes dist/index.d.ts to tsc — no zig/bun build needed.
+      # branch, so npm installs its prebuilt dist/index.d.ts from the
+      # local package — no zig/bun build needed.
       - run: npm run build
 
       - name: Verify package version matches git tag

@@ -6,6 +6,12 @@ both BiDi ordering and Arabic cursive joining across Hebrew, Arabic, and Persian
 - [coder/ghostty-web#83](https://github.com/coder/ghostty-web/issues/83) — Hebrew renders reversed in the browser terminal
 - [ghostty-org/ghostty#1442](https://github.com/ghostty-org/ghostty/issues/1442) — upstream BiDi support in the VT/screen model
 
+**Update (2026-09-27):** booba now pins ghostty-web `c51504e` (source `10a023d`),
+which adds BiDi ordering across Canvas2D, WebGL, and WebGPU, with corresponding
+selection, link, and mouse-coordinate mapping. The findings below describe the
+previous `52ed6df` build. Keep this harness for visual regression checks; Arabic
+and Persian cursive shaping remains a separate limitation.
+
 ## What it does
 
 A static BubbleTea screen — no timers, no animation, no input beyond quit — that

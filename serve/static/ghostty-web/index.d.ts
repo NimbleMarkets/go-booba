@@ -85,6 +85,7 @@ export declare class CanvasRenderer implements Renderer {
     private selectionManager?;
     private bidiMapper;
     private currentSelectionCoords;
+    private currentSelectionColumnSpace;
     private hoveredHyperlinkId;
     private previousHoveredHyperlinkId;
     private hoveredLinkRange;
@@ -490,8 +491,8 @@ export declare class GhosttyTerminal {
      * terminal handles are only unique within a single WASM instance, and
      * indices into one module's table are meaningless in another.
      *
-     * One trampoline pair (write_pty + size) is installed per table; their
-     * slot indices live here alongside the routing map. The dispatchers
+     * One set of trampolines (write_pty, size, decode_png, read_shm) is installed
+     * per table; their slot indices live here alongside the routing map. The dispatchers
      * close over the same instancesByHandle so any GhosttyTerminal coming
      * from this WASM module routes correctly.
      */
@@ -781,7 +782,7 @@ export declare class GhosttyTerminal {
      */
     readResponse(): string | null;
     /**
-     * Install the WRITE_PTY and SIZE trampoline callbacks.
+     * Install the terminal and image-loading trampoline callbacks.
      *
      * Trampolines are shared across all terminals that come from the
      * same WASM instance, but NOT across instances — terminal handles are
@@ -792,7 +793,7 @@ export declare class GhosttyTerminal {
      * table.
      *
      * On first use for a given table we instantiate the trampolines,
-     * `table.grow(2)`, and write both into the new slots. Subsequent
+     * grow the table, and write the four callbacks into new slots. Subsequent
      * terminals from the same module reuse the registry and just
      * register their handle in instancesByHandle.
      */
@@ -2115,6 +2116,8 @@ declare interface ScrollbarRenderInput {
     opacity: number;
 }
 
+export declare type SelectionColumnSpace = 'visual' | 'logical';
+
 export declare interface SelectionCoordinates {
     startCol: number;
     startRow: number;
@@ -2130,6 +2133,7 @@ export declare class SelectionManager {
     private bidiMapper;
     private selectionStart;
     private selectionEnd;
+    private selectionColumnSpace;
     private isSelecting;
     private mouseDownX;
     private mouseDownY;
@@ -2219,6 +2223,12 @@ export declare class SelectionManager {
      */
     getSelectionCoords(): SelectionCoordinates | null;
     /**
+     * Return the coordinate space used by the current selection's columns.
+     * Renderers use this to test visual cells against logical programmatic
+     * selections after BiDi reordering.
+     */
+    getSelectionColumnSpace(): SelectionColumnSpace;
+    /**
      * Get dirty selection rows that need redraw (for clearing old highlight)
      */
     getDirtySelectionRows(): Set<number>;
@@ -2264,7 +2274,7 @@ export declare class SelectionManager {
      */
     private normalizeSelection;
     /**
-     * Get word boundaries at a cell position
+     * Get logical word boundaries at a visual cell position.
      */
     private getWordAtCell;
     /**
@@ -2292,6 +2302,8 @@ export declare class SelectionManager {
 }
 
 export declare class Terminal implements ITerminalCore {
+    private kittyAPCState;
+    private writtenKittyGraphics;
     cols: number;
     rows: number;
     element?: HTMLElement;
@@ -2342,6 +2354,7 @@ export declare class Terminal implements ITerminalCore {
     private isSwapping;
     private animationFrameId?;
     private writeQueue;
+    private awaitingEcho;
     private addons;
     private customKeyEventHandler?;
     private currentTitle;
@@ -2628,6 +2641,20 @@ export declare class Terminal implements ITerminalCore {
      */
     private assertOpen;
     /**
+     * Convert a visual (screen-position) column to the logical column within
+     * `line`, per BiDi reordering (see lib/bidi.ts). Callers must pass the
+     * EXACT line object they already read for this row — never refetch by
+     * row index, since scrollback vs. screen indexing differs and a mismatched
+     * refetch could compute the map against the wrong row's content.
+     */
+    private visualColToLogical;
+    /**
+     * Resolve a viewport row to the exact scrollback or screen line currently
+     * displayed there. Mouse reporting must use this rather than getLine(row):
+     * when scrolled, viewport rows and screen-buffer rows are different.
+     */
+    private getViewportLine;
+    /**
      * Handle mouse move for link hover detection and scrollbar dragging
      * Throttled to avoid blocking scroll events (except when dragging scrollbar)
      */
@@ -2874,3 +2901,10 @@ export declare class WebGPURenderer implements Renderer {
 }
 
 export { }
+
+export {};
+
+declare global {
+  /** Whole, tightly packed Kitty pixel buffers, consumed by a t=s transmission. */
+  var ghosttyKittySharedMemory: Map<string, Uint8Array> | undefined;
+}
