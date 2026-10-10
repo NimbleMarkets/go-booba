@@ -1,4 +1,5 @@
 import { ActionController, type TerminalAction } from './actions.js';
+import { displayText, ensureStyles } from './host_styles.js';
 
 export interface ActionBarOptions {
     parent: HTMLElement;
@@ -30,18 +31,10 @@ export const ACTION_BAR_CSS = `@layer booba {
 
 const STYLE_ATTRIBUTE = 'data-booba-styles';
 
-function ensureStyles(doc: Document): void {
-    if (doc.head.querySelector(`style[${STYLE_ATTRIBUTE}]`)) return;
-    const style = doc.createElement('style');
-    style.setAttribute(STYLE_ATTRIBUTE, '');
-    style.textContent = ACTION_BAR_CSS;
-    doc.head.append(style);
-}
-
 /** Mount accessible controls in a host-owned element; return an idempotent disposer. */
 export function installActionBar(controller: ActionController, options: ActionBarOptions): () => void {
     const doc = options.parent.ownerDocument;
-    if (options.styles !== false) ensureStyles(doc);
+    if (options.styles !== false) ensureStyles(doc, STYLE_ATTRIBUTE, ACTION_BAR_CSS);
     const root = doc.createElement('div');
     root.className = 'booba-action-bar';
     root.setAttribute('role', 'group');
@@ -49,13 +42,11 @@ export function installActionBar(controller: ActionController, options: ActionBa
     options.parent.append(root);
     let expanded = false;
     let disposed = false;
-    // Invisible direction overrides in application labels must not reorder host UI.
-    const display = (value: string) => value.replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/gu, '');
     const button = (label: string, activate: () => unknown, modifier?: string): HTMLButtonElement => {
         const b = doc.createElement('button');
         b.type = 'button';
         b.className = modifier ? `booba-action ${modifier}` : 'booba-action';
-        b.textContent = display(label);
+        b.textContent = displayText(label);
         // Avoid moving focus to the terminal textarea or changing the software keyboard.
         b.addEventListener('pointerdown', event => { if (event.pointerType !== 'mouse') event.preventDefault(); });
         b.addEventListener('click', () => { if (!disposed) activate(); });
@@ -78,7 +69,7 @@ export function installActionBar(controller: ActionController, options: ActionBa
                     const b = button(label, controller.capture(action.id, index));
                     b.dataset.actionFocus = `${action.id}:${index}`;
                     b.disabled = !controller.canActivate(action.id, index);
-                    b.title = display(action.hint || keyLabel);
+                    b.title = displayText(action.hint || keyLabel);
                     parent.append(b);
                 }
             };

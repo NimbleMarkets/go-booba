@@ -5,6 +5,7 @@ import { BoobaAutoAdapter } from './auto_adapter.js';
 import { OSC52Scanner } from './clipboard.js';
 import { ActionController } from './actions.js';
 import { ActionStatusBridge } from './action_status.js';
+import { ProgramStatusStore } from './program_status_store.js';
 import { TerminalSequenceObserver } from './terminal_sequences.js';
 import { applyThemeProperties } from './theme_properties.js';
 export class BoobaTerminal {
@@ -24,13 +25,17 @@ export class BoobaTerminal {
         this.programStatusCallback = callback;
         this.syncProgramStatus();
     }
+    get consumesProgramStatus() {
+        return !!(this.options.allowOSC7501Actions || this.programStatusCallback || this.programStatus.listenerCount > 0);
+    }
     syncProgramStatus() {
         this.programStatusSubscription?.dispose();
         this.programStatusSubscription = null;
         const source = this.term;
-        if ((this.programStatusCallback || this.options.allowOSC7501Actions) && source?.onProgramStatus) {
+        if (this.consumesProgramStatus && source?.onProgramStatus) {
             this.programStatusSubscription = source.onProgramStatus(report => {
                 const display = this.options.allowOSC7501Actions ? this.actionStatus.receive(report) : report;
+                this.programStatus.apply(display);
                 this.programStatusCallback?.(display);
             });
         }
@@ -44,6 +49,7 @@ export class BoobaTerminal {
         this._dprCleanup = null;
         this.actionKeyEncoder = null;
         this.actionReadOnly = false;
+        this.terminalWriteDepth = 0;
         this.lifecycleBoundaries = [];
         this.onActionError = null;
         this.programStatusSubscription = null;
@@ -85,28 +91,62 @@ export class BoobaTerminal {
             },
         });
         this.actionStatus = new ActionStatusBridge(this.actions, error => this.onActionError?.(error));
+        this.programStatus = new ProgramStatusStore(Date.now, () => this.syncProgramStatus());
         this.sequenceObserver = new TerminalSequenceObserver({
             osc: () => { },
-            lifecycle: (_reason, end) => this.lifecycleBoundaries.push(end),
+            lifecycle: (reason, end) => this.lifecycleBoundaries.push({ reason, end }),
         });
     }
     // Split only at lifecycle boundaries so native onProgramStatus events and
     // clears retain wire order even when multiple sequences share one write.
     writeLiveOutput(data) {
-        if (!this.options.allowOSC7501Actions) {
-            this.term?.write(data);
+        if (!this.consumesProgramStatus) {
+            this.writeTerminal(data);
             return;
         }
         this.lifecycleBoundaries = [];
         this.sequenceObserver.scan(data);
         let start = 0;
-        for (const end of this.lifecycleBoundaries) {
-            this.term?.write(data.slice(start, end));
+        for (const { reason, end } of this.lifecycleBoundaries) {
+            this.writeTerminal(data.slice(start, end));
             this.actionStatus.clear();
+            // Records belong to the terminal, not the screen: a full reset drops
+            // them all, a shell prompt ends in-flight work, a screen switch is nothing.
+            if (reason === 'reset')
+                this.programStatus.clear();
+            else if (reason === 'prompt')
+                this.programStatus.prompt();
             start = end;
         }
         if (start < data.length)
-            this.term?.write(data.slice(start));
+            this.writeTerminal(data.slice(start));
+    }
+    /**
+     * Write to the terminal. Replies the terminal generates while parsing
+     * (query responses) arrive on onData synchronously inside this call, which
+     * is how forwardInput tells them apart from user input.
+     */
+    writeTerminal(data, callback) {
+        this.terminalWriteDepth++;
+        try {
+            this.term?.write(data, callback);
+        }
+        finally {
+            this.terminalWriteDepth--;
+        }
+    }
+    /**
+     * Send user input to the program. The user has now seen any finished or
+     * failed status, which the protocol retires on the next interaction.
+     * Terminal-generated replies arrive here synchronously inside a write and
+     * are not user input, so they never dismiss.
+     * @internal exposed for tests; terminal input normally arrives here via onData.
+     */
+    forwardInput(data) {
+        if (this.terminalWriteDepth === 0 && this.programStatus.records.some(r => r.state === 'done' || r.state === 'error')) {
+            this.programStatus.dismissSettled();
+        }
+        this.adapter?.boobaWrite(data);
     }
     async init() {
         if (!this.container) {
@@ -139,9 +179,7 @@ export class BoobaTerminal {
         });
         console.log('Terminal opened. Size:', term.cols, 'x', term.rows);
         // Send user input through adapter
-        term.onData((data) => {
-            this.adapter?.boobaWrite(data);
-        });
+        term.onData((data) => this.forwardInput(data));
         term.onBell(() => {
             this.onBell?.();
         });
@@ -253,6 +291,10 @@ export class BoobaTerminal {
                 return;
             this.sequenceObserver.reset();
             this.actionStatus.clear();
+            if (state === 'connected')
+                this.programStatus.clear();
+            else if (state === 'disconnected')
+                this.programStatus.exit();
             this.actions.setConnected(state === 'connected');
             this._updateStatus(state, message);
             const term = this.term;
@@ -270,6 +312,7 @@ export class BoobaTerminal {
         this.adapter = null;
         this.sequenceObserver.reset();
         this.actionStatus.clear();
+        this.programStatus.exit();
         this.actions.setConnected(false);
         adapter?.disconnect();
         if (adapter)
@@ -358,15 +401,22 @@ export class BoobaTerminal {
     reset() {
         this.sequenceObserver.reset();
         this.actionStatus.clear();
+        this.programStatus.clear();
         this.term?.reset();
     }
     /** Write data to the terminal display */
     write(data, callback) {
-        this.term?.write(data, callback);
+        this.writeTerminal(data, callback);
     }
     /** Write data with a trailing newline */
     writeln(data, callback) {
-        this.term?.writeln(data, callback);
+        this.terminalWriteDepth++;
+        try {
+            this.term?.writeln(data, callback);
+        }
+        finally {
+            this.terminalWriteDepth--;
+        }
     }
     // --- Terminal Mode Queries ---
     /** Check if the program has enabled mouse tracking */
@@ -413,6 +463,7 @@ export class BoobaTerminal {
         this._dprCleanup = null;
         this.programStatusSubscription?.dispose();
         this.programStatusSubscription = null;
+        this.programStatus.clear();
         this.term?.dispose();
         this.term = null;
         this.fitAddon = null;
@@ -495,4 +546,6 @@ export { installRendererHud, parseRendererFromURL } from '../ghostty-web/ghostty
 // Transport-independent terminal actions and optional host UI.
 export { ActionController, ACTION_LIMITS, validateActionSnapshot, decodeActionSnapshot } from './actions.js';
 export { installActionBar, ACTION_BAR_CSS } from './action_bar.js';
+export { ProgramStatusStore, MAX_PROGRAM_STATUS_RECORDS } from './program_status_store.js';
+export { installStatusBar, STATUS_BAR_CSS } from './status_bar.js';
 export { decodeActionStatus, actionStatusID, ACTION_MESSAGE_MARKER, ACTION_STATUS_NAMESPACE } from './action_status.js';

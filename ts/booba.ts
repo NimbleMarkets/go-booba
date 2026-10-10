@@ -6,6 +6,7 @@ import { OSC52Scanner } from './clipboard.js';
 import { ActionController, type ActionKeyEncoder } from './actions.js';
 import type { ProgramStatusReport, ProgramStatusSource } from './program_status.js';
 import { ActionStatusBridge } from './action_status.js';
+import { ProgramStatusStore } from './program_status_store.js';
 import { TerminalSequenceObserver } from './terminal_sequences.js';
 import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js';
 import { applyThemeProperties } from './theme_properties.js';
@@ -45,8 +46,11 @@ export class BoobaTerminal {
     private actionKeyEncoder: ActionKeyEncoder | null = null;
     private actionReadOnly = false;
     private actionStatus: ActionStatusBridge;
+    /** Program Status Protocol (OSC 7501) records, with the protocol's lifetime rules applied. */
+    readonly programStatus: ProgramStatusStore;
     private sequenceObserver: TerminalSequenceObserver;
-    private lifecycleBoundaries: number[] = [];
+    private terminalWriteDepth = 0;
+    private lifecycleBoundaries: { reason: 'reset' | 'screen' | 'prompt'; end: number }[] = [];
     onActionError: ((error: Error) => void) | null = null;
 
     /** Install a mode-aware encoder; no gestures are enabled without one. */
@@ -72,13 +76,18 @@ export class BoobaTerminal {
         this.syncProgramStatus();
     }
 
+    private get consumesProgramStatus(): boolean {
+        return !!(this.options.allowOSC7501Actions || this.programStatusCallback || this.programStatus.listenerCount > 0);
+    }
+
     private syncProgramStatus(): void {
         this.programStatusSubscription?.dispose();
         this.programStatusSubscription = null;
         const source = this.term as ProgramStatusSource | null;
-        if ((this.programStatusCallback || this.options.allowOSC7501Actions) && source?.onProgramStatus) {
+        if (this.consumesProgramStatus && source?.onProgramStatus) {
             this.programStatusSubscription = source.onProgramStatus(report => {
                 const display = this.options.allowOSC7501Actions ? this.actionStatus.receive(report) : report;
+                this.programStatus.apply(display);
                 this.programStatusCallback?.(display);
             });
         }
@@ -122,25 +131,54 @@ export class BoobaTerminal {
             },
         });
         this.actionStatus = new ActionStatusBridge(this.actions, error => this.onActionError?.(error));
+        this.programStatus = new ProgramStatusStore(Date.now, () => this.syncProgramStatus());
         this.sequenceObserver = new TerminalSequenceObserver({
             osc: () => {},
-            lifecycle: (_reason, end) => this.lifecycleBoundaries.push(end),
+            lifecycle: (reason, end) => this.lifecycleBoundaries.push({ reason, end }),
         });
     }
 
     // Split only at lifecycle boundaries so native onProgramStatus events and
     // clears retain wire order even when multiple sequences share one write.
     private writeLiveOutput(data: string | Uint8Array): void {
-        if (!this.options.allowOSC7501Actions) { this.term?.write(data); return; }
+        if (!this.consumesProgramStatus) { this.writeTerminal(data); return; }
         this.lifecycleBoundaries = [];
         this.sequenceObserver.scan(data);
         let start = 0;
-        for (const end of this.lifecycleBoundaries) {
-            this.term?.write(data.slice(start, end));
+        for (const { reason, end } of this.lifecycleBoundaries) {
+            this.writeTerminal(data.slice(start, end));
             this.actionStatus.clear();
+            // Records belong to the terminal, not the screen: a full reset drops
+            // them all, a shell prompt ends in-flight work, a screen switch is nothing.
+            if (reason === 'reset') this.programStatus.clear();
+            else if (reason === 'prompt') this.programStatus.prompt();
             start = end;
         }
-        if (start < data.length) this.term?.write(data.slice(start));
+        if (start < data.length) this.writeTerminal(data.slice(start));
+    }
+
+    /**
+     * Write to the terminal. Replies the terminal generates while parsing
+     * (query responses) arrive on onData synchronously inside this call, which
+     * is how forwardInput tells them apart from user input.
+     */
+    private writeTerminal(data: string | Uint8Array, callback?: () => void): void {
+        this.terminalWriteDepth++;
+        try { this.term?.write(data, callback); } finally { this.terminalWriteDepth--; }
+    }
+
+    /**
+     * Send user input to the program. The user has now seen any finished or
+     * failed status, which the protocol retires on the next interaction.
+     * Terminal-generated replies arrive here synchronously inside a write and
+     * are not user input, so they never dismiss.
+     * @internal exposed for tests; terminal input normally arrives here via onData.
+     */
+    forwardInput(data: string | Uint8Array): void {
+        if (this.terminalWriteDepth === 0 && this.programStatus.records.some(r => r.state === 'done' || r.state === 'error')) {
+            this.programStatus.dismissSettled();
+        }
+        this.adapter?.boobaWrite(data);
     }
 
     async init() {
@@ -181,9 +219,7 @@ export class BoobaTerminal {
         console.log('Terminal opened. Size:', term.cols, 'x', term.rows);
 
         // Send user input through adapter
-        term.onData((data) => {
-            this.adapter?.boobaWrite(data);
-        });
+        term.onData((data) => this.forwardInput(data));
 
         term.onBell(() => {
             this.onBell?.();
@@ -300,6 +336,8 @@ export class BoobaTerminal {
                 if (this.adapter !== adapter) return;
                 this.sequenceObserver.reset();
                 this.actionStatus.clear();
+                if (state === 'connected') this.programStatus.clear();
+                else if (state === 'disconnected') this.programStatus.exit();
                 this.actions.setConnected(state === 'connected');
                 this._updateStatus(state, message);
                 const term = this.term;
@@ -319,6 +357,7 @@ export class BoobaTerminal {
         this.adapter = null;
         this.sequenceObserver.reset();
         this.actionStatus.clear();
+        this.programStatus.exit();
         this.actions.setConnected(false);
         adapter?.disconnect();
         if (adapter) this._updateStatus('disconnected', 'Disconnected');
@@ -429,17 +468,19 @@ export class BoobaTerminal {
     reset(): void {
         this.sequenceObserver.reset();
         this.actionStatus.clear();
+        this.programStatus.clear();
         this.term?.reset();
     }
 
     /** Write data to the terminal display */
     write(data: string | Uint8Array, callback?: () => void): void {
-        this.term?.write(data, callback);
+        this.writeTerminal(data, callback);
     }
 
     /** Write data with a trailing newline */
     writeln(data: string | Uint8Array, callback?: () => void): void {
-        this.term?.writeln(data, callback);
+        this.terminalWriteDepth++;
+        try { this.term?.writeln(data, callback); } finally { this.terminalWriteDepth--; }
     }
 
     // --- Terminal Mode Queries ---
@@ -498,6 +539,7 @@ export class BoobaTerminal {
         this._dprCleanup = null;
         this.programStatusSubscription?.dispose();
         this.programStatusSubscription = null;
+        this.programStatus.clear();
         this.term?.dispose();
         this.term = null;
         this.fitAddon = null;
@@ -612,5 +654,9 @@ export { ActionController, ACTION_LIMITS, validateActionSnapshot, decodeActionSn
 export type { ActionSnapshot, TerminalAction, ActionGesture, ActionControllerOptions, ActionKeyEncoder } from './actions.js';
 export { installActionBar, ACTION_BAR_CSS } from './action_bar.js';
 export type { ActionBarOptions } from './action_bar.js';
+export { ProgramStatusStore, MAX_PROGRAM_STATUS_RECORDS } from './program_status_store.js';
+export type { ProgramStatusRecord, ProgramStatusState } from './program_status_store.js';
+export { installStatusBar, STATUS_BAR_CSS } from './status_bar.js';
+export type { StatusBarOptions } from './status_bar.js';
 export type { ProgramStatusReport } from './program_status.js';
 export { decodeActionStatus, actionStatusID, ACTION_MESSAGE_MARKER, ACTION_STATUS_NAMESPACE } from './action_status.js';
