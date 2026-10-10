@@ -6,6 +6,14 @@
 // bubbletea_resize) that booba's BoobaWasmAdapter polls to shuttle data between
 // the ghostty-web terminal emulator and the Go program.
 //
+// Program exit:
+//
+// Once the Go program returns, no Go function can be called from JavaScript
+// again, so [Program.Run] announces the exit before that happens: it stores the
+// unread output in window.bubbletea_final and sets window.bubbletea_exited to
+// true. The adapter delivers that final frame, stops polling, and reports the
+// session as disconnected. NewProgram resets both values.
+//
 // Environment synthesis:
 //
 // During package initialization (before any consumer code runs), this package
@@ -67,6 +75,9 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 		toJS:    toJS,
 	}
 
+	js.Global().Set("bubbletea_exited", false)
+	js.Global().Set("bubbletea_final", "")
+
 	p.writeFunc = js.FuncOf(func(_ js.Value, args []js.Value) any {
 		if len(args) > 0 {
 			p.fromJS.Write([]byte(args[0].String()))
@@ -98,13 +109,24 @@ func NewProgram(model tea.Model, opts ...tea.ProgramOption) *Program {
 	return p
 }
 
-// Run starts the program and blocks until it exits, cleaning up JS functions.
+// Run starts the program and blocks until it exits. Before the bridge
+// functions are released it publishes the exit to JavaScript (see the package
+// documentation), because nothing in Go is callable once Run has returned.
 func (p *Program) Run() (tea.Model, error) {
 	defer p.writeFunc.Release()
 	defer p.readFunc.Release()
 	defer p.resizeFunc.Release()
 
-	return p.Program.Run()
+	model, err := p.Program.Run()
+	p.publishExit()
+	return model, err
+}
+
+// publishExit hands the unread output to JavaScript and flags the exit.
+func (p *Program) publishExit() {
+	global := js.Global()
+	global.Set("bubbletea_final", string(p.toJS.ReadAndReset()))
+	global.Set("bubbletea_exited", true)
 }
 
 // TeaProgram returns the underlying *tea.Program for use with functions

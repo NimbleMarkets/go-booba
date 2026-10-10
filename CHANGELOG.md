@@ -10,6 +10,16 @@
 - Run `booba-view-example` through `booba.Run`, so its browser build registers the
   WASM bridge instead of failing to open a TTY.
 
+### Go and WASM integration
+
+- Announce program exit across the WASM bridge. When a browser-hosted program
+  returns, the `wasm` package stores its unread output in `window.bubbletea_final`
+  and sets `window.bubbletea_exited` before the Go runtime goes away; the WASM
+  adapter delivers that final frame, stops polling, and reports the session as
+  disconnected. The action bar clears and the console no longer fills with
+  "Go program has already exited" errors. `task go-test-wasm` runs the `wasm`
+  package's tests under Node and is part of `task test`.
+
 ## [0.8.0] - 2026-10-10
 
 Booba 0.8.0 adds an experimental Terminal Actions system that turns an

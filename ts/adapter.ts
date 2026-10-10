@@ -47,19 +47,27 @@ export interface BoobaAdapter {
 
 /**
  * WASM-based adapter for pure embedding mode
- * 
- * Communicates with BubbleTea via global WASM functions:
- * - window.booba_write(data: string): void
- * - window.booba_read(): string
- * - window.booba_resize(cols: number, rows: number): void
+ *
+ * Communicates with BubbleTea via global functions the Go program registers:
+ * - window.bubbletea_write(data: string): void
+ * - window.bubbletea_read(): string
+ * - window.bubbletea_resize(cols: number, rows: number): void
+ *
+ * Once the Go program returns, none of them can be called again, so booba's
+ * wasm package announces the exit first: window.bubbletea_exited becomes true
+ * and window.bubbletea_final holds the unread output. The adapter delivers that
+ * final frame, stops polling, and reports 'disconnected' with "Program exited".
  */
 export class BoobaWasmAdapter implements BoobaAdapter {
     private pollInterval: number | null = null;
     private onDataCallback: ((data: string | Uint8Array) => void) | null = null;
+    private onStateChangeCallback: ((state: BoobaConnectionState, message: string) => void) | null = null;
+    private exited = false;
 
     constructor(private pollMs: number = 16) { } // ~60fps
 
     boobaRead(): string | null {
+        if (this.exited) return null;
         if (typeof (window as any).bubbletea_read !== 'function') {
             console.warn('bubbletea_read not available');
             return null;
@@ -69,6 +77,7 @@ export class BoobaWasmAdapter implements BoobaAdapter {
     }
 
     boobaWrite(data: string | Uint8Array): void {
+        if (this.exited) return;
         if (typeof (window as any).bubbletea_write !== 'function') {
             console.warn('bubbletea_write not available');
             return;
@@ -78,6 +87,7 @@ export class BoobaWasmAdapter implements BoobaAdapter {
     }
 
     boobaResize(cols: number, rows: number, _widthPx?: number, _heightPx?: number): void {
+        if (this.exited) return;
         if (typeof (window as any).bubbletea_resize !== 'function') {
             console.warn('bubbletea_resize not available');
             return;
@@ -86,19 +96,49 @@ export class BoobaWasmAdapter implements BoobaAdapter {
         console.log('Sent resize to WASM:', cols, rows);
     }
 
+    /** Called when the Go program has returned: flush its last output and end the session. */
+    private handleExit(): void {
+        if (this.exited) return;
+        this.exited = true;
+        if (this.pollInterval !== null) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+        }
+        const final = (window as any).bubbletea_final;
+        if (typeof final === 'string' && final.length > 0) {
+            this.onDataCallback?.(final);
+        }
+        this.onStateChangeCallback?.('disconnected', 'Program exited');
+    }
+
+    private poll(): void {
+        if ((window as any).bubbletea_exited === true) {
+            this.handleExit();
+            return;
+        }
+        let data: string | null;
+        try {
+            data = this.boobaRead();
+        } catch {
+            // The bridge throws "Go program has already exited" once the runtime is gone.
+            this.handleExit();
+            return;
+        }
+        if (data && data.length > 0 && this.onDataCallback) {
+            this.onDataCallback(data);
+        }
+    }
+
     connect(
         onData: (data: string | Uint8Array) => void,
         onStateChange: (state: BoobaConnectionState, message: string) => void
     ): void {
         this.onDataCallback = onData;
+        this.onStateChangeCallback = onStateChange;
+        this.exited = false;
 
         const startPolling = () => {
-            this.pollInterval = window.setInterval(() => {
-                const data = this.boobaRead();
-                if (data && data.length > 0 && this.onDataCallback) {
-                    this.onDataCallback(data);
-                }
-            }, this.pollMs);
+            this.pollInterval = window.setInterval(() => this.poll(), this.pollMs);
 
             onStateChange('connected', 'Connected');
             console.log('WASM adapter connected, polling at', this.pollMs, 'ms');
@@ -132,5 +172,6 @@ export class BoobaWasmAdapter implements BoobaAdapter {
             this.pollInterval = null;
         }
         this.onDataCallback = null;
+        this.onStateChangeCallback = null;
     }
 }

@@ -57,6 +57,7 @@ tasks:
     desc: 'Test go-booba'
     deps:
       - go-test
+      - go-test-wasm
       - npm-test
 
   npm-test:
@@ -91,6 +92,11 @@ tasks:
     deps: [build-serve-assets]
     cmds:
       - go test ./...
+
+  go-test-wasm:
+    desc: 'Run the js/wasm Go tests under Node (the wasm package only builds for the browser)'
+    cmds:
+      - PATH="$(go env GOROOT)/lib/wasm:$PATH" GOOS=js GOARCH=wasm go test ./wasm/
 
 ###############################################################################
 # Assets
