@@ -1,6 +1,6 @@
 # Design Note: Middleware Architecture
 
-**Status:** Shipped in v0.3. The serve package now exposes ConnectMiddleware, SessionMiddleware, and Middleware (layer-3) with functional options on NewServer; LiftHTTPMiddleware adapts net/http middleware. See `docs/superpowers/specs/2026-04-16-v0.3-middleware-design.md` for the implementation spec and `docs/superpowers/plans/2026-04-16-v0.3-middleware-implementation.md` for the task-by-task plan that landed.
+**Status:** Shipped in v0.3. The serve package now exposes ConnectMiddleware, SessionMiddleware, and Middleware (layer-3) with functional options on NewServer; LiftHTTPMiddleware adapts net/http middleware.
 
 **Audience:** booba maintainers and contributors planning the middleware story.
 

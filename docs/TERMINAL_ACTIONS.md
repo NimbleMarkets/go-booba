@@ -130,4 +130,4 @@ Version 1 accepts up to 128 actions, 16 gestures per action, and 32 full-help gr
 
 The named keys are space, enter, escape, tab, backspace, up, down, left, right, home, end, insert, delete, pageup, pagedown, and f1–f12. Printable single Unicode scalar values are also accepted. Modifiers are shift, alt, and ctrl without duplicates. Schema acceptance does not promise that a particular host can encode every combination. The Bubble Tea adapter additionally recognizes esc, pgup, pgdown, and a literal space.
 
-Run `go test ./actions/...` and `npm test` to exercise the shared validation fixtures, adapter mapping, publisher retries, lifecycle handling, and DOM controls. The full design and remaining wire decisions are in [the Terminal Actions spec](superpowers/specs/2026-10-09-terminal-actions-design.md).
+Run `go test ./actions/...` and `npm test` to exercise the shared validation fixtures, adapter mapping, publisher retries, lifecycle handling, and DOM controls.

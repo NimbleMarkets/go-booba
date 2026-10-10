@@ -2,6 +2,7 @@
 
 .task
 .superpowers/
+docs/superpowers/
 .DS_Store
 .zig-cache/
 node_modules/
