@@ -24,3 +24,6 @@ serve/static/ghostty-web/*
 !serve/static/ghostty-web/ghostty-web.js
 !serve/static/ghostty-web/ghostty-vt.wasm
 !serve/static/ghostty-web/__vite-*.js
+
+# git worktrees
+.worktrees/
