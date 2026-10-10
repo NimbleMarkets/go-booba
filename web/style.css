@@ -140,6 +140,26 @@ h1, h2, h3 {
 .booba-action--toggle[aria-expanded="true"] { background: var(--accent); }
 .booba-action--keyboard { margin-inline-start: auto; }
 
+/* ---- Program status bar (OSC 7501) ---- */
+
+.demo-status { margin: 0 0 12px; }
+.booba-status { font-size: 14px; color: var(--fg-muted); }
+.booba-status__app { font-family: var(--font-mono); color: var(--secondary); }
+.booba-status__title { font-family: var(--font-head); color: var(--fg); }
+.booba-status--working .booba-status__message,
+.booba-status--done .booba-status__message { color: var(--sage); }
+.booba-status--blocked .booba-status__message,
+.booba-status--error .booba-status__message { color: var(--cta); }
+.booba-status--blocked[data-kind]::before {
+  content: attr(data-kind);
+  font-family: var(--font-head);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--cta);
+}
+.booba-status__progress { width: 100%; height: 6px; accent-color: var(--secondary); }
+
 /* ---- Landing ---- */
 
 .hero { margin-bottom: 32px; }

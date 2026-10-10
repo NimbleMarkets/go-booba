@@ -99,6 +99,28 @@ booba.onRender = ({ start, end }) => { /* rows rendered */ };
 booba.onCursorMove = () => { /* cursor moved */ };
 ```
 
+## Program Status
+
+Programs can describe themselves with the Program Status Protocol (OSC 7501): idle, working with a percentage, done, blocked on a permission, question, or login, or failed. Bubble Tea v2.1 sets it from `View.ProgramStatus`. booba keeps the records in a store that follows the protocol's lifetime rules and can render them outside the canvas.
+
+```javascript
+import { installStatusBar } from './booba/booba.js';
+
+booba.programStatus.records          // sorted by id path, root first
+booba.programStatus.subscribe(() => render(booba.programStatus.records));
+
+const dispose = installStatusBar(booba.programStatus, {
+    parent: document.getElementById('status'),
+    onLayout: () => booba.fitAddon?.fit(),
+});
+```
+
+The store fills only while something consumes status: a `programStatus.subscribe` listener (which `installStatusBar` adds), an `onProgramStatus` callback, or the `allowOSC7501Actions` option. Polling `records` without one of those always sees an empty store.
+
+Lifetimes: each report replaces its record; `state=clear` removes a record and everything beneath it. Working and blocked records drop at a shell prompt and when the process exits. Done and error persist until the user's next input to the program. A full terminal reset clears everything; alternate-screen switches change nothing. The store holds at most 256 records.
+
+The bar is host-styled like the action bar: every element has a stable class (`booba-status-bar`, `booba-status`, `booba-status--<state>`, `booba-status__app`, `booba-status__title`, `booba-status__message`, `booba-status__progress`), state and kind are also `data-state` and `data-kind` attributes, defaults live in `@layer booba` so plain host rules win, and `styles: false` with `STATUS_BAR_CSS` serves hosts whose CSP forbids inline styles. `booba.onProgramStatus` still delivers every report for hosts that keep their own store; `supportsProgramStatus` says whether the loaded runtime emits the event at all. The bar sets the `hidden` attribute when it has nothing to show; a host that restyles the root's `display` should scope that rule with `:not([hidden])`, since an unlayered rule would otherwise reveal the empty bar.
+
 ## Link Detection
 
 ```javascript

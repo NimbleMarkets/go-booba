@@ -85,6 +85,8 @@ console.log(booba.supportsProgramStatus); // Inspect after init.
 
 Booba does not advertise status support merely because this callback exists on its wrapper: it subscribes to the underlying event only when a consumer is present. `supportsProgramStatus` reports whether the loaded runtime provides the event, which matters when a host supplies its own ghostty-web build.
 
+Reports also land in `booba.programStatus`, a store with the protocol's lifetime rules, which `installStatusBar` renders; see "Program Status" in `docs/TYPESCRIPT_API.md`. An action record reaches the store with its readable summary as the message.
+
 Enable `allowOSC7501Actions: true` in the terminal constructor to interpret the private convention. The standard decoded `msg` contains:
 
 ```text

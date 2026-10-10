@@ -86,6 +86,8 @@ See [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md) for the full reference.
 
 **Experimental:** [Terminal Actions](./docs/TERMINAL_ACTIONS.md) adapts Bubbles help maps into compact and expanded touch controls. The opt-in prototype sends descriptions through a private OSC 7501 message convention and returns ordinary keyboard input. Its APIs and wire convention may change. See the guide for the runnable example and required OSC-enabled runtime.
 
+Programs that report their state with the Program Status Protocol (OSC 7501), as Bubble Tea v2.1 does through `View.ProgramStatus`, get a record store and an optional host-styled status bar in the browser; see [Program Status](./docs/TYPESCRIPT_API.md#program-status).
+
 For adapter usage (WebSocket, WASM, custom), see [ADAPTER_USAGE.md](./ADAPTER_USAGE.md).
 
 ## Embedding a BubbleTea Application in a Web Browser

@@ -109,3 +109,37 @@ describe('status bar markup contract', () => {
         expect(STATUS_BAR_CSS).toContain('display: none');
     });
 });
+
+describe('status bar in-place updates', () => {
+    it('updates a ticking percentage in place without rebuilding the block', () => {
+        const store = new ProgramStatusStore();
+        store.apply(report({ id: 'job', state: 'working', progress: 10, message: 'Loading' }));
+        const parent = document.createElement('div'); document.body.append(parent);
+        installStatusBar(store, { parent });
+        const before = parent.querySelector('.booba-status')!;
+        const message = before.querySelector('.booba-status__message')!;
+        store.apply(report({ id: 'job', state: 'working', progress: 55, message: 'Loading' }));
+        const after = parent.querySelector('.booba-status')!;
+        expect(after).toBe(before);
+        expect(after.querySelector('.booba-status__message')).toBe(message);
+        expect(after.querySelector('progress')!.getAttribute('value')).toBe('55');
+        store.apply(report({ id: 'job', state: 'working', progress: null, message: 'Loading' }));
+        expect(parent.querySelector('progress')!.hasAttribute('value')).toBe(false);
+    });
+
+    it('rebuilds a block when its text or state changes and keeps store order', () => {
+        const store = new ProgramStatusStore();
+        store.apply(report({ id: 'b', state: 'working', message: 'two' }));
+        store.apply(report({ id: 'a', state: 'idle', message: 'one' }));
+        const parent = document.createElement('div'); document.body.append(parent);
+        installStatusBar(store, { parent });
+        const first = parent.querySelector('[data-id="a"]')!;
+        store.apply(report({ id: 'a', state: 'done', message: 'one done' }));
+        const rebuilt = parent.querySelector('[data-id="a"]')!;
+        expect(rebuilt).not.toBe(first);
+        expect(rebuilt.classList.contains('booba-status--done')).toBe(true);
+        expect(Array.from(parent.querySelectorAll('.booba-status')).map(e => e.getAttribute('data-id'))).toEqual(['a', 'b']);
+        store.apply(report({ id: 'b', state: 'clear' }));
+        expect(Array.from(parent.querySelectorAll('.booba-status')).map(e => e.getAttribute('data-id'))).toEqual(['a']);
+    });
+});

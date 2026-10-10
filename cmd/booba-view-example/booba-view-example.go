@@ -114,16 +114,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // The main view, which just calls the appropriate sub-view
 func (m model) View() tea.View {
-	var s string
 	if m.Quitting {
-		return tea.NewView("\n  See you later!\n\n")
+		v := tea.NewView("\n  See you later!\n\n")
+		// Keep the last status through the final frame: Bubble Tea clears the record
+		// if the view drops it, and the protocol wants done/error left in place at exit.
+		v.ProgramStatus = m.programStatus()
+		return v
 	}
+	var s string
 	if !m.Chosen {
 		s = choicesView(m)
 	} else {
 		s = chosenView(m)
 	}
-	return tea.NewView(mainStyle.Render("\n" + s + "\n"))
+	v := tea.NewView(mainStyle.Render("\n" + s + "\n"))
+	v.ProgramStatus = m.programStatus()
+	return v
+}
+
+// programStatus describes the current screen with the Program Status Protocol
+// (OSC 7501), which terminals that support it can show outside the program's
+// own output. App and Title repeat in every report because each report
+// replaces the record completely.
+func (m model) programStatus() *tea.ProgramStatus {
+	status := tea.ProgramStatus{App: "booba-views", Title: "Views demo"}
+	switch {
+	case !m.Chosen:
+		status.State, status.Message = tea.ProgramStateIdle, "Choose a task"
+	case !m.Loaded:
+		status.State, status.Message = tea.ProgramStateWorking, "Loading"
+		status.Progress, status.HasProgress = int(m.Progress*100), true
+	default:
+		status.State, status.Message = tea.ProgramStateDone, "Loaded"
+	}
+	return &status
 }
 
 // Sub-update functions

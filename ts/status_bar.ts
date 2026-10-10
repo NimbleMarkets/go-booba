@@ -66,13 +66,40 @@ export function installStatusBar(store: ProgramStatusStore, options: StatusBarOp
         }
         return el;
     };
+    // One element per record id. Only a changed signature rebuilds the block, so a
+    // ticking percentage updates the progress element alone and a screen reader on
+    // the live region is not told the whole record again each tick.
+    const entries = new Map<string, { el: HTMLDivElement; signature: string }>();
+    const signature = (record: ProgramStatusRecord): string =>
+        [record.state, record.kind ?? '', record.effectiveApp, record.title, record.message].join('\u0000');
+    const setProgress = (el: HTMLDivElement, progress: number | null) => {
+        const bar = el.querySelector('progress');
+        if (!bar) return;
+        if (progress !== null) bar.setAttribute('value', String(progress));
+        else bar.removeAttribute('value');
+    };
     const render = () => {
         if (disposed) return;
-        root.replaceChildren();
         const records = store.records;
+        const next = new Map<string, { el: HTMLDivElement; signature: string }>();
+        for (const record of records) {
+            const sig = signature(record);
+            const existing = entries.get(record.id);
+            if (existing && existing.signature === sig) {
+                setProgress(existing.el, record.progress);
+                next.set(record.id, existing);
+            } else {
+                next.set(record.id, { el: block(record), signature: sig });
+            }
+        }
+        entries.clear();
+        for (const [id, entry] of next) entries.set(id, entry);
+        const keep = new Set(Array.from(next.values(), entry => entry.el));
+        for (const child of Array.from(root.children)) if (!keep.has(child as HTMLDivElement)) child.remove();
         if (records.length === 0) root.setAttribute('hidden', '');
         else root.removeAttribute('hidden');
-        for (const record of records) root.append(block(record));
+        // Appending an existing child moves it, so this orders and inserts in one pass.
+        for (const entry of next.values()) root.append(entry.el);
         options.onLayout?.();
     };
     const unsubscribe = store.subscribe(render);

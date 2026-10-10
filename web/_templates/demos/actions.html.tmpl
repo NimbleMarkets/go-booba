@@ -47,7 +47,6 @@
       document.getElementById("context").textContent =
         snapshot ? `${snapshot.context} · revision ${snapshot.revision}` : "";
     });
-    booba.onProgramStatus = report => { if (report.message) status.textContent = report.message; };
     booba.onActionError = error => { status.textContent = String(error); };
     status.textContent = "Running";
   };

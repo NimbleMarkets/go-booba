@@ -22,6 +22,7 @@
     </div>
   </header>
   {{ .ExtraBody }}
+  <section class="demo-status"></section>
   <section class="terminal-frame">
     <div id="terminal"></div>
   </section>
@@ -36,6 +37,7 @@
   import {
     BoobaTerminal,
     installRendererHud,
+    installStatusBar,
     parseRendererFromURL,
   } from "{{ .Base }}/_assets/booba/booba.js";
 
@@ -51,6 +53,11 @@
       ...(window.demoOptions ?? {}),
     });
     await booba.init();
+    // Program status (OSC 7501) from the demo, shown outside the canvas.
+    installStatusBar(booba.programStatus, {
+      parent: document.querySelector(".demo-status"),
+      onLayout: () => booba.fitAddon?.fit(),
+    });
     if (typeof window.demoSetup === "function") {
       await window.demoSetup(booba);
     }
