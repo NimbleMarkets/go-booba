@@ -1,6 +1,7 @@
 # go-booba - Web-based BubbleTea TUIs using libghostty
 
 <p>
+    <a href="https://nimblemarkets.github.io/go-booba/"><img src="https://img.shields.io/badge/Live%20Demos-E24F36" alt="Live Demos"></a>
     <a href="https://github.com/NimbleMarkets/go-booba/blob/main/docs/markdown/booba.md"><img src="https://img.shields.io/badge/Command%20Ref-6B2DAD" alt="Command Reference"></a>
     <a href="https://github.com/NimbleMarkets/go-booba/tags"><img src="https://img.shields.io/github/tag/NimbleMarkets/go-booba.svg" alt="Latest Release"></a>
     <a href="https://pkg.go.dev/github.com/NimbleMarkets/go-booba?tab=doc"><img src="https://pkg.go.dev/badge/github.com/NimbleMarkets/go-booba?utm_source=godoc" alt="GoDoc"></a>
@@ -8,6 +9,8 @@
 </p>
 
 `go-booba` is a Golang module that facilitates embedding [BubbleTea](https://github.com/charmbracelet/bubbletea) Terminal User Interfaces (TUIs) into a Web Browser, served over HTTP with a Ghostty-powered terminal frontend.
+
+See it running at the [live demos](https://nimblemarkets.github.io/go-booba/): Bubble Tea programs compiled to WebAssembly, including the experimental Terminal Actions bar.
 
 <p>
   <table>
