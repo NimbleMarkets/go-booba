@@ -66,3 +66,25 @@ func TestRunPublishesExitToJavaScript(t *testing.T) {
 		t.Fatalf("bubbletea_final = %q, want the final frame", final.String())
 	}
 }
+
+// TestSupersededProgramDoesNotPublishExit covers a page that starts a second
+// program while the first still runs (a Restart button). The second NewProgram
+// takes over the bridge, so the first program's later exit must not flip
+// bubbletea_exited or replace bubbletea_final under the program that is live.
+func TestSupersededProgramDoesNotPublishExit(t *testing.T) {
+	global := js.Global()
+	first := NewProgram(quitModel{})
+	NewProgram(quitModel{}) // supersedes first on the bridge
+
+	go first.Send(tea.WindowSizeMsg{Width: 80, Height: 24})
+	if _, err := first.Run(); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+
+	if global.Get("bubbletea_exited").Truthy() {
+		t.Fatal("a superseded program must not set bubbletea_exited")
+	}
+	if final := global.Get("bubbletea_final"); final.Truthy() {
+		t.Fatalf("a superseded program must not publish bubbletea_final, got %q", final.String())
+	}
+}

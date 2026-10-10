@@ -122,9 +122,15 @@ func (p *Program) Run() (tea.Model, error) {
 	return model, err
 }
 
-// publishExit hands the unread output to JavaScript and flags the exit.
+// publishExit hands the unread output to JavaScript and flags the exit. A
+// program that a later NewProgram has superseded on the bridge stays silent:
+// the flag and the final frame belong to whichever program is registered, and
+// a stale exit would end the live program's session from under it.
 func (p *Program) publishExit() {
 	global := js.Global()
+	if !global.Get("bubbletea_read").Equal(p.readFunc.Value) {
+		return
+	}
 	global.Set("bubbletea_final", string(p.toJS.ReadAndReset()))
 	global.Set("bubbletea_exited", true)
 }

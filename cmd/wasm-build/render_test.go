@@ -38,14 +38,16 @@ func TestRenderProducesAllPages(t *testing.T) {
 		"go run ./cmd/booba-view-example",
 		`src="/go-booba/_assets/wasm_exec.js"`, `_assets/booba/booba.js`,
 		`fetch("./app.wasm")`, "connectWasm()",
-		`getElementById("terminal")`, "installStatusBar", "demo-status")
-	mustNotContain(t, views, "demo-controls", "installActionBar")
+		`getElementById("terminal")`, "installStatusBar", "demo-status",
+		`id="restart"`, "compileStreaming", "WebAssembly.instantiate(module",
+		`booba.input("\x03")`, "booba.disconnect()", "booba.reset()")
+	mustNotContain(t, views, "demo-controls", "installActionBar", "instantiateStreaming")
 
 	actions := filepath.Join(out, "demos", "actions", "index.html")
 	mustContain(t, actions,
 		"sidebar-link-active", `id="controls"`, "demo-controls",
 		"installActionBar", "allowOSC7501Actions", "setActionKeyEncoder", "supportsProgramStatus")
-	mustContain(t, actions, "installStatusBar")
+	mustContain(t, actions, "installStatusBar", `id="restart"`)
 	mustNotContain(t, actions, "booba.onProgramStatus = report")
 }
 

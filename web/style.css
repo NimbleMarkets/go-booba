@@ -124,7 +124,8 @@ h1, h2, h3 {
 .demo-controls pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
 /* booba's action-bar defaults live in @layer booba, so these plain rules win. */
 .booba-action-bar { margin: 12px 0; }
-.booba-action {
+.booba-action,
+.demo-restart {
   min-height: 40px;
   border: 1px solid var(--accent);
   background: var(--primary);
@@ -134,15 +135,18 @@ h1, h2, h3 {
   font: inherit;
   cursor: pointer;
 }
-.booba-action:hover { background: var(--accent); }
-.booba-action:focus-visible { outline: 2px solid var(--sage); outline-offset: 3px; }
-.booba-action:disabled { opacity: 0.4; cursor: default; }
+.booba-action:hover, .demo-restart:hover { background: var(--accent); }
+.booba-action:focus-visible, .demo-restart:focus-visible { outline: 2px solid var(--sage); outline-offset: 3px; }
+.booba-action:disabled, .demo-restart:disabled { opacity: 0.4; cursor: default; }
 .booba-action--toggle[aria-expanded="true"] { background: var(--accent); }
 .booba-action--keyboard { margin-inline-start: auto; }
 
 /* ---- Program status bar (OSC 7501) ---- */
 
-.demo-status { margin: 0 0 12px; }
+/* Status bar on the left, Restart on the right, directly above the terminal. */
+.demo-program-row { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+.demo-status { flex: 1; min-width: 0; }
+.demo-restart { flex: none; min-height: 32px; padding: 4px 12px; font-size: 14px; }
 .booba-status { font-size: 14px; color: var(--fg-muted); }
 .booba-status__app { font-family: var(--font-mono); color: var(--secondary); }
 .booba-status__title { font-family: var(--font-head); color: var(--fg); }

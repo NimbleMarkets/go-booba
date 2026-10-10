@@ -22,7 +22,10 @@
     </div>
   </header>
   {{ .ExtraBody }}
-  <section class="demo-status"></section>
+  <div class="demo-program-row">
+    <section class="demo-status"></section>
+    <button id="restart" class="demo-restart" type="button" disabled>Restart program</button>
+  </div>
   <section class="terminal-frame">
     <div id="terminal"></div>
   </section>
@@ -30,10 +33,13 @@
 <script src="{{ .Base }}/_assets/wasm_exec.js"></script>
 {{ .ExtraScript }}
 <script type="module">
-  // Instantiate the Go runtime with this demo's app.wasm, then mount a
-  // BoobaTerminal on the container and connect it to the program through the
-  // WASM adapter. A fragment may set window.demoOptions (merged into the
-  // terminal options) and window.demoSetup (awaited after init, before connect).
+  // Compile this demo's app.wasm once, mount a BoobaTerminal on the container,
+  // and run the program through the WASM adapter. A fragment may set
+  // window.demoOptions (merged into the terminal options) and window.demoSetup
+  // (awaited after init, before the program starts). The Restart button runs
+  // the compiled module again on a fresh Go runtime: a Go program cannot be
+  // re-entered once it returns, but the module can be instantiated any number
+  // of times.
   import {
     BoobaTerminal,
     installRendererHud,
@@ -41,12 +47,16 @@
     parseRendererFromURL,
   } from "{{ .Base }}/_assets/booba/booba.js";
 
-  async function main() {
+  async function run(booba, module) {
     const go = new Go();
-    const result = await WebAssembly.instantiateStreaming(
-      fetch("./app.wasm"), go.importObject
-    );
-    go.run(result.instance);
+    const instance = await WebAssembly.instantiate(module, go.importObject);
+    go.run(instance);
+    booba.connectWasm();
+    booba.focus();
+  }
+
+  async function main() {
+    const module = await WebAssembly.compileStreaming(fetch("./app.wasm"));
 
     const booba = new BoobaTerminal("terminal", {
       renderer: parseRendererFromURL(),
@@ -61,8 +71,32 @@
     if (typeof window.demoSetup === "function") {
       await window.demoSetup(booba);
     }
-    booba.connectWasm();
-    booba.focus();
+    await run(booba, module);
+
+    const restart = document.getElementById("restart");
+    restart.addEventListener("click", async () => {
+      restart.disabled = true;
+      try {
+        // A program that is still running keeps its runtime alive after the
+        // page stops listening, so ask it to quit first (both demos quit on
+        // Ctrl+C) and give it a moment to return.
+        if (window.bubbletea_exited !== true) {
+          booba.input("\x03");
+          for (let i = 0; i < 20 && window.bubbletea_exited !== true; i++) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+        }
+        booba.disconnect();
+        booba.reset();
+        await run(booba, module);
+      } catch (error) {
+        console.error(error);
+        booba.writeln(String(error));
+      } finally {
+        restart.disabled = false;
+      }
+    });
+    restart.disabled = false;
 
     const frame = document.querySelector(".terminal-frame");
     installRendererHud(booba.term, {
