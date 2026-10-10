@@ -20,6 +20,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	booba "github.com/NimbleMarkets/go-booba"
 	"github.com/fogleman/ease"
 	"github.com/lucasb-eyer/go-colorful"
 	"github.com/spf13/pflag"
@@ -54,8 +55,9 @@ func main() {
 	}
 
 	initialModel := model{0, false, 10, 0, 0, false, false}
-	p := tea.NewProgram(initialModel)
-	if _, err := p.Run(); err != nil {
+	// booba.Run picks the runtime for the build target: a terminal natively,
+	// the browser bridge on js/wasm.
+	if err := booba.Run(initialModel); err != nil {
 		fmt.Println("could not start program:", err)
 	}
 }
