@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Experimental Terminal Actions demo</title>
+<style>
+:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #10151d; color: #e4edf7; }
+body { max-width: 960px; margin: auto; padding: 20px; }
+h1 { margin: 0 0 8px; font-size: 1.5rem; }
+p { color: #adbcd0; line-height: 1.5; }
+header, .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:12px; justify-content:space-between; }
+button { border:1px solid #475a72; background:#20324a; color:#f2f6ff; border-radius:8px; padding:10px 16px; font:inherit; cursor:pointer; }
+button:hover { background:#2b4667; } button:focus-visible { outline: 2px solid #80c5ff; outline-offset:3px; }
+button:disabled { opacity:0.4; cursor:default; }
+/* Action bar: booba's defaults sit in @layer booba, so these plain rules win without !important. */
+.booba-action { min-height: 40px; }
+.booba-action--toggle[aria-expanded="true"] { background:#2b4667; }
+.booba-action--keyboard { margin-inline-start:auto; }
+/* booba.init() sets --booba-background on #terminal from the theme option; the padding gutter matches the canvas without repeating the hex. */
+#terminal { height: min(52dvh, 440px); min-height:200px; background: var(--booba-background, #10151d); padding:8px; border:1px solid #334257; border-radius:10px; overflow:hidden; }
+#controls { margin:16px 0; }
+#status { color:#8cdbad; }
+#context { font-family:ui-monospace, monospace; color:#8cbcff; }
+details { margin-top:24px; border-top:1px solid #334257; padding-top:14px; }
+pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; }
+.note { font-size:0.85rem; }
+</style>
+</head>
+<body>
+<header><h1>Terminal Actions <small>· Experimental</small></h1><button id="restart" type="button">Restart</button></header>
+<p>A live Bubble Tea application. Its help bindings generate the buttons below.</p>
+<div class="toolbar"><p id="status" role="status">Connecting…</p><span id="context"></span></div>
+<div id="terminal" aria-label="Live terminal"></div>
+<div id="controls"></div>
+<p>Tap <b>More</b> for navigation, then <b>Open</b>. The controls change to <b>Confirm</b> and <b>Back</b>. Use <b>Hide TUI help</b> / <b>Show TUI help</b> to choose whether help also appears inside the terminal. Use <b>Keyboard</b> for normal typing.</p>
+<p class="note">Actions arrive through OSC 7501 terminal output. Buttons send ordinary keystrokes back. The marked JSON suffix in the status message is a private, opt-in convention.</p>
+<details><summary>Current action snapshot</summary><pre id="snapshot">Waiting for the application…</pre></details>
+<script type="module">
+import { BoobaTerminal, installActionBar } from '/static/booba/booba.js';
+const status = document.getElementById('status');
+const booba = new BoobaTerminal('terminal', { fontSize: 16, allowOSC7501Actions: true, renderer: 'canvas2d', theme: { background:'#10151d', foreground:'#e4edf7' } });
+
+try {
+ await booba.init();
+ // This application uses only these gestures and never requests release/all-key
+ // reporting. This bounded demo encoder is not a general terminal encoder.
+ const encode = gesture => {
+  const mods = gesture.modifiers.join('+');
+  if (mods === 'ctrl' && gesture.key === 'c') return '\x03';
+  if (mods) return null;
+  const fixed = { enter:'\r', escape:'\x1b', '?':'?', h:'h' };
+  if (Object.hasOwn(fixed, gesture.key)) return fixed[gesture.key];
+  if (gesture.key === 'up' || gesture.key === 'down') return '\x1b' + (booba.getMode(1) ? 'O' : '[') + (gesture.key === 'up' ? 'A' : 'B');
+  return null;
+ };
+ booba.setActionKeyEncoder({canEncode: g => encode(g) !== null, encode});
+ installActionBar(booba.actions, {parent:document.getElementById('controls'),openKeyboard:()=>booba.focus(),onLayout:()=>booba.fitAddon?.fit()});
+ booba.actions.subscribe(() => {
+  const snapshot = booba.actions.snapshot;
+  document.getElementById('snapshot').textContent = snapshot ? JSON.stringify(snapshot,null,2) : 'No active actions';
+  document.getElementById('context').textContent = snapshot ? `${snapshot.context} · revision ${snapshot.revision}` : '';
+ });
+ booba.onStatusChange = (state,message) => { status.textContent = message || state; };
+ booba.onProgramStatus = report => { if(report.message) status.textContent = report.message; };
+ booba.onActionError = error => { status.textContent = String(error); };
+ if (!booba.supportsProgramStatus) throw new Error('This runtime needs OSC 7501 support. Start the demo with -ghostty-assets pointing to your osc-7501 dist directory.');
+ booba.connectWebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws`);
+} catch(error) { status.textContent=String(error); }
+document.getElementById('restart').addEventListener('click',()=>location.reload());
+window.addEventListener('pagehide',()=>booba.dispose(),{once:true});
+</script>
+</body>
+</html>

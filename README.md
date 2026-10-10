@@ -81,6 +81,8 @@ booba.focus();
 
 See [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md) for the full reference.
 
+**Experimental:** [Terminal Actions](./docs/TERMINAL_ACTIONS.md) adapts Bubbles help maps into compact and expanded touch controls. The opt-in prototype sends descriptions through a private OSC 7501 message convention and returns ordinary keyboard input. Its APIs and wire convention may change. See the guide for the runnable example and required OSC-enabled runtime.
+
 For adapter usage (WebSocket, WASM, custom), see [ADAPTER_USAGE.md](./ADAPTER_USAGE.md).
 
 ## Embedding a BubbleTea Application in a Web Browser

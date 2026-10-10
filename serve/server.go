@@ -92,6 +92,14 @@ func (s *Server) ServeCommand(ctx context.Context, name string, args ...string) 
 	return s.start(ctx)
 }
 
+// HTTPHandlerFor constructs an embeddable HTTP handler for Bubble Tea sessions.
+// Configure it before serving requests. Handler middleware is applied once,
+// with the same ordering as Serve.
+func (s *Server) HTTPHandlerFor(handler Handler) (http.Handler, error) {
+	s.handler = applyHandlerMiddleware(handler, s.middleware)
+	return s.HTTPHandler()
+}
+
 // HTTPHandler constructs the application HTTP handler without starting listeners.
 func (s *Server) HTTPHandler() (http.Handler, error) {
 	if err := s.validateConfig(); err != nil {

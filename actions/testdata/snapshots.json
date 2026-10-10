@@ -1,0 +1,1075 @@
+[
+  {
+    "name": "grouped navigation",
+    "valid": true,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "unknown version",
+    "valid": false,
+    "snapshot": {
+      "version": 2,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "negative revision",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": -1,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "unsafe revision",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 9007199254740992,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "unknown reference",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "missing"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "duplicate full reference",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "open"
+        ],
+        [
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "duplicate ID",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "open",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "control in label",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open\u001b[31m",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "oversize label",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "unsupported key",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "ctrl+x enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "duplicate modifier",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": [
+                "ctrl",
+                "ctrl"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "null modifiers",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": null
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "preferred alias",
+    "valid": true,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ],
+          "preferred": 1
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "bad preferred",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ],
+          "preferred": 2
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "null preferred",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ],
+          "preferred": null
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "unicode scalar",
+    "valid": true,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "\ud83d\ude00",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "empty clear",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "clear",
+    "valid": true,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [],
+      "short": [],
+      "full": []
+    }
+  },
+  {
+    "name": "unknown field",
+    "valid": true,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "enter",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ],
+      "future": {
+        "ignored": true
+      }
+    }
+  },
+  {
+    "name": "null hint",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": null,
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "unpaired surrogate",
+    "valid": false,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "\ud800",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "escaped backslash",
+    "valid": true,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "literal \\uD800",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "valid surrogate pair",
+    "valid": true,
+    "snapshot": {
+      "version": 1,
+      "instance": "picker-7",
+      "context": "files",
+      "revision": 12,
+      "actions": [
+        {
+          "id": "open",
+          "label": "Open",
+          "hint": "\ud83d\ude00",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "enter",
+              "modifiers": []
+            }
+          ]
+        },
+        {
+          "id": "navigate",
+          "label": "Navigate",
+          "hint": "\u2191/\u2193",
+          "enabled": true,
+          "keys": [
+            {
+              "key": "up",
+              "modifiers": []
+            },
+            {
+              "key": "down",
+              "modifiers": []
+            }
+          ]
+        }
+      ],
+      "short": [
+        "open"
+      ],
+      "full": [
+        [
+          "navigate",
+          "open"
+        ]
+      ]
+    }
+  }
+]

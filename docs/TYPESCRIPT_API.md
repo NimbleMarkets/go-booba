@@ -38,6 +38,8 @@ booba.focus();
 
 All [ghostty-web ITerminalOptions](https://github.com/coder/ghostty-web) are supported: `fontSize`, `fontFamily`, `cols`, `rows`, `cursorBlink`, `cursorStyle`, `scrollback`, `allowOSC52`, `allowTransparency`, `convertEol`, `disableStdin`, `smoothScrollDuration`, and a full `theme` with 16-color palette and cursor/selection colors.
 
+After `init()`, the container element carries the resolved `theme.background` and `theme.foreground` as the CSS custom properties `--booba-background` and `--booba-foreground`. They inherit to the container and its descendants only, so the padding around the canvas can use `var(--booba-background)` without repeating the hex value.
+
 ## Selection & Clipboard
 
 ```javascript

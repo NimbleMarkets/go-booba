@@ -3,7 +3,12 @@ import { BoobaAdapter, BoobaConnectionState, BoobaWasmAdapter } from './adapter.
 import { BoobaProtocolAdapter, type WebSocketAdapterCallbacks } from './websocket_adapter.js';
 import { BoobaAutoAdapter } from './auto_adapter.js';
 import { OSC52Scanner } from './clipboard.js';
+import { ActionController, type ActionKeyEncoder } from './actions.js';
+import type { ProgramStatusReport, ProgramStatusSource } from './program_status.js';
+import { ActionStatusBridge } from './action_status.js';
+import { TerminalSequenceObserver } from './terminal_sequences.js';
 import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js';
+import { applyThemeProperties } from './theme_properties.js';
 
 import type { RendererBackend } from 'ghostty-web';
 
@@ -16,6 +21,8 @@ export interface BoobaTerminalOptions {
     cursorStyle?: 'block' | 'underline' | 'bar';
     scrollback?: number;
     allowOSC52?: boolean;
+    /** Experimental, disabled by default. Interpret the private booba-actions msg convention; its schema may change. */
+    allowOSC7501Actions?: boolean;
     allowTransparency?: boolean;
     convertEol?: boolean;
     disableStdin?: boolean;
@@ -33,6 +40,49 @@ export class BoobaTerminal {
     private _resizeHandler: (() => void) | null = null;
     private _dprCleanup: (() => void) | null = null;
     private osc52Scanner: OSC52Scanner;
+    /** Direct publication API until the action OSC envelope is defined. */
+    readonly actions: ActionController;
+    private actionKeyEncoder: ActionKeyEncoder | null = null;
+    private actionReadOnly = false;
+    private actionStatus: ActionStatusBridge;
+    private sequenceObserver: TerminalSequenceObserver;
+    private lifecycleBoundaries: number[] = [];
+    onActionError: ((error: Error) => void) | null = null;
+
+    /** Install a mode-aware encoder; no gestures are enabled without one. */
+    setActionKeyEncoder(encoder: ActionKeyEncoder | null): void {
+        this.actionKeyEncoder = encoder;
+        this.actions.clear();
+    }
+
+    private programStatusSubscription: { dispose(): void } | null = null;
+    private programStatusCallback: ((report: ProgramStatusReport) => void) | null = null;
+
+    /** Available when the loaded ghostty-web runtime provides OSC 7501 events. */
+    get supportsProgramStatus(): boolean {
+        return typeof (this.term as ProgramStatusSource | null)?.onProgramStatus === 'function';
+    }
+
+    get onProgramStatus(): ((report: ProgramStatusReport) => void) | null {
+        return this.programStatusCallback;
+    }
+
+    set onProgramStatus(callback: ((report: ProgramStatusReport) => void) | null) {
+        this.programStatusCallback = callback;
+        this.syncProgramStatus();
+    }
+
+    private syncProgramStatus(): void {
+        this.programStatusSubscription?.dispose();
+        this.programStatusSubscription = null;
+        const source = this.term as ProgramStatusSource | null;
+        if ((this.programStatusCallback || this.options.allowOSC7501Actions) && source?.onProgramStatus) {
+            this.programStatusSubscription = source.onProgramStatus(report => {
+                const display = this.options.allowOSC7501Actions ? this.actionStatus.receive(report) : report;
+                this.programStatusCallback?.(display);
+            });
+        }
+    }
 
     // --- Event Callbacks ---
     onStatusChange: ((state: string, message: string) => void) | null = null;
@@ -59,6 +109,38 @@ export class BoobaTerminal {
             ...options
         };
         this.osc52Scanner = new OSC52Scanner(this.options.allowOSC52 ?? false);
+        this.actions = new ActionController({
+            canSendKey: gesture => !!(this.term && this.adapter && !this.actionReadOnly &&
+                !this.options.disableStdin && !this.term.options.disableStdin &&
+                this.actionKeyEncoder?.canEncode(gesture)),
+            sendKey: gesture => {
+                const encoded = this.actionKeyEncoder?.encode(gesture);
+                if (!encoded || !this.term || !this.adapter || this.actionReadOnly ||
+                    this.options.disableStdin || this.term.options.disableStdin) return false;
+                this.term.input(encoded, true);
+                return true;
+            },
+        });
+        this.actionStatus = new ActionStatusBridge(this.actions, error => this.onActionError?.(error));
+        this.sequenceObserver = new TerminalSequenceObserver({
+            osc: () => {},
+            lifecycle: (_reason, end) => this.lifecycleBoundaries.push(end),
+        });
+    }
+
+    // Split only at lifecycle boundaries so native onProgramStatus events and
+    // clears retain wire order even when multiple sequences share one write.
+    private writeLiveOutput(data: string | Uint8Array): void {
+        if (!this.options.allowOSC7501Actions) { this.term?.write(data); return; }
+        this.lifecycleBoundaries = [];
+        this.sequenceObserver.scan(data);
+        let start = 0;
+        for (const end of this.lifecycleBoundaries) {
+            this.term?.write(data.slice(start, end));
+            this.actionStatus.clear();
+            start = end;
+        }
+        if (start < data.length) this.term?.write(data.slice(start));
     }
 
     async init() {
@@ -68,6 +150,7 @@ export class BoobaTerminal {
         await init();
         const term = new Terminal(this.options);
         this.term = term;
+        this.syncProgramStatus();
 
         this.fitAddon = new FitAddon();
         term.loadAddon(this.fitAddon);
@@ -78,6 +161,7 @@ export class BoobaTerminal {
         // term.write() will call assertOpen() before isOpen flips true, causing
         // "Terminal must be opened" error. See ghostty-web.js:8055-8067 for details.
         await term.open(this.container);
+        applyThemeProperties(this.container, this.options.theme);
         this.fitAddon.fit();
         this.fitAddon.observeResize();
 
@@ -135,14 +219,22 @@ export class BoobaTerminal {
      * @param url WebSocket URL (e.g., 'ws://localhost:8080/ws')
      */
     connectWebSocket(url: string) {
+        this.disconnect();
+        this.actionReadOnly = true;
         const callbacks: WebSocketAdapterCallbacks = {
-            onTitle: (title) => { this.onTitleChange?.(title); },
-            onOptions: (_opts) => { /* store readOnly state if needed */ },
+            onTitle: (title) => { if (this.adapter === adapter) this.onTitleChange?.(title); },
+            onOptions: (opts) => {
+                if (this.adapter !== adapter) return;
+                this.actionReadOnly = opts.readOnly !== false;
+                this.actions.setReadOnly(this.actionReadOnly);
+            },
             onClose: (reason) => {
+                if (this.adapter !== adapter) return;
                 this.term?.write(`\r\n${reason}\r\n`);
             },
         };
-        this.adapter = new BoobaProtocolAdapter(url, callbacks);
+        const adapter = new BoobaProtocolAdapter(url, callbacks);
+        this.adapter = adapter;
         this._setupAdapter();
     }
 
@@ -153,12 +245,19 @@ export class BoobaTerminal {
      * @param certHashUrl URL to fetch cert hash (e.g., 'https://localhost:8080/cert-hash'), or null
      */
     connectAuto(wsUrl: string, wtUrl: string | null = null, certHashUrl: string | null = null) {
+        this.disconnect();
+        this.actionReadOnly = true;
         const callbacks = {
-            onTitle: (title: string) => { this.onTitleChange?.(title); },
-            onOptions: (_opts: any) => {},
-            onClose: (reason: string) => { this.term?.write(`\r\n${reason}\r\n`); },
+            onTitle: (title: string) => { if (this.adapter === adapter) this.onTitleChange?.(title); },
+            onOptions: (opts: { readOnly: boolean }) => {
+                if (this.adapter !== adapter) return;
+                this.actionReadOnly = opts.readOnly !== false;
+                this.actions.setReadOnly(this.actionReadOnly);
+            },
+            onClose: (reason: string) => { if (this.adapter !== adapter) return; this.term?.write(`\r\n${reason}\r\n`); },
         };
-        this.adapter = new BoobaAutoAdapter(wsUrl, wtUrl, certHashUrl, callbacks);
+        const adapter = new BoobaAutoAdapter(wsUrl, wtUrl, certHashUrl, callbacks);
+        this.adapter = adapter;
         this._setupAdapter();
     }
 
@@ -167,6 +266,8 @@ export class BoobaTerminal {
      * @param pollMs Polling interval in milliseconds (default: 16ms / ~60fps)
      */
     connectWasm(pollMs: number = 16) {
+        this.disconnect();
+        this.actionReadOnly = false;
         this.adapter = new BoobaWasmAdapter(pollMs);
         this._setupAdapter();
     }
@@ -176,20 +277,30 @@ export class BoobaTerminal {
      * @param adapter Custom BubbleTeaAdapter
      */
     connectAdapter(adapter: BoobaAdapter) {
+        this.disconnect();
+        this.actionReadOnly = false;
         this.adapter = adapter;
         this._setupAdapter();
     }
 
     private _setupAdapter() {
         if (!this.adapter) return;
-        this.adapter.connect(
+        const adapter = this.adapter;
+        this.actions.setConnected(false);
+        this.actions.setReadOnly(this.actionReadOnly);
+        adapter.connect(
             (data: string | Uint8Array) => {
+                if (this.adapter !== adapter) return;
                 if (data instanceof Uint8Array) {
                     this.osc52Scanner.scan(data);
                 }
-                this.term?.write(data);
+                this.writeLiveOutput(data);
             },
             (state: BoobaConnectionState, message: string) => {
+                if (this.adapter !== adapter) return;
+                this.sequenceObserver.reset();
+                this.actionStatus.clear();
+                this.actions.setConnected(state === 'connected');
                 this._updateStatus(state, message);
                 const term = this.term;
                 if (state === 'connected' && term) {
@@ -204,8 +315,13 @@ export class BoobaTerminal {
     }
 
     disconnect() {
-        this.adapter?.disconnect();
+        const adapter = this.adapter;
         this.adapter = null;
+        this.sequenceObserver.reset();
+        this.actionStatus.clear();
+        this.actions.setConnected(false);
+        adapter?.disconnect();
+        if (adapter) this._updateStatus('disconnected', 'Disconnected');
     }
 
     // --- Selection & Clipboard ---
@@ -311,6 +427,8 @@ export class BoobaTerminal {
 
     /** Reset the terminal state */
     reset(): void {
+        this.sequenceObserver.reset();
+        this.actionStatus.clear();
         this.term?.reset();
     }
 
@@ -378,6 +496,8 @@ export class BoobaTerminal {
         }
         this._dprCleanup?.();
         this._dprCleanup = null;
+        this.programStatusSubscription?.dispose();
+        this.programStatusSubscription = null;
         this.term?.dispose();
         this.term = null;
         this.fitAddon = null;
@@ -486,3 +606,11 @@ export type BoobaRendererHudOptions = RendererHudOptions;
  * old name implied.
  */
 export type BoobaRenderer = _RendererBackend;
+
+// Transport-independent terminal actions and optional host UI.
+export { ActionController, ACTION_LIMITS, validateActionSnapshot, decodeActionSnapshot } from './actions.js';
+export type { ActionSnapshot, TerminalAction, ActionGesture, ActionControllerOptions, ActionKeyEncoder } from './actions.js';
+export { installActionBar, ACTION_BAR_CSS } from './action_bar.js';
+export type { ActionBarOptions } from './action_bar.js';
+export type { ProgramStatusReport } from './program_status.js';
+export { decodeActionStatus, actionStatusID, ACTION_MESSAGE_MARKER, ACTION_STATUS_NAMESPACE } from './action_status.js';

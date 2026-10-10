@@ -3,7 +3,38 @@ import { BoobaWasmAdapter } from './adapter.js';
 import { BoobaProtocolAdapter } from './websocket_adapter.js';
 import { BoobaAutoAdapter } from './auto_adapter.js';
 import { OSC52Scanner } from './clipboard.js';
+import { ActionController } from './actions.js';
+import { ActionStatusBridge } from './action_status.js';
+import { TerminalSequenceObserver } from './terminal_sequences.js';
+import { applyThemeProperties } from './theme_properties.js';
 export class BoobaTerminal {
+    /** Install a mode-aware encoder; no gestures are enabled without one. */
+    setActionKeyEncoder(encoder) {
+        this.actionKeyEncoder = encoder;
+        this.actions.clear();
+    }
+    /** Available when the loaded ghostty-web runtime provides OSC 7501 events. */
+    get supportsProgramStatus() {
+        return typeof this.term?.onProgramStatus === 'function';
+    }
+    get onProgramStatus() {
+        return this.programStatusCallback;
+    }
+    set onProgramStatus(callback) {
+        this.programStatusCallback = callback;
+        this.syncProgramStatus();
+    }
+    syncProgramStatus() {
+        this.programStatusSubscription?.dispose();
+        this.programStatusSubscription = null;
+        const source = this.term;
+        if ((this.programStatusCallback || this.options.allowOSC7501Actions) && source?.onProgramStatus) {
+            this.programStatusSubscription = source.onProgramStatus(report => {
+                const display = this.options.allowOSC7501Actions ? this.actionStatus.receive(report) : report;
+                this.programStatusCallback?.(display);
+            });
+        }
+    }
     constructor(containerId, options = {}) {
         this.container = null;
         this.term = null;
@@ -11,6 +42,12 @@ export class BoobaTerminal {
         this.fitAddon = null;
         this._resizeHandler = null;
         this._dprCleanup = null;
+        this.actionKeyEncoder = null;
+        this.actionReadOnly = false;
+        this.lifecycleBoundaries = [];
+        this.onActionError = null;
+        this.programStatusSubscription = null;
+        this.programStatusCallback = null;
         // --- Event Callbacks ---
         this.onStatusChange = null;
         this.onBell = null;
@@ -34,6 +71,42 @@ export class BoobaTerminal {
             ...options
         };
         this.osc52Scanner = new OSC52Scanner(this.options.allowOSC52 ?? false);
+        this.actions = new ActionController({
+            canSendKey: gesture => !!(this.term && this.adapter && !this.actionReadOnly &&
+                !this.options.disableStdin && !this.term.options.disableStdin &&
+                this.actionKeyEncoder?.canEncode(gesture)),
+            sendKey: gesture => {
+                const encoded = this.actionKeyEncoder?.encode(gesture);
+                if (!encoded || !this.term || !this.adapter || this.actionReadOnly ||
+                    this.options.disableStdin || this.term.options.disableStdin)
+                    return false;
+                this.term.input(encoded, true);
+                return true;
+            },
+        });
+        this.actionStatus = new ActionStatusBridge(this.actions, error => this.onActionError?.(error));
+        this.sequenceObserver = new TerminalSequenceObserver({
+            osc: () => { },
+            lifecycle: (_reason, end) => this.lifecycleBoundaries.push(end),
+        });
+    }
+    // Split only at lifecycle boundaries so native onProgramStatus events and
+    // clears retain wire order even when multiple sequences share one write.
+    writeLiveOutput(data) {
+        if (!this.options.allowOSC7501Actions) {
+            this.term?.write(data);
+            return;
+        }
+        this.lifecycleBoundaries = [];
+        this.sequenceObserver.scan(data);
+        let start = 0;
+        for (const end of this.lifecycleBoundaries) {
+            this.term?.write(data.slice(start, end));
+            this.actionStatus.clear();
+            start = end;
+        }
+        if (start < data.length)
+            this.term?.write(data.slice(start));
     }
     async init() {
         if (!this.container) {
@@ -42,6 +115,7 @@ export class BoobaTerminal {
         await init();
         const term = new Terminal(this.options);
         this.term = term;
+        this.syncProgramStatus();
         this.fitAddon = new FitAddon();
         term.loadAddon(this.fitAddon);
         // CRITICAL: term.open() is async and must be awaited. Without the await,
@@ -50,6 +124,7 @@ export class BoobaTerminal {
         // term.write() will call assertOpen() before isOpen flips true, causing
         // "Terminal must be opened" error. See ghostty-web.js:8055-8067 for details.
         await term.open(this.container);
+        applyThemeProperties(this.container, this.options.theme);
         this.fitAddon.fit();
         this.fitAddon.observeResize();
         // Handle window resize as fallback
@@ -94,14 +169,25 @@ export class BoobaTerminal {
      * @param url WebSocket URL (e.g., 'ws://localhost:8080/ws')
      */
     connectWebSocket(url) {
+        this.disconnect();
+        this.actionReadOnly = true;
         const callbacks = {
-            onTitle: (title) => { this.onTitleChange?.(title); },
-            onOptions: (_opts) => { },
+            onTitle: (title) => { if (this.adapter === adapter)
+                this.onTitleChange?.(title); },
+            onOptions: (opts) => {
+                if (this.adapter !== adapter)
+                    return;
+                this.actionReadOnly = opts.readOnly !== false;
+                this.actions.setReadOnly(this.actionReadOnly);
+            },
             onClose: (reason) => {
+                if (this.adapter !== adapter)
+                    return;
                 this.term?.write(`\r\n${reason}\r\n`);
             },
         };
-        this.adapter = new BoobaProtocolAdapter(url, callbacks);
+        const adapter = new BoobaProtocolAdapter(url, callbacks);
+        this.adapter = adapter;
         this._setupAdapter();
     }
     /**
@@ -111,12 +197,22 @@ export class BoobaTerminal {
      * @param certHashUrl URL to fetch cert hash (e.g., 'https://localhost:8080/cert-hash'), or null
      */
     connectAuto(wsUrl, wtUrl = null, certHashUrl = null) {
+        this.disconnect();
+        this.actionReadOnly = true;
         const callbacks = {
-            onTitle: (title) => { this.onTitleChange?.(title); },
-            onOptions: (_opts) => { },
-            onClose: (reason) => { this.term?.write(`\r\n${reason}\r\n`); },
+            onTitle: (title) => { if (this.adapter === adapter)
+                this.onTitleChange?.(title); },
+            onOptions: (opts) => {
+                if (this.adapter !== adapter)
+                    return;
+                this.actionReadOnly = opts.readOnly !== false;
+                this.actions.setReadOnly(this.actionReadOnly);
+            },
+            onClose: (reason) => { if (this.adapter !== adapter)
+                return; this.term?.write(`\r\n${reason}\r\n`); },
         };
-        this.adapter = new BoobaAutoAdapter(wsUrl, wtUrl, certHashUrl, callbacks);
+        const adapter = new BoobaAutoAdapter(wsUrl, wtUrl, certHashUrl, callbacks);
+        this.adapter = adapter;
         this._setupAdapter();
     }
     /**
@@ -124,6 +220,8 @@ export class BoobaTerminal {
      * @param pollMs Polling interval in milliseconds (default: 16ms / ~60fps)
      */
     connectWasm(pollMs = 16) {
+        this.disconnect();
+        this.actionReadOnly = false;
         this.adapter = new BoobaWasmAdapter(pollMs);
         this._setupAdapter();
     }
@@ -132,18 +230,30 @@ export class BoobaTerminal {
      * @param adapter Custom BubbleTeaAdapter
      */
     connectAdapter(adapter) {
+        this.disconnect();
+        this.actionReadOnly = false;
         this.adapter = adapter;
         this._setupAdapter();
     }
     _setupAdapter() {
         if (!this.adapter)
             return;
-        this.adapter.connect((data) => {
+        const adapter = this.adapter;
+        this.actions.setConnected(false);
+        this.actions.setReadOnly(this.actionReadOnly);
+        adapter.connect((data) => {
+            if (this.adapter !== adapter)
+                return;
             if (data instanceof Uint8Array) {
                 this.osc52Scanner.scan(data);
             }
-            this.term?.write(data);
+            this.writeLiveOutput(data);
         }, (state, message) => {
+            if (this.adapter !== adapter)
+                return;
+            this.sequenceObserver.reset();
+            this.actionStatus.clear();
+            this.actions.setConnected(state === 'connected');
             this._updateStatus(state, message);
             const term = this.term;
             if (state === 'connected' && term) {
@@ -156,8 +266,14 @@ export class BoobaTerminal {
         });
     }
     disconnect() {
-        this.adapter?.disconnect();
+        const adapter = this.adapter;
         this.adapter = null;
+        this.sequenceObserver.reset();
+        this.actionStatus.clear();
+        this.actions.setConnected(false);
+        adapter?.disconnect();
+        if (adapter)
+            this._updateStatus('disconnected', 'Disconnected');
     }
     // --- Selection & Clipboard ---
     /** Get the currently selected text */
@@ -240,6 +356,8 @@ export class BoobaTerminal {
     }
     /** Reset the terminal state */
     reset() {
+        this.sequenceObserver.reset();
+        this.actionStatus.clear();
         this.term?.reset();
     }
     /** Write data to the terminal display */
@@ -293,6 +411,8 @@ export class BoobaTerminal {
         }
         this._dprCleanup?.();
         this._dprCleanup = null;
+        this.programStatusSubscription?.dispose();
+        this.programStatusSubscription = null;
         this.term?.dispose();
         this.term = null;
         this.fitAddon = null;
@@ -372,3 +492,7 @@ export { OSC52Scanner } from './clipboard.js';
 export { resolveBoobaURLs } from './urls.js';
 // HUD utilities (optional, treeshakeable) — re-exported from ghostty-web
 export { installRendererHud, parseRendererFromURL } from '../ghostty-web/ghostty-web.js';
+// Transport-independent terminal actions and optional host UI.
+export { ActionController, ACTION_LIMITS, validateActionSnapshot, decodeActionSnapshot } from './actions.js';
+export { installActionBar, ACTION_BAR_CSS } from './action_bar.js';
+export { decodeActionStatus, actionStatusID, ACTION_MESSAGE_MARKER, ACTION_STATUS_NAMESPACE } from './action_status.js';
