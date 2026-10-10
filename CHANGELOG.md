@@ -64,6 +64,9 @@ Browser builds pick up the new ghostty-web runtime by rerunning `booba-assets`.
   session handler with the server's middleware applied once.
 - Move the BubbleTea WASM fork to `c397c32`, rebased onto v2.1.0, which
   provides `View.ProgramStatus` and the capability-query messages natively.
+- Hold a finished WebTransport session open briefly, up to two seconds, until the
+  client closes it. Closing immediately could make the client discard the final
+  output and close frames, which surfaced as a flaky end-to-end test on CI.
 
 ### Packaging and development
 

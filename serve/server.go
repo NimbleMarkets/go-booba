@@ -577,7 +577,15 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		log.Printf("webtransport upgrade: %v", err)
 		return
 	}
+	// Once the session has run, give the client a moment to drain the
+	// stream before closing the WebTransport session: a session close makes
+	// the peer's library cancel its stream reads and discard buffered frames,
+	// so closing too early can lose the final output and the MsgClose frame.
+	drainBeforeClose := false
 	defer func() {
+		if drainBeforeClose {
+			waitForPeerClose(wtSess, wtCloseGracePeriod)
+		}
 		if err := wtSess.CloseWithError(0, ""); err != nil {
 			log.Printf("webtransport session close: %v", err)
 		}
@@ -638,7 +646,24 @@ func (s *Server) handleWT(w http.ResponseWriter, r *http.Request, wtServer *webt
 		}
 	}()
 
+	drainBeforeClose = true
 	handleWebTransport(ctx, sess, stream, opts, s.config.Debug, s.config)
+}
+
+// wtCloseGracePeriod bounds how long handleWT waits for the client to close
+// the WebTransport session after the stream has been closed. Browser clients
+// do not close the session on MsgClose, so this is the usual teardown delay.
+const wtCloseGracePeriod = 2 * time.Second
+
+// waitForPeerClose returns when the peer closes the WebTransport session or
+// the grace period elapses, whichever comes first.
+func waitForPeerClose(sess *webtransport.Session, grace time.Duration) {
+	timer := time.NewTimer(grace)
+	defer timer.Stop()
+	select {
+	case <-sess.Context().Done():
+	case <-timer.C:
+	}
 }
 
 func (s *Server) checkAuth(w http.ResponseWriter, r *http.Request) bool {
