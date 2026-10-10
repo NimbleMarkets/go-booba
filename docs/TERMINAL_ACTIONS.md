@@ -1,6 +1,6 @@
 # Terminal Actions (experimental)
 
-This is an opt-in experiment in Booba. APIs and the private wire convention may change without compatibility guarantees. The reference demo lives in `cmd/booba-actions-example`; it currently requires an OSC-enabled ghostty-web runtime override.
+This is an opt-in experiment in Booba. APIs and the private wire convention may change without compatibility guarantees. The reference demo lives in `cmd/booba-actions-example`. The ghostty-web runtime embedded since Booba 0.8.0 supports OSC 7501.
 
 Terminal Actions turns an application's help bindings into touch controls. The current implementation provides a transport-independent JSON model, Go publisher, Bubbles v2 adapter, browser controller, and optional action bar. The browser demo carries actions inside OSC 7501 terminal output using an opt-in private convention; activations return as ordinary keyboard input.
 
@@ -73,9 +73,9 @@ Standard WebSocket/WebTransport options and `disableStdin` prevent activation th
 
 ## Program status integration
 
-Bubble Tea v2.1 already provides `View.ProgramStatus`, `RequestProgramStatusSupport`, and `ProgramStatusSupportMsg`. Booba still pins the earlier WASM fork; rebase that fork onto v2.1 before relying on those APIs. The help adapter uses Bubbles v2.1.0 and works with the existing fork.
+Bubble Tea v2.1 provides `View.ProgramStatus`, `RequestProgramStatusSupport`, and `ProgramStatusSupportMsg`. Booba's pinned WASM fork is based on v2.1.0 as of 0.8.0, so those APIs are available to WASM builds. The help adapter uses Bubbles v2.1.0.
 
-The ghostty-web `osc-7501` branch at `0e226b4` exposes `onProgramStatus` backed by libghostty/WASM parsing. Booba forwards it when the loaded runtime provides it:
+The embedded ghostty-web runtime (`nm-kitty-built` `579fc63`, source `3f84d01`) exposes `onProgramStatus` backed by libghostty-vt parsing. Booba forwards it when the loaded runtime provides it:
 
 ```ts
 booba.onProgramStatus = report => statusStore.apply(report);
@@ -83,7 +83,7 @@ booba.onProgramStatus = report => statusStore.apply(report);
 console.log(booba.supportsProgramStatus); // Inspect after init.
 ```
 
-The current pinned ghostty-web build does not include this event. Booba does not advertise status support merely because this callback exists on its wrapper: it subscribes to the underlying event only when a consumer is present. No ghostty-web submodule update is included in this change.
+Booba does not advertise status support merely because this callback exists on its wrapper: it subscribes to the underlying event only when a consumer is present. `supportsProgramStatus` reports whether the loaded runtime provides the event, which matters when a host supplies its own ghostty-web build.
 
 Enable `allowOSC7501Actions: true` in the terminal constructor to interpret the private convention. The standard decoded `msg` contains:
 
@@ -100,13 +100,12 @@ This is a private interpretation of a human-readable field, not a standardized a
 ## Try the browser demo
 
 ```sh
-go run ./cmd/booba-actions-example -listen 127.0.0.1:8081 \
-  -ghostty-assets /path/to/osc-enabled-runtime
+go run ./cmd/booba-actions-example -listen 127.0.0.1:8081
 ```
 
 Open http://127.0.0.1:8081. Each tab gets a live Bubble Tea session. Tap More to reveal navigation, select an item, and tap Open. The controls change to Confirm and Back as the Go application changes context. Hide TUI help / Show TUI help (the `h` key) toggles the terminal help while browser controls remain available. Help is visible initially; `?` switches compact/full terminal help and reveals it if hidden. Keyboard opens normal terminal input; Restart starts a fresh session. The expandable snapshot panel shows the exact help-generated description.
 
-The runtime directory must contain `ghostty-web.js`, its imported JavaScript chunks, and the matching `ghostty-vt.wasm`. A source checkout may put JavaScript in `dist/` and WASM at the repository root; assemble them in a temporary directory. The committed runtime does not yet support OSC 7501; the page explains this if the override is omitted.
+To test a ghostty-web build before it is embedded, pass `-ghostty-assets <dir>` with a directory containing `ghostty-web.js`, its imported JavaScript chunks, and the matching `ghostty-vt.wasm`. A source checkout may put JavaScript in `dist/` and WASM at the repository root; assemble them in a temporary directory. The page reports an error if the loaded runtime lacks OSC 7501 support.
 
 The demo uses Booba’s normal Sip WebSocket connection and PTY-backed Bubble Tea sessions. Action reports are ordinary terminal output; button presses are terminal input. Its key encoder supports this application's bindings only, including application cursor mode. It is not a general-purpose keyboard encoder. The demo binds to loopback only.
 

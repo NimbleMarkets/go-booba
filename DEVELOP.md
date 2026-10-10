@@ -84,7 +84,7 @@ The patched BubbleTea (via the `replace` directive — see [BubbleTea Integratio
 `app.wasm` needs supporting files alongside it to run in a browser. The `booba-assets` tool scaffolds a complete `web/` directory (`wasm_exec.js`, `booba/`, `ghostty-web/`, starter `index.html`):
 
 ```sh
-go get -tool github.com/NimbleMarkets/go-booba/cmd/booba-assets@v0.7.0
+go get -tool github.com/NimbleMarkets/go-booba/cmd/booba-assets@v0.8.0
 go tool booba-assets web/
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```

@@ -1,5 +1,77 @@
 # `booba` CHANGELOG
 
+## [0.8.0] - 2026-10-10
+
+Booba 0.8.0 adds an experimental Terminal Actions system that turns an
+application's help bindings into browser touch controls, updates the embedded
+ghostty-web runtime to a libghostty-vt build with OSC 7501 program status, and
+moves the BubbleTea WASM fork onto v2.1.0.
+
+### Upgrading from 0.7.x
+
+The pinned BubbleTea fork changed. Update the `replace` directive in your
+module's `go.mod`:
+
+```sh
+go mod edit -replace charm.land/bubbletea/v2=github.com/neomantra/bubbletea/v2@v2.0.0-20261009201241-c397c32a5074
+go mod tidy
+```
+
+The fork is now based on BubbleTea v2.1.0 and carries only the `js/wasm` and
+`wasip1` build-tag stubs. Register the asset tool with
+`go get -tool github.com/NimbleMarkets/go-booba/cmd/booba-assets@v0.8.0`.
+Browser builds pick up the new ghostty-web runtime by rerunning `booba-assets`.
+
+### Terminal Actions (experimental)
+
+- Add a transport-independent JSON description of an application's available
+  key interactions, with Go validation and a change-aware publisher.
+- Add a Bubbles v2.1 help adapter: short help supplies the compact controls,
+  full help supplies grouped expanded controls, and the same bindings drive
+  terminal help and browser buttons.
+- Carry snapshots inside OSC 7501 program status reports under the private,
+  opt-in `booba-actions/v1` convention. Enable it with `allowOSC7501Actions`.
+- Add `ActionController`, `installActionBar`, and `setActionKeyEncoder` to the
+  browser API. Buttons send only host-encoded keys and never implicitly focus
+  the terminal. Controls clear at shell prompts, alternate-screen transitions,
+  resets, reconnects, and disposal.
+- Style the action bar from the host page: every element carries a stable
+  class, defaults live in `@layer booba` so plain host rules win without
+  `!important`, `ACTION_BAR_CSS` and `styles: false` serve strict CSP hosts,
+  and `init()` mirrors the theme as `--booba-background` and
+  `--booba-foreground` on the container.
+- Add the `booba-actions-example` native demo and
+  [docs/TERMINAL_ACTIONS.md](docs/TERMINAL_ACTIONS.md). APIs and the wire
+  convention may change.
+
+### Terminal rendering
+
+- Update ghostty-web to `579fc63` (source `3f84d01`), synced to libghostty-vt
+  `a4aacd9`. The runtime exposes OSC 7501 reports through `onProgramStatus`;
+  Booba forwards them via `booba.onProgramStatus` and reports availability in
+  `supportsProgramStatus`.
+- Restore line-based scrollback. The libghostty-vt update introduced a 10,000
+  byte scrollback budget that capped history at roughly 940 rows; Booba's
+  `scrollback` option again means lines.
+- Keep grapheme clustering (mode 2027) across a full terminal reset, so flag
+  and ZWJ emoji stay single cells after a program sends `ESC c`.
+- The WASM runtime grows from 626 KB to 940 KiB with the upstream update.
+  Rebuilding it requires Zig 0.16.0.
+
+### Go and WASM integration
+
+- Add `Server.HTTPHandlerFor` to build an embeddable handler for a given
+  session handler with the server's middleware applied once.
+- Move the BubbleTea WASM fork to `c397c32`, rebased onto v2.1.0, which
+  provides `View.ProgramStatus` and the capability-query messages natively.
+
+### Packaging and development
+
+- Point the Command Reference badge at the generated command docs in the
+  repository; the previous GitHub Pages target was never deployed.
+- Document the host styling contract in
+  `docs/superpowers/specs/2026-10-09-action-bar-styling-design.md`.
+
 ## [0.7.0] - 2026-09-28
 
 Booba 0.7.0 improves browser terminal rendering with GPU backends, bidirectional
