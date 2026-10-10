@@ -239,6 +239,21 @@ tasks:
     generates:
       - bin/booba-view-example.wasm
 
+  site:
+    desc: 'Generate the demo site into web/ (WASM builds, runtime assets, HTML)'
+    cmds:
+      - go run ./cmd/wasm-build
+
+  site-serve:
+    desc: 'Serve the generated demo site at http://localhost:3000/go-booba/'
+    preconditions:
+      - sh: test -f web/index.html
+        msg: "web/index.html is missing; run `task site` first"
+    cmds:
+      - rm -rf bin/site && mkdir -p bin/site/go-booba
+      - cp -R web/. bin/site/go-booba/
+      - npx -y serve -l 3000 bin/site
+
   clean-cmds:
     desc: 'Cleans all commands'
     cmds:

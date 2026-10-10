@@ -1,0 +1,57 @@
+{{- define "sidebar" -}}
+{{- /* Left-hand navigation. Data: { Base, Active: "<demo-name>" or "", Manifest } */ -}}
+<aside class="sidebar">
+  <a href="{{ .Base }}/" class="sidebar-brand">
+    <img src="{{ .Base }}/_assets/booba.png" alt="" class="sidebar-logo">
+    <span class="sidebar-title">booba</span>
+  </a>
+  <nav class="sidebar-nav">
+    <h2 class="sidebar-group">Start</h2>
+    <ul class="sidebar-list">
+      <li><a href="{{ .Base }}/" class="sidebar-link{{ if eq .Active "" }} sidebar-link-active{{ end }}">Overview</a></li>
+    </ul>
+    {{- range .Manifest.Groups }}
+    <h2 class="sidebar-group">{{ .Title }}</h2>
+    <ul class="sidebar-list">
+      {{- range .Demos }}
+      <li>
+        <a href="{{ $.Base }}/demos/{{ .Name }}/"
+           class="sidebar-link{{ if eq $.Active .Name }} sidebar-link-active{{ end }}">
+          {{ .Title }}
+        </a>
+      </li>
+      {{- end }}
+    </ul>
+    {{- end }}
+  </nav>
+  <footer class="sidebar-footer">
+    <a href="https://github.com/NimbleMarkets/go-booba">GitHub</a>
+    <a href="https://pkg.go.dev/github.com/NimbleMarkets/go-booba">godoc</a>
+    <a href="https://nimble.markets/">Nimble.Markets</a>
+  </footer>
+</aside>
+{{- end -}}
+
+{{- define "menu-script" -}}
+<script>
+(function() {
+  const menuButton = document.querySelector('.menu-button');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  function toggleMenu() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+    menuButton.textContent = sidebar.classList.contains('open') ? '×' : '☰';
+  }
+  function closeMenu() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    menuButton.textContent = '☰';
+  }
+  menuButton.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+  document.querySelectorAll('.sidebar-link').forEach(link => link.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+})();
+</script>
+{{- end -}}

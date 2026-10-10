@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>booba — Bubble Tea in the browser</title>
+<link rel="icon" type="image/png" href="{{ .Base }}/_assets/booba.png">
+<link rel="stylesheet" href="{{ .Base }}/style.css">
+</head>
+<body class="layout">
+<button class="menu-button" aria-label="Toggle navigation">☰</button>
+<div class="sidebar-overlay"></div>
+{{ template "sidebar" . }}
+<main class="main">
+  <section class="hero">
+    <h1>booba</h1>
+    <p class="hero-tagline">Bubble Tea terminal apps, in a web browser.</p>
+    <p>
+      <code>go-booba</code> puts <a href="https://github.com/charmbracelet/bubbletea">Bubble Tea</a>
+      programs in the browser on a <a href="https://github.com/coder/ghostty-web">Ghostty</a>-powered terminal.
+      Compile a program to WebAssembly and run it with no server, or serve a program over
+      WebSocket or WebTransport from a machine that has it. The demos here are the first kind:
+      everything you see runs in this page.
+    </p>
+    <p class="hero-ctas">
+      <a class="cta" href="https://github.com/NimbleMarkets/go-booba">View on GitHub</a>
+      <a class="cta cta-secondary" href="https://pkg.go.dev/github.com/NimbleMarkets/go-booba">godoc</a>
+      <a class="cta cta-secondary" href="https://github.com/NimbleMarkets/go-booba-example">Starter template</a>
+    </p>
+  </section>
+
+  <section class="features">
+    {{- range .Manifest.Groups }}
+    <h2>{{ .Title }}</h2>
+    <ul class="feature-list">
+      {{- range .Demos }}
+      <li>
+        <a href="{{ $.Base }}/demos/{{ .Name }}/">
+          <strong>{{ .Title }}</strong>
+          <span>{{ .BlurbHTML }}</span>
+        </a>
+      </li>
+      {{- end }}
+    </ul>
+    {{- end }}
+  </section>
+
+  <section class="prose">
+    <h2>Serving a program</h2>
+    <p>
+      GitHub Pages can only host static files, so the other half of booba is not on this site.
+      The <code>serve</code> package runs a Bubble Tea program, or any command in a PTY, behind an
+      HTTP server and bridges browser clients over WebSocket or WebTransport with the same terminal
+      front end used here. The <code>booba</code> command does it for any local program:
+    </p>
+    <pre><code>booba --listen 127.0.0.1:8080 -- htop</code></pre>
+    <p>
+      See the <a href="https://github.com/NimbleMarkets/go-booba#web-frontend-for-bubbletea-based-service">README</a>
+      for the server API and middleware, and
+      <a href="https://github.com/NimbleMarkets/go-booba/blob/main/docs/TERMINAL_ACTIONS.md">Terminal Actions</a>
+      for the experiment behind the touch-controls demo.
+    </p>
+  </section>
+</main>
+{{ template "menu-script" . }}
+</body>
+</html>

@@ -1,0 +1,55 @@
+{{- define "actions-body" -}}
+<section class="demo-controls">
+  <div class="demo-toolbar"><p id="status" role="status">Starting…</p><span id="context"></span></div>
+  <div id="controls"></div>
+  <p>Tap <b>More</b> for navigation, then <b>Open</b>. The controls change to <b>Confirm</b> and <b>Back</b>.
+     <b>Hide TUI help</b> / <b>Show TUI help</b> chooses whether help also appears inside the terminal.
+     <b>Keyboard</b> focuses the terminal for normal typing.</p>
+  <details><summary>Current action snapshot</summary><pre id="snapshot">Waiting for the application…</pre></details>
+</section>
+{{- end -}}
+
+{{- define "actions-script" -}}
+<script type="module">
+  import { installActionBar } from "{{ .Base }}/_assets/booba/booba.js";
+
+  window.demoOptions = { allowOSC7501Actions: true };
+
+  window.demoSetup = async booba => {
+    const status = document.getElementById("status");
+    if (!booba.supportsProgramStatus) {
+      status.textContent = "This runtime lacks OSC 7501 support (onProgramStatus); actions cannot work.";
+      return;
+    }
+    // This program uses only these gestures and never requests release or
+    // all-key reporting. A bounded demo encoder, not a general one.
+    const encode = gesture => {
+      const mods = gesture.modifiers.join("+");
+      if (mods === "ctrl" && gesture.key === "c") return "\x03";
+      if (mods) return null;
+      const fixed = { enter: "\r", escape: "\x1b", "?": "?", h: "h" };
+      if (Object.hasOwn(fixed, gesture.key)) return fixed[gesture.key];
+      if (gesture.key === "up" || gesture.key === "down") {
+        return "\x1b" + (booba.getMode(1) ? "O" : "[") + (gesture.key === "up" ? "A" : "B");
+      }
+      return null;
+    };
+    booba.setActionKeyEncoder({ canEncode: g => encode(g) !== null, encode });
+    installActionBar(booba.actions, {
+      parent: document.getElementById("controls"),
+      openKeyboard: () => booba.focus(),
+      onLayout: () => booba.fitAddon?.fit(),
+    });
+    booba.actions.subscribe(() => {
+      const snapshot = booba.actions.snapshot;
+      document.getElementById("snapshot").textContent =
+        snapshot ? JSON.stringify(snapshot, null, 2) : "No active actions";
+      document.getElementById("context").textContent =
+        snapshot ? `${snapshot.context} · revision ${snapshot.revision}` : "";
+    });
+    booba.onProgramStatus = report => { if (report.message) status.textContent = report.message; };
+    booba.onActionError = error => { status.textContent = String(error); };
+    status.textContent = "Running";
+  };
+</script>
+{{- end -}}

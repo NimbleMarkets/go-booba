@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{ .Demo.Title }} — booba</title>
+<link rel="icon" type="image/png" href="{{ .Base }}/_assets/booba.png">
+<link rel="stylesheet" href="{{ .Base }}/style.css">
+</head>
+<body class="layout">
+<button class="menu-button" aria-label="Toggle navigation">☰</button>
+<div class="sidebar-overlay"></div>
+{{ template "sidebar" . }}
+<main class="main">
+  <header class="demo-header">
+    <h1>{{ .Demo.Title }}</h1>
+    <p class="demo-blurb">{{ .Demo.BlurbHTML }}</p>
+    <a class="demo-source-link" href="{{ .Demo.SourceURL }}">Source on GitHub →</a>
+    <div class="demo-run">
+      <p>Run it natively from a checkout of go-booba:</p>
+      <pre><code>{{ .Demo.RunCommand }}</code></pre>
+    </div>
+  </header>
+  {{ .ExtraBody }}
+  <section class="terminal-frame">
+    <div id="terminal"></div>
+  </section>
+</main>
+<script src="{{ .Base }}/_assets/wasm_exec.js"></script>
+{{ .ExtraScript }}
+<script type="module">
+  // Instantiate the Go runtime with this demo's app.wasm, then mount a
+  // BoobaTerminal on the container and connect it to the program through the
+  // WASM adapter. A fragment may set window.demoOptions (merged into the
+  // terminal options) and window.demoSetup (awaited after init, before connect).
+  import {
+    BoobaTerminal,
+    installRendererHud,
+    parseRendererFromURL,
+  } from "{{ .Base }}/_assets/booba/booba.js";
+
+  async function main() {
+    const go = new Go();
+    const result = await WebAssembly.instantiateStreaming(
+      fetch("./app.wasm"), go.importObject
+    );
+    go.run(result.instance);
+
+    const booba = new BoobaTerminal("terminal", {
+      renderer: parseRendererFromURL(),
+      ...(window.demoOptions ?? {}),
+    });
+    await booba.init();
+    if (typeof window.demoSetup === "function") {
+      await window.demoSetup(booba);
+    }
+    booba.connectWasm();
+    booba.focus();
+
+    const frame = document.querySelector(".terminal-frame");
+    installRendererHud(booba.term, {
+      parent: frame ?? undefined,
+      position: "absolute",
+      className: "demo-renderer-hud",
+      bindToggleHotkey: false,
+    });
+  }
+
+  main().catch(error => {
+    console.error(error);
+    const target = document.getElementById("status") ?? document.getElementById("terminal");
+    if (target) target.textContent = String(error);
+  });
+</script>
+{{ template "menu-script" . }}
+</body>
+</html>

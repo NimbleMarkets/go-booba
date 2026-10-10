@@ -1,0 +1,15 @@
+# Source of truth for the demo site. Consumed by cmd/wasm-build.
+groups:
+  - title: Bubble Tea in the browser
+    demos:
+      - name: views
+        title: Multiple views
+        blurb: The Bubble Tea <em>views</em> sample, compiled to WebAssembly and running entirely in your browser. Press <kbd>j</kbd>/<kbd>k</kbd> and <kbd>Enter</kbd>.
+        source: ./cmd/booba-view-example
+  - title: Terminal Actions (experimental)
+    demos:
+      - name: actions
+        title: Touch controls from help bindings
+        blurb: The program publishes its help map over OSC 7501; booba renders it as buttons that send ordinary key input back.
+        source: ./cmd/booba-actions-example
+        page: actions

@@ -27,3 +27,11 @@ serve/static/ghostty-web/*
 
 # git worktrees
 .worktrees/
+
+# Demo site output (cmd/wasm-build); sources under web/ are committed.
+web/index.html
+web/demos/
+web/_assets/wasm_exec.js
+web/_assets/index.html
+web/_assets/booba/
+web/_assets/ghostty-web/
