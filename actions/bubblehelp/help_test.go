@@ -94,7 +94,7 @@ func TestStatusSummaryByteBoundary(t *testing.T) {
 	// Use a smaller map if the fixture already exceeds the wire limit.
 	for remaining < 1 || remaining > 255 {
 		km.short = km.short[:len(km.short)-1]
-		s, _, err = Snapshot(km, "app", "list", 1, Options{})
+		s, _, _ = Snapshot(km, "app", "list", 1, Options{})
 		data, _ = json.Marshal(s)
 		remaining = actions.MaxStatusMessageBytes - len(actions.MessageMarker) - len(data)
 	}
