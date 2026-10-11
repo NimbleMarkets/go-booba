@@ -1,6 +1,31 @@
 # `booba` CHANGELOG
 
-## [Unreleased]
+## [0.9.1] - 2026-10-11
+
+### Terminal Actions (experimental)
+
+- Shorten generated action IDs from 34 characters to eight hexadecimal
+  characters, reducing repeated IDs in action definitions and help lists.
+  Collisions return an error and can be resolved with explicit IDs.
+- Make `bubblehelp.Snapshot` return an error when the snapshot, marker, and
+  readable summary exceed OSC 7501's 2048-byte decoded message limit.
+  `Options.Summary` supplies the summary for validation and defaults to context.
+  `bubblehelp.NewModel` also validates its initial description at construction;
+  later publication errors still clear stale controls and call `OnError` when set.
+- Export `encodeKey(gesture, modes)` and `booba.encodeKey(gesture)` for opt-in
+  legacy VT/xterm keyboard encoding. The terminal method reads current cursor,
+  backarrow, and newline modes on each call. Unsupported gestures return `null`.
+  Kitty keyboard and modifyOtherKeys protocols still require a host encoder
+  because ghostty-web does not expose their state. Update the actions demo to
+  use the shared legacy encoder.
+
+### Packaging
+
+- Add `booba-assets --no-index` to skip the starter page and the existing-page
+  notice when a host supplies its own HTML. It takes precedence over `--force`.
+- Refresh embedded browser assets to include the shared key encoder.
+
+## [0.9.0] - 2026-10-11
 
 ### Server shutdown
 
