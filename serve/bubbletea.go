@@ -57,12 +57,27 @@ func MakeOptions(sess Session) []tea.ProgramOption {
 }
 
 // runBubbleTea starts a BubbleTea program attached to the session PTY.
-func runBubbleTea(ctx context.Context, sess Session, handler Handler) error {
+func runBubbleTea(ctx context.Context, sess, rawSess Session, handler Handler) error {
+	if sess.Context().Err() != nil {
+		return nil
+	}
 	model, extraOpts := handler(sess)
-	opts := MakeOptions(sess)
+	if ps, ok := rawSess.(*ptySession); ok {
+		release, open := ps.beginBubbleTea()
+		if !open {
+			return nil
+		}
+		defer release()
+	}
+
+	opts := MakeOptions(rawSess)
 	opts = append(opts, extraOpts...)
 
 	prog := tea.NewProgram(model, opts...)
+	// Quit shuts down gracefully and joins the input reader. WithContext/Kill
+	// uses Bubble Tea's forced shutdown path, which skips that join.
+	stop := context.AfterFunc(sess.Context(), prog.Quit)
+	defer stop()
 	forwardResizeEvents(ctx, sess, prog)
 
 	if _, err := prog.Run(); err != nil {

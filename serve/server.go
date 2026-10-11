@@ -398,7 +398,7 @@ func applyHandlerMiddleware(base Handler, mws []Middleware) Handler {
 func (s *Server) runSession(ctx context.Context, sess, rawSess Session) error {
 	switch {
 	case s.handler != nil:
-		return runBubbleTea(ctx, sess, s.handler)
+		return runBubbleTea(ctx, sess, rawSess, s.handler)
 	case s.cmdName != "":
 		ptySess, ok := rawSess.(*ptySession)
 		if !ok {

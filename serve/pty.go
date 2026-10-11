@@ -12,14 +12,15 @@ import (
 
 // ptySession implements Session using a pseudo-terminal.
 type ptySession struct {
-	pty     xpty.Pty
-	winSize WindowSize
-	resize  chan WindowSize
-	ctx     context.Context
-	cancel  context.CancelFunc
-	done    chan struct{}
-	closed  bool
-	mu      sync.Mutex
+	pty          xpty.Pty
+	winSize      WindowSize
+	resize       chan WindowSize
+	ctx          context.Context
+	cancel       context.CancelFunc
+	done         chan struct{}
+	closed       bool
+	workloadDone chan struct{}
+	mu           sync.Mutex
 }
 
 // newPtySession creates a new PTY session with the given initial size.
@@ -68,8 +69,12 @@ func (s *ptySession) ResizeWindow(size WindowSize) {
 
 func (s *ptySession) applyResize(size WindowSize) {
 	s.mu.Lock()
+	if s.closed {
+		s.mu.Unlock()
+		return
+	}
 	s.winSize = size
-	s.mu.Unlock()
+	defer s.mu.Unlock()
 
 	select {
 	case s.resize <- size:
@@ -105,9 +110,33 @@ func (s *ptySession) Close() error {
 		return nil
 	}
 	s.closed = true
+	done := s.workloadDone
 	s.mu.Unlock()
 
 	s.cancel()
 	close(s.done)
+	if done != nil {
+		// The transport may have stopped reading. Keep draining so the renderer's
+		// final writes cannot block while Bubble Tea restores terminal state.
+		select {
+		case <-done:
+		default:
+			go func() { _, _ = io.Copy(io.Discard, s.pty) }()
+			<-done
+		}
+	}
 	return s.pty.Close()
+}
+
+// beginBubbleTea reserves the PTY before terminal setup.
+// Close cancels the session first, then waits for the owner to release it.
+func (s *ptySession) beginBubbleTea() (func(), bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed || s.workloadDone != nil {
+		return nil, false
+	}
+	done := make(chan struct{})
+	s.workloadDone = done
+	return func() { close(done) }, true
 }

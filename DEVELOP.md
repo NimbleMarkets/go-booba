@@ -173,3 +173,16 @@ To set up macOS signing:
 5. Create an App Store Connect API key with **Developer** role and copy the Issuer ID, Key ID, and private key content into the corresponding secrets.
 
 The `etc/entitlements.plist` file relaxes the macOS hardened runtime for Go binaries (JIT, unsigned executable memory, and library validation are allowed). Adjust it if you introduce features that require additional entitlements.
+
+## Served Bubble Tea shutdown
+
+A native PTY session reserves its terminal for the Bubble Tea run after the model
+factory returns. Closing the session cancels its context, requests a graceful
+`Program.Quit`, and waits for `Run` to finish before closing the PTY. A disconnect
+also drains terminal output so the renderer can finish without a client reader.
+Resizes stop once closing begins. This ordering prevents a BSD/macOS cancelreader
+from accessing a file descriptor concurrently with `os.File.Close`.
+
+Do not replace graceful quit with `Program.Kill` or context-forced program
+shutdown: Bubble Tea's forced path can skip joining its input reader. Model
+factories may decline a session by closing it before returning.

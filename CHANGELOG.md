@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Server shutdown
+
+- Let served Bubble Tea programs stop their input readers before closing the PTY
+  on disconnect. Drain final renderer output and ignore late resizes during shutdown.
+
 ### Program status
 
 - Keep Program Status Protocol (OSC 7501) records in `booba.programStatus`, a store
