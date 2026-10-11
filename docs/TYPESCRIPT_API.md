@@ -115,6 +115,8 @@ const dispose = installStatusBar(booba.programStatus, {
 });
 ```
 
+Calling `installStatusBar` again on the same parent replaces the earlier bar; the disposer returned by the earlier call becomes a no-op.
+
 The store fills only while something consumes status: a `programStatus.subscribe` listener (which `installStatusBar` adds), an `onProgramStatus` callback, or the `allowOSC7501Actions` option. Polling `records` without one of those always sees an empty store.
 
 Lifetimes: each report replaces its record; `state=clear` removes a record and everything beneath it. Working and blocked records drop at a shell prompt and when the process exits. Done and error persist until the user's next input to the program. A full terminal reset clears everything; alternate-screen switches change nothing. The store holds at most 256 records.

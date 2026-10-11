@@ -110,6 +110,25 @@ describe('status bar markup contract', () => {
     });
 });
 
+describe('status bar reinstall', () => {
+    it('replaces a previous install on the same parent instead of appending a second bar', () => {
+        const store = new ProgramStatusStore();
+        const parent = document.createElement('div'); document.body.append(parent);
+        const firstLayout = vi.fn();
+        const disposeFirst = installStatusBar(store, { parent, onLayout: firstLayout });
+        const disposeSecond = installStatusBar(store, { parent });
+        expect(parent.querySelectorAll('.booba-status-bar')).toHaveLength(1);
+        const layoutCallsAfterReplace = firstLayout.mock.calls.length;
+        store.apply(report({ id: 'job', state: 'working', message: 'Busy' }));
+        expect(firstLayout).toHaveBeenCalledTimes(layoutCallsAfterReplace); // first install unsubscribed
+        expect(parent.querySelectorAll('.booba-status')).toHaveLength(1);
+        disposeFirst(); // stale disposer is a no-op
+        expect(parent.querySelectorAll('.booba-status-bar')).toHaveLength(1);
+        disposeSecond();
+        expect(parent.querySelector('.booba-status-bar')).toBeNull();
+    });
+});
+
 describe('status bar in-place updates', () => {
     it('updates a ticking percentage in place without rebuilding the block', () => {
         const store = new ProgramStatusStore();

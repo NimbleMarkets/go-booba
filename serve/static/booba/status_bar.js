@@ -15,8 +15,14 @@ export const STATUS_BAR_CSS = `@layer booba {
 }
 `;
 const STYLE_ATTRIBUTE = 'data-booba-status-styles';
-/** Render a store's records into host-owned DOM; returns an idempotent disposer. */
+/** The live install per parent, so a reinstall replaces the bar instead of stacking a second one. */
+const installs = new WeakMap();
+/**
+ * Render a store's records into host-owned DOM; returns an idempotent disposer.
+ * Installing again on the same parent disposes the earlier bar first.
+ */
 export function installStatusBar(store, options) {
+    installs.get(options.parent)?.();
     const doc = options.parent.ownerDocument;
     if (options.styles !== false)
         ensureStyles(doc, STYLE_ATTRIBUTE, STATUS_BAR_CSS);
@@ -105,12 +111,16 @@ export function installStatusBar(store, options) {
     };
     const unsubscribe = store.subscribe(render);
     render();
-    return () => {
+    const dispose = () => {
         if (disposed)
             return;
         disposed = true;
+        if (installs.get(options.parent) === dispose)
+            installs.delete(options.parent);
         unsubscribe();
         root.remove();
         options.onLayout?.();
     };
+    installs.set(options.parent, dispose);
+    return dispose;
 }
