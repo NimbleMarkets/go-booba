@@ -9,7 +9,7 @@ import (
 
 func TestRunCopiesViteChunks(t *testing.T) {
 	out := t.TempDir()
-	if err := run(out, false); err != nil {
+	if err := run(out, false, false); err != nil {
 		t.Fatal(err)
 	}
 

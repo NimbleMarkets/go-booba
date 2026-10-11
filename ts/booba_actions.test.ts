@@ -22,6 +22,17 @@ function setup() {
     return { booba, terminal, adapter };
 }
 describe('Booba actions integration', () => {
+    it('encodes with live terminal modes and declines before initialization', () => {
+        const uninitialized = new BoobaTerminal('unused');
+        expect(uninitialized.encodeKey({ key: 'up', modifiers: [] })).toBeNull();
+        const { booba, terminal } = setup();
+        let application = false;
+        Object.assign(terminal, { getMode: (mode: number) => mode === 1 && application });
+        const gesture = { key: 'up', modifiers: [] };
+        expect(booba.encodeKey(gesture)).toBe('\x1b[A');
+        application = true;
+        expect(booba.encodeKey(gesture)).toBe('\x1bOA');
+    });
     it('waits for writable server options and applies later read-only changes', () => {
         const connect = vi.spyOn(BoobaProtocolAdapter.prototype, 'connect').mockImplementation((_output, state) => state('connected', 'ready'));
         try {

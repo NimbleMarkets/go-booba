@@ -3,6 +3,7 @@ import { BoobaWasmAdapter } from './adapter.js';
 import { BoobaProtocolAdapter } from './websocket_adapter.js';
 import { BoobaAutoAdapter } from './auto_adapter.js';
 import { OSC52Scanner } from './clipboard.js';
+import { encodeKey as encodeLegacyKey } from './key_encoder.js';
 import { ActionController } from './actions.js';
 import { ActionStatusBridge } from './action_status.js';
 import { ProgramStatusStore } from './program_status_store.js';
@@ -13,6 +14,19 @@ export class BoobaTerminal {
     setActionKeyEncoder(encoder) {
         this.actionKeyEncoder = encoder;
         this.actions.clear();
+    }
+    /** Encode a legacy VT/xterm gesture using current cursor, backarrow and newline modes.
+     * Opt-in only: ghostty-web cannot report Kitty/modifyOtherKeys state. Hosts using
+     * those protocols must supply their own ActionKeyEncoder instead.
+     */
+    encodeKey(gesture) {
+        if (!this.term)
+            return null;
+        return encodeLegacyKey(gesture, {
+            applicationCursor: this.getMode(1),
+            backarrow: this.getMode(67),
+            newline: this.getMode(20, true),
+        });
     }
     /** Available when the loaded ghostty-web runtime provides OSC 7501 events. */
     get supportsProgramStatus() {
@@ -549,3 +563,4 @@ export { installActionBar, ACTION_BAR_CSS } from './action_bar.js';
 export { ProgramStatusStore, MAX_PROGRAM_STATUS_RECORDS } from './program_status_store.js';
 export { installStatusBar, STATUS_BAR_CSS } from './status_bar.js';
 export { decodeActionStatus, actionStatusID, ACTION_MESSAGE_MARKER, ACTION_STATUS_NAMESPACE } from './action_status.js';
+export { encodeKey } from './key_encoder.js';

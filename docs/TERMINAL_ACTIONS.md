@@ -17,7 +17,9 @@ snapshot, diagnostics, err := bubblehelp.Snapshot(
 
 Import `github.com/NimbleMarkets/go-booba/actions/bubblehelp`. Handle `err` before publishing, and inspect diagnostics for unsupported key strings. Disabled and unbound bindings are omitted by default. Set `IncludeDisabled` to retain disabled controls.
 
-Each key in a help entry is independently selectable. An entry with up/down must expose both gestures. If keys are aliases, `Options.Customize` can set `Action.Preferred` to the desired key index, and optionally assign an explicit ID or label. Generated IDs are based on the complete original binding; exact copies share an ID across both help presentations. Changing a label or keys changes that generated ID. The adapter currently merges identical entries; represent intentionally distinct actions with distinct binding metadata.
+Each key in a help entry is independently selectable. An entry with up/down must expose both gestures. If keys are aliases, `Options.Customize` can set `Action.Preferred` to the desired key index, and optionally assign an explicit ID or label. Generated IDs are eight hexadecimal characters based on the complete original binding; exact copies share an ID across both help presentations. Changing a label or keys changes that generated ID. The adapter currently merges identical entries; represent intentionally distinct actions with distinct binding metadata.
+
+`Snapshot` validates the 2048-byte decoded OSC 7501 message budget, including JSON, marker, and readable summary. Set `Options.Summary` to the summary you will publish; it defaults to context. `NewModel` validates its initial description at construction, using the actual status summary. Later publication errors still clear stale controls and call `OnError` when installed. ID collisions return an error; assign explicit IDs to resolve them.
 
 `actions.NewPublisher(instance, sendJSON)` manages revisions and suppresses unchanged snapshots. Pass each updated snapshot to `Publish`; supplied version, instance, and revision are replaced by the publisher. Failed sends can be retried without losing a revision. `Refresh` resends the latest snapshot when the host requests resynchronization. Its callback must not reenter the publisher. Send errors mean delivery was not confirmed; receivers deduplicate retries by instance and revision.
 
@@ -43,7 +45,18 @@ const removeControls = installActionBar(booba.actions, {
 booba.actions.publish(receivedSnapshot);
 ```
 
-`hostEncoder` is supplied by the embedding application. It must encode a complete gesture according to current terminal modes, including releases where required. Returning `null` declines activation. Do not implement it by concatenating help text or dispatching a synthetic browser event. The API deliberately has no default encoder that could silently send an incorrect key.
+For applications using legacy VT/xterm keyboard input, Booba supplies a shared encoder:
+
+```ts
+booba.setActionKeyEncoder({
+    canEncode: gesture => booba.encodeKey(gesture) !== null,
+    encode: gesture => booba.encodeKey(gesture),
+});
+```
+
+`booba.encodeKey` reads current cursor, backarrow, and newline modes on every call. It supports navigation, F1–F12, printable characters, and common modifiers; unsupported combinations return `null`. Shift changes ASCII letter case; shifted punctuation must be supplied as its resulting character. The standalone `encodeKey(gesture, modes)` export accepts explicit `KeyEncodingModes`. Set `extendedKeyboard: true` to decline encoding when an extended protocol is active. These are **legacy encoders**: the pinned ghostty-web API cannot report Kitty keyboard flags or modifyOtherKeys state. Hosts using those protocols must provide a protocol-aware encoder. The legacy encoder is opt-in and is not installed automatically.
+
+`hostEncoder` can instead be supplied by the embedding application. It must encode a complete gesture according to current terminal modes, including releases where required. Returning `null` declines activation. Do not implement it by concatenating help text or dispatching a synthetic browser event. The API deliberately has no default encoder that could silently send an incorrect key.
 
 `installActionBar`, `ActionController`, `decodeActionSnapshot`, and their types are exported from `@nimblemarkets/booba`. For custom controls, read `controller.snapshot`, subscribe to changes with `subscribe`, and use `capture(actionID, keyIndex)` to bind activation. Captured activations become invalid after replacement or clearing. The snapshot getter returns a defensive copy. Call the returned unsubscribe or action-bar disposer during teardown.
 
@@ -109,7 +122,7 @@ Open http://127.0.0.1:8081. Each tab gets a live Bubble Tea session. Tap More to
 
 To test a ghostty-web build before it is embedded, pass `-ghostty-assets <dir>` with a directory containing `ghostty-web.js`, its imported JavaScript chunks, and the matching `ghostty-vt.wasm`. A source checkout may put JavaScript in `dist/` and WASM at the repository root; assemble them in a temporary directory. The page reports an error if the loaded runtime lacks OSC 7501 support.
 
-The demo uses Booba’s normal Sip WebSocket connection and PTY-backed Bubble Tea sessions. Action reports are ordinary terminal output; button presses are terminal input. Its key encoder supports this application's bindings only, including application cursor mode. It is not a general-purpose keyboard encoder. The demo binds to loopback only.
+The demo uses Booba’s normal Sip WebSocket connection and PTY-backed Bubble Tea sessions. Action reports are ordinary terminal output; button presses are terminal input. It opts into Booba's shared legacy key encoder, including application cursor mode; it does not enable extended keyboard protocols. The demo binds to loopback only.
 
 ## Try the reference help map
 

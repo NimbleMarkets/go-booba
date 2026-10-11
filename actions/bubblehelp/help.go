@@ -15,6 +15,9 @@ import (
 // Options allows application identity and presentation to supplement help data.
 type Options struct {
 	IncludeDisabled bool
+	// Summary is the OSC 7501 readable summary used for size validation.
+	// Empty uses context, matching Model.
+	Summary string
 	// Customize is called once per distinct binding. It may set ID, labels and
 	// Preferred (only for aliases); errors abort the snapshot. It must be deterministic.
 	Customize func(key.Binding, *actions.Action) error
@@ -28,6 +31,7 @@ type Diagnostic struct {
 
 // Snapshot preserves help ordering and groups. Unsupported keys are diagnosed
 // and omitted. Distinct gestures remain separate unless Customize sets Preferred.
+// Returns an error if the snapshot and summary exceed the OSC 7501 message limit.
 func Snapshot(km help.KeyMap, instance, context string, revision uint64, opts Options) (actions.Snapshot, []Diagnostic, error) {
 	s := actions.Snapshot{Version: actions.Version, Instance: instance, Context: context, Revision: revision, Actions: []actions.Action{}, Short: []string{}, Full: [][]string{}}
 	diagnostics := []Diagnostic{}
@@ -47,7 +51,7 @@ func Snapshot(km help.KeyMap, instance, context string, revision uint64, opts Op
 			return id, nil
 		}
 		hash := sha256.Sum256(canonical)
-		a := actions.Action{ID: fmt.Sprintf("a-%x", hash[:16]), Label: ansi.Strip(b.Help().Desc), Hint: ansi.Strip(b.Help().Key), Enabled: b.Enabled(), Keys: []actions.Gesture{}}
+		a := actions.Action{ID: fmt.Sprintf("%x", hash[:4]), Label: ansi.Strip(b.Help().Desc), Hint: ansi.Strip(b.Help().Key), Enabled: b.Enabled(), Keys: []actions.Gesture{}}
 		seen := map[string]bool{}
 		for _, k := range b.Keys() {
 			g, err := actions.ParseKey(k)
@@ -113,5 +117,10 @@ func Snapshot(km help.KeyMap, instance, context string, revision uint64, opts Op
 			s.Full = append(s.Full, ids)
 		}
 	}
-	return s, diagnostics, s.Validate()
+	summary := opts.Summary
+	if summary == "" {
+		summary = context
+	}
+	_, err = actions.EncodeProgramStatus(s, actions.ProgramStatus{Summary: summary})
+	return s, diagnostics, err
 }

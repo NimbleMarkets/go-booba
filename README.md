@@ -159,6 +159,8 @@ binary from the [release archives](https://github.com/NimbleMarkets/go-booba/rel
 The binary embeds its browser assets but still needs the Go toolchain used to
 build `app.wasm` to supply the matching `wasm_exec.js`.
 
+For a custom host page, use `go tool booba-assets --no-index web/` to skip the starter page entirely (including the existing-page notice). `--no-index` takes precedence over `--force`.
+
 Serve the resulting `web/` directory with any static file server. `booba-assets` leaves an existing `index.html` untouched unless you pass `--force`, so re-running it after a go-booba upgrade safely refreshes the asset files while preserving your host page.
 
 For finer control, the [`wasm`](./wasm) subpackage exposes the browser bridge directly, and native code can construct a `tea.Program` the usual way.

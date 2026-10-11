@@ -43,18 +43,11 @@ const booba = new BoobaTerminal('terminal', { fontSize: 16, allowOSC7501Actions:
 
 try {
  await booba.init();
- // This application uses only these gestures and never requests release/all-key
- // reporting. This bounded demo encoder is not a general terminal encoder.
- const encode = gesture => {
-  const mods = gesture.modifiers.join('+');
-  if (mods === 'ctrl' && gesture.key === 'c') return '\x03';
-  if (mods) return null;
-  const fixed = { enter:'\r', escape:'\x1b', '?':'?', h:'h' };
-  if (Object.hasOwn(fixed, gesture.key)) return fixed[gesture.key];
-  if (gesture.key === 'up' || gesture.key === 'down') return '\x1b' + (booba.getMode(1) ? 'O' : '[') + (gesture.key === 'up' ? 'A' : 'B');
-  return null;
- };
- booba.setActionKeyEncoder({canEncode: g => encode(g) !== null, encode});
+ // This application uses legacy keyboard input (no Kitty/modifyOtherKeys).
+ booba.setActionKeyEncoder({
+  canEncode: gesture => booba.encodeKey(gesture) !== null,
+  encode: gesture => booba.encodeKey(gesture),
+ });
  installActionBar(booba.actions, {parent:document.getElementById('controls'),openKeyboard:()=>booba.focus(),onLayout:()=>booba.fitAddon?.fit()});
  booba.actions.subscribe(() => {
   const snapshot = booba.actions.snapshot;

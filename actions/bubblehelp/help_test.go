@@ -2,7 +2,9 @@ package bubblehelp
 
 import (
 	"charm.land/bubbles/v2/key"
+	"encoding/json"
 	"github.com/NimbleMarkets/go-booba/actions"
+	"strings"
 	"testing"
 )
 
@@ -45,5 +47,61 @@ func TestOverridesAndDisabled(t *testing.T) {
 	a := s.Actions[0]
 	if a.Enabled || a.Label != "Move up" || a.ID != "up" || a.Preferred == nil {
 		t.Fatalf("%+v", a)
+	}
+}
+
+func TestCompactIDsAndStatusLimit(t *testing.T) {
+	bindings := []key.Binding{}
+	for _, k := range "abcdefghijk" {
+		bindings = append(bindings, key.NewBinding(key.WithKeys(string(k)), key.WithHelp(string(k), "Action "+string(k))))
+	}
+	km := keymap{bindings, [][]key.Binding{bindings}}
+	s, _, err := Snapshot(km, "app", "list", 1, Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, a := range s.Actions {
+		if len(a.ID) != 8 {
+			t.Fatalf("expected eight-character ID, got %q", a.ID)
+		}
+	}
+	if _, err := actions.EncodeProgramStatus(s, actions.ProgramStatus{Summary: "list"}); err != nil {
+		t.Fatal(err)
+	}
+	// Each label is valid on its own, but the combined status is too large.
+	_, _, err = Snapshot(km, "app", "list", 1, Options{Customize: func(_ key.Binding, a *actions.Action) error {
+		a.Label = strings.Repeat("x", 200)
+		return nil
+	}})
+	if err == nil || !strings.Contains(err.Error(), "2048") {
+		t.Fatalf("expected OSC limit error, got %v", err)
+	}
+}
+
+func TestStatusSummaryByteBoundary(t *testing.T) {
+	binding := key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "Action"))
+	km := keymap{short: []key.Binding{binding}}
+	// Repeated references and JSON escaping must count toward the decoded limit.
+	for n := 1; n < 20; n++ {
+		km.short = append(km.short, key.NewBinding(key.WithKeys("b"), key.WithHelp("b", strings.Repeat("界", n))))
+	}
+	s, _, _ := Snapshot(km, "app", "list", 1, Options{})
+	data, err := json.Marshal(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	remaining := actions.MaxStatusMessageBytes - len(actions.MessageMarker) - len(data)
+	// Use a smaller map if the fixture already exceeds the wire limit.
+	for remaining < 1 || remaining > 255 {
+		km.short = km.short[:len(km.short)-1]
+		s, _, err = Snapshot(km, "app", "list", 1, Options{})
+		data, _ = json.Marshal(s)
+		remaining = actions.MaxStatusMessageBytes - len(actions.MessageMarker) - len(data)
+	}
+	if _, _, err := Snapshot(km, "app", "list", 1, Options{Summary: strings.Repeat("x", remaining)}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := Snapshot(km, "app", "list", 1, Options{Summary: strings.Repeat("x", remaining+1)}); err == nil {
+		t.Fatal("accepted oversized summary plus snapshot")
 	}
 }

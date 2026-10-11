@@ -15,7 +15,7 @@
 //
 // Usage:
 //
-//	booba-assets [--force] <output-dir>
+//	booba-assets [--force] [--no-index] <output-dir>
 package main
 
 import (
@@ -38,9 +38,10 @@ import (
 var templateFS embed.FS
 
 func main() {
+	noIndex := pflag.Bool("no-index", false, "skip the starter index.html (even with --force)")
 	force := pflag.BoolP("force", "f", false, "overwrite an existing index.html")
 	pflag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [--force] <output-dir>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [--force] [--no-index] <output-dir>\n\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, "Populates <output-dir> with wasm_exec.js, booba/, ghostty-web/,")
 		fmt.Fprintln(os.Stderr, "and a starter index.html for hosting a BubbleTea WASM program.")
 		pflag.PrintDefaults()
@@ -51,13 +52,13 @@ func main() {
 		pflag.Usage()
 		os.Exit(2)
 	}
-	if err := run(pflag.Arg(0), *force); err != nil {
+	if err := run(pflag.Arg(0), *force, *noIndex); err != nil {
 		fmt.Fprintf(os.Stderr, "booba-assets: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(outDir string, force bool) error {
+func run(outDir string, force, noIndex bool) error {
 	if err := os.MkdirAll(outDir, 0o755); err != nil {
 		return fmt.Errorf("create output dir: %w", err)
 	}
@@ -93,6 +94,10 @@ func run(outDir string, force bool) error {
 		return fmt.Errorf("ghostty-web.js contains unresolved Vite references: %w", err)
 	}
 	fmt.Printf("  ghostty-web/ (%d files) → %s\n", n, ghDst)
+
+	if noIndex {
+		return nil
+	}
 
 	// index.html (only if missing or --force)
 	htmlDst := filepath.Join(outDir, "index.html")

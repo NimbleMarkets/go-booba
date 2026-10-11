@@ -66,6 +66,15 @@ func NewModel(inner tea.Model, describe Describe, opts ModelOptions) (*Model, er
 		return nil, err
 	}
 	m.publisher = publisher
+	// Validate the initial description before any terminal output is emitted.
+	description := m.describe(m.Inner)
+	snapshot, err := m.snapshot(description, 1)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := actions.EncodeProgramStatus(snapshot, m.status); err != nil {
+		return nil, err
+	}
 	return m, nil
 }
 func (m *Model) Init() tea.Cmd  { return tea.Batch(m.Inner.Init(), tea.Raw(actions.QueryProgramStatus)) }
@@ -104,16 +113,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 func (m *Model) publish(force bool) tea.Cmd {
 	description := m.describe(m.Inner)
-	if description.Keys == nil {
-		return m.fail(fmt.Errorf("action help map is nil"))
-	}
-	snapshot, _, err := Snapshot(description.Keys, m.options.Instance, description.Context, 0, m.options.Adapter)
+	snapshot, err := m.snapshot(description, 0)
 	if err != nil {
 		return m.fail(err)
-	}
-	m.status = description.Status
-	if m.status.Summary == "" {
-		m.status.Summary = description.Context
 	}
 	m.sequence = ""
 	changed, err := m.publisher.Publish(snapshot)
@@ -130,6 +132,20 @@ func (m *Model) publish(force bool) tea.Cmd {
 	}
 	return tea.Raw(m.sequence)
 }
+func (m *Model) snapshot(description Description, revision uint64) (actions.Snapshot, error) {
+	if description.Keys == nil {
+		return actions.Snapshot{}, fmt.Errorf("action help map is nil")
+	}
+	m.status = description.Status
+	if m.status.Summary == "" {
+		m.status.Summary = description.Context
+	}
+	opts := m.options.Adapter
+	opts.Summary = m.status.Summary
+	snapshot, _, err := Snapshot(description.Keys, m.options.Instance, description.Context, revision, opts)
+	return snapshot, err
+}
+
 func (m *Model) fail(err error) tea.Cmd {
 	m.retry = true
 	if m.options.OnError != nil {
