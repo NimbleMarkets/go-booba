@@ -255,10 +255,14 @@ tasks:
     preconditions:
       - sh: test -f web/index.html
         msg: "web/index.html is missing; run `task site` first"
+      # serve 14 parses --no-port-switching but still moves to a random port, so
+      # check the port here to fail loudly instead of serving somewhere unexpected.
+      - sh: '! lsof -nP -iTCP:3000 -sTCP:LISTEN -t >/dev/null'
+        msg: "port 3000 is already in use; stop that server first (lsof -nP -iTCP:3000 -sTCP:LISTEN)"
     cmds:
       - rm -rf bin/site && mkdir -p bin/site/go-booba
       - cp -R web/. bin/site/go-booba/
-      - npx -y serve -l 3000 bin/site
+      - npx -y serve -l 3000 --no-port-switching bin/site
 
   clean-cmds:
     desc: 'Cleans all commands'

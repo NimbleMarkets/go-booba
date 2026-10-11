@@ -10,6 +10,8 @@
   done and error persist until the user's next input.
 - Add `installStatusBar`, a host-styled bar over the store with the same class and
   cascade-layer contract as the action bar, and `STATUS_BAR_CSS` for CSP hosts.
+  Installing it again on the same parent replaces the earlier bar instead of
+  stacking a second one.
 - `booba-view-example` reports idle, working with a percentage, and done; the demo
   site shows the bar on every demo page.
 
@@ -19,7 +21,9 @@
   the Bubble Tea views sample and the Terminal Actions demo, compiled to
   WebAssembly. `task site` builds it locally and `task site-serve` serves it.
   Each demo page has a Restart button that runs the program again on a fresh Go
-  runtime after it exits.
+  runtime after it exits, and frames the program status bar as a panel with a
+  state dot. `task site-serve` fails when port 3000 is taken instead of moving
+  to another port.
 - Run `booba-view-example` through `booba.Run`, so its browser build registers the
   WASM bridge instead of failing to open a TTY.
 
