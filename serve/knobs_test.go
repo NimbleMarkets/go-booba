@@ -37,9 +37,14 @@ func TestProcessMessageAcceptsResizeUnderMaxWindowDims(t *testing.T) {
 type resizeTrackingSession struct {
 	Session
 	lastCols, lastRows int
+	resized            chan WindowSize
 }
 
 func (r *resizeTrackingSession) Resize(cols, rows int) {
+	if r.resized != nil {
+		r.resized <- WindowSize{Width: cols, Height: rows}
+		return
+	}
 	r.lastCols, r.lastRows = cols, rows
 }
 
@@ -82,7 +87,7 @@ type writeFunc func(p []byte) (int, error)
 func (f writeFunc) Write(p []byte) (int, error) { return f(p) }
 
 func TestResizeThrottleCoalesces(t *testing.T) {
-	sess := &resizeTrackingSession{Session: &resizeTestSession{}}
+	sess := &resizeTrackingSession{Session: &resizeTestSession{}, resized: make(chan WindowSize, 10)}
 	apply, stop := newResizeApplier(sess, 50*time.Millisecond)
 	defer stop()
 
@@ -91,10 +96,12 @@ func TestResizeThrottleCoalesces(t *testing.T) {
 		apply(WindowSize{Width: i * 10, Height: i * 5})
 	}
 
-	// Wait long enough for the throttle to fire.
-	time.Sleep(120 * time.Millisecond)
-
-	if sess.lastCols != 100 || sess.lastRows != 50 {
-		t.Errorf("after coalescing got %dx%d; want 100x50 (latest value)", sess.lastCols, sess.lastRows)
+	select {
+	case got := <-sess.resized:
+		if got.Width != 100 || got.Height != 50 {
+			t.Errorf("after coalescing got %+v; want 100x50", got)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("resize was not delivered")
 	}
 }

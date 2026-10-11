@@ -7,6 +7,7 @@ import (
 	"context"
 	"log"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/NimbleMarkets/go-booba/sip"
@@ -52,9 +53,9 @@ func TestProcessWTMessageLogsUnknownTypeWhenDebug(t *testing.T) {
 
 // captureLog redirects the stdlib log package to a buffer for the duration
 // of the test and restores it on cleanup.
-func captureLog(t *testing.T) *bytes.Buffer {
+func captureLog(t *testing.T) *lockedLogBuffer {
 	t.Helper()
-	var buf bytes.Buffer
+	var buf lockedLogBuffer
 	prev := log.Writer()
 	prevFlags := log.Flags()
 	log.SetOutput(&buf)
@@ -64,4 +65,26 @@ func captureLog(t *testing.T) *bytes.Buffer {
 		log.SetFlags(prevFlags)
 	})
 	return &buf
+}
+
+// HTTP handlers from an earlier test can still log while assertions inspect it.
+type lockedLogBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *lockedLogBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+func (b *lockedLogBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
+}
+func (b *lockedLogBuffer) Len() int {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Len()
 }
