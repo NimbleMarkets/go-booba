@@ -36,8 +36,10 @@ func TestProcessMessageSilentOnUnknownTypeWhenDebugDisabled(t *testing.T) {
 	sess := &writeTrackingSession{Session: &resizeTestSession{}}
 	processMessage(context.Background(), nil, sess, sip.OptionsMessage{}, unknownMsgType, []byte("x"), false, Config{}, func(WindowSize) {})
 
-	if buf.Len() != 0 {
-		t.Errorf("log output = %q; want empty when debug=false", buf.String())
+	// Earlier HTTP handlers can still emit shutdown logs through the global
+	// logger. Only the diagnostic from this dispatch must be absent.
+	if output := buf.String(); strings.Contains(output, "websocket unknown message type") {
+		t.Errorf("log output = %q; want no unknown-message diagnostic when debug=false", output)
 	}
 }
 
