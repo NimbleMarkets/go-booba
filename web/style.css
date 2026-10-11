@@ -147,9 +147,28 @@ h1, h2, h3 {
 .demo-program-row { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
 .demo-status { flex: 1; min-width: 0; }
 .demo-restart { flex: none; min-height: 32px; padding: 4px 12px; font-size: 14px; }
-.booba-status { font-size: 14px; color: var(--fg-muted); }
+/* A framed panel with a state dot, so an idle report reads as the program's status
+   rather than a stray caption. */
+.demo-status .booba-status-bar:not([hidden]) {
+  padding: 8px 12px;
+  background: #15131f;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.booba-status { font-size: 15px; color: var(--fg); }
+.booba-status:not(.booba-status--blocked)::before {
+  content: "";
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+}
+.booba-status.booba-status--working::before,
+.booba-status.booba-status--done::before { background: var(--sage); }
+.booba-status.booba-status--error::before { background: var(--cta); }
 .booba-status__app { font-family: var(--font-mono); color: var(--secondary); }
-.booba-status__title { font-family: var(--font-head); color: var(--fg); }
+.booba-status__title { font-family: var(--font-head); font-weight: 700; color: var(--fg); }
 .booba-status--working .booba-status__message,
 .booba-status--done .booba-status__message { color: var(--sage); }
 .booba-status--blocked .booba-status__message,
