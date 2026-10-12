@@ -1,5 +1,11 @@
 # `booba` CHANGELOG
 
+## Unreleased
+
+- Refresh ghostty-web to fix retransmitted-image caches, honor synchronized
+  output, suppress missing-image placeholder boxes, and reduce Canvas2D redraw
+  costs and repeated clears at fractional display scaling.
+
 ## [0.9.1] - 2026-10-11
 
 ### Terminal Actions (experimental)

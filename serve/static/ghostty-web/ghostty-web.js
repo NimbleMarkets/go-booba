@@ -1,17 +1,17 @@
-var ni = Object.defineProperty;
-var Si = (A, I, g) => I in A ? ni(A, I, { enumerable: !0, configurable: !0, writable: !0, value: g }) : A[I] = g;
-var j = (A, I, g) => (Si(A, typeof I != "symbol" ? I + "" : I, g), g);
-function $B(A, I = "utf8") {
+var Si = Object.defineProperty;
+var Hi = (A, I, g) => I in A ? Si(A, I, { enumerable: !0, configurable: !0, writable: !0, value: g }) : A[I] = g;
+var j = (A, I, g) => (Hi(A, typeof I != "symbol" ? I + "" : I, g), g);
+function AC(A, I = "utf8") {
   return new TextDecoder(I).decode(A);
 }
-const Hi = new TextEncoder();
-function Yi(A) {
-  return Hi.encode(A);
+const Yi = new TextEncoder();
+function li(A) {
+  return Yi.encode(A);
 }
-const li = 1024 * 8, fi = (() => {
+const fi = 1024 * 8, Ki = (() => {
   const A = new Uint8Array(4), I = new Uint32Array(A.buffer);
   return !((I[0] = 1) & A[0]);
-})(), RQ = {
+})(), rQ = {
   int8: globalThis.Int8Array,
   uint8: globalThis.Uint8Array,
   int16: globalThis.Int16Array,
@@ -23,7 +23,7 @@ const li = 1024 * 8, fi = (() => {
   float32: globalThis.Float32Array,
   float64: globalThis.Float64Array
 };
-class DB {
+class wB {
   /**
    * Create a new IOBuffer.
    * @param data - The data to construct the IOBuffer with.
@@ -34,7 +34,7 @@ class DB {
    * @param options - An object for the options.
    * @returns A new IOBuffer instance.
    */
-  constructor(I = li, g = {}) {
+  constructor(I = fi, g = {}) {
     /**
      * Reference to the internal ArrayBuffer object.
      */
@@ -64,7 +64,7 @@ class DB {
     typeof I == "number" ? I = new ArrayBuffer(I) : (Q = !0, this.lastWrittenByte = I.byteLength);
     const B = g.offset ? g.offset >>> 0 : 0, C = I.byteLength - B;
     let E = B;
-    (ArrayBuffer.isView(I) || I instanceof DB) && (I.byteLength !== I.buffer.byteLength && (E = I.byteOffset + B), I = I.buffer), Q ? this.lastWrittenByte = C : this.lastWrittenByte = 0, this.buffer = I, this.length = C, this.byteLength = C, this.byteOffset = E, this.offset = 0, this.littleEndian = !0, this._data = new DataView(this.buffer, E, C), this._mark = 0, this._marks = [];
+    (ArrayBuffer.isView(I) || I instanceof wB) && (I.byteLength !== I.buffer.byteLength && (E = I.byteOffset + B), I = I.buffer), Q ? this.lastWrittenByte = C : this.lastWrittenByte = 0, this.buffer = I, this.length = C, this.byteLength = C, this.byteOffset = E, this.offset = 0, this.littleEndian = !0, this._data = new DataView(this.buffer, E, C), this._mark = 0, this._marks = [];
   }
   /**
    * Checks if the memory allocated to the buffer is sufficient to store more
@@ -231,14 +231,14 @@ class DB {
    * @returns The read array.
    */
   readArray(I, g) {
-    const Q = RQ[g].BYTES_PER_ELEMENT * I, B = this.byteOffset + this.offset, C = this.buffer.slice(B, B + Q);
-    if (this.littleEndian === fi && g !== "uint8" && g !== "int8") {
+    const Q = rQ[g].BYTES_PER_ELEMENT * I, B = this.byteOffset + this.offset, C = this.buffer.slice(B, B + Q);
+    if (this.littleEndian === Ki && g !== "uint8" && g !== "int8") {
       const i = new Uint8Array(this.buffer.slice(B, B + Q));
       i.reverse();
-      const o = new RQ[g](i.buffer);
+      const o = new rQ[g](i.buffer);
       return this.offset += Q, o.reverse(), o;
     }
-    const E = new RQ[g](C);
+    const E = new rQ[g](C);
     return this.offset += Q, E;
   }
   /**
@@ -330,7 +330,7 @@ class DB {
    * @returns The decoded string.
    */
   readUtf8(I = 1) {
-    return $B(this.readBytes(I));
+    return AC(this.readBytes(I));
   }
   /**
    * Read the next `n` bytes, return a string decoded with `encoding` and move pointer
@@ -341,7 +341,7 @@ class DB {
    * @returns The decoded string.
    */
   decodeText(I = 1, g = "utf8") {
-    return $B(this.readBytes(I), g);
+    return AC(this.readBytes(I), g);
   }
   /**
    * Write 0xff if the passed value is truthy, 0x00 otherwise and move pointer
@@ -488,7 +488,7 @@ class DB {
    * @returns This.
    */
   writeUtf8(I) {
-    return this.writeBytes(Yi(I));
+    return this.writeBytes(li(I));
   }
   /**
    * Export a Uint8Array view of the internal buffer.
@@ -515,44 +515,44 @@ class DB {
   }
 }
 /*! pako 2.1.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */
-const Ki = 4, AC = 0, IC = 1, di = 2;
+const di = 4, IC = 0, gC = 1, Oi = 2;
 function SI(A) {
   let I = A.length;
   for (; --I >= 0; )
     A[I] = 0;
 }
-const Oi = 0, oE = 1, qi = 2, Ti = 3, xi = 258, wB = 29, Dg = 256, Ag = Dg + 1 + wB, JI = 30, oB = 19, sE = 2 * Ag + 1, EI = 15, rQ = 16, pi = 7, sB = 256, tE = 16, eE = 17, hE = 18, VQ = (
+const qi = 0, sE = 1, Ti = 2, xi = 3, pi = 258, oB = 29, Dg = 256, Ag = Dg + 1 + oB, JI = 30, sB = 19, tE = 2 * Ag + 1, EI = 15, RQ = 16, ui = 7, tB = 256, eE = 16, hE = 17, aE = 18, ZQ = (
   /* extra bits for each length code */
   new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0])
 ), Og = (
   /* extra bits for each distance code */
   new Uint8Array([0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13])
-), ui = (
+), bi = (
   /* extra bits for each bit length code */
   new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7])
-), aE = new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]), bi = 512, OA = new Array((Ag + 2) * 2);
+), NE = new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]), mi = 512, OA = new Array((Ag + 2) * 2);
 SI(OA);
 const zI = new Array(JI * 2);
 SI(zI);
-const Ig = new Array(bi);
+const Ig = new Array(mi);
 SI(Ig);
-const gg = new Array(xi - Ti + 1);
+const gg = new Array(pi - xi + 1);
 SI(gg);
-const tB = new Array(wB);
-SI(tB);
+const eB = new Array(oB);
+SI(eB);
 const ug = new Array(JI);
 SI(ug);
 function yQ(A, I, g, Q, B) {
   this.static_tree = A, this.extra_bits = I, this.extra_base = g, this.elems = Q, this.max_length = B, this.has_stree = A && A.length;
 }
-let NE, kE, ME;
+let kE, ME, GE;
 function nQ(A, I) {
   this.dyn_tree = A, this.max_code = 0, this.stat_desc = I;
 }
-const GE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
+const cE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
   A.pending_buf[A.pending++] = I & 255, A.pending_buf[A.pending++] = I >>> 8 & 255;
 }, tA = (A, I, g) => {
-  A.bi_valid > rQ - g ? (A.bi_buf |= I << A.bi_valid & 65535, Qg(A, A.bi_buf), A.bi_buf = I >> rQ - A.bi_valid, A.bi_valid += g - rQ) : (A.bi_buf |= I << A.bi_valid & 65535, A.bi_valid += g);
+  A.bi_valid > RQ - g ? (A.bi_buf |= I << A.bi_valid & 65535, Qg(A, A.bi_buf), A.bi_buf = I >> RQ - A.bi_valid, A.bi_valid += g - RQ) : (A.bi_buf |= I << A.bi_valid & 65535, A.bi_valid += g);
 }, yA = (A, I, g) => {
   tA(
     A,
@@ -560,45 +560,45 @@ const GE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
     g[I * 2 + 1]
     /*.Len*/
   );
-}, cE = (A, I) => {
+}, FE = (A, I) => {
   let g = 0;
   do
     g |= A & 1, A >>>= 1, g <<= 1;
   while (--I > 0);
   return g >>> 1;
-}, mi = (A) => {
+}, Pi = (A) => {
   A.bi_valid === 16 ? (Qg(A, A.bi_buf), A.bi_buf = 0, A.bi_valid = 0) : A.bi_valid >= 8 && (A.pending_buf[A.pending++] = A.bi_buf & 255, A.bi_buf >>= 8, A.bi_valid -= 8);
-}, Pi = (A, I) => {
+}, ji = (A, I) => {
   const g = I.dyn_tree, Q = I.max_code, B = I.stat_desc.static_tree, C = I.stat_desc.has_stree, E = I.stat_desc.extra_bits, i = I.stat_desc.extra_base, o = I.stat_desc.max_length;
-  let D, w, t, s, e, h, a = 0;
-  for (s = 0; s <= EI; s++)
-    A.bl_count[s] = 0;
-  for (g[A.heap[A.heap_max] * 2 + 1] = 0, D = A.heap_max + 1; D < sE; D++)
-    w = A.heap[D], s = g[g[w * 2 + 1] * 2 + 1] + 1, s > o && (s = o, a++), g[w * 2 + 1] = s, !(w > Q) && (A.bl_count[s]++, e = 0, w >= i && (e = E[w - i]), h = g[w * 2], A.opt_len += h * (s + e), C && (A.static_len += h * (B[w * 2 + 1] + e)));
-  if (a !== 0) {
+  let D, w, s, t, e, N, h = 0;
+  for (t = 0; t <= EI; t++)
+    A.bl_count[t] = 0;
+  for (g[A.heap[A.heap_max] * 2 + 1] = 0, D = A.heap_max + 1; D < tE; D++)
+    w = A.heap[D], t = g[g[w * 2 + 1] * 2 + 1] + 1, t > o && (t = o, h++), g[w * 2 + 1] = t, !(w > Q) && (A.bl_count[t]++, e = 0, w >= i && (e = E[w - i]), N = g[w * 2], A.opt_len += N * (t + e), C && (A.static_len += N * (B[w * 2 + 1] + e)));
+  if (h !== 0) {
     do {
-      for (s = o - 1; A.bl_count[s] === 0; )
-        s--;
-      A.bl_count[s]--, A.bl_count[s + 1] += 2, A.bl_count[o]--, a -= 2;
-    } while (a > 0);
-    for (s = o; s !== 0; s--)
-      for (w = A.bl_count[s]; w !== 0; )
-        t = A.heap[--D], !(t > Q) && (g[t * 2 + 1] !== s && (A.opt_len += (s - g[t * 2 + 1]) * g[t * 2], g[t * 2 + 1] = s), w--);
+      for (t = o - 1; A.bl_count[t] === 0; )
+        t--;
+      A.bl_count[t]--, A.bl_count[t + 1] += 2, A.bl_count[o]--, h -= 2;
+    } while (h > 0);
+    for (t = o; t !== 0; t--)
+      for (w = A.bl_count[t]; w !== 0; )
+        s = A.heap[--D], !(s > Q) && (g[s * 2 + 1] !== t && (A.opt_len += (t - g[s * 2 + 1]) * g[s * 2], g[s * 2 + 1] = t), w--);
   }
-}, FE = (A, I, g) => {
+}, UE = (A, I, g) => {
   const Q = new Array(EI + 1);
   let B = 0, C, E;
   for (C = 1; C <= EI; C++)
     B = B + g[C - 1] << 1, Q[C] = B;
   for (E = 0; E <= I; E++) {
     let i = A[E * 2 + 1];
-    i !== 0 && (A[E * 2] = cE(Q[i]++, i));
+    i !== 0 && (A[E * 2] = FE(Q[i]++, i));
   }
-}, ji = () => {
+}, Vi = () => {
   let A, I, g, Q, B;
   const C = new Array(EI + 1);
-  for (g = 0, Q = 0; Q < wB - 1; Q++)
-    for (tB[Q] = g, A = 0; A < 1 << VQ[Q]; A++)
+  for (g = 0, Q = 0; Q < oB - 1; Q++)
+    for (eB[Q] = g, A = 0; A < 1 << ZQ[Q]; A++)
       gg[g++] = Q;
   for (gg[g - 1] = Q, B = 0, Q = 0; Q < 16; Q++)
     for (ug[Q] = B, A = 0; A < 1 << Og[Q]; A++)
@@ -616,40 +616,40 @@ const GE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
     OA[A * 2 + 1] = 7, A++, C[7]++;
   for (; A <= 287; )
     OA[A * 2 + 1] = 8, A++, C[8]++;
-  for (FE(OA, Ag + 1, C), A = 0; A < JI; A++)
-    zI[A * 2 + 1] = 5, zI[A * 2] = cE(A, 5);
-  NE = new yQ(OA, VQ, Dg + 1, Ag, EI), kE = new yQ(zI, Og, 0, JI, EI), ME = new yQ(new Array(0), ui, 0, oB, pi);
-}, UE = (A) => {
+  for (UE(OA, Ag + 1, C), A = 0; A < JI; A++)
+    zI[A * 2 + 1] = 5, zI[A * 2] = FE(A, 5);
+  kE = new yQ(OA, ZQ, Dg + 1, Ag, EI), ME = new yQ(zI, Og, 0, JI, EI), GE = new yQ(new Array(0), bi, 0, sB, ui);
+}, JE = (A) => {
   let I;
   for (I = 0; I < Ag; I++)
     A.dyn_ltree[I * 2] = 0;
   for (I = 0; I < JI; I++)
     A.dyn_dtree[I * 2] = 0;
-  for (I = 0; I < oB; I++)
+  for (I = 0; I < sB; I++)
     A.bl_tree[I * 2] = 0;
-  A.dyn_ltree[sB * 2] = 1, A.opt_len = A.static_len = 0, A.sym_next = A.matches = 0;
-}, JE = (A) => {
+  A.dyn_ltree[tB * 2] = 1, A.opt_len = A.static_len = 0, A.sym_next = A.matches = 0;
+}, LE = (A) => {
   A.bi_valid > 8 ? Qg(A, A.bi_buf) : A.bi_valid > 0 && (A.pending_buf[A.pending++] = A.bi_buf), A.bi_buf = 0, A.bi_valid = 0;
-}, gC = (A, I, g, Q) => {
+}, QC = (A, I, g, Q) => {
   const B = I * 2, C = g * 2;
   return A[B] < A[C] || A[B] === A[C] && Q[I] <= Q[g];
 }, SQ = (A, I, g) => {
   const Q = A.heap[g];
   let B = g << 1;
-  for (; B <= A.heap_len && (B < A.heap_len && gC(I, A.heap[B + 1], A.heap[B], A.depth) && B++, !gC(I, Q, A.heap[B], A.depth)); )
+  for (; B <= A.heap_len && (B < A.heap_len && QC(I, A.heap[B + 1], A.heap[B], A.depth) && B++, !QC(I, Q, A.heap[B], A.depth)); )
     A.heap[g] = A.heap[B], g = B, B <<= 1;
   A.heap[g] = Q;
-}, QC = (A, I, g) => {
+}, BC = (A, I, g) => {
   let Q, B, C = 0, E, i;
   if (A.sym_next !== 0)
     do
-      Q = A.pending_buf[A.sym_buf + C++] & 255, Q += (A.pending_buf[A.sym_buf + C++] & 255) << 8, B = A.pending_buf[A.sym_buf + C++], Q === 0 ? yA(A, B, I) : (E = gg[B], yA(A, E + Dg + 1, I), i = VQ[E], i !== 0 && (B -= tB[E], tA(A, B, i)), Q--, E = GE(Q), yA(A, E, g), i = Og[E], i !== 0 && (Q -= ug[E], tA(A, Q, i)));
+      Q = A.pending_buf[A.sym_buf + C++] & 255, Q += (A.pending_buf[A.sym_buf + C++] & 255) << 8, B = A.pending_buf[A.sym_buf + C++], Q === 0 ? yA(A, B, I) : (E = gg[B], yA(A, E + Dg + 1, I), i = ZQ[E], i !== 0 && (B -= eB[E], tA(A, B, i)), Q--, E = cE(Q), yA(A, E, g), i = Og[E], i !== 0 && (Q -= ug[E], tA(A, Q, i)));
     while (C < A.sym_next);
-  yA(A, sB, I);
-}, ZQ = (A, I) => {
+  yA(A, tB, I);
+}, XQ = (A, I) => {
   const g = I.dyn_tree, Q = I.stat_desc.static_tree, B = I.stat_desc.has_stree, C = I.stat_desc.elems;
   let E, i, o = -1, D;
-  for (A.heap_len = 0, A.heap_max = sE, E = 0; E < C; E++)
+  for (A.heap_len = 0, A.heap_max = tE, E = 0; E < C; E++)
     g[E * 2] !== 0 ? (A.heap[++A.heap_len] = o = E, A.depth[E] = 0) : g[E * 2 + 1] = 0;
   for (; A.heap_len < 2; )
     D = A.heap[++A.heap_len] = o < 2 ? ++o : 0, g[D * 2] = 1, A.depth[D] = 0, A.opt_len--, B && (A.static_len -= Q[D * 2 + 1]);
@@ -684,12 +684,12 @@ const GE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
   A.heap[--A.heap_max] = A.heap[
     1
     /*SMALLEST*/
-  ], Pi(A, I), FE(g, o, A.bl_count);
-}, BC = (A, I, g) => {
+  ], ji(A, I), UE(g, o, A.bl_count);
+}, CC = (A, I, g) => {
   let Q, B = -1, C, E = I[0 * 2 + 1], i = 0, o = 7, D = 4;
   for (E === 0 && (o = 138, D = 3), I[(g + 1) * 2 + 1] = 65535, Q = 0; Q <= g; Q++)
-    C = E, E = I[(Q + 1) * 2 + 1], !(++i < o && C === E) && (i < D ? A.bl_tree[C * 2] += i : C !== 0 ? (C !== B && A.bl_tree[C * 2]++, A.bl_tree[tE * 2]++) : i <= 10 ? A.bl_tree[eE * 2]++ : A.bl_tree[hE * 2]++, i = 0, B = C, E === 0 ? (o = 138, D = 3) : C === E ? (o = 6, D = 3) : (o = 7, D = 4));
-}, CC = (A, I, g) => {
+    C = E, E = I[(Q + 1) * 2 + 1], !(++i < o && C === E) && (i < D ? A.bl_tree[C * 2] += i : C !== 0 ? (C !== B && A.bl_tree[C * 2]++, A.bl_tree[eE * 2]++) : i <= 10 ? A.bl_tree[hE * 2]++ : A.bl_tree[aE * 2]++, i = 0, B = C, E === 0 ? (o = 138, D = 3) : C === E ? (o = 6, D = 3) : (o = 7, D = 4));
+}, EC = (A, I, g) => {
   let Q, B = -1, C, E = I[0 * 2 + 1], i = 0, o = 7, D = 4;
   for (E === 0 && (o = 138, D = 3), Q = 0; Q <= g; Q++)
     if (C = E, E = I[(Q + 1) * 2 + 1], !(++i < o && C === E)) {
@@ -698,50 +698,50 @@ const GE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
           yA(A, C, A.bl_tree);
         while (--i !== 0);
       else
-        C !== 0 ? (C !== B && (yA(A, C, A.bl_tree), i--), yA(A, tE, A.bl_tree), tA(A, i - 3, 2)) : i <= 10 ? (yA(A, eE, A.bl_tree), tA(A, i - 3, 3)) : (yA(A, hE, A.bl_tree), tA(A, i - 11, 7));
+        C !== 0 ? (C !== B && (yA(A, C, A.bl_tree), i--), yA(A, eE, A.bl_tree), tA(A, i - 3, 2)) : i <= 10 ? (yA(A, hE, A.bl_tree), tA(A, i - 3, 3)) : (yA(A, aE, A.bl_tree), tA(A, i - 11, 7));
       i = 0, B = C, E === 0 ? (o = 138, D = 3) : C === E ? (o = 6, D = 3) : (o = 7, D = 4);
     }
-}, Vi = (A) => {
+}, Zi = (A) => {
   let I;
-  for (BC(A, A.dyn_ltree, A.l_desc.max_code), BC(A, A.dyn_dtree, A.d_desc.max_code), ZQ(A, A.bl_desc), I = oB - 1; I >= 3 && A.bl_tree[aE[I] * 2 + 1] === 0; I--)
+  for (CC(A, A.dyn_ltree, A.l_desc.max_code), CC(A, A.dyn_dtree, A.d_desc.max_code), XQ(A, A.bl_desc), I = sB - 1; I >= 3 && A.bl_tree[NE[I] * 2 + 1] === 0; I--)
     ;
   return A.opt_len += 3 * (I + 1) + 5 + 5 + 4, I;
-}, Zi = (A, I, g, Q) => {
+}, Xi = (A, I, g, Q) => {
   let B;
   for (tA(A, I - 257, 5), tA(A, g - 1, 5), tA(A, Q - 4, 4), B = 0; B < Q; B++)
-    tA(A, A.bl_tree[aE[B] * 2 + 1], 3);
-  CC(A, A.dyn_ltree, I - 1), CC(A, A.dyn_dtree, g - 1);
-}, Xi = (A) => {
+    tA(A, A.bl_tree[NE[B] * 2 + 1], 3);
+  EC(A, A.dyn_ltree, I - 1), EC(A, A.dyn_dtree, g - 1);
+}, vi = (A) => {
   let I = 4093624447, g;
   for (g = 0; g <= 31; g++, I >>>= 1)
     if (I & 1 && A.dyn_ltree[g * 2] !== 0)
-      return AC;
+      return IC;
   if (A.dyn_ltree[9 * 2] !== 0 || A.dyn_ltree[10 * 2] !== 0 || A.dyn_ltree[13 * 2] !== 0)
-    return IC;
+    return gC;
   for (g = 32; g < Dg; g++)
     if (A.dyn_ltree[g * 2] !== 0)
-      return IC;
-  return AC;
+      return gC;
+  return IC;
 };
-let EC = !1;
-const vi = (A) => {
-  EC || (ji(), EC = !0), A.l_desc = new nQ(A.dyn_ltree, NE), A.d_desc = new nQ(A.dyn_dtree, kE), A.bl_desc = new nQ(A.bl_tree, ME), A.bi_buf = 0, A.bi_valid = 0, UE(A);
-}, LE = (A, I, g, Q) => {
-  tA(A, (Oi << 1) + (Q ? 1 : 0), 3), JE(A), Qg(A, g), Qg(A, ~g), g && A.pending_buf.set(A.window.subarray(I, I + g), A.pending), A.pending += g;
-}, zi = (A) => {
-  tA(A, oE << 1, 3), yA(A, sB, OA), mi(A);
-}, Wi = (A, I, g, Q) => {
+let iC = !1;
+const zi = (A) => {
+  iC || (Vi(), iC = !0), A.l_desc = new nQ(A.dyn_ltree, kE), A.d_desc = new nQ(A.dyn_dtree, ME), A.bl_desc = new nQ(A.bl_tree, GE), A.bi_buf = 0, A.bi_valid = 0, JE(A);
+}, rE = (A, I, g, Q) => {
+  tA(A, (qi << 1) + (Q ? 1 : 0), 3), LE(A), Qg(A, g), Qg(A, ~g), g && A.pending_buf.set(A.window.subarray(I, I + g), A.pending), A.pending += g;
+}, Wi = (A) => {
+  tA(A, sE << 1, 3), yA(A, tB, OA), Pi(A);
+}, _i = (A, I, g, Q) => {
   let B, C, E = 0;
-  A.level > 0 ? (A.strm.data_type === di && (A.strm.data_type = Xi(A)), ZQ(A, A.l_desc), ZQ(A, A.d_desc), E = Vi(A), B = A.opt_len + 3 + 7 >>> 3, C = A.static_len + 3 + 7 >>> 3, C <= B && (B = C)) : B = C = g + 5, g + 4 <= B && I !== -1 ? LE(A, I, g, Q) : A.strategy === Ki || C === B ? (tA(A, (oE << 1) + (Q ? 1 : 0), 3), QC(A, OA, zI)) : (tA(A, (qi << 1) + (Q ? 1 : 0), 3), Zi(A, A.l_desc.max_code + 1, A.d_desc.max_code + 1, E + 1), QC(A, A.dyn_ltree, A.dyn_dtree)), UE(A), Q && JE(A);
-}, _i = (A, I, g) => (A.pending_buf[A.sym_buf + A.sym_next++] = I, A.pending_buf[A.sym_buf + A.sym_next++] = I >> 8, A.pending_buf[A.sym_buf + A.sym_next++] = g, I === 0 ? A.dyn_ltree[g * 2]++ : (A.matches++, I--, A.dyn_ltree[(gg[g] + Dg + 1) * 2]++, A.dyn_dtree[GE(I) * 2]++), A.sym_next === A.sym_end);
-var $i = vi, AD = LE, ID = Wi, gD = _i, QD = zi, BD = {
-  _tr_init: $i,
-  _tr_stored_block: AD,
-  _tr_flush_block: ID,
-  _tr_tally: gD,
-  _tr_align: QD
+  A.level > 0 ? (A.strm.data_type === Oi && (A.strm.data_type = vi(A)), XQ(A, A.l_desc), XQ(A, A.d_desc), E = Zi(A), B = A.opt_len + 3 + 7 >>> 3, C = A.static_len + 3 + 7 >>> 3, C <= B && (B = C)) : B = C = g + 5, g + 4 <= B && I !== -1 ? rE(A, I, g, Q) : A.strategy === di || C === B ? (tA(A, (sE << 1) + (Q ? 1 : 0), 3), BC(A, OA, zI)) : (tA(A, (Ti << 1) + (Q ? 1 : 0), 3), Xi(A, A.l_desc.max_code + 1, A.d_desc.max_code + 1, E + 1), BC(A, A.dyn_ltree, A.dyn_dtree)), JE(A), Q && LE(A);
+}, $i = (A, I, g) => (A.pending_buf[A.sym_buf + A.sym_next++] = I, A.pending_buf[A.sym_buf + A.sym_next++] = I >> 8, A.pending_buf[A.sym_buf + A.sym_next++] = g, I === 0 ? A.dyn_ltree[g * 2]++ : (A.matches++, I--, A.dyn_ltree[(gg[g] + Dg + 1) * 2]++, A.dyn_dtree[cE(I) * 2]++), A.sym_next === A.sym_end);
+var AD = zi, ID = rE, gD = _i, QD = $i, BD = Wi, CD = {
+  _tr_init: AD,
+  _tr_stored_block: ID,
+  _tr_flush_block: gD,
+  _tr_tally: QD,
+  _tr_align: BD
 };
-const CD = (A, I, g, Q) => {
+const ED = (A, I, g, Q) => {
   let B = A & 65535 | 0, C = A >>> 16 & 65535 | 0, E = 0;
   for (; g !== 0; ) {
     E = g > 2e3 ? 2e3 : g, g -= E;
@@ -752,8 +752,8 @@ const CD = (A, I, g, Q) => {
   }
   return B | C << 16 | 0;
 };
-var Bg = CD;
-const ED = () => {
+var Bg = ED;
+const iD = () => {
   let A, I = [];
   for (var g = 0; g < 256; g++) {
     A = g;
@@ -762,14 +762,14 @@ const ED = () => {
     I[g] = A;
   }
   return I;
-}, iD = new Uint32Array(ED()), DD = (A, I, g, Q) => {
-  const B = iD, C = Q + g;
+}, DD = new Uint32Array(iD()), wD = (A, I, g, Q) => {
+  const B = DD, C = Q + g;
   A ^= -1;
   for (let E = Q; E < C; E++)
     A = A >>> 8 ^ B[(A ^ I[E]) & 255];
   return A ^ -1;
 };
-var gA = DD, rI = {
+var gA = wD, RI = {
   2: "need dictionary",
   /* Z_NEED_DICT       2  */
   1: "stream end",
@@ -828,30 +828,30 @@ var gA = DD, rI = {
   Z_DEFLATED: 8
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
-const { _tr_init: wD, _tr_stored_block: XQ, _tr_flush_block: oD, _tr_tally: zA, _tr_align: sD } = BD, {
+const { _tr_init: oD, _tr_stored_block: vQ, _tr_flush_block: sD, _tr_tally: zA, _tr_align: tD } = CD, {
   Z_NO_FLUSH: WA,
-  Z_PARTIAL_FLUSH: tD,
-  Z_FULL_FLUSH: eD,
+  Z_PARTIAL_FLUSH: eD,
+  Z_FULL_FLUSH: hD,
   Z_FINISH: GA,
-  Z_BLOCK: iC,
+  Z_BLOCK: DC,
   Z_OK: iA,
-  Z_STREAM_END: DC,
+  Z_STREAM_END: wC,
   Z_STREAM_ERROR: nA,
-  Z_DATA_ERROR: hD,
+  Z_DATA_ERROR: aD,
   Z_BUF_ERROR: HQ,
-  Z_DEFAULT_COMPRESSION: aD,
-  Z_FILTERED: ND,
+  Z_DEFAULT_COMPRESSION: ND,
+  Z_FILTERED: kD,
   Z_HUFFMAN_ONLY: Sg,
-  Z_RLE: kD,
-  Z_FIXED: MD,
-  Z_DEFAULT_STRATEGY: GD,
-  Z_UNKNOWN: cD,
+  Z_RLE: MD,
+  Z_FIXED: GD,
+  Z_DEFAULT_STRATEGY: cD,
+  Z_UNKNOWN: FD,
   Z_DEFLATED: Vg
-} = wg, FD = 9, UD = 15, JD = 8, LD = 29, RD = 256, vQ = RD + 1 + LD, rD = 30, yD = 19, nD = 2 * vQ + 1, SD = 15, p = 3, vA = 258, SA = vA + p + 1, HD = 32, yI = 42, eB = 57, zQ = 69, WQ = 73, _Q = 91, $Q = 103, iI = 113, jI = 666, wA = 1, HI = 2, wI = 3, YI = 4, YD = 3, DI = (A, I) => (A.msg = rI[I], I), wC = (A) => A * 2 - (A > 4 ? 9 : 0), XA = (A) => {
+} = wg, UD = 9, JD = 15, LD = 8, rD = 29, RD = 256, zQ = RD + 1 + rD, yD = 30, nD = 19, SD = 2 * zQ + 1, HD = 15, p = 3, vA = 258, SA = vA + p + 1, YD = 32, yI = 42, hB = 57, WQ = 69, _Q = 73, $Q = 91, AB = 103, iI = 113, jI = 666, wA = 1, HI = 2, wI = 3, YI = 4, lD = 3, DI = (A, I) => (A.msg = RI[I], I), oC = (A) => A * 2 - (A > 4 ? 9 : 0), XA = (A) => {
   let I = A.length;
   for (; --I >= 0; )
     A[I] = 0;
-}, lD = (A) => {
+}, fD = (A) => {
   let I, g, Q, B = A.w_size;
   I = A.hash_size, Q = I;
   do
@@ -862,57 +862,57 @@ const { _tr_init: wD, _tr_stored_block: XQ, _tr_flush_block: oD, _tr_tally: zA, 
     g = A.prev[--Q], A.prev[Q] = g >= B ? g - B : 0;
   while (--I);
 };
-let fD = (A, I, g) => (I << A.hash_shift ^ g) & A.hash_mask, _A = fD;
+let KD = (A, I, g) => (I << A.hash_shift ^ g) & A.hash_mask, _A = KD;
 const NA = (A) => {
   const I = A.state;
   let g = I.pending;
   g > A.avail_out && (g = A.avail_out), g !== 0 && (A.output.set(I.pending_buf.subarray(I.pending_out, I.pending_out + g), A.next_out), A.next_out += g, I.pending_out += g, A.total_out += g, A.avail_out -= g, I.pending -= g, I.pending === 0 && (I.pending_out = 0));
 }, kA = (A, I) => {
-  oD(A, A.block_start >= 0 ? A.block_start : -1, A.strstart - A.block_start, I), A.block_start = A.strstart, NA(A.strm);
+  sD(A, A.block_start >= 0 ? A.block_start : -1, A.strstart - A.block_start, I), A.block_start = A.strstart, NA(A.strm);
 }, b = (A, I) => {
   A.pending_buf[A.pending++] = I;
 }, mI = (A, I) => {
   A.pending_buf[A.pending++] = I >>> 8 & 255, A.pending_buf[A.pending++] = I & 255;
-}, AB = (A, I, g, Q) => {
+}, IB = (A, I, g, Q) => {
   let B = A.avail_in;
   return B > Q && (B = Q), B === 0 ? 0 : (A.avail_in -= B, I.set(A.input.subarray(A.next_in, A.next_in + B), g), A.state.wrap === 1 ? A.adler = Bg(A.adler, I, B, g) : A.state.wrap === 2 && (A.adler = gA(A.adler, I, B, g)), A.next_in += B, A.total_in += B, B);
 }, RE = (A, I) => {
   let g = A.max_chain_length, Q = A.strstart, B, C, E = A.prev_length, i = A.nice_match;
-  const o = A.strstart > A.w_size - SA ? A.strstart - (A.w_size - SA) : 0, D = A.window, w = A.w_mask, t = A.prev, s = A.strstart + vA;
-  let e = D[Q + E - 1], h = D[Q + E];
+  const o = A.strstart > A.w_size - SA ? A.strstart - (A.w_size - SA) : 0, D = A.window, w = A.w_mask, s = A.prev, t = A.strstart + vA;
+  let e = D[Q + E - 1], N = D[Q + E];
   A.prev_length >= A.good_match && (g >>= 2), i > A.lookahead && (i = A.lookahead);
   do
-    if (B = I, !(D[B + E] !== h || D[B + E - 1] !== e || D[B] !== D[Q] || D[++B] !== D[Q + 1])) {
+    if (B = I, !(D[B + E] !== N || D[B + E - 1] !== e || D[B] !== D[Q] || D[++B] !== D[Q + 1])) {
       Q += 2, B++;
       do
         ;
-      while (D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && Q < s);
-      if (C = vA - (s - Q), Q = s - vA, C > E) {
+      while (D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && D[++Q] === D[++B] && Q < t);
+      if (C = vA - (t - Q), Q = t - vA, C > E) {
         if (A.match_start = I, E = C, C >= i)
           break;
-        e = D[Q + E - 1], h = D[Q + E];
+        e = D[Q + E - 1], N = D[Q + E];
       }
     }
-  while ((I = t[I & w]) > o && --g !== 0);
+  while ((I = s[I & w]) > o && --g !== 0);
   return E <= A.lookahead ? E : A.lookahead;
 }, nI = (A) => {
   const I = A.w_size;
   let g, Q, B;
   do {
-    if (Q = A.window_size - A.lookahead - A.strstart, A.strstart >= I + (I - SA) && (A.window.set(A.window.subarray(I, I + I - Q), 0), A.match_start -= I, A.strstart -= I, A.block_start -= I, A.insert > A.strstart && (A.insert = A.strstart), lD(A), Q += I), A.strm.avail_in === 0)
+    if (Q = A.window_size - A.lookahead - A.strstart, A.strstart >= I + (I - SA) && (A.window.set(A.window.subarray(I, I + I - Q), 0), A.match_start -= I, A.strstart -= I, A.block_start -= I, A.insert > A.strstart && (A.insert = A.strstart), fD(A), Q += I), A.strm.avail_in === 0)
       break;
-    if (g = AB(A.strm, A.window, A.strstart + A.lookahead, Q), A.lookahead += g, A.lookahead + A.insert >= p)
+    if (g = IB(A.strm, A.window, A.strstart + A.lookahead, Q), A.lookahead += g, A.lookahead + A.insert >= p)
       for (B = A.strstart - A.insert, A.ins_h = A.window[B], A.ins_h = _A(A, A.ins_h, A.window[B + 1]); A.insert && (A.ins_h = _A(A, A.ins_h, A.window[B + p - 1]), A.prev[B & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = B, B++, A.insert--, !(A.lookahead + A.insert < p)); )
         ;
   } while (A.lookahead < SA && A.strm.avail_in !== 0);
-}, rE = (A, I) => {
+}, yE = (A, I) => {
   let g = A.pending_buf_size - 5 > A.w_size ? A.w_size : A.pending_buf_size - 5, Q, B, C, E = 0, i = A.strm.avail_in;
   do {
     if (Q = 65535, C = A.bi_valid + 42 >> 3, A.strm.avail_out < C || (C = A.strm.avail_out - C, B = A.strstart - A.block_start, Q > B + A.strm.avail_in && (Q = B + A.strm.avail_in), Q > C && (Q = C), Q < g && (Q === 0 && I !== GA || I === WA || Q !== B + A.strm.avail_in)))
       break;
-    E = I === GA && Q === B + A.strm.avail_in ? 1 : 0, XQ(A, 0, 0, E), A.pending_buf[A.pending - 4] = Q, A.pending_buf[A.pending - 3] = Q >> 8, A.pending_buf[A.pending - 2] = ~Q, A.pending_buf[A.pending - 1] = ~Q >> 8, NA(A.strm), B && (B > Q && (B = Q), A.strm.output.set(A.window.subarray(A.block_start, A.block_start + B), A.strm.next_out), A.strm.next_out += B, A.strm.avail_out -= B, A.strm.total_out += B, A.block_start += B, Q -= B), Q && (AB(A.strm, A.strm.output, A.strm.next_out, Q), A.strm.next_out += Q, A.strm.avail_out -= Q, A.strm.total_out += Q);
+    E = I === GA && Q === B + A.strm.avail_in ? 1 : 0, vQ(A, 0, 0, E), A.pending_buf[A.pending - 4] = Q, A.pending_buf[A.pending - 3] = Q >> 8, A.pending_buf[A.pending - 2] = ~Q, A.pending_buf[A.pending - 1] = ~Q >> 8, NA(A.strm), B && (B > Q && (B = Q), A.strm.output.set(A.window.subarray(A.block_start, A.block_start + B), A.strm.next_out), A.strm.next_out += B, A.strm.avail_out -= B, A.strm.total_out += B, A.block_start += B, Q -= B), Q && (IB(A.strm, A.strm.output, A.strm.next_out, Q), A.strm.next_out += Q, A.strm.avail_out -= Q, A.strm.total_out += Q);
   } while (E === 0);
-  return i -= A.strm.avail_in, i && (i >= A.w_size ? (A.matches = 2, A.window.set(A.strm.input.subarray(A.strm.next_in - A.w_size, A.strm.next_in), 0), A.strstart = A.w_size, A.insert = A.strstart) : (A.window_size - A.strstart <= i && (A.strstart -= A.w_size, A.window.set(A.window.subarray(A.w_size, A.w_size + A.strstart), 0), A.matches < 2 && A.matches++, A.insert > A.strstart && (A.insert = A.strstart)), A.window.set(A.strm.input.subarray(A.strm.next_in - i, A.strm.next_in), A.strstart), A.strstart += i, A.insert += i > A.w_size - A.insert ? A.w_size - A.insert : i), A.block_start = A.strstart), A.high_water < A.strstart && (A.high_water = A.strstart), E ? YI : I !== WA && I !== GA && A.strm.avail_in === 0 && A.strstart === A.block_start ? HI : (C = A.window_size - A.strstart, A.strm.avail_in > C && A.block_start >= A.w_size && (A.block_start -= A.w_size, A.strstart -= A.w_size, A.window.set(A.window.subarray(A.w_size, A.w_size + A.strstart), 0), A.matches < 2 && A.matches++, C += A.w_size, A.insert > A.strstart && (A.insert = A.strstart)), C > A.strm.avail_in && (C = A.strm.avail_in), C && (AB(A.strm, A.window, A.strstart, C), A.strstart += C, A.insert += C > A.w_size - A.insert ? A.w_size - A.insert : C), A.high_water < A.strstart && (A.high_water = A.strstart), C = A.bi_valid + 42 >> 3, C = A.pending_buf_size - C > 65535 ? 65535 : A.pending_buf_size - C, g = C > A.w_size ? A.w_size : C, B = A.strstart - A.block_start, (B >= g || (B || I === GA) && I !== WA && A.strm.avail_in === 0 && B <= C) && (Q = B > C ? C : B, E = I === GA && A.strm.avail_in === 0 && Q === B ? 1 : 0, XQ(A, A.block_start, Q, E), A.block_start += Q, NA(A.strm)), E ? wI : wA);
+  return i -= A.strm.avail_in, i && (i >= A.w_size ? (A.matches = 2, A.window.set(A.strm.input.subarray(A.strm.next_in - A.w_size, A.strm.next_in), 0), A.strstart = A.w_size, A.insert = A.strstart) : (A.window_size - A.strstart <= i && (A.strstart -= A.w_size, A.window.set(A.window.subarray(A.w_size, A.w_size + A.strstart), 0), A.matches < 2 && A.matches++, A.insert > A.strstart && (A.insert = A.strstart)), A.window.set(A.strm.input.subarray(A.strm.next_in - i, A.strm.next_in), A.strstart), A.strstart += i, A.insert += i > A.w_size - A.insert ? A.w_size - A.insert : i), A.block_start = A.strstart), A.high_water < A.strstart && (A.high_water = A.strstart), E ? YI : I !== WA && I !== GA && A.strm.avail_in === 0 && A.strstart === A.block_start ? HI : (C = A.window_size - A.strstart, A.strm.avail_in > C && A.block_start >= A.w_size && (A.block_start -= A.w_size, A.strstart -= A.w_size, A.window.set(A.window.subarray(A.w_size, A.w_size + A.strstart), 0), A.matches < 2 && A.matches++, C += A.w_size, A.insert > A.strstart && (A.insert = A.strstart)), C > A.strm.avail_in && (C = A.strm.avail_in), C && (IB(A.strm, A.window, A.strstart, C), A.strstart += C, A.insert += C > A.w_size - A.insert ? A.w_size - A.insert : C), A.high_water < A.strstart && (A.high_water = A.strstart), C = A.bi_valid + 42 >> 3, C = A.pending_buf_size - C > 65535 ? 65535 : A.pending_buf_size - C, g = C > A.w_size ? A.w_size : C, B = A.strstart - A.block_start, (B >= g || (B || I === GA) && I !== WA && A.strm.avail_in === 0 && B <= C) && (Q = B > C ? C : B, E = I === GA && A.strm.avail_in === 0 && Q === B ? 1 : 0, vQ(A, A.block_start, Q, E), A.block_start += Q, NA(A.strm)), E ? wI : wA);
 }, YQ = (A, I) => {
   let g, Q;
   for (; ; ) {
@@ -946,7 +946,7 @@ const NA = (A) => {
       if (A.lookahead === 0)
         break;
     }
-    if (g = 0, A.lookahead >= p && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart), A.prev_length = A.match_length, A.prev_match = A.match_start, A.match_length = p - 1, g !== 0 && A.prev_length < A.max_lazy_match && A.strstart - g <= A.w_size - SA && (A.match_length = RE(A, g), A.match_length <= 5 && (A.strategy === ND || A.match_length === p && A.strstart - A.match_start > 4096) && (A.match_length = p - 1)), A.prev_length >= p && A.match_length <= A.prev_length) {
+    if (g = 0, A.lookahead >= p && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart), A.prev_length = A.match_length, A.prev_match = A.match_start, A.match_length = p - 1, g !== 0 && A.prev_length < A.max_lazy_match && A.strstart - g <= A.w_size - SA && (A.match_length = RE(A, g), A.match_length <= 5 && (A.strategy === kD || A.match_length === p && A.strstart - A.match_start > 4096) && (A.match_length = p - 1)), A.prev_length >= p && A.match_length <= A.prev_length) {
       B = A.strstart + A.lookahead - p, Q = zA(A, A.strstart - 1 - A.prev_match, A.prev_length - p), A.lookahead -= A.prev_length - 1, A.prev_length -= 2;
       do
         ++A.strstart <= B && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart);
@@ -960,7 +960,7 @@ const NA = (A) => {
       A.match_available = 1, A.strstart++, A.lookahead--;
   }
   return A.match_available && (Q = zA(A, 0, A.window[A.strstart - 1]), A.match_available = 0), A.insert = A.strstart < p - 1 ? A.strstart : p - 1, I === GA ? (kA(A, !0), A.strm.avail_out === 0 ? wI : YI) : A.sym_next && (kA(A, !1), A.strm.avail_out === 0) ? wA : HI;
-}, KD = (A, I) => {
+}, dD = (A, I) => {
   let g, Q, B, C;
   const E = A.window;
   for (; ; ) {
@@ -981,7 +981,7 @@ const NA = (A) => {
       return wA;
   }
   return A.insert = 0, I === GA ? (kA(A, !0), A.strm.avail_out === 0 ? wI : YI) : A.sym_next && (kA(A, !1), A.strm.avail_out === 0) ? wA : HI;
-}, dD = (A, I) => {
+}, OD = (A, I) => {
   let g;
   for (; ; ) {
     if (A.lookahead === 0 && (nI(A), A.lookahead === 0)) {
@@ -994,68 +994,68 @@ const NA = (A) => {
   }
   return A.insert = 0, I === GA ? (kA(A, !0), A.strm.avail_out === 0 ? wI : YI) : A.sym_next && (kA(A, !1), A.strm.avail_out === 0) ? wA : HI;
 };
-function rA(A, I, g, Q, B) {
+function RA(A, I, g, Q, B) {
   this.good_length = A, this.max_lazy = I, this.nice_length = g, this.max_chain = Q, this.func = B;
 }
 const VI = [
   /*      good lazy nice chain */
-  new rA(0, 0, 0, 0, rE),
+  new RA(0, 0, 0, 0, yE),
   /* 0 store only */
-  new rA(4, 4, 8, 4, YQ),
+  new RA(4, 4, 8, 4, YQ),
   /* 1 max speed, no lazy matches */
-  new rA(4, 5, 16, 8, YQ),
+  new RA(4, 5, 16, 8, YQ),
   /* 2 */
-  new rA(4, 6, 32, 32, YQ),
+  new RA(4, 6, 32, 32, YQ),
   /* 3 */
-  new rA(4, 4, 16, 16, GI),
+  new RA(4, 4, 16, 16, GI),
   /* 4 lazy matches */
-  new rA(8, 16, 32, 32, GI),
+  new RA(8, 16, 32, 32, GI),
   /* 5 */
-  new rA(8, 16, 128, 128, GI),
+  new RA(8, 16, 128, 128, GI),
   /* 6 */
-  new rA(8, 32, 128, 256, GI),
+  new RA(8, 32, 128, 256, GI),
   /* 7 */
-  new rA(32, 128, 258, 1024, GI),
+  new RA(32, 128, 258, 1024, GI),
   /* 8 */
-  new rA(32, 258, 258, 4096, GI)
+  new RA(32, 258, 258, 4096, GI)
   /* 9 max compression */
-], OD = (A) => {
+], qD = (A) => {
   A.window_size = 2 * A.w_size, XA(A.head), A.max_lazy_match = VI[A.level].max_lazy, A.good_match = VI[A.level].good_length, A.nice_match = VI[A.level].nice_length, A.max_chain_length = VI[A.level].max_chain, A.strstart = 0, A.block_start = 0, A.lookahead = 0, A.insert = 0, A.match_length = A.prev_length = p - 1, A.match_available = 0, A.ins_h = 0;
 };
-function qD() {
-  this.strm = null, this.status = 0, this.pending_buf = null, this.pending_buf_size = 0, this.pending_out = 0, this.pending = 0, this.wrap = 0, this.gzhead = null, this.gzindex = 0, this.method = Vg, this.last_flush = -1, this.w_size = 0, this.w_bits = 0, this.w_mask = 0, this.window = null, this.window_size = 0, this.prev = null, this.head = null, this.ins_h = 0, this.hash_size = 0, this.hash_bits = 0, this.hash_mask = 0, this.hash_shift = 0, this.block_start = 0, this.match_length = 0, this.prev_match = 0, this.match_available = 0, this.strstart = 0, this.match_start = 0, this.lookahead = 0, this.prev_length = 0, this.max_chain_length = 0, this.max_lazy_match = 0, this.level = 0, this.strategy = 0, this.good_match = 0, this.nice_match = 0, this.dyn_ltree = new Uint16Array(nD * 2), this.dyn_dtree = new Uint16Array((2 * rD + 1) * 2), this.bl_tree = new Uint16Array((2 * yD + 1) * 2), XA(this.dyn_ltree), XA(this.dyn_dtree), XA(this.bl_tree), this.l_desc = null, this.d_desc = null, this.bl_desc = null, this.bl_count = new Uint16Array(SD + 1), this.heap = new Uint16Array(2 * vQ + 1), XA(this.heap), this.heap_len = 0, this.heap_max = 0, this.depth = new Uint16Array(2 * vQ + 1), XA(this.depth), this.sym_buf = 0, this.lit_bufsize = 0, this.sym_next = 0, this.sym_end = 0, this.opt_len = 0, this.static_len = 0, this.matches = 0, this.insert = 0, this.bi_buf = 0, this.bi_valid = 0;
+function TD() {
+  this.strm = null, this.status = 0, this.pending_buf = null, this.pending_buf_size = 0, this.pending_out = 0, this.pending = 0, this.wrap = 0, this.gzhead = null, this.gzindex = 0, this.method = Vg, this.last_flush = -1, this.w_size = 0, this.w_bits = 0, this.w_mask = 0, this.window = null, this.window_size = 0, this.prev = null, this.head = null, this.ins_h = 0, this.hash_size = 0, this.hash_bits = 0, this.hash_mask = 0, this.hash_shift = 0, this.block_start = 0, this.match_length = 0, this.prev_match = 0, this.match_available = 0, this.strstart = 0, this.match_start = 0, this.lookahead = 0, this.prev_length = 0, this.max_chain_length = 0, this.max_lazy_match = 0, this.level = 0, this.strategy = 0, this.good_match = 0, this.nice_match = 0, this.dyn_ltree = new Uint16Array(SD * 2), this.dyn_dtree = new Uint16Array((2 * yD + 1) * 2), this.bl_tree = new Uint16Array((2 * nD + 1) * 2), XA(this.dyn_ltree), XA(this.dyn_dtree), XA(this.bl_tree), this.l_desc = null, this.d_desc = null, this.bl_desc = null, this.bl_count = new Uint16Array(HD + 1), this.heap = new Uint16Array(2 * zQ + 1), XA(this.heap), this.heap_len = 0, this.heap_max = 0, this.depth = new Uint16Array(2 * zQ + 1), XA(this.depth), this.sym_buf = 0, this.lit_bufsize = 0, this.sym_next = 0, this.sym_end = 0, this.opt_len = 0, this.static_len = 0, this.matches = 0, this.insert = 0, this.bi_buf = 0, this.bi_valid = 0;
 }
 const og = (A) => {
   if (!A)
     return 1;
   const I = A.state;
   return !I || I.strm !== A || I.status !== yI && //#ifdef GZIP
-  I.status !== eB && //#endif
-  I.status !== zQ && I.status !== WQ && I.status !== _Q && I.status !== $Q && I.status !== iI && I.status !== jI ? 1 : 0;
-}, yE = (A) => {
+  I.status !== hB && //#endif
+  I.status !== WQ && I.status !== _Q && I.status !== $Q && I.status !== AB && I.status !== iI && I.status !== jI ? 1 : 0;
+}, nE = (A) => {
   if (og(A))
     return DI(A, nA);
-  A.total_in = A.total_out = 0, A.data_type = cD;
+  A.total_in = A.total_out = 0, A.data_type = FD;
   const I = A.state;
   return I.pending = 0, I.pending_out = 0, I.wrap < 0 && (I.wrap = -I.wrap), I.status = //#ifdef GZIP
-  I.wrap === 2 ? eB : (
+  I.wrap === 2 ? hB : (
     //#endif
     I.wrap ? yI : iI
-  ), A.adler = I.wrap === 2 ? 0 : 1, I.last_flush = -2, wD(I), iA;
-}, nE = (A) => {
-  const I = yE(A);
-  return I === iA && OD(A.state), I;
-}, TD = (A, I) => og(A) || A.state.wrap !== 2 ? nA : (A.state.gzhead = I, iA), SE = (A, I, g, Q, B, C) => {
+  ), A.adler = I.wrap === 2 ? 0 : 1, I.last_flush = -2, oD(I), iA;
+}, SE = (A) => {
+  const I = nE(A);
+  return I === iA && qD(A.state), I;
+}, xD = (A, I) => og(A) || A.state.wrap !== 2 ? nA : (A.state.gzhead = I, iA), HE = (A, I, g, Q, B, C) => {
   if (!A)
     return nA;
   let E = 1;
-  if (I === aD && (I = 6), Q < 0 ? (E = 0, Q = -Q) : Q > 15 && (E = 2, Q -= 16), B < 1 || B > FD || g !== Vg || Q < 8 || Q > 15 || I < 0 || I > 9 || C < 0 || C > MD || Q === 8 && E !== 1)
+  if (I === ND && (I = 6), Q < 0 ? (E = 0, Q = -Q) : Q > 15 && (E = 2, Q -= 16), B < 1 || B > UD || g !== Vg || Q < 8 || Q > 15 || I < 0 || I > 9 || C < 0 || C > GD || Q === 8 && E !== 1)
     return DI(A, nA);
   Q === 8 && (Q = 9);
-  const i = new qD();
-  return A.state = i, i.strm = A, i.status = yI, i.wrap = E, i.gzhead = null, i.w_bits = Q, i.w_size = 1 << i.w_bits, i.w_mask = i.w_size - 1, i.hash_bits = B + 7, i.hash_size = 1 << i.hash_bits, i.hash_mask = i.hash_size - 1, i.hash_shift = ~~((i.hash_bits + p - 1) / p), i.window = new Uint8Array(i.w_size * 2), i.head = new Uint16Array(i.hash_size), i.prev = new Uint16Array(i.w_size), i.lit_bufsize = 1 << B + 6, i.pending_buf_size = i.lit_bufsize * 4, i.pending_buf = new Uint8Array(i.pending_buf_size), i.sym_buf = i.lit_bufsize, i.sym_end = (i.lit_bufsize - 1) * 3, i.level = I, i.strategy = C, i.method = g, nE(A);
-}, xD = (A, I) => SE(A, I, Vg, UD, JD, GD), pD = (A, I) => {
-  if (og(A) || I > iC || I < 0)
+  const i = new TD();
+  return A.state = i, i.strm = A, i.status = yI, i.wrap = E, i.gzhead = null, i.w_bits = Q, i.w_size = 1 << i.w_bits, i.w_mask = i.w_size - 1, i.hash_bits = B + 7, i.hash_size = 1 << i.hash_bits, i.hash_mask = i.hash_size - 1, i.hash_shift = ~~((i.hash_bits + p - 1) / p), i.window = new Uint8Array(i.w_size * 2), i.head = new Uint16Array(i.hash_size), i.prev = new Uint16Array(i.w_size), i.lit_bufsize = 1 << B + 6, i.pending_buf_size = i.lit_bufsize * 4, i.pending_buf = new Uint8Array(i.pending_buf_size), i.sym_buf = i.lit_bufsize, i.sym_end = (i.lit_bufsize - 1) * 3, i.level = I, i.strategy = C, i.method = g, SE(A);
+}, pD = (A, I) => HE(A, I, Vg, JD, LD, cD), uD = (A, I) => {
+  if (og(A) || I > DC || I < 0)
     return A ? DI(A, nA) : nA;
   const g = A.state;
   if (!A.output || A.avail_in !== 0 && !A.input || g.status === jI && I !== GA)
@@ -1064,25 +1064,25 @@ const og = (A) => {
   if (g.last_flush = I, g.pending !== 0) {
     if (NA(A), A.avail_out === 0)
       return g.last_flush = -1, iA;
-  } else if (A.avail_in === 0 && wC(I) <= wC(Q) && I !== GA)
+  } else if (A.avail_in === 0 && oC(I) <= oC(Q) && I !== GA)
     return DI(A, HQ);
   if (g.status === jI && A.avail_in !== 0)
     return DI(A, HQ);
   if (g.status === yI && g.wrap === 0 && (g.status = iI), g.status === yI) {
     let B = Vg + (g.w_bits - 8 << 4) << 8, C = -1;
-    if (g.strategy >= Sg || g.level < 2 ? C = 0 : g.level < 6 ? C = 1 : g.level === 6 ? C = 2 : C = 3, B |= C << 6, g.strstart !== 0 && (B |= HD), B += 31 - B % 31, mI(g, B), g.strstart !== 0 && (mI(g, A.adler >>> 16), mI(g, A.adler & 65535)), A.adler = 1, g.status = iI, NA(A), g.pending !== 0)
+    if (g.strategy >= Sg || g.level < 2 ? C = 0 : g.level < 6 ? C = 1 : g.level === 6 ? C = 2 : C = 3, B |= C << 6, g.strstart !== 0 && (B |= YD), B += 31 - B % 31, mI(g, B), g.strstart !== 0 && (mI(g, A.adler >>> 16), mI(g, A.adler & 65535)), A.adler = 1, g.status = iI, NA(A), g.pending !== 0)
       return g.last_flush = -1, iA;
   }
-  if (g.status === eB) {
+  if (g.status === hB) {
     if (A.adler = 0, b(g, 31), b(g, 139), b(g, 8), g.gzhead)
       b(
         g,
         (g.gzhead.text ? 1 : 0) + (g.gzhead.hcrc ? 2 : 0) + (g.gzhead.extra ? 4 : 0) + (g.gzhead.name ? 8 : 0) + (g.gzhead.comment ? 16 : 0)
-      ), b(g, g.gzhead.time & 255), b(g, g.gzhead.time >> 8 & 255), b(g, g.gzhead.time >> 16 & 255), b(g, g.gzhead.time >> 24 & 255), b(g, g.level === 9 ? 2 : g.strategy >= Sg || g.level < 2 ? 4 : 0), b(g, g.gzhead.os & 255), g.gzhead.extra && g.gzhead.extra.length && (b(g, g.gzhead.extra.length & 255), b(g, g.gzhead.extra.length >> 8 & 255)), g.gzhead.hcrc && (A.adler = gA(A.adler, g.pending_buf, g.pending, 0)), g.gzindex = 0, g.status = zQ;
-    else if (b(g, 0), b(g, 0), b(g, 0), b(g, 0), b(g, 0), b(g, g.level === 9 ? 2 : g.strategy >= Sg || g.level < 2 ? 4 : 0), b(g, YD), g.status = iI, NA(A), g.pending !== 0)
+      ), b(g, g.gzhead.time & 255), b(g, g.gzhead.time >> 8 & 255), b(g, g.gzhead.time >> 16 & 255), b(g, g.gzhead.time >> 24 & 255), b(g, g.level === 9 ? 2 : g.strategy >= Sg || g.level < 2 ? 4 : 0), b(g, g.gzhead.os & 255), g.gzhead.extra && g.gzhead.extra.length && (b(g, g.gzhead.extra.length & 255), b(g, g.gzhead.extra.length >> 8 & 255)), g.gzhead.hcrc && (A.adler = gA(A.adler, g.pending_buf, g.pending, 0)), g.gzindex = 0, g.status = WQ;
+    else if (b(g, 0), b(g, 0), b(g, 0), b(g, 0), b(g, 0), b(g, g.level === 9 ? 2 : g.strategy >= Sg || g.level < 2 ? 4 : 0), b(g, lD), g.status = iI, NA(A), g.pending !== 0)
       return g.last_flush = -1, iA;
   }
-  if (g.status === zQ) {
+  if (g.status === WQ) {
     if (g.gzhead.extra) {
       let B = g.pending, C = (g.gzhead.extra.length & 65535) - g.gzindex;
       for (; g.pending + C > g.pending_buf_size; ) {
@@ -1094,9 +1094,9 @@ const og = (A) => {
       let E = new Uint8Array(g.gzhead.extra);
       g.pending_buf.set(E.subarray(g.gzindex, g.gzindex + C), g.pending), g.pending += C, g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex = 0;
     }
-    g.status = WQ;
+    g.status = _Q;
   }
-  if (g.status === WQ) {
+  if (g.status === _Q) {
     if (g.gzhead.name) {
       let B = g.pending, C;
       do {
@@ -1109,9 +1109,9 @@ const og = (A) => {
       } while (C !== 0);
       g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex = 0;
     }
-    g.status = _Q;
+    g.status = $Q;
   }
-  if (g.status === _Q) {
+  if (g.status === $Q) {
     if (g.gzhead.comment) {
       let B = g.pending, C;
       do {
@@ -1124,9 +1124,9 @@ const og = (A) => {
       } while (C !== 0);
       g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B));
     }
-    g.status = $Q;
+    g.status = AB;
   }
-  if (g.status === $Q) {
+  if (g.status === AB) {
     if (g.gzhead.hcrc) {
       if (g.pending + 2 > g.pending_buf_size && (NA(A), g.pending !== 0))
         return g.last_flush = -1, iA;
@@ -1136,19 +1136,19 @@ const og = (A) => {
       return g.last_flush = -1, iA;
   }
   if (A.avail_in !== 0 || g.lookahead !== 0 || I !== WA && g.status !== jI) {
-    let B = g.level === 0 ? rE(g, I) : g.strategy === Sg ? dD(g, I) : g.strategy === kD ? KD(g, I) : VI[g.level].func(g, I);
+    let B = g.level === 0 ? yE(g, I) : g.strategy === Sg ? OD(g, I) : g.strategy === MD ? dD(g, I) : VI[g.level].func(g, I);
     if ((B === wI || B === YI) && (g.status = jI), B === wA || B === wI)
       return A.avail_out === 0 && (g.last_flush = -1), iA;
-    if (B === HI && (I === tD ? sD(g) : I !== iC && (XQ(g, 0, 0, !1), I === eD && (XA(g.head), g.lookahead === 0 && (g.strstart = 0, g.block_start = 0, g.insert = 0))), NA(A), A.avail_out === 0))
+    if (B === HI && (I === eD ? tD(g) : I !== DC && (vQ(g, 0, 0, !1), I === hD && (XA(g.head), g.lookahead === 0 && (g.strstart = 0, g.block_start = 0, g.insert = 0))), NA(A), A.avail_out === 0))
       return g.last_flush = -1, iA;
   }
-  return I !== GA ? iA : g.wrap <= 0 ? DC : (g.wrap === 2 ? (b(g, A.adler & 255), b(g, A.adler >> 8 & 255), b(g, A.adler >> 16 & 255), b(g, A.adler >> 24 & 255), b(g, A.total_in & 255), b(g, A.total_in >> 8 & 255), b(g, A.total_in >> 16 & 255), b(g, A.total_in >> 24 & 255)) : (mI(g, A.adler >>> 16), mI(g, A.adler & 65535)), NA(A), g.wrap > 0 && (g.wrap = -g.wrap), g.pending !== 0 ? iA : DC);
-}, uD = (A) => {
+  return I !== GA ? iA : g.wrap <= 0 ? wC : (g.wrap === 2 ? (b(g, A.adler & 255), b(g, A.adler >> 8 & 255), b(g, A.adler >> 16 & 255), b(g, A.adler >> 24 & 255), b(g, A.total_in & 255), b(g, A.total_in >> 8 & 255), b(g, A.total_in >> 16 & 255), b(g, A.total_in >> 24 & 255)) : (mI(g, A.adler >>> 16), mI(g, A.adler & 65535)), NA(A), g.wrap > 0 && (g.wrap = -g.wrap), g.pending !== 0 ? iA : wC);
+}, bD = (A) => {
   if (og(A))
     return nA;
   const I = A.state.status;
-  return A.state = null, I === iI ? DI(A, hD) : iA;
-}, bD = (A, I) => {
+  return A.state = null, I === iI ? DI(A, aD) : iA;
+}, mD = (A, I) => {
   let g = I.length;
   if (og(A))
     return nA;
@@ -1170,19 +1170,19 @@ const og = (A) => {
   }
   return Q.strstart += Q.lookahead, Q.block_start = Q.strstart, Q.insert = Q.lookahead, Q.lookahead = 0, Q.match_length = Q.prev_length = p - 1, Q.match_available = 0, A.next_in = E, A.input = i, A.avail_in = C, Q.wrap = B, iA;
 };
-var mD = xD, PD = SE, jD = nE, VD = yE, ZD = TD, XD = pD, vD = uD, zD = bD, WD = "pako deflate (from Nodeca project)", WI = {
-  deflateInit: mD,
-  deflateInit2: PD,
-  deflateReset: jD,
-  deflateResetKeep: VD,
-  deflateSetHeader: ZD,
-  deflate: XD,
-  deflateEnd: vD,
-  deflateSetDictionary: zD,
-  deflateInfo: WD
+var PD = pD, jD = HE, VD = SE, ZD = nE, XD = xD, vD = uD, zD = bD, WD = mD, _D = "pako deflate (from Nodeca project)", WI = {
+  deflateInit: PD,
+  deflateInit2: jD,
+  deflateReset: VD,
+  deflateResetKeep: ZD,
+  deflateSetHeader: XD,
+  deflate: vD,
+  deflateEnd: zD,
+  deflateSetDictionary: WD,
+  deflateInfo: _D
 };
-const _D = (A, I) => Object.prototype.hasOwnProperty.call(A, I);
-var $D = function(A) {
+const $D = (A, I) => Object.prototype.hasOwnProperty.call(A, I);
+var Aw = function(A) {
   const I = Array.prototype.slice.call(arguments, 1);
   for (; I.length; ) {
     const g = I.shift();
@@ -1190,11 +1190,11 @@ var $D = function(A) {
       if (typeof g != "object")
         throw new TypeError(g + "must be non-object");
       for (const Q in g)
-        _D(g, Q) && (A[Q] = g[Q]);
+        $D(g, Q) && (A[Q] = g[Q]);
     }
   }
   return A;
-}, Aw = (A) => {
+}, Iw = (A) => {
   let I = 0;
   for (let Q = 0, B = A.length; Q < B; Q++)
     I += A[Q].length;
@@ -1205,20 +1205,20 @@ var $D = function(A) {
   }
   return g;
 }, Zg = {
-  assign: $D,
-  flattenChunks: Aw
+  assign: Aw,
+  flattenChunks: Iw
 };
-let HE = !0;
+let YE = !0;
 try {
   String.fromCharCode.apply(null, new Uint8Array(1));
 } catch {
-  HE = !1;
+  YE = !1;
 }
 const Cg = new Uint8Array(256);
 for (let A = 0; A < 256; A++)
   Cg[A] = A >= 252 ? 6 : A >= 248 ? 5 : A >= 240 ? 4 : A >= 224 ? 3 : A >= 192 ? 2 : 1;
 Cg[254] = Cg[254] = 1;
-var Iw = (A) => {
+var gw = (A) => {
   if (typeof TextEncoder == "function" && TextEncoder.prototype.encode)
     return new TextEncoder().encode(A);
   let I, g, Q, B, C, E = A.length, i = 0;
@@ -1228,15 +1228,15 @@ var Iw = (A) => {
     g = A.charCodeAt(B), (g & 64512) === 55296 && B + 1 < E && (Q = A.charCodeAt(B + 1), (Q & 64512) === 56320 && (g = 65536 + (g - 55296 << 10) + (Q - 56320), B++)), g < 128 ? I[C++] = g : g < 2048 ? (I[C++] = 192 | g >>> 6, I[C++] = 128 | g & 63) : g < 65536 ? (I[C++] = 224 | g >>> 12, I[C++] = 128 | g >>> 6 & 63, I[C++] = 128 | g & 63) : (I[C++] = 240 | g >>> 18, I[C++] = 128 | g >>> 12 & 63, I[C++] = 128 | g >>> 6 & 63, I[C++] = 128 | g & 63);
   return I;
 };
-const gw = (A, I) => {
-  if (I < 65534 && A.subarray && HE)
+const Qw = (A, I) => {
+  if (I < 65534 && A.subarray && YE)
     return String.fromCharCode.apply(null, A.length === I ? A : A.subarray(0, I));
   let g = "";
   for (let Q = 0; Q < I; Q++)
     g += String.fromCharCode(A[Q]);
   return g;
 };
-var Qw = (A, I) => {
+var Bw = (A, I) => {
   const g = I || A.length;
   if (typeof TextDecoder == "function" && TextDecoder.prototype.decode)
     return new TextDecoder().decode(A.subarray(0, I));
@@ -1261,44 +1261,44 @@ var Qw = (A, I) => {
     }
     E < 65536 ? C[B++] = E : (E -= 65536, C[B++] = 55296 | E >> 10 & 1023, C[B++] = 56320 | E & 1023);
   }
-  return gw(C, B);
-}, Bw = (A, I) => {
+  return Qw(C, B);
+}, Cw = (A, I) => {
   I = I || A.length, I > A.length && (I = A.length);
   let g = I - 1;
   for (; g >= 0 && (A[g] & 192) === 128; )
     g--;
   return g < 0 || g === 0 ? I : g + Cg[A[g]] > I ? g : I;
 }, Eg = {
-  string2buf: Iw,
-  buf2string: Qw,
-  utf8border: Bw
+  string2buf: gw,
+  buf2string: Bw,
+  utf8border: Cw
 };
-function Cw() {
+function Ew() {
   this.input = null, this.next_in = 0, this.avail_in = 0, this.total_in = 0, this.output = null, this.next_out = 0, this.avail_out = 0, this.total_out = 0, this.msg = "", this.state = null, this.data_type = 2, this.adler = 0;
 }
-var YE = Cw;
-const lE = Object.prototype.toString, {
-  Z_NO_FLUSH: Ew,
-  Z_SYNC_FLUSH: iw,
-  Z_FULL_FLUSH: Dw,
-  Z_FINISH: ww,
+var lE = Ew;
+const fE = Object.prototype.toString, {
+  Z_NO_FLUSH: iw,
+  Z_SYNC_FLUSH: Dw,
+  Z_FULL_FLUSH: ww,
+  Z_FINISH: ow,
   Z_OK: bg,
-  Z_STREAM_END: ow,
-  Z_DEFAULT_COMPRESSION: sw,
-  Z_DEFAULT_STRATEGY: tw,
-  Z_DEFLATED: ew
+  Z_STREAM_END: sw,
+  Z_DEFAULT_COMPRESSION: tw,
+  Z_DEFAULT_STRATEGY: ew,
+  Z_DEFLATED: hw
 } = wg;
-function hB(A) {
+function aB(A) {
   this.options = Zg.assign({
-    level: sw,
-    method: ew,
+    level: tw,
+    method: hw,
     chunkSize: 16384,
     windowBits: 15,
     memLevel: 8,
-    strategy: tw
+    strategy: ew
   }, A || {});
   let I = this.options;
-  I.raw && I.windowBits > 0 ? I.windowBits = -I.windowBits : I.gzip && I.windowBits > 0 && I.windowBits < 16 && (I.windowBits += 16), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new YE(), this.strm.avail_out = 0;
+  I.raw && I.windowBits > 0 ? I.windowBits = -I.windowBits : I.gzip && I.windowBits > 0 && I.windowBits < 16 && (I.windowBits += 16), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new lE(), this.strm.avail_out = 0;
   let g = WI.deflateInit2(
     this.strm,
     I.level,
@@ -1308,25 +1308,25 @@ function hB(A) {
     I.strategy
   );
   if (g !== bg)
-    throw new Error(rI[g]);
+    throw new Error(RI[g]);
   if (I.header && WI.deflateSetHeader(this.strm, I.header), I.dictionary) {
     let Q;
-    if (typeof I.dictionary == "string" ? Q = Eg.string2buf(I.dictionary) : lE.call(I.dictionary) === "[object ArrayBuffer]" ? Q = new Uint8Array(I.dictionary) : Q = I.dictionary, g = WI.deflateSetDictionary(this.strm, Q), g !== bg)
-      throw new Error(rI[g]);
+    if (typeof I.dictionary == "string" ? Q = Eg.string2buf(I.dictionary) : fE.call(I.dictionary) === "[object ArrayBuffer]" ? Q = new Uint8Array(I.dictionary) : Q = I.dictionary, g = WI.deflateSetDictionary(this.strm, Q), g !== bg)
+      throw new Error(RI[g]);
     this._dict_set = !0;
   }
 }
-hB.prototype.push = function(A, I) {
+aB.prototype.push = function(A, I) {
   const g = this.strm, Q = this.options.chunkSize;
   let B, C;
   if (this.ended)
     return !1;
-  for (I === ~~I ? C = I : C = I === !0 ? ww : Ew, typeof A == "string" ? g.input = Eg.string2buf(A) : lE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
-    if (g.avail_out === 0 && (g.output = new Uint8Array(Q), g.next_out = 0, g.avail_out = Q), (C === iw || C === Dw) && g.avail_out <= 6) {
+  for (I === ~~I ? C = I : C = I === !0 ? ow : iw, typeof A == "string" ? g.input = Eg.string2buf(A) : fE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
+    if (g.avail_out === 0 && (g.output = new Uint8Array(Q), g.next_out = 0, g.avail_out = Q), (C === Dw || C === ww) && g.avail_out <= 6) {
       this.onData(g.output.subarray(0, g.next_out)), g.avail_out = 0;
       continue;
     }
-    if (B = WI.deflate(g, C), B === ow)
+    if (B = WI.deflate(g, C), B === sw)
       return g.next_out > 0 && this.onData(g.output.subarray(0, g.next_out)), B = WI.deflateEnd(this.strm), this.onEnd(B), this.ended = !0, B === bg;
     if (g.avail_out === 0) {
       this.onData(g.output);
@@ -1341,104 +1341,104 @@ hB.prototype.push = function(A, I) {
   }
   return !0;
 };
-hB.prototype.onData = function(A) {
+aB.prototype.onData = function(A) {
   this.chunks.push(A);
 };
-hB.prototype.onEnd = function(A) {
+aB.prototype.onEnd = function(A) {
   A === bg && (this.result = Zg.flattenChunks(this.chunks)), this.chunks = [], this.err = A, this.msg = this.strm.msg;
 };
-const Hg = 16209, hw = 16191;
-var aw = function(I, g) {
-  let Q, B, C, E, i, o, D, w, t, s, e, h, a, G, R, N, L, J, r, n, M, k, U, c;
-  const y = I.state;
-  Q = I.next_in, U = I.input, B = Q + (I.avail_in - 5), C = I.next_out, c = I.output, E = C - (g - I.avail_out), i = C + (I.avail_out - 257), o = y.dmax, D = y.wsize, w = y.whave, t = y.wnext, s = y.window, e = y.hold, h = y.bits, a = y.lencode, G = y.distcode, R = (1 << y.lenbits) - 1, N = (1 << y.distbits) - 1;
+const Hg = 16209, aw = 16191;
+var Nw = function(I, g) {
+  let Q, B, C, E, i, o, D, w, s, t, e, N, h, c, r, G, U, F, y, S, k, L, J, a;
+  const R = I.state;
+  Q = I.next_in, J = I.input, B = Q + (I.avail_in - 5), C = I.next_out, a = I.output, E = C - (g - I.avail_out), i = C + (I.avail_out - 257), o = R.dmax, D = R.wsize, w = R.whave, s = R.wnext, t = R.window, e = R.hold, N = R.bits, h = R.lencode, c = R.distcode, r = (1 << R.lenbits) - 1, G = (1 << R.distbits) - 1;
   A:
     do {
-      h < 15 && (e += U[Q++] << h, h += 8, e += U[Q++] << h, h += 8), L = a[e & R];
+      N < 15 && (e += J[Q++] << N, N += 8, e += J[Q++] << N, N += 8), U = h[e & r];
       I:
         for (; ; ) {
-          if (J = L >>> 24, e >>>= J, h -= J, J = L >>> 16 & 255, J === 0)
-            c[C++] = L & 65535;
-          else if (J & 16) {
-            r = L & 65535, J &= 15, J && (h < J && (e += U[Q++] << h, h += 8), r += e & (1 << J) - 1, e >>>= J, h -= J), h < 15 && (e += U[Q++] << h, h += 8, e += U[Q++] << h, h += 8), L = G[e & N];
+          if (F = U >>> 24, e >>>= F, N -= F, F = U >>> 16 & 255, F === 0)
+            a[C++] = U & 65535;
+          else if (F & 16) {
+            y = U & 65535, F &= 15, F && (N < F && (e += J[Q++] << N, N += 8), y += e & (1 << F) - 1, e >>>= F, N -= F), N < 15 && (e += J[Q++] << N, N += 8, e += J[Q++] << N, N += 8), U = c[e & G];
             g:
               for (; ; ) {
-                if (J = L >>> 24, e >>>= J, h -= J, J = L >>> 16 & 255, J & 16) {
-                  if (n = L & 65535, J &= 15, h < J && (e += U[Q++] << h, h += 8, h < J && (e += U[Q++] << h, h += 8)), n += e & (1 << J) - 1, n > o) {
-                    I.msg = "invalid distance too far back", y.mode = Hg;
+                if (F = U >>> 24, e >>>= F, N -= F, F = U >>> 16 & 255, F & 16) {
+                  if (S = U & 65535, F &= 15, N < F && (e += J[Q++] << N, N += 8, N < F && (e += J[Q++] << N, N += 8)), S += e & (1 << F) - 1, S > o) {
+                    I.msg = "invalid distance too far back", R.mode = Hg;
                     break A;
                   }
-                  if (e >>>= J, h -= J, J = C - E, n > J) {
-                    if (J = n - J, J > w && y.sane) {
-                      I.msg = "invalid distance too far back", y.mode = Hg;
+                  if (e >>>= F, N -= F, F = C - E, S > F) {
+                    if (F = S - F, F > w && R.sane) {
+                      I.msg = "invalid distance too far back", R.mode = Hg;
                       break A;
                     }
-                    if (M = 0, k = s, t === 0) {
-                      if (M += D - J, J < r) {
-                        r -= J;
+                    if (k = 0, L = t, s === 0) {
+                      if (k += D - F, F < y) {
+                        y -= F;
                         do
-                          c[C++] = s[M++];
-                        while (--J);
-                        M = C - n, k = c;
+                          a[C++] = t[k++];
+                        while (--F);
+                        k = C - S, L = a;
                       }
-                    } else if (t < J) {
-                      if (M += D + t - J, J -= t, J < r) {
-                        r -= J;
+                    } else if (s < F) {
+                      if (k += D + s - F, F -= s, F < y) {
+                        y -= F;
                         do
-                          c[C++] = s[M++];
-                        while (--J);
-                        if (M = 0, t < r) {
-                          J = t, r -= J;
+                          a[C++] = t[k++];
+                        while (--F);
+                        if (k = 0, s < y) {
+                          F = s, y -= F;
                           do
-                            c[C++] = s[M++];
-                          while (--J);
-                          M = C - n, k = c;
+                            a[C++] = t[k++];
+                          while (--F);
+                          k = C - S, L = a;
                         }
                       }
-                    } else if (M += t - J, J < r) {
-                      r -= J;
+                    } else if (k += s - F, F < y) {
+                      y -= F;
                       do
-                        c[C++] = s[M++];
-                      while (--J);
-                      M = C - n, k = c;
+                        a[C++] = t[k++];
+                      while (--F);
+                      k = C - S, L = a;
                     }
-                    for (; r > 2; )
-                      c[C++] = k[M++], c[C++] = k[M++], c[C++] = k[M++], r -= 3;
-                    r && (c[C++] = k[M++], r > 1 && (c[C++] = k[M++]));
+                    for (; y > 2; )
+                      a[C++] = L[k++], a[C++] = L[k++], a[C++] = L[k++], y -= 3;
+                    y && (a[C++] = L[k++], y > 1 && (a[C++] = L[k++]));
                   } else {
-                    M = C - n;
+                    k = C - S;
                     do
-                      c[C++] = c[M++], c[C++] = c[M++], c[C++] = c[M++], r -= 3;
-                    while (r > 2);
-                    r && (c[C++] = c[M++], r > 1 && (c[C++] = c[M++]));
+                      a[C++] = a[k++], a[C++] = a[k++], a[C++] = a[k++], y -= 3;
+                    while (y > 2);
+                    y && (a[C++] = a[k++], y > 1 && (a[C++] = a[k++]));
                   }
-                } else if (J & 64) {
-                  I.msg = "invalid distance code", y.mode = Hg;
+                } else if (F & 64) {
+                  I.msg = "invalid distance code", R.mode = Hg;
                   break A;
                 } else {
-                  L = G[(L & 65535) + (e & (1 << J) - 1)];
+                  U = c[(U & 65535) + (e & (1 << F) - 1)];
                   continue g;
                 }
                 break;
               }
-          } else if (J & 64)
-            if (J & 32) {
-              y.mode = hw;
+          } else if (F & 64)
+            if (F & 32) {
+              R.mode = aw;
               break A;
             } else {
-              I.msg = "invalid literal/length code", y.mode = Hg;
+              I.msg = "invalid literal/length code", R.mode = Hg;
               break A;
             }
           else {
-            L = a[(L & 65535) + (e & (1 << J) - 1)];
+            U = h[(U & 65535) + (e & (1 << F) - 1)];
             continue I;
           }
           break;
         }
     } while (Q < B && C < i);
-  r = h >> 3, Q -= r, h -= r << 3, e &= (1 << h) - 1, I.next_in = Q, I.next_out = C, I.avail_in = Q < B ? 5 + (B - Q) : 5 - (Q - B), I.avail_out = C < i ? 257 + (i - C) : 257 - (C - i), y.hold = e, y.bits = h;
+  y = N >> 3, Q -= y, N -= y << 3, e &= (1 << N) - 1, I.next_in = Q, I.next_out = C, I.avail_in = Q < B ? 5 + (B - Q) : 5 - (Q - B), I.avail_out = C < i ? 257 + (i - C) : 257 - (C - i), R.hold = e, R.bits = N;
 };
-const cI = 15, oC = 852, sC = 592, tC = 0, lQ = 1, eC = 2, Nw = new Uint16Array([
+const cI = 15, sC = 852, tC = 592, eC = 0, lQ = 1, hC = 2, kw = new Uint16Array([
   /* Length codes 257..285 base */
   3,
   4,
@@ -1471,7 +1471,7 @@ const cI = 15, oC = 852, sC = 592, tC = 0, lQ = 1, eC = 2, Nw = new Uint16Array(
   258,
   0,
   0
-]), kw = new Uint8Array([
+]), Mw = new Uint8Array([
   /* Length codes 257..285 extra */
   16,
   16,
@@ -1504,7 +1504,7 @@ const cI = 15, oC = 852, sC = 592, tC = 0, lQ = 1, eC = 2, Nw = new Uint16Array(
   16,
   72,
   78
-]), Mw = new Uint16Array([
+]), Gw = new Uint16Array([
   /* Distance codes 0..29 base */
   1,
   2,
@@ -1538,7 +1538,7 @@ const cI = 15, oC = 852, sC = 592, tC = 0, lQ = 1, eC = 2, Nw = new Uint16Array(
   24577,
   0,
   0
-]), Gw = new Uint8Array([
+]), cw = new Uint8Array([
   /* Distance codes 0..29 extra */
   16,
   16,
@@ -1572,103 +1572,103 @@ const cI = 15, oC = 852, sC = 592, tC = 0, lQ = 1, eC = 2, Nw = new Uint16Array(
   29,
   64,
   64
-]), cw = (A, I, g, Q, B, C, E, i) => {
+]), Fw = (A, I, g, Q, B, C, E, i) => {
   const o = i.bits;
-  let D = 0, w = 0, t = 0, s = 0, e = 0, h = 0, a = 0, G = 0, R = 0, N = 0, L, J, r, n, M, k = null, U;
-  const c = new Uint16Array(cI + 1), y = new Uint16Array(cI + 1);
-  let T = null, l, x, d;
+  let D = 0, w = 0, s = 0, t = 0, e = 0, N = 0, h = 0, c = 0, r = 0, G = 0, U, F, y, S, k, L = null, J;
+  const a = new Uint16Array(cI + 1), R = new Uint16Array(cI + 1);
+  let f = null, l, x, O;
   for (D = 0; D <= cI; D++)
-    c[D] = 0;
+    a[D] = 0;
   for (w = 0; w < Q; w++)
-    c[I[g + w]]++;
-  for (e = o, s = cI; s >= 1 && c[s] === 0; s--)
+    a[I[g + w]]++;
+  for (e = o, t = cI; t >= 1 && a[t] === 0; t--)
     ;
-  if (e > s && (e = s), s === 0)
+  if (e > t && (e = t), t === 0)
     return B[C++] = 1 << 24 | 64 << 16 | 0, B[C++] = 1 << 24 | 64 << 16 | 0, i.bits = 1, 0;
-  for (t = 1; t < s && c[t] === 0; t++)
+  for (s = 1; s < t && a[s] === 0; s++)
     ;
-  for (e < t && (e = t), G = 1, D = 1; D <= cI; D++)
-    if (G <<= 1, G -= c[D], G < 0)
+  for (e < s && (e = s), c = 1, D = 1; D <= cI; D++)
+    if (c <<= 1, c -= a[D], c < 0)
       return -1;
-  if (G > 0 && (A === tC || s !== 1))
+  if (c > 0 && (A === eC || t !== 1))
     return -1;
-  for (y[1] = 0, D = 1; D < cI; D++)
-    y[D + 1] = y[D] + c[D];
+  for (R[1] = 0, D = 1; D < cI; D++)
+    R[D + 1] = R[D] + a[D];
   for (w = 0; w < Q; w++)
-    I[g + w] !== 0 && (E[y[I[g + w]]++] = w);
-  if (A === tC ? (k = T = E, U = 20) : A === lQ ? (k = Nw, T = kw, U = 257) : (k = Mw, T = Gw, U = 0), N = 0, w = 0, D = t, M = C, h = e, a = 0, r = -1, R = 1 << e, n = R - 1, A === lQ && R > oC || A === eC && R > sC)
+    I[g + w] !== 0 && (E[R[I[g + w]]++] = w);
+  if (A === eC ? (L = f = E, J = 20) : A === lQ ? (L = kw, f = Mw, J = 257) : (L = Gw, f = cw, J = 0), G = 0, w = 0, D = s, k = C, N = e, h = 0, y = -1, r = 1 << e, S = r - 1, A === lQ && r > sC || A === hC && r > tC)
     return 1;
   for (; ; ) {
-    l = D - a, E[w] + 1 < U ? (x = 0, d = E[w]) : E[w] >= U ? (x = T[E[w] - U], d = k[E[w] - U]) : (x = 32 + 64, d = 0), L = 1 << D - a, J = 1 << h, t = J;
+    l = D - h, E[w] + 1 < J ? (x = 0, O = E[w]) : E[w] >= J ? (x = f[E[w] - J], O = L[E[w] - J]) : (x = 32 + 64, O = 0), U = 1 << D - h, F = 1 << N, s = F;
     do
-      J -= L, B[M + (N >> a) + J] = l << 24 | x << 16 | d | 0;
-    while (J !== 0);
-    for (L = 1 << D - 1; N & L; )
-      L >>= 1;
-    if (L !== 0 ? (N &= L - 1, N += L) : N = 0, w++, --c[D] === 0) {
-      if (D === s)
+      F -= U, B[k + (G >> h) + F] = l << 24 | x << 16 | O | 0;
+    while (F !== 0);
+    for (U = 1 << D - 1; G & U; )
+      U >>= 1;
+    if (U !== 0 ? (G &= U - 1, G += U) : G = 0, w++, --a[D] === 0) {
+      if (D === t)
         break;
       D = I[g + E[w]];
     }
-    if (D > e && (N & n) !== r) {
-      for (a === 0 && (a = e), M += t, h = D - a, G = 1 << h; h + a < s && (G -= c[h + a], !(G <= 0)); )
-        h++, G <<= 1;
-      if (R += 1 << h, A === lQ && R > oC || A === eC && R > sC)
+    if (D > e && (G & S) !== y) {
+      for (h === 0 && (h = e), k += s, N = D - h, c = 1 << N; N + h < t && (c -= a[N + h], !(c <= 0)); )
+        N++, c <<= 1;
+      if (r += 1 << N, A === lQ && r > sC || A === hC && r > tC)
         return 1;
-      r = N & n, B[r] = e << 24 | h << 16 | M - C | 0;
+      y = G & S, B[y] = e << 24 | N << 16 | k - C | 0;
     }
   }
-  return N !== 0 && (B[M + N] = D - a << 24 | 64 << 16 | 0), i.bits = e, 0;
+  return G !== 0 && (B[k + G] = D - h << 24 | 64 << 16 | 0), i.bits = e, 0;
 };
-var _I = cw;
-const Fw = 0, fE = 1, KE = 2, {
-  Z_FINISH: hC,
-  Z_BLOCK: Uw,
+var _I = Fw;
+const Uw = 0, KE = 1, dE = 2, {
+  Z_FINISH: aC,
+  Z_BLOCK: Jw,
   Z_TREES: Yg,
   Z_OK: oI,
-  Z_STREAM_END: Jw,
-  Z_NEED_DICT: Lw,
+  Z_STREAM_END: Lw,
+  Z_NEED_DICT: rw,
   Z_STREAM_ERROR: cA,
-  Z_DATA_ERROR: dE,
-  Z_MEM_ERROR: OE,
+  Z_DATA_ERROR: OE,
+  Z_MEM_ERROR: qE,
   Z_BUF_ERROR: Rw,
-  Z_DEFLATED: aC
-} = wg, Xg = 16180, NC = 16181, kC = 16182, MC = 16183, GC = 16184, cC = 16185, FC = 16186, UC = 16187, JC = 16188, LC = 16189, mg = 16190, lA = 16191, fQ = 16192, RC = 16193, KQ = 16194, rC = 16195, yC = 16196, nC = 16197, SC = 16198, lg = 16199, fg = 16200, HC = 16201, YC = 16202, lC = 16203, fC = 16204, KC = 16205, dQ = 16206, dC = 16207, OC = 16208, z = 16209, qE = 16210, TE = 16211, rw = 852, yw = 592, nw = 15, Sw = nw, qC = (A) => (A >>> 24 & 255) + (A >>> 8 & 65280) + ((A & 65280) << 8) + ((A & 255) << 24);
-function Hw() {
+  Z_DEFLATED: NC
+} = wg, Xg = 16180, kC = 16181, MC = 16182, GC = 16183, cC = 16184, FC = 16185, UC = 16186, JC = 16187, LC = 16188, rC = 16189, mg = 16190, lA = 16191, fQ = 16192, RC = 16193, KQ = 16194, yC = 16195, nC = 16196, SC = 16197, HC = 16198, lg = 16199, fg = 16200, YC = 16201, lC = 16202, fC = 16203, KC = 16204, dC = 16205, dQ = 16206, OC = 16207, qC = 16208, z = 16209, TE = 16210, xE = 16211, yw = 852, nw = 592, Sw = 15, Hw = Sw, TC = (A) => (A >>> 24 & 255) + (A >>> 8 & 65280) + ((A & 65280) << 8) + ((A & 255) << 24);
+function Yw() {
   this.strm = null, this.mode = 0, this.last = !1, this.wrap = 0, this.havedict = !1, this.flags = 0, this.dmax = 0, this.check = 0, this.total = 0, this.head = null, this.wbits = 0, this.wsize = 0, this.whave = 0, this.wnext = 0, this.window = null, this.hold = 0, this.bits = 0, this.length = 0, this.offset = 0, this.extra = 0, this.lencode = null, this.distcode = null, this.lenbits = 0, this.distbits = 0, this.ncode = 0, this.nlen = 0, this.ndist = 0, this.have = 0, this.next = null, this.lens = new Uint16Array(320), this.work = new Uint16Array(288), this.lendyn = null, this.distdyn = null, this.sane = 0, this.back = 0, this.was = 0;
 }
 const sI = (A) => {
   if (!A)
     return 1;
   const I = A.state;
-  return !I || I.strm !== A || I.mode < Xg || I.mode > TE ? 1 : 0;
-}, xE = (A) => {
-  if (sI(A))
-    return cA;
-  const I = A.state;
-  return A.total_in = A.total_out = I.total = 0, A.msg = "", I.wrap && (A.adler = I.wrap & 1), I.mode = Xg, I.last = 0, I.havedict = 0, I.flags = -1, I.dmax = 32768, I.head = null, I.hold = 0, I.bits = 0, I.lencode = I.lendyn = new Int32Array(rw), I.distcode = I.distdyn = new Int32Array(yw), I.sane = 1, I.back = -1, oI;
+  return !I || I.strm !== A || I.mode < Xg || I.mode > xE ? 1 : 0;
 }, pE = (A) => {
   if (sI(A))
     return cA;
   const I = A.state;
-  return I.wsize = 0, I.whave = 0, I.wnext = 0, xE(A);
-}, uE = (A, I) => {
+  return A.total_in = A.total_out = I.total = 0, A.msg = "", I.wrap && (A.adler = I.wrap & 1), I.mode = Xg, I.last = 0, I.havedict = 0, I.flags = -1, I.dmax = 32768, I.head = null, I.hold = 0, I.bits = 0, I.lencode = I.lendyn = new Int32Array(yw), I.distcode = I.distdyn = new Int32Array(nw), I.sane = 1, I.back = -1, oI;
+}, uE = (A) => {
+  if (sI(A))
+    return cA;
+  const I = A.state;
+  return I.wsize = 0, I.whave = 0, I.wnext = 0, pE(A);
+}, bE = (A, I) => {
   let g;
   if (sI(A))
     return cA;
   const Q = A.state;
-  return I < 0 ? (g = 0, I = -I) : (g = (I >> 4) + 5, I < 48 && (I &= 15)), I && (I < 8 || I > 15) ? cA : (Q.window !== null && Q.wbits !== I && (Q.window = null), Q.wrap = g, Q.wbits = I, pE(A));
-}, bE = (A, I) => {
+  return I < 0 ? (g = 0, I = -I) : (g = (I >> 4) + 5, I < 48 && (I &= 15)), I && (I < 8 || I > 15) ? cA : (Q.window !== null && Q.wbits !== I && (Q.window = null), Q.wrap = g, Q.wbits = I, uE(A));
+}, mE = (A, I) => {
   if (!A)
     return cA;
-  const g = new Hw();
+  const g = new Yw();
   A.state = g, g.strm = A, g.window = null, g.mode = Xg;
-  const Q = uE(A, I);
+  const Q = bE(A, I);
   return Q !== oI && (A.state = null), Q;
-}, Yw = (A) => bE(A, Sw);
-let TC = !0, OQ, qQ;
-const lw = (A) => {
-  if (TC) {
+}, lw = (A) => mE(A, Hw);
+let xC = !0, OQ, qQ;
+const fw = (A) => {
+  if (xC) {
     OQ = new Int32Array(512), qQ = new Int32Array(32);
     let I = 0;
     for (; I < 144; )
@@ -1679,26 +1679,26 @@ const lw = (A) => {
       A.lens[I++] = 7;
     for (; I < 288; )
       A.lens[I++] = 8;
-    for (_I(fE, A.lens, 0, 288, OQ, 0, A.work, { bits: 9 }), I = 0; I < 32; )
+    for (_I(KE, A.lens, 0, 288, OQ, 0, A.work, { bits: 9 }), I = 0; I < 32; )
       A.lens[I++] = 5;
-    _I(KE, A.lens, 0, 32, qQ, 0, A.work, { bits: 5 }), TC = !1;
+    _I(dE, A.lens, 0, 32, qQ, 0, A.work, { bits: 5 }), xC = !1;
   }
   A.lencode = OQ, A.lenbits = 9, A.distcode = qQ, A.distbits = 5;
-}, mE = (A, I, g, Q) => {
+}, PE = (A, I, g, Q) => {
   let B;
   const C = A.state;
   return C.window === null && (C.wsize = 1 << C.wbits, C.wnext = 0, C.whave = 0, C.window = new Uint8Array(C.wsize)), Q >= C.wsize ? (C.window.set(I.subarray(g - C.wsize, g), 0), C.wnext = 0, C.whave = C.wsize) : (B = C.wsize - C.wnext, B > Q && (B = Q), C.window.set(I.subarray(g - Q, g - Q + B), C.wnext), Q -= B, Q ? (C.window.set(I.subarray(g - Q, g), 0), C.wnext = Q, C.whave = C.wsize) : (C.wnext += B, C.wnext === C.wsize && (C.wnext = 0), C.whave < C.wsize && (C.whave += B))), 0;
-}, fw = (A, I) => {
-  let g, Q, B, C, E, i, o, D, w, t, s, e, h, a, G = 0, R, N, L, J, r, n, M, k;
-  const U = new Uint8Array(4);
-  let c, y;
-  const T = (
+}, Kw = (A, I) => {
+  let g, Q, B, C, E, i, o, D, w, s, t, e, N, h, c = 0, r, G, U, F, y, S, k, L;
+  const J = new Uint8Array(4);
+  let a, R;
+  const f = (
     /* permutation of code lengths */
     new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15])
   );
   if (sI(A) || !A.output || !A.input && A.avail_in !== 0)
     return cA;
-  g = A.state, g.mode === lA && (g.mode = fQ), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, t = i, s = o, k = oI;
+  g = A.state, g.mode === lA && (g.mode = fQ), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, s = i, t = o, L = oI;
   A:
     for (; ; )
       switch (g.mode) {
@@ -1713,7 +1713,7 @@ const lw = (A) => {
             i--, D += Q[C++] << w, w += 8;
           }
           if (g.wrap & 2 && D === 35615) {
-            g.wbits === 0 && (g.wbits = 15), g.check = 0, U[0] = D & 255, U[1] = D >>> 8 & 255, g.check = gA(g.check, U, 2, 0), D = 0, w = 0, g.mode = NC;
+            g.wbits === 0 && (g.wbits = 15), g.check = 0, J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0), D = 0, w = 0, g.mode = kC;
             break;
           }
           if (g.head && (g.head.done = !1), !(g.wrap & 1) || /* check if zlib header allowed */
@@ -1721,23 +1721,23 @@ const lw = (A) => {
             A.msg = "incorrect header check", g.mode = z;
             break;
           }
-          if ((D & 15) !== aC) {
+          if ((D & 15) !== NC) {
             A.msg = "unknown compression method", g.mode = z;
             break;
           }
-          if (D >>>= 4, w -= 4, M = (D & 15) + 8, g.wbits === 0 && (g.wbits = M), M > 15 || M > g.wbits) {
+          if (D >>>= 4, w -= 4, k = (D & 15) + 8, g.wbits === 0 && (g.wbits = k), k > 15 || k > g.wbits) {
             A.msg = "invalid window size", g.mode = z;
             break;
           }
-          g.dmax = 1 << g.wbits, g.flags = 0, A.adler = g.check = 1, g.mode = D & 512 ? LC : lA, D = 0, w = 0;
+          g.dmax = 1 << g.wbits, g.flags = 0, A.adler = g.check = 1, g.mode = D & 512 ? rC : lA, D = 0, w = 0;
           break;
-        case NC:
+        case kC:
           for (; w < 16; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          if (g.flags = D, (g.flags & 255) !== aC) {
+          if (g.flags = D, (g.flags & 255) !== NC) {
             A.msg = "unknown compression method", g.mode = z;
             break;
           }
@@ -1745,34 +1745,34 @@ const lw = (A) => {
             A.msg = "unknown header flags set", g.mode = z;
             break;
           }
-          g.head && (g.head.text = D >> 8 & 1), g.flags & 512 && g.wrap & 4 && (U[0] = D & 255, U[1] = D >>> 8 & 255, g.check = gA(g.check, U, 2, 0)), D = 0, w = 0, g.mode = kC;
-        case kC:
+          g.head && (g.head.text = D >> 8 & 1), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = MC;
+        case MC:
           for (; w < 32; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          g.head && (g.head.time = D), g.flags & 512 && g.wrap & 4 && (U[0] = D & 255, U[1] = D >>> 8 & 255, U[2] = D >>> 16 & 255, U[3] = D >>> 24 & 255, g.check = gA(g.check, U, 4, 0)), D = 0, w = 0, g.mode = MC;
-        case MC:
+          g.head && (g.head.time = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, J[2] = D >>> 16 & 255, J[3] = D >>> 24 & 255, g.check = gA(g.check, J, 4, 0)), D = 0, w = 0, g.mode = GC;
+        case GC:
           for (; w < 16; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          g.head && (g.head.xflags = D & 255, g.head.os = D >> 8), g.flags & 512 && g.wrap & 4 && (U[0] = D & 255, U[1] = D >>> 8 & 255, g.check = gA(g.check, U, 2, 0)), D = 0, w = 0, g.mode = GC;
-        case GC:
+          g.head && (g.head.xflags = D & 255, g.head.os = D >> 8), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = cC;
+        case cC:
           if (g.flags & 1024) {
             for (; w < 16; ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
-            g.length = D, g.head && (g.head.extra_len = D), g.flags & 512 && g.wrap & 4 && (U[0] = D & 255, U[1] = D >>> 8 & 255, g.check = gA(g.check, U, 2, 0)), D = 0, w = 0;
+            g.length = D, g.head && (g.head.extra_len = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0;
           } else
             g.head && (g.head.extra = null);
-          g.mode = cC;
-        case cC:
-          if (g.flags & 1024 && (e = g.length, e > i && (e = i), e && (g.head && (M = g.head.extra_len - g.length, g.head.extra || (g.head.extra = new Uint8Array(g.head.extra_len)), g.head.extra.set(
+          g.mode = FC;
+        case FC:
+          if (g.flags & 1024 && (e = g.length, e > i && (e = i), e && (g.head && (k = g.head.extra_len - g.length, g.head.extra || (g.head.extra = new Uint8Array(g.head.extra_len)), g.head.extra.set(
             Q.subarray(
               C,
               // extra field is limited to 65536 bytes
@@ -1780,37 +1780,37 @@ const lw = (A) => {
               C + e
             ),
             /*len + copy > state.head.extra_max - len ? state.head.extra_max : copy,*/
-            M
+            k
           )), g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, g.length -= e), g.length))
             break A;
-          g.length = 0, g.mode = FC;
-        case FC:
+          g.length = 0, g.mode = UC;
+        case UC:
           if (g.flags & 2048) {
             if (i === 0)
               break A;
             e = 0;
             do
-              M = Q[C + e++], g.head && M && g.length < 65536 && (g.head.name += String.fromCharCode(M));
-            while (M && e < i);
-            if (g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, M)
+              k = Q[C + e++], g.head && k && g.length < 65536 && (g.head.name += String.fromCharCode(k));
+            while (k && e < i);
+            if (g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, k)
               break A;
           } else
             g.head && (g.head.name = null);
-          g.length = 0, g.mode = UC;
-        case UC:
+          g.length = 0, g.mode = JC;
+        case JC:
           if (g.flags & 4096) {
             if (i === 0)
               break A;
             e = 0;
             do
-              M = Q[C + e++], g.head && M && g.length < 65536 && (g.head.comment += String.fromCharCode(M));
-            while (M && e < i);
-            if (g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, M)
+              k = Q[C + e++], g.head && k && g.length < 65536 && (g.head.comment += String.fromCharCode(k));
+            while (k && e < i);
+            if (g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, k)
               break A;
           } else
             g.head && (g.head.comment = null);
-          g.mode = JC;
-        case JC:
+          g.mode = LC;
+        case LC:
           if (g.flags & 512) {
             for (; w < 16; ) {
               if (i === 0)
@@ -1825,19 +1825,19 @@ const lw = (A) => {
           }
           g.head && (g.head.hcrc = g.flags >> 9 & 1, g.head.done = !0), A.adler = g.check = 0, g.mode = lA;
           break;
-        case LC:
+        case rC:
           for (; w < 32; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          A.adler = g.check = qC(D), D = 0, w = 0, g.mode = mg;
+          A.adler = g.check = TC(D), D = 0, w = 0, g.mode = mg;
         case mg:
           if (g.havedict === 0)
-            return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, Lw;
+            return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, rw;
           A.adler = g.check = 1, g.mode = lA;
         case lA:
-          if (I === Uw || I === Yg)
+          if (I === Jw || I === Yg)
             break A;
         case fQ:
           if (g.last) {
@@ -1854,13 +1854,13 @@ const lw = (A) => {
               g.mode = RC;
               break;
             case 1:
-              if (lw(g), g.mode = lg, I === Yg) {
+              if (fw(g), g.mode = lg, I === Yg) {
                 D >>>= 2, w -= 2;
                 break A;
               }
               break;
             case 2:
-              g.mode = yC;
+              g.mode = nC;
               break;
             case 3:
               A.msg = "invalid block type", g.mode = z;
@@ -1880,8 +1880,8 @@ const lw = (A) => {
           if (g.length = D & 65535, D = 0, w = 0, g.mode = KQ, I === Yg)
             break A;
         case KQ:
-          g.mode = rC;
-        case rC:
+          g.mode = yC;
+        case yC:
           if (e = g.length, e) {
             if (e > i && (e = i), e > o && (e = o), e === 0)
               break A;
@@ -1890,7 +1890,7 @@ const lw = (A) => {
           }
           g.mode = lA;
           break;
-        case yC:
+        case nC:
           for (; w < 14; ) {
             if (i === 0)
               break A;
@@ -1900,65 +1900,65 @@ const lw = (A) => {
             A.msg = "too many length or distance symbols", g.mode = z;
             break;
           }
-          g.have = 0, g.mode = nC;
-        case nC:
+          g.have = 0, g.mode = SC;
+        case SC:
           for (; g.have < g.ncode; ) {
             for (; w < 3; ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
-            g.lens[T[g.have++]] = D & 7, D >>>= 3, w -= 3;
+            g.lens[f[g.have++]] = D & 7, D >>>= 3, w -= 3;
           }
           for (; g.have < 19; )
-            g.lens[T[g.have++]] = 0;
-          if (g.lencode = g.lendyn, g.lenbits = 7, c = { bits: g.lenbits }, k = _I(Fw, g.lens, 0, 19, g.lencode, 0, g.work, c), g.lenbits = c.bits, k) {
+            g.lens[f[g.have++]] = 0;
+          if (g.lencode = g.lendyn, g.lenbits = 7, a = { bits: g.lenbits }, L = _I(Uw, g.lens, 0, 19, g.lencode, 0, g.work, a), g.lenbits = a.bits, L) {
             A.msg = "invalid code lengths set", g.mode = z;
             break;
           }
-          g.have = 0, g.mode = SC;
-        case SC:
+          g.have = 0, g.mode = HC;
+        case HC:
           for (; g.have < g.nlen + g.ndist; ) {
-            for (; G = g.lencode[D & (1 << g.lenbits) - 1], R = G >>> 24, N = G >>> 16 & 255, L = G & 65535, !(R <= w); ) {
+            for (; c = g.lencode[D & (1 << g.lenbits) - 1], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(r <= w); ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
-            if (L < 16)
-              D >>>= R, w -= R, g.lens[g.have++] = L;
+            if (U < 16)
+              D >>>= r, w -= r, g.lens[g.have++] = U;
             else {
-              if (L === 16) {
-                for (y = R + 2; w < y; ) {
+              if (U === 16) {
+                for (R = r + 2; w < R; ) {
                   if (i === 0)
                     break A;
                   i--, D += Q[C++] << w, w += 8;
                 }
-                if (D >>>= R, w -= R, g.have === 0) {
+                if (D >>>= r, w -= r, g.have === 0) {
                   A.msg = "invalid bit length repeat", g.mode = z;
                   break;
                 }
-                M = g.lens[g.have - 1], e = 3 + (D & 3), D >>>= 2, w -= 2;
-              } else if (L === 17) {
-                for (y = R + 3; w < y; ) {
+                k = g.lens[g.have - 1], e = 3 + (D & 3), D >>>= 2, w -= 2;
+              } else if (U === 17) {
+                for (R = r + 3; w < R; ) {
                   if (i === 0)
                     break A;
                   i--, D += Q[C++] << w, w += 8;
                 }
-                D >>>= R, w -= R, M = 0, e = 3 + (D & 7), D >>>= 3, w -= 3;
+                D >>>= r, w -= r, k = 0, e = 3 + (D & 7), D >>>= 3, w -= 3;
               } else {
-                for (y = R + 7; w < y; ) {
+                for (R = r + 7; w < R; ) {
                   if (i === 0)
                     break A;
                   i--, D += Q[C++] << w, w += 8;
                 }
-                D >>>= R, w -= R, M = 0, e = 11 + (D & 127), D >>>= 7, w -= 7;
+                D >>>= r, w -= r, k = 0, e = 11 + (D & 127), D >>>= 7, w -= 7;
               }
               if (g.have + e > g.nlen + g.ndist) {
                 A.msg = "invalid bit length repeat", g.mode = z;
                 break;
               }
               for (; e--; )
-                g.lens[g.have++] = M;
+                g.lens[g.have++] = k;
             }
           }
           if (g.mode === z)
@@ -1967,11 +1967,11 @@ const lw = (A) => {
             A.msg = "invalid code -- missing end-of-block", g.mode = z;
             break;
           }
-          if (g.lenbits = 9, c = { bits: g.lenbits }, k = _I(fE, g.lens, 0, g.nlen, g.lencode, 0, g.work, c), g.lenbits = c.bits, k) {
+          if (g.lenbits = 9, a = { bits: g.lenbits }, L = _I(KE, g.lens, 0, g.nlen, g.lencode, 0, g.work, a), g.lenbits = a.bits, L) {
             A.msg = "invalid literal/lengths set", g.mode = z;
             break;
           }
-          if (g.distbits = 6, g.distcode = g.distdyn, c = { bits: g.distbits }, k = _I(KE, g.lens, g.nlen, g.ndist, g.distcode, 0, g.work, c), g.distbits = c.bits, k) {
+          if (g.distbits = 6, g.distcode = g.distdyn, a = { bits: g.distbits }, L = _I(dE, g.lens, g.nlen, g.ndist, g.distcode, 0, g.work, a), g.distbits = a.bits, L) {
             A.msg = "invalid distances set", g.mode = z;
             break;
           }
@@ -1981,67 +1981,67 @@ const lw = (A) => {
           g.mode = fg;
         case fg:
           if (i >= 6 && o >= 258) {
-            A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, aw(A, s), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, g.mode === lA && (g.back = -1);
+            A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, Nw(A, t), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, g.mode === lA && (g.back = -1);
             break;
           }
-          for (g.back = 0; G = g.lencode[D & (1 << g.lenbits) - 1], R = G >>> 24, N = G >>> 16 & 255, L = G & 65535, !(R <= w); ) {
+          for (g.back = 0; c = g.lencode[D & (1 << g.lenbits) - 1], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(r <= w); ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          if (N && !(N & 240)) {
-            for (J = R, r = N, n = L; G = g.lencode[n + ((D & (1 << J + r) - 1) >> J)], R = G >>> 24, N = G >>> 16 & 255, L = G & 65535, !(J + R <= w); ) {
+          if (G && !(G & 240)) {
+            for (F = r, y = G, S = U; c = g.lencode[S + ((D & (1 << F + y) - 1) >> F)], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(F + r <= w); ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
-            D >>>= J, w -= J, g.back += J;
+            D >>>= F, w -= F, g.back += F;
           }
-          if (D >>>= R, w -= R, g.back += R, g.length = L, N === 0) {
-            g.mode = KC;
+          if (D >>>= r, w -= r, g.back += r, g.length = U, G === 0) {
+            g.mode = dC;
             break;
           }
-          if (N & 32) {
+          if (G & 32) {
             g.back = -1, g.mode = lA;
             break;
           }
-          if (N & 64) {
+          if (G & 64) {
             A.msg = "invalid literal/length code", g.mode = z;
             break;
           }
-          g.extra = N & 15, g.mode = HC;
-        case HC:
+          g.extra = G & 15, g.mode = YC;
+        case YC:
           if (g.extra) {
-            for (y = g.extra; w < y; ) {
+            for (R = g.extra; w < R; ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
             g.length += D & (1 << g.extra) - 1, D >>>= g.extra, w -= g.extra, g.back += g.extra;
           }
-          g.was = g.length, g.mode = YC;
-        case YC:
-          for (; G = g.distcode[D & (1 << g.distbits) - 1], R = G >>> 24, N = G >>> 16 & 255, L = G & 65535, !(R <= w); ) {
+          g.was = g.length, g.mode = lC;
+        case lC:
+          for (; c = g.distcode[D & (1 << g.distbits) - 1], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(r <= w); ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          if (!(N & 240)) {
-            for (J = R, r = N, n = L; G = g.distcode[n + ((D & (1 << J + r) - 1) >> J)], R = G >>> 24, N = G >>> 16 & 255, L = G & 65535, !(J + R <= w); ) {
+          if (!(G & 240)) {
+            for (F = r, y = G, S = U; c = g.distcode[S + ((D & (1 << F + y) - 1) >> F)], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(F + r <= w); ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
-            D >>>= J, w -= J, g.back += J;
+            D >>>= F, w -= F, g.back += F;
           }
-          if (D >>>= R, w -= R, g.back += R, N & 64) {
+          if (D >>>= r, w -= r, g.back += r, G & 64) {
             A.msg = "invalid distance code", g.mode = z;
             break;
           }
-          g.offset = L, g.extra = N & 15, g.mode = lC;
-        case lC:
+          g.offset = U, g.extra = G & 15, g.mode = fC;
+        case fC:
           if (g.extra) {
-            for (y = g.extra; w < y; ) {
+            for (R = g.extra; w < R; ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
@@ -2052,25 +2052,25 @@ const lw = (A) => {
             A.msg = "invalid distance too far back", g.mode = z;
             break;
           }
-          g.mode = fC;
-        case fC:
+          g.mode = KC;
+        case KC:
           if (o === 0)
             break A;
-          if (e = s - o, g.offset > e) {
+          if (e = t - o, g.offset > e) {
             if (e = g.offset - e, e > g.whave && g.sane) {
               A.msg = "invalid distance too far back", g.mode = z;
               break;
             }
-            e > g.wnext ? (e -= g.wnext, h = g.wsize - e) : h = g.wnext - e, e > g.length && (e = g.length), a = g.window;
+            e > g.wnext ? (e -= g.wnext, N = g.wsize - e) : N = g.wnext - e, e > g.length && (e = g.length), h = g.window;
           } else
-            a = B, h = E - g.offset, e = g.length;
+            h = B, N = E - g.offset, e = g.length;
           e > o && (e = o), o -= e, g.length -= e;
           do
-            B[E++] = a[h++];
+            B[E++] = h[N++];
           while (--e);
           g.length === 0 && (g.mode = fg);
           break;
-        case KC:
+        case dC:
           if (o === 0)
             break A;
           B[E++] = g.length, o--, g.mode = fg;
@@ -2082,15 +2082,15 @@ const lw = (A) => {
                 break A;
               i--, D |= Q[C++] << w, w += 8;
             }
-            if (s -= o, A.total_out += s, g.total += s, g.wrap & 4 && s && (A.adler = g.check = /*UPDATE_CHECK(state.check, put - _out, _out);*/
-            g.flags ? gA(g.check, B, s, E - s) : Bg(g.check, B, s, E - s)), s = o, g.wrap & 4 && (g.flags ? D : qC(D)) !== g.check) {
+            if (t -= o, A.total_out += t, g.total += t, g.wrap & 4 && t && (A.adler = g.check = /*UPDATE_CHECK(state.check, put - _out, _out);*/
+            g.flags ? gA(g.check, B, t, E - t) : Bg(g.check, B, t, E - t)), t = o, g.wrap & 4 && (g.flags ? D : TC(D)) !== g.check) {
               A.msg = "incorrect data check", g.mode = z;
               break;
             }
             D = 0, w = 0;
           }
-          g.mode = dC;
-        case dC:
+          g.mode = OC;
+        case OC:
           if (g.wrap && g.flags) {
             for (; w < 32; ) {
               if (i === 0)
@@ -2103,61 +2103,61 @@ const lw = (A) => {
             }
             D = 0, w = 0;
           }
-          g.mode = OC;
-        case OC:
-          k = Jw;
+          g.mode = qC;
+        case qC:
+          L = Lw;
           break A;
         case z:
-          k = dE;
+          L = OE;
           break A;
-        case qE:
-          return OE;
         case TE:
+          return qE;
+        case xE:
         default:
           return cA;
       }
-  return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, (g.wsize || s !== A.avail_out && g.mode < z && (g.mode < dQ || I !== hC)) && mE(A, A.output, A.next_out, s - A.avail_out), t -= A.avail_in, s -= A.avail_out, A.total_in += t, A.total_out += s, g.total += s, g.wrap & 4 && s && (A.adler = g.check = /*UPDATE_CHECK(state.check, strm.next_out - _out, _out);*/
-  g.flags ? gA(g.check, B, s, A.next_out - s) : Bg(g.check, B, s, A.next_out - s)), A.data_type = g.bits + (g.last ? 64 : 0) + (g.mode === lA ? 128 : 0) + (g.mode === lg || g.mode === KQ ? 256 : 0), (t === 0 && s === 0 || I === hC) && k === oI && (k = Rw), k;
-}, Kw = (A) => {
+  return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, (g.wsize || t !== A.avail_out && g.mode < z && (g.mode < dQ || I !== aC)) && PE(A, A.output, A.next_out, t - A.avail_out), s -= A.avail_in, t -= A.avail_out, A.total_in += s, A.total_out += t, g.total += t, g.wrap & 4 && t && (A.adler = g.check = /*UPDATE_CHECK(state.check, strm.next_out - _out, _out);*/
+  g.flags ? gA(g.check, B, t, A.next_out - t) : Bg(g.check, B, t, A.next_out - t)), A.data_type = g.bits + (g.last ? 64 : 0) + (g.mode === lA ? 128 : 0) + (g.mode === lg || g.mode === KQ ? 256 : 0), (s === 0 && t === 0 || I === aC) && L === oI && (L = Rw), L;
+}, dw = (A) => {
   if (sI(A))
     return cA;
   let I = A.state;
   return I.window && (I.window = null), A.state = null, oI;
-}, dw = (A, I) => {
+}, Ow = (A, I) => {
   if (sI(A))
     return cA;
   const g = A.state;
   return g.wrap & 2 ? (g.head = I, I.done = !1, oI) : cA;
-}, Ow = (A, I) => {
+}, qw = (A, I) => {
   const g = I.length;
   let Q, B, C;
-  return sI(A) || (Q = A.state, Q.wrap !== 0 && Q.mode !== mg) ? cA : Q.mode === mg && (B = 1, B = Bg(B, I, g, 0), B !== Q.check) ? dE : (C = mE(A, I, g, g), C ? (Q.mode = qE, OE) : (Q.havedict = 1, oI));
+  return sI(A) || (Q = A.state, Q.wrap !== 0 && Q.mode !== mg) ? cA : Q.mode === mg && (B = 1, B = Bg(B, I, g, 0), B !== Q.check) ? OE : (C = PE(A, I, g, g), C ? (Q.mode = TE, qE) : (Q.havedict = 1, oI));
 };
-var qw = pE, Tw = uE, xw = xE, pw = Yw, uw = bE, bw = fw, mw = Kw, Pw = dw, jw = Ow, Vw = "pako inflate (from Nodeca project)", qA = {
-  inflateReset: qw,
-  inflateReset2: Tw,
-  inflateResetKeep: xw,
-  inflateInit: pw,
-  inflateInit2: uw,
-  inflate: bw,
-  inflateEnd: mw,
-  inflateGetHeader: Pw,
-  inflateSetDictionary: jw,
-  inflateInfo: Vw
+var Tw = uE, xw = bE, pw = pE, uw = lw, bw = mE, mw = Kw, Pw = dw, jw = Ow, Vw = qw, Zw = "pako inflate (from Nodeca project)", qA = {
+  inflateReset: Tw,
+  inflateReset2: xw,
+  inflateResetKeep: pw,
+  inflateInit: uw,
+  inflateInit2: bw,
+  inflate: mw,
+  inflateEnd: Pw,
+  inflateGetHeader: jw,
+  inflateSetDictionary: Vw,
+  inflateInfo: Zw
 };
-function Zw() {
+function Xw() {
   this.text = 0, this.time = 0, this.xflags = 0, this.os = 0, this.extra = null, this.extra_len = 0, this.name = "", this.comment = "", this.hcrc = 0, this.done = !1;
 }
-var Xw = Zw;
-const PE = Object.prototype.toString, {
-  Z_NO_FLUSH: vw,
-  Z_FINISH: zw,
+var vw = Xw;
+const jE = Object.prototype.toString, {
+  Z_NO_FLUSH: zw,
+  Z_FINISH: Ww,
   Z_OK: ig,
   Z_STREAM_END: TQ,
   Z_NEED_DICT: xQ,
-  Z_STREAM_ERROR: Ww,
-  Z_DATA_ERROR: xC,
-  Z_MEM_ERROR: _w
+  Z_STREAM_ERROR: _w,
+  Z_DATA_ERROR: pC,
+  Z_MEM_ERROR: $w
 } = wg;
 function sg(A) {
   this.options = Zg.assign({
@@ -2166,29 +2166,29 @@ function sg(A) {
     to: ""
   }, A || {});
   const I = this.options;
-  I.raw && I.windowBits >= 0 && I.windowBits < 16 && (I.windowBits = -I.windowBits, I.windowBits === 0 && (I.windowBits = -15)), I.windowBits >= 0 && I.windowBits < 16 && !(A && A.windowBits) && (I.windowBits += 32), I.windowBits > 15 && I.windowBits < 48 && (I.windowBits & 15 || (I.windowBits |= 15)), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new YE(), this.strm.avail_out = 0;
+  I.raw && I.windowBits >= 0 && I.windowBits < 16 && (I.windowBits = -I.windowBits, I.windowBits === 0 && (I.windowBits = -15)), I.windowBits >= 0 && I.windowBits < 16 && !(A && A.windowBits) && (I.windowBits += 32), I.windowBits > 15 && I.windowBits < 48 && (I.windowBits & 15 || (I.windowBits |= 15)), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new lE(), this.strm.avail_out = 0;
   let g = qA.inflateInit2(
     this.strm,
     I.windowBits
   );
   if (g !== ig)
-    throw new Error(rI[g]);
-  if (this.header = new Xw(), qA.inflateGetHeader(this.strm, this.header), I.dictionary && (typeof I.dictionary == "string" ? I.dictionary = Eg.string2buf(I.dictionary) : PE.call(I.dictionary) === "[object ArrayBuffer]" && (I.dictionary = new Uint8Array(I.dictionary)), I.raw && (g = qA.inflateSetDictionary(this.strm, I.dictionary), g !== ig)))
-    throw new Error(rI[g]);
+    throw new Error(RI[g]);
+  if (this.header = new vw(), qA.inflateGetHeader(this.strm, this.header), I.dictionary && (typeof I.dictionary == "string" ? I.dictionary = Eg.string2buf(I.dictionary) : jE.call(I.dictionary) === "[object ArrayBuffer]" && (I.dictionary = new Uint8Array(I.dictionary)), I.raw && (g = qA.inflateSetDictionary(this.strm, I.dictionary), g !== ig)))
+    throw new Error(RI[g]);
 }
 sg.prototype.push = function(A, I) {
   const g = this.strm, Q = this.options.chunkSize, B = this.options.dictionary;
   let C, E, i;
   if (this.ended)
     return !1;
-  for (I === ~~I ? E = I : E = I === !0 ? zw : vw, PE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
-    for (g.avail_out === 0 && (g.output = new Uint8Array(Q), g.next_out = 0, g.avail_out = Q), C = qA.inflate(g, E), C === xQ && B && (C = qA.inflateSetDictionary(g, B), C === ig ? C = qA.inflate(g, E) : C === xC && (C = xQ)); g.avail_in > 0 && C === TQ && g.state.wrap > 0 && A[g.next_in] !== 0; )
+  for (I === ~~I ? E = I : E = I === !0 ? Ww : zw, jE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
+    for (g.avail_out === 0 && (g.output = new Uint8Array(Q), g.next_out = 0, g.avail_out = Q), C = qA.inflate(g, E), C === xQ && B && (C = qA.inflateSetDictionary(g, B), C === ig ? C = qA.inflate(g, E) : C === pC && (C = xQ)); g.avail_in > 0 && C === TQ && g.state.wrap > 0 && A[g.next_in] !== 0; )
       qA.inflateReset(g), C = qA.inflate(g, E);
     switch (C) {
-      case Ww:
-      case xC:
-      case xQ:
       case _w:
+      case pC:
+      case xQ:
+      case $w:
         return this.onEnd(C), this.ended = !0, !1;
     }
     if (i = g.avail_out, g.next_out && (g.avail_out === 0 || C === TQ))
@@ -2212,58 +2212,58 @@ sg.prototype.onData = function(A) {
 sg.prototype.onEnd = function(A) {
   A === ig && (this.options.to === "string" ? this.result = this.chunks.join("") : this.result = Zg.flattenChunks(this.chunks)), this.chunks = [], this.err = A, this.msg = this.strm.msg;
 };
-function aB(A, I) {
+function NB(A, I) {
   const g = new sg(I);
   if (g.push(A), g.err)
-    throw g.msg || rI[g.err];
+    throw g.msg || RI[g.err];
   return g.result;
 }
-function $w(A, I) {
-  return I = I || {}, I.raw = !0, aB(A, I);
+function Ao(A, I) {
+  return I = I || {}, I.raw = !0, NB(A, I);
 }
-var Ao = sg, Io = aB, go = $w, Qo = aB, Bo = wg, Co = {
-  Inflate: Ao,
-  inflate: Io,
-  inflateRaw: go,
-  ungzip: Qo,
-  constants: Bo
+var Io = sg, go = NB, Qo = Ao, Bo = NB, Co = wg, Eo = {
+  Inflate: Io,
+  inflate: go,
+  inflateRaw: Qo,
+  ungzip: Bo,
+  constants: Co
 };
-const { Inflate: Eo, inflate: io, inflateRaw: Os, ungzip: qs } = Co;
-var pC = Eo, Do = io;
-const jE = [];
+const { Inflate: io, inflate: Do, inflateRaw: Ts, ungzip: xs } = Eo;
+var uC = io, wo = Do;
+const VE = [];
 for (let A = 0; A < 256; A++) {
   let I = A;
   for (let g = 0; g < 8; g++)
     I & 1 ? I = 3988292384 ^ I >>> 1 : I = I >>> 1;
-  jE[A] = I;
+  VE[A] = I;
 }
-const uC = 4294967295;
-function wo(A, I, g) {
+const bC = 4294967295;
+function oo(A, I, g) {
   let Q = A;
   for (let B = 0; B < g; B++)
-    Q = jE[(Q ^ I[B]) & 255] ^ Q >>> 8;
+    Q = VE[(Q ^ I[B]) & 255] ^ Q >>> 8;
   return Q;
 }
-function oo(A, I) {
-  return (wo(uC, A, I) ^ uC) >>> 0;
+function so(A, I) {
+  return (oo(bC, A, I) ^ bC) >>> 0;
 }
-function bC(A, I, g) {
-  const Q = A.readUint32(), B = oo(new Uint8Array(A.buffer, A.byteOffset + A.offset - I - 4, I), I);
+function mC(A, I, g) {
+  const Q = A.readUint32(), B = so(new Uint8Array(A.buffer, A.byteOffset + A.offset - I - 4, I), I);
   if (B !== Q)
     throw new Error(`CRC mismatch for chunk ${g}. Expected ${Q}, found ${B}`);
 }
-function VE(A, I, g) {
+function ZE(A, I, g) {
   for (let Q = 0; Q < g; Q++)
     I[Q] = A[Q];
 }
-function ZE(A, I, g, Q) {
+function XE(A, I, g, Q) {
   let B = 0;
   for (; B < Q; B++)
     I[B] = A[B];
   for (; B < g; B++)
     I[B] = A[B] + I[B - Q] & 255;
 }
-function XE(A, I, g, Q) {
+function vE(A, I, g, Q) {
   let B = 0;
   if (g.length === 0)
     for (; B < Q; B++)
@@ -2272,7 +2272,7 @@ function XE(A, I, g, Q) {
     for (; B < Q; B++)
       I[B] = A[B] + g[B] & 255;
 }
-function vE(A, I, g, Q, B) {
+function zE(A, I, g, Q, B) {
   let C = 0;
   if (g.length === 0) {
     for (; C < B; C++)
@@ -2286,7 +2286,7 @@ function vE(A, I, g, Q, B) {
       I[C] = A[C] + (I[C - B] + g[C] >> 1) & 255;
   }
 }
-function zE(A, I, g, Q, B) {
+function WE(A, I, g, Q, B) {
   let C = 0;
   if (g.length === 0) {
     for (; C < B; C++)
@@ -2297,36 +2297,36 @@ function zE(A, I, g, Q, B) {
     for (; C < B; C++)
       I[C] = A[C] + g[C] & 255;
     for (; C < Q; C++)
-      I[C] = A[C] + so(I[C - B], g[C], g[C - B]) & 255;
+      I[C] = A[C] + to(I[C - B], g[C], g[C - B]) & 255;
   }
 }
-function so(A, I, g) {
+function to(A, I, g) {
   const Q = A + I - g, B = Math.abs(Q - A), C = Math.abs(Q - I), E = Math.abs(Q - g);
   return B <= C && B <= E ? A : C <= E ? I : g;
 }
-function to(A, I, g, Q, B, C) {
+function eo(A, I, g, Q, B, C) {
   switch (A) {
     case 0:
-      VE(I, g, B);
+      ZE(I, g, B);
       break;
     case 1:
-      ZE(I, g, B, C);
+      XE(I, g, B, C);
       break;
     case 2:
-      XE(I, g, Q, B);
+      vE(I, g, Q, B);
       break;
     case 3:
-      vE(I, g, Q, B, C);
+      zE(I, g, Q, B, C);
       break;
     case 4:
-      zE(I, g, Q, B, C);
+      WE(I, g, Q, B, C);
       break;
     default:
       throw new Error(`Unsupported filter: ${A}`);
   }
 }
-const eo = new Uint16Array([255]), ho = new Uint8Array(eo.buffer), ao = ho[0] === 255;
-function No(A) {
+const ho = new Uint16Array([255]), ao = new Uint8Array(ho.buffer), No = ao[0] === 255;
+function ko(A) {
   const { data: I, width: g, height: Q, channels: B, depth: C } = A, E = [
     { x: 0, y: 0, xStep: 8, yStep: 8 },
     // Pass 1
@@ -2345,79 +2345,79 @@ function No(A) {
   ], i = Math.ceil(C / 8) * B, o = new Uint8Array(Q * g * i);
   let D = 0;
   for (let w = 0; w < 7; w++) {
-    const t = E[w], s = Math.ceil((g - t.x) / t.xStep), e = Math.ceil((Q - t.y) / t.yStep);
-    if (s <= 0 || e <= 0)
+    const s = E[w], t = Math.ceil((g - s.x) / s.xStep), e = Math.ceil((Q - s.y) / s.yStep);
+    if (t <= 0 || e <= 0)
       continue;
-    const h = s * i, a = new Uint8Array(h);
-    for (let G = 0; G < e; G++) {
-      const R = I[D++], N = I.subarray(D, D + h);
-      D += h;
-      const L = new Uint8Array(h);
-      to(R, N, L, a, h, i), a.set(L);
-      for (let J = 0; J < s; J++) {
-        const r = t.x + J * t.xStep, n = t.y + G * t.yStep;
-        if (!(r >= g || n >= Q))
-          for (let M = 0; M < i; M++)
-            o[(n * g + r) * i + M] = L[J * i + M];
+    const N = t * i, h = new Uint8Array(N);
+    for (let c = 0; c < e; c++) {
+      const r = I[D++], G = I.subarray(D, D + N);
+      D += N;
+      const U = new Uint8Array(N);
+      eo(r, G, U, h, N, i), h.set(U);
+      for (let F = 0; F < t; F++) {
+        const y = s.x + F * s.xStep, S = s.y + c * s.yStep;
+        if (!(y >= g || S >= Q))
+          for (let k = 0; k < i; k++)
+            o[(S * g + y) * i + k] = U[F * i + k];
       }
     }
   }
   if (C === 16) {
     const w = new Uint16Array(o.buffer);
-    if (ao)
-      for (let t = 0; t < w.length; t++)
-        w[t] = ko(w[t]);
+    if (No)
+      for (let s = 0; s < w.length; s++)
+        w[s] = Mo(w[s]);
     return w;
   } else
     return o;
 }
-function ko(A) {
+function Mo(A) {
   return (A & 255) << 8 | A >> 8 & 255;
 }
-const Mo = new Uint16Array([255]), Go = new Uint8Array(Mo.buffer), co = Go[0] === 255, Fo = new Uint8Array(0);
-function mC(A) {
+const Go = new Uint16Array([255]), co = new Uint8Array(Go.buffer), Fo = co[0] === 255, Uo = new Uint8Array(0);
+function PC(A) {
   const { data: I, width: g, height: Q, channels: B, depth: C } = A, E = Math.ceil(C / 8) * B, i = Math.ceil(C / 8 * B * g), o = new Uint8Array(Q * i);
-  let D = Fo, w = 0, t, s;
+  let D = Uo, w = 0, s, t;
   for (let e = 0; e < Q; e++) {
-    switch (t = I.subarray(w + 1, w + 1 + i), s = o.subarray(e * i, (e + 1) * i), I[w]) {
+    switch (s = I.subarray(w + 1, w + 1 + i), t = o.subarray(e * i, (e + 1) * i), I[w]) {
       case 0:
-        VE(t, s, i);
+        ZE(s, t, i);
         break;
       case 1:
-        ZE(t, s, i, E);
+        XE(s, t, i, E);
         break;
       case 2:
-        XE(t, s, D, i);
+        vE(s, t, D, i);
         break;
       case 3:
-        vE(t, s, D, i, E);
+        zE(s, t, D, i, E);
         break;
       case 4:
-        zE(t, s, D, i, E);
+        WE(s, t, D, i, E);
         break;
       default:
         throw new Error(`Unsupported filter: ${I[w]}`);
     }
-    D = s, w += i + 1;
+    D = t, w += i + 1;
   }
   if (C === 16) {
     const e = new Uint16Array(o.buffer);
-    if (co)
-      for (let h = 0; h < e.length; h++)
-        e[h] = Uo(e[h]);
+    if (Fo)
+      for (let N = 0; N < e.length; N++)
+        e[N] = Jo(e[N]);
     return e;
   } else
     return o;
 }
-function Uo(A) {
+function Jo(A) {
   return (A & 255) << 8 | A >> 8 & 255;
 }
 const qg = Uint8Array.of(137, 80, 78, 71, 13, 10, 26, 10);
-function PC(A) {
-  if (!Jo(A.readBytes(qg.length)))
+function jC(A) {
+  if (!Lo(A.readBytes(qg.length)))
     throw new Error("wrong PNG signature");
 }
-function Jo(A) {
+function Lo(A) {
   if (A.length < qg.length)
     return !1;
   for (let I = 0; I < qg.length; I++)
@@ -2425,30 +2425,30 @@ function Jo(A) {
       return !1;
   return !0;
 }
-const Lo = "tEXt", Ro = 0, WE = new TextDecoder("latin1");
-function ro(A) {
-  if (no(A), A.length === 0 || A.length > 79)
+const ro = "tEXt", Ro = 0, _E = new TextDecoder("latin1");
+function yo(A) {
+  if (So(A), A.length === 0 || A.length > 79)
     throw new Error("keyword length must be between 1 and 79");
 }
-const yo = /^[\u0000-\u00FF]*$/;
-function no(A) {
-  if (!yo.test(A))
+const no = /^[\u0000-\u00FF]*$/;
+function So(A) {
+  if (!no.test(A))
     throw new Error("invalid latin1 text");
 }
-function So(A, I, g) {
-  const Q = _E(I);
-  A[Q] = Ho(I, g - Q.length - 1);
+function Ho(A, I, g) {
+  const Q = $E(I);
+  A[Q] = Yo(I, g - Q.length - 1);
 }
-function _E(A) {
+function $E(A) {
   for (A.mark(); A.readByte() !== Ro; )
     ;
   const I = A.offset;
   A.reset();
-  const g = WE.decode(A.readBytes(I - A.offset - 1));
-  return A.skip(1), ro(g), g;
+  const g = _E.decode(A.readBytes(I - A.offset - 1));
+  return A.skip(1), yo(g), g;
 }
-function Ho(A, I) {
-  return WE.decode(A.readBytes(I));
+function Yo(A, I) {
+  return _E.decode(A.readBytes(I));
 }
 const hA = {
   UNKNOWN: -1,
@@ -2460,7 +2460,7 @@ const hA = {
 }, pQ = {
   UNKNOWN: -1,
   DEFLATE: 0
-}, jC = {
+}, VC = {
   UNKNOWN: -1,
   ADAPTIVE: 0
 }, uQ = {
@@ -2475,7 +2475,7 @@ const hA = {
   SOURCE: 0,
   OVER: 1
 };
-class Yo extends DB {
+class lo extends wB {
   constructor(g, Q = {}) {
     super(g);
     j(this, "_checkCrc");
@@ -2497,7 +2497,7 @@ class Yo extends DB {
     j(this, "_frames");
     j(this, "_writingDataChunks");
     const { checkCrc: B = !1 } = Q;
-    this._checkCrc = B, this._inflator = new pC(), this._png = {
+    this._checkCrc = B, this._inflator = new uC(), this._png = {
       width: -1,
       height: -1,
       channels: -1,
@@ -2513,17 +2513,17 @@ class Yo extends DB {
       numberOfPlays: 0,
       text: {},
       frames: []
-    }, this._end = !1, this._hasPalette = !1, this._palette = [], this._hasTransparency = !1, this._transparency = new Uint16Array(0), this._compressionMethod = pQ.UNKNOWN, this._filterMethod = jC.UNKNOWN, this._interlaceMethod = uQ.UNKNOWN, this._colorType = hA.UNKNOWN, this._isAnimated = !1, this._numberOfFrames = 1, this._numberOfPlays = 0, this._frames = [], this._writingDataChunks = !1, this.setBigEndian();
+    }, this._end = !1, this._hasPalette = !1, this._palette = [], this._hasTransparency = !1, this._transparency = new Uint16Array(0), this._compressionMethod = pQ.UNKNOWN, this._filterMethod = VC.UNKNOWN, this._interlaceMethod = uQ.UNKNOWN, this._colorType = hA.UNKNOWN, this._isAnimated = !1, this._numberOfFrames = 1, this._numberOfPlays = 0, this._frames = [], this._writingDataChunks = !1, this.setBigEndian();
   }
   decode() {
-    for (PC(this); !this._end; ) {
+    for (jC(this); !this._end; ) {
       const g = this.readUint32(), Q = this.readChars(4);
       this.decodeChunk(g, Q);
     }
     return this.decodeImage(), this._png;
   }
   decodeApng() {
-    for (PC(this); !this._end; ) {
+    for (jC(this); !this._end; ) {
       const g = this.readUint32(), Q = this.readChars(4);
       this.decodeApngChunk(g, Q);
     }
@@ -2551,8 +2551,8 @@ class Yo extends DB {
       case "iCCP":
         this.decodeiCCP(g);
         break;
-      case Lo:
-        So(this._png.text, this, g);
+      case ro:
+        Ho(this._png.text, this, g);
         break;
       case "pHYs":
         this.decodepHYs();
@@ -2563,7 +2563,7 @@ class Yo extends DB {
     }
     if (this.offset - B !== g)
       throw new Error(`Length mismatch while decoding chunk ${Q}`);
-    this._checkCrc ? bC(this, g + 4, Q) : this.skip(4);
+    this._checkCrc ? mC(this, g + 4, Q) : this.skip(4);
   }
   decodeApngChunk(g, Q) {
     const B = this.offset;
@@ -2583,12 +2583,12 @@ class Yo extends DB {
     }
     if (this.offset - B !== g)
       throw new Error(`Length mismatch while decoding chunk ${Q}`);
-    this._checkCrc ? bC(this, g + 4, Q) : this.skip(4);
+    this._checkCrc ? mC(this, g + 4, Q) : this.skip(4);
   }
   // https://www.w3.org/TR/PNG/#11IHDR
   decodeIHDR() {
     const g = this._png;
-    g.width = this.readUint32(), g.height = this.readUint32(), g.depth = lo(this.readUint8());
+    g.width = this.readUint32(), g.height = this.readUint32(), g.depth = fo(this.readUint8());
     const Q = this.readUint8();
     this._colorType = Q;
     let B;
@@ -2695,13 +2695,13 @@ class Yo extends DB {
   }
   // https://www.w3.org/TR/PNG/#11iCCP
   decodeiCCP(g) {
-    const Q = _E(this), B = this.readUint8();
+    const Q = $E(this), B = this.readUint8();
     if (B !== pQ.DEFLATE)
       throw new Error(`Unsupported iCCP compression method: ${B}`);
     const C = this.readBytes(g - Q.length - 2);
     this._png.iccEmbeddedProfile = {
       name: Q,
-      profile: Do(C)
+      profile: wo(C)
     };
   }
   // https://www.w3.org/TR/PNG/#11pHYs
@@ -2723,7 +2723,7 @@ class Yo extends DB {
         data: this._apng.depth === 8 ? new Uint8Array(this._apng.width * this._apng.height * this._apng.channels) : new Uint16Array(this._apng.width * this._apng.height * this._apng.channels)
       }, B = this._frames.at(g);
       if (B) {
-        if (B.data = mC({
+        if (B.data = PC({
           data: B.data,
           width: B.width,
           height: B.height,
@@ -2778,7 +2778,7 @@ class Yo extends DB {
           for (let i = 0; i < Q.width; i++) {
             const { index: o, frameIndex: D } = C(E, i);
             for (let w = 0; w < this._png.channels; w++) {
-              const t = Q.data[D + this._png.channels - 1] / B, s = w % (this._png.channels - 1) === 0 ? 1 : Q.data[D + w], e = Math.floor(t * s + (1 - t) * g.data[o + w]);
+              const s = Q.data[D + this._png.channels - 1] / B, t = w % (this._png.channels - 1) === 0 ? 1 : Q.data[D + w], e = Math.floor(s * t + (1 - s) * g.data[o + w]);
               g.data[o + w] += e;
             }
           }
@@ -2792,10 +2792,10 @@ class Yo extends DB {
     if (this._inflator.err)
       throw new Error(`Error while decompressing the data: ${this._inflator.err}`);
     const g = this._isAnimated ? ((Q = this._frames) == null ? void 0 : Q.at(0)).data : this._inflator.result;
-    if (this._filterMethod !== jC.ADAPTIVE)
+    if (this._filterMethod !== VC.ADAPTIVE)
       throw new Error(`Filter method ${this._filterMethod} not supported`);
     if (this._interlaceMethod === uQ.NO_INTERLACE)
-      this._png.data = mC({
+      this._png.data = PC({
         data: g,
         width: this._png.width,
         height: this._png.height,
@@ -2803,7 +2803,7 @@ class Yo extends DB {
         depth: this._png.depth
       });
     else if (this._interlaceMethod === uQ.ADAM7)
-      this._png.data = No({
+      this._png.data = ko({
         data: g,
         width: this._png.width,
         height: this._png.height,
@@ -2827,25 +2827,53 @@ class Yo extends DB {
       disposeOp: Kg.NONE,
       blendOp: bQ.SOURCE,
       data: g
-    }), this._inflator = new pC(), this._writingDataChunks = !1;
+    }), this._inflator = new uC(), this._writingDataChunks = !1;
   }
 }
-function lo(A) {
+function fo(A) {
   if (A !== 1 && A !== 2 && A !== 4 && A !== 8 && A !== 16)
     throw new Error(`invalid bit depth: ${A}`);
   return A;
 }
-function fo(A, I) {
-  return new Yo(A, I).decode();
+function Ko(A, I) {
+  return new lo(A, I).decode();
 }
-var NB = /* @__PURE__ */ ((A) => (A[A.CURSOR_KEY_APPLICATION = 0] = "CURSOR_KEY_APPLICATION", A[A.KEYPAD_KEY_APPLICATION = 1] = "KEYPAD_KEY_APPLICATION", A[A.IGNORE_KEYPAD_WITH_NUMLOCK = 2] = "IGNORE_KEYPAD_WITH_NUMLOCK", A[A.ALT_ESC_PREFIX = 3] = "ALT_ESC_PREFIX", A[A.MODIFY_OTHER_KEYS_STATE_2 = 4] = "MODIFY_OTHER_KEYS_STATE_2", A[A.KITTY_KEYBOARD_FLAGS = 5] = "KITTY_KEYBOARD_FLAGS", A))(NB || {}), $E = /* @__PURE__ */ ((A) => (A[A.RELEASE = 0] = "RELEASE", A[A.PRESS = 1] = "PRESS", A[A.REPEAT = 2] = "REPEAT", A))($E || {}), F = /* @__PURE__ */ ((A) => (A[A.UNIDENTIFIED = 0] = "UNIDENTIFIED", A[A.GRAVE = 1] = "GRAVE", A[A.BACKSLASH = 2] = "BACKSLASH", A[A.BRACKET_LEFT = 3] = "BRACKET_LEFT", A[A.BRACKET_RIGHT = 4] = "BRACKET_RIGHT", A[A.COMMA = 5] = "COMMA", A[A.ZERO = 6] = "ZERO", A[A.ONE = 7] = "ONE", A[A.TWO = 8] = "TWO", A[A.THREE = 9] = "THREE", A[A.FOUR = 10] = "FOUR", A[A.FIVE = 11] = "FIVE", A[A.SIX = 12] = "SIX", A[A.SEVEN = 13] = "SEVEN", A[A.EIGHT = 14] = "EIGHT", A[A.NINE = 15] = "NINE", A[A.EQUAL = 16] = "EQUAL", A[A.INTL_BACKSLASH = 17] = "INTL_BACKSLASH", A[A.INTL_RO = 18] = "INTL_RO", A[A.INTL_YEN = 19] = "INTL_YEN", A[A.A = 20] = "A", A[A.B = 21] = "B", A[A.C = 22] = "C", A[A.D = 23] = "D", A[A.E = 24] = "E", A[A.F = 25] = "F", A[A.G = 26] = "G", A[A.H = 27] = "H", A[A.I = 28] = "I", A[A.J = 29] = "J", A[A.K = 30] = "K", A[A.L = 31] = "L", A[A.M = 32] = "M", A[A.N = 33] = "N", A[A.O = 34] = "O", A[A.P = 35] = "P", A[A.Q = 36] = "Q", A[A.R = 37] = "R", A[A.S = 38] = "S", A[A.T = 39] = "T", A[A.U = 40] = "U", A[A.V = 41] = "V", A[A.W = 42] = "W", A[A.X = 43] = "X", A[A.Y = 44] = "Y", A[A.Z = 45] = "Z", A[A.MINUS = 46] = "MINUS", A[A.PERIOD = 47] = "PERIOD", A[A.QUOTE = 48] = "QUOTE", A[A.SEMICOLON = 49] = "SEMICOLON", A[A.SLASH = 50] = "SLASH", A[A.ALT_LEFT = 51] = "ALT_LEFT", A[A.ALT_RIGHT = 52] = "ALT_RIGHT", A[A.BACKSPACE = 53] = "BACKSPACE", A[A.CAPS_LOCK = 54] = "CAPS_LOCK", A[A.CONTEXT_MENU = 55] = "CONTEXT_MENU", A[A.CONTROL_LEFT = 56] = "CONTROL_LEFT", A[A.CONTROL_RIGHT = 57] = "CONTROL_RIGHT", A[A.ENTER = 58] = "ENTER", A[A.META_LEFT = 59] = "META_LEFT", A[A.META_RIGHT = 60] = "META_RIGHT", A[A.SHIFT_LEFT = 61] = "SHIFT_LEFT", A[A.SHIFT_RIGHT = 62] = "SHIFT_RIGHT", A[A.SPACE = 63] = "SPACE", A[A.TAB = 64] = "TAB", A[A.CONVERT = 65] = "CONVERT", A[A.KANA_MODE = 66] = "KANA_MODE", A[A.NON_CONVERT = 67] = "NON_CONVERT", A[A.DELETE = 68] = "DELETE", A[A.END = 69] = "END", A[A.HELP = 70] = "HELP", A[A.HOME = 71] = "HOME", A[A.INSERT = 72] = "INSERT", A[A.PAGE_DOWN = 73] = "PAGE_DOWN", A[A.PAGE_UP = 74] = "PAGE_UP", A[A.DOWN = 75] = "DOWN", A[A.LEFT = 76] = "LEFT", A[A.RIGHT = 77] = "RIGHT", A[A.UP = 78] = "UP", A[A.NUM_LOCK = 79] = "NUM_LOCK", A[A.KP_0 = 80] = "KP_0", A[A.KP_1 = 81] = "KP_1", A[A.KP_2 = 82] = "KP_2", A[A.KP_3 = 83] = "KP_3", A[A.KP_4 = 84] = "KP_4", A[A.KP_5 = 85] = "KP_5", A[A.KP_6 = 86] = "KP_6", A[A.KP_7 = 87] = "KP_7", A[A.KP_8 = 88] = "KP_8", A[A.KP_9 = 89] = "KP_9", A[A.KP_PLUS = 90] = "KP_PLUS", A[A.KP_BACKSPACE = 91] = "KP_BACKSPACE", A[A.KP_CLEAR = 92] = "KP_CLEAR", A[A.KP_CLEAR_ENTRY = 93] = "KP_CLEAR_ENTRY", A[A.KP_COMMA = 94] = "KP_COMMA", A[A.KP_PERIOD = 95] = "KP_PERIOD", A[A.KP_DIVIDE = 96] = "KP_DIVIDE", A[A.KP_ENTER = 97] = "KP_ENTER", A[A.KP_EQUAL = 98] = "KP_EQUAL", A[A.KP_MEMORY_ADD = 99] = "KP_MEMORY_ADD", A[A.KP_MEMORY_CLEAR = 100] = "KP_MEMORY_CLEAR", A[A.KP_MEMORY_RECALL = 101] = "KP_MEMORY_RECALL", A[A.KP_MEMORY_STORE = 102] = "KP_MEMORY_STORE", A[A.KP_MEMORY_SUBTRACT = 103] = "KP_MEMORY_SUBTRACT", A[A.KP_MULTIPLY = 104] = "KP_MULTIPLY", A[A.KP_PAREN_LEFT = 105] = "KP_PAREN_LEFT", A[A.KP_PAREN_RIGHT = 106] = "KP_PAREN_RIGHT", A[A.KP_MINUS = 107] = "KP_MINUS", A[A.KP_SEPARATOR = 108] = "KP_SEPARATOR", A[A.NUMPAD_UP = 109] = "NUMPAD_UP", A[A.NUMPAD_DOWN = 110] = "NUMPAD_DOWN", A[A.NUMPAD_RIGHT = 111] = "NUMPAD_RIGHT", A[A.NUMPAD_LEFT = 112] = "NUMPAD_LEFT", A[A.NUMPAD_BEGIN = 113] = "NUMPAD_BEGIN", A[A.NUMPAD_HOME = 114] = "NUMPAD_HOME", A[A.NUMPAD_END = 115] = "NUMPAD_END", A[A.NUMPAD_INSERT = 116] = "NUMPAD_INSERT", A[A.NUMPAD_DELETE = 117] = "NUMPAD_DELETE", A[A.NUMPAD_PAGE_UP = 118] = "NUMPAD_PAGE_UP", A[A.NUMPAD_PAGE_DOWN = 119] = "NUMPAD_PAGE_DOWN", A[A.ESCAPE = 120] = "ESCAPE", A[A.F1 = 121] = "F1", A[A.F2 = 122] = "F2", A[A.F3 = 123] = "F3", A[A.F4 = 124] = "F4", A[A.F5 = 125] = "F5", A[A.F6 = 126] = "F6", A[A.F7 = 127] = "F7", A[A.F8 = 128] = "F8", A[A.F9 = 129] = "F9", A[A.F10 = 130] = "F10", A[A.F11 = 131] = "F11", A[A.F12 = 132] = "F12", A[A.F13 = 133] = "F13", A[A.F14 = 134] = "F14", A[A.F15 = 135] = "F15", A[A.F16 = 136] = "F16", A[A.F17 = 137] = "F17", A[A.F18 = 138] = "F18", A[A.F19 = 139] = "F19", A[A.F20 = 140] = "F20", A[A.F21 = 141] = "F21", A[A.F22 = 142] = "F22", A[A.F23 = 143] = "F23", A[A.F24 = 144] = "F24", A[A.F25 = 145] = "F25", A[A.FN_LOCK = 146] = "FN_LOCK", A[A.PRINT_SCREEN = 147] = "PRINT_SCREEN", A[A.SCROLL_LOCK = 148] = "SCROLL_LOCK", A[A.PAUSE = 149] = "PAUSE", A[A.BROWSER_BACK = 150] = "BROWSER_BACK", A[A.BROWSER_FAVORITES = 151] = "BROWSER_FAVORITES", A[A.BROWSER_FORWARD = 152] = "BROWSER_FORWARD", A[A.BROWSER_HOME = 153] = "BROWSER_HOME", A[A.BROWSER_REFRESH = 154] = "BROWSER_REFRESH", A[A.BROWSER_SEARCH = 155] = "BROWSER_SEARCH", A[A.BROWSER_STOP = 156] = "BROWSER_STOP", A[A.EJECT = 157] = "EJECT", A[A.LAUNCH_APP_1 = 158] = "LAUNCH_APP_1", A[A.LAUNCH_APP_2 = 159] = "LAUNCH_APP_2", A[A.LAUNCH_MAIL = 160] = "LAUNCH_MAIL", A[A.MEDIA_PLAY_PAUSE = 161] = "MEDIA_PLAY_PAUSE", A[A.MEDIA_SELECT = 162] = "MEDIA_SELECT", A[A.MEDIA_STOP = 163] = "MEDIA_STOP", A[A.MEDIA_TRACK_NEXT = 164] = "MEDIA_TRACK_NEXT", A[A.MEDIA_TRACK_PREVIOUS = 165] = "MEDIA_TRACK_PREVIOUS", A[A.POWER = 166] = "POWER", A[A.SLEEP = 167] = "SLEEP", A[A.AUDIO_VOLUME_DOWN = 168] = "AUDIO_VOLUME_DOWN", A[A.AUDIO_VOLUME_MUTE = 169] = "AUDIO_VOLUME_MUTE", A[A.AUDIO_VOLUME_UP = 170] = "AUDIO_VOLUME_UP", A[A.WAKE_UP = 171] = "WAKE_UP", A[A.COPY = 172] = "COPY", A[A.CUT = 173] = "CUT", A[A.PASTE = 174] = "PASTE", A))(F || {}), KA = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.SHIFT = 1] = "SHIFT", A[A.CTRL = 2] = "CTRL", A[A.ALT = 4] = "ALT", A[A.SUPER = 8] = "SUPER", A[A.CAPSLOCK = 16] = "CAPSLOCK", A[A.NUMLOCK = 32] = "NUMLOCK", A))(KA || {}), Tg = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.PARTIAL = 1] = "PARTIAL", A[A.FULL = 2] = "FULL", A))(Tg || {}), DA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.DIRTY = 3] = "DIRTY", A[A.ROW_ITERATOR = 4] = "ROW_ITERATOR", A[A.COLOR_BACKGROUND = 5] = "COLOR_BACKGROUND", A[A.COLOR_FOREGROUND = 6] = "COLOR_FOREGROUND", A[A.COLOR_CURSOR = 7] = "COLOR_CURSOR", A[A.COLOR_CURSOR_HAS_VALUE = 8] = "COLOR_CURSOR_HAS_VALUE", A[A.COLOR_PALETTE = 9] = "COLOR_PALETTE", A[A.CURSOR_VISUAL_STYLE = 10] = "CURSOR_VISUAL_STYLE", A[A.CURSOR_VISIBLE = 11] = "CURSOR_VISIBLE", A[A.CURSOR_BLINKING = 12] = "CURSOR_BLINKING", A[A.CURSOR_PASSWORD_INPUT = 13] = "CURSOR_PASSWORD_INPUT", A[A.CURSOR_VIEWPORT_HAS_VALUE = 14] = "CURSOR_VIEWPORT_HAS_VALUE", A[A.CURSOR_VIEWPORT_X = 15] = "CURSOR_VIEWPORT_X", A[A.CURSOR_VIEWPORT_Y = 16] = "CURSOR_VIEWPORT_Y", A[A.CURSOR_VIEWPORT_WIDE_TAIL = 17] = "CURSOR_VIEWPORT_WIDE_TAIL", A))(DA || {}), Ai = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Ai || {}), IB = /* @__PURE__ */ ((A) => (A[A.BAR = 0] = "BAR", A[A.BLOCK = 1] = "BLOCK", A[A.UNDERLINE = 2] = "UNDERLINE", A[A.BLOCK_HOLLOW = 3] = "BLOCK_HOLLOW", A))(IB || {}), ZA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.CURSOR_X = 3] = "CURSOR_X", A[A.CURSOR_Y = 4] = "CURSOR_Y", A[A.CURSOR_PENDING_WRAP = 5] = "CURSOR_PENDING_WRAP", A[A.ACTIVE_SCREEN = 6] = "ACTIVE_SCREEN", A[A.CURSOR_VISIBLE = 7] = "CURSOR_VISIBLE", A[A.KITTY_KEYBOARD_FLAGS = 8] = "KITTY_KEYBOARD_FLAGS", A[A.SCROLLBAR = 9] = "SCROLLBAR", A[A.CURSOR_STYLE = 10] = "CURSOR_STYLE", A[A.MOUSE_TRACKING = 11] = "MOUSE_TRACKING", A[A.TITLE = 12] = "TITLE", A[A.PWD = 13] = "PWD", A[A.TOTAL_ROWS = 14] = "TOTAL_ROWS", A[A.SCROLLBACK_ROWS = 15] = "SCROLLBACK_ROWS", A[A.WIDTH_PX = 16] = "WIDTH_PX", A[A.HEIGHT_PX = 17] = "HEIGHT_PX", A[A.COLOR_FOREGROUND = 18] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 19] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 20] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 21] = "COLOR_PALETTE", A[A.COLOR_FOREGROUND_DEFAULT = 22] = "COLOR_FOREGROUND_DEFAULT", A[A.COLOR_BACKGROUND_DEFAULT = 23] = "COLOR_BACKGROUND_DEFAULT", A[A.COLOR_CURSOR_DEFAULT = 24] = "COLOR_CURSOR_DEFAULT", A[A.COLOR_PALETTE_DEFAULT = 25] = "COLOR_PALETTE_DEFAULT", A[A.KITTY_IMAGE_STORAGE_LIMIT = 26] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_GRAPHICS = 30] = "KITTY_GRAPHICS", A[A.MODE = 37] = "MODE", A))(ZA || {}), aA = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.WRITE_PTY = 1] = "WRITE_PTY", A[A.BELL = 2] = "BELL", A[A.ENQUIRY = 3] = "ENQUIRY", A[A.XTVERSION = 4] = "XTVERSION", A[A.TITLE_CHANGED = 5] = "TITLE_CHANGED", A[A.SIZE = 6] = "SIZE", A[A.COLOR_FOREGROUND = 11] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 12] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 13] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 14] = "COLOR_PALETTE", A[A.KITTY_IMAGE_STORAGE_LIMIT = 15] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_IMAGE_MEDIUM_SHARED_MEM = 18] = "KITTY_IMAGE_MEDIUM_SHARED_MEM", A[A.SCROLLBACK_MAX_BYTES = 27] = "SCROLLBACK_MAX_BYTES", A[A.SCROLLBACK_MAX_LINES = 28] = "SCROLLBACK_MAX_LINES", A[A.MODE_DEFAULT = 33] = "MODE_DEFAULT", A[A.MODE = 34] = "MODE", A[A.PROGRAM_STATUS = 46] = "PROGRAM_STATUS", A))(aA || {}), gB = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.DECODE_PNG = 1] = "DECODE_PNG", A[A.LOG = 2] = "LOG", A[A.RANDOM_SECURE = 3] = "RANDOM_SECURE", A[A.READ_SHARED_MEMORY = 4] = "READ_SHARED_MEMORY", A))(gB || {}), Ii = /* @__PURE__ */ ((A) => (A[A.PLACEMENT_ITERATOR = 1] = "PLACEMENT_ITERATOR", A))(Ii || {}), QB = /* @__PURE__ */ ((A) => (A[A.IMAGE_ID = 1] = "IMAGE_ID", A[A.PLACEMENT_ID = 2] = "PLACEMENT_ID", A[A.IS_VIRTUAL = 3] = "IS_VIRTUAL", A[A.X_OFFSET = 4] = "X_OFFSET", A[A.Y_OFFSET = 5] = "Y_OFFSET", A[A.SOURCE_X = 6] = "SOURCE_X", A[A.SOURCE_Y = 7] = "SOURCE_Y", A[A.SOURCE_WIDTH = 8] = "SOURCE_WIDTH", A[A.SOURCE_HEIGHT = 9] = "SOURCE_HEIGHT", A[A.COLUMNS = 10] = "COLUMNS", A[A.ROWS = 11] = "ROWS", A[A.Z = 12] = "Z", A))(QB || {}), FI = /* @__PURE__ */ ((A) => (A[A.ID = 1] = "ID", A[A.NUMBER = 2] = "NUMBER", A[A.WIDTH = 3] = "WIDTH", A[A.HEIGHT = 4] = "HEIGHT", A[A.FORMAT = 5] = "FORMAT", A[A.COMPRESSION = 6] = "COMPRESSION", A[A.DATA_PTR = 7] = "DATA_PTR", A[A.DATA_LEN = 8] = "DATA_LEN", A))(FI || {}), TA = /* @__PURE__ */ ((A) => (A[A.RGB = 0] = "RGB", A[A.RGBA = 1] = "RGBA", A[A.PNG = 2] = "PNG", A[A.GRAY_ALPHA = 3] = "GRAY_ALPHA", A[A.GRAY = 4] = "GRAY", A))(TA || {});
+let ZC = 0;
+class Oo {
+  constructor() {
+    this.value = ++ZC, this.state = 0;
+  }
+  write(I) {
+    for (let g = 0; g < I.length; g++) {
+      const Q = typeof I == "string" ? I.charCodeAt(g) : I[g];
+      switch (this.state) {
+        case 0:
+          this.state = Q === 27 ? 1 : 0;
+          break;
+        case 1:
+          this.state = Q === 95 ? 2 : Q === 27 ? 1 : 0;
+          break;
+        case 2:
+          this.state = Q === 71 ? 3 : Q === 27 ? 1 : 0;
+          break;
+        case 3:
+          Q === 27 && (this.state = 4);
+          break;
+        case 4:
+          Q === 92 ? (this.value = ++ZC, this.state = 0) : this.state = Q === 27 ? 4 : 3;
+          break;
+      }
+    }
+  }
+}
+var kB = /* @__PURE__ */ ((A) => (A[A.CURSOR_KEY_APPLICATION = 0] = "CURSOR_KEY_APPLICATION", A[A.KEYPAD_KEY_APPLICATION = 1] = "KEYPAD_KEY_APPLICATION", A[A.IGNORE_KEYPAD_WITH_NUMLOCK = 2] = "IGNORE_KEYPAD_WITH_NUMLOCK", A[A.ALT_ESC_PREFIX = 3] = "ALT_ESC_PREFIX", A[A.MODIFY_OTHER_KEYS_STATE_2 = 4] = "MODIFY_OTHER_KEYS_STATE_2", A[A.KITTY_KEYBOARD_FLAGS = 5] = "KITTY_KEYBOARD_FLAGS", A))(kB || {}), Ai = /* @__PURE__ */ ((A) => (A[A.RELEASE = 0] = "RELEASE", A[A.PRESS = 1] = "PRESS", A[A.REPEAT = 2] = "REPEAT", A))(Ai || {}), M = /* @__PURE__ */ ((A) => (A[A.UNIDENTIFIED = 0] = "UNIDENTIFIED", A[A.GRAVE = 1] = "GRAVE", A[A.BACKSLASH = 2] = "BACKSLASH", A[A.BRACKET_LEFT = 3] = "BRACKET_LEFT", A[A.BRACKET_RIGHT = 4] = "BRACKET_RIGHT", A[A.COMMA = 5] = "COMMA", A[A.ZERO = 6] = "ZERO", A[A.ONE = 7] = "ONE", A[A.TWO = 8] = "TWO", A[A.THREE = 9] = "THREE", A[A.FOUR = 10] = "FOUR", A[A.FIVE = 11] = "FIVE", A[A.SIX = 12] = "SIX", A[A.SEVEN = 13] = "SEVEN", A[A.EIGHT = 14] = "EIGHT", A[A.NINE = 15] = "NINE", A[A.EQUAL = 16] = "EQUAL", A[A.INTL_BACKSLASH = 17] = "INTL_BACKSLASH", A[A.INTL_RO = 18] = "INTL_RO", A[A.INTL_YEN = 19] = "INTL_YEN", A[A.A = 20] = "A", A[A.B = 21] = "B", A[A.C = 22] = "C", A[A.D = 23] = "D", A[A.E = 24] = "E", A[A.F = 25] = "F", A[A.G = 26] = "G", A[A.H = 27] = "H", A[A.I = 28] = "I", A[A.J = 29] = "J", A[A.K = 30] = "K", A[A.L = 31] = "L", A[A.M = 32] = "M", A[A.N = 33] = "N", A[A.O = 34] = "O", A[A.P = 35] = "P", A[A.Q = 36] = "Q", A[A.R = 37] = "R", A[A.S = 38] = "S", A[A.T = 39] = "T", A[A.U = 40] = "U", A[A.V = 41] = "V", A[A.W = 42] = "W", A[A.X = 43] = "X", A[A.Y = 44] = "Y", A[A.Z = 45] = "Z", A[A.MINUS = 46] = "MINUS", A[A.PERIOD = 47] = "PERIOD", A[A.QUOTE = 48] = "QUOTE", A[A.SEMICOLON = 49] = "SEMICOLON", A[A.SLASH = 50] = "SLASH", A[A.ALT_LEFT = 51] = "ALT_LEFT", A[A.ALT_RIGHT = 52] = "ALT_RIGHT", A[A.BACKSPACE = 53] = "BACKSPACE", A[A.CAPS_LOCK = 54] = "CAPS_LOCK", A[A.CONTEXT_MENU = 55] = "CONTEXT_MENU", A[A.CONTROL_LEFT = 56] = "CONTROL_LEFT", A[A.CONTROL_RIGHT = 57] = "CONTROL_RIGHT", A[A.ENTER = 58] = "ENTER", A[A.META_LEFT = 59] = "META_LEFT", A[A.META_RIGHT = 60] = "META_RIGHT", A[A.SHIFT_LEFT = 61] = "SHIFT_LEFT", A[A.SHIFT_RIGHT = 62] = "SHIFT_RIGHT", A[A.SPACE = 63] = "SPACE", A[A.TAB = 64] = "TAB", A[A.CONVERT = 65] = "CONVERT", A[A.KANA_MODE = 66] = "KANA_MODE", A[A.NON_CONVERT = 67] = "NON_CONVERT", A[A.DELETE = 68] = "DELETE", A[A.END = 69] = "END", A[A.HELP = 70] = "HELP", A[A.HOME = 71] = "HOME", A[A.INSERT = 72] = "INSERT", A[A.PAGE_DOWN = 73] = "PAGE_DOWN", A[A.PAGE_UP = 74] = "PAGE_UP", A[A.DOWN = 75] = "DOWN", A[A.LEFT = 76] = "LEFT", A[A.RIGHT = 77] = "RIGHT", A[A.UP = 78] = "UP", A[A.NUM_LOCK = 79] = "NUM_LOCK", A[A.KP_0 = 80] = "KP_0", A[A.KP_1 = 81] = "KP_1", A[A.KP_2 = 82] = "KP_2", A[A.KP_3 = 83] = "KP_3", A[A.KP_4 = 84] = "KP_4", A[A.KP_5 = 85] = "KP_5", A[A.KP_6 = 86] = "KP_6", A[A.KP_7 = 87] = "KP_7", A[A.KP_8 = 88] = "KP_8", A[A.KP_9 = 89] = "KP_9", A[A.KP_PLUS = 90] = "KP_PLUS", A[A.KP_BACKSPACE = 91] = "KP_BACKSPACE", A[A.KP_CLEAR = 92] = "KP_CLEAR", A[A.KP_CLEAR_ENTRY = 93] = "KP_CLEAR_ENTRY", A[A.KP_COMMA = 94] = "KP_COMMA", A[A.KP_PERIOD = 95] = "KP_PERIOD", A[A.KP_DIVIDE = 96] = "KP_DIVIDE", A[A.KP_ENTER = 97] = "KP_ENTER", A[A.KP_EQUAL = 98] = "KP_EQUAL", A[A.KP_MEMORY_ADD = 99] = "KP_MEMORY_ADD", A[A.KP_MEMORY_CLEAR = 100] = "KP_MEMORY_CLEAR", A[A.KP_MEMORY_RECALL = 101] = "KP_MEMORY_RECALL", A[A.KP_MEMORY_STORE = 102] = "KP_MEMORY_STORE", A[A.KP_MEMORY_SUBTRACT = 103] = "KP_MEMORY_SUBTRACT", A[A.KP_MULTIPLY = 104] = "KP_MULTIPLY", A[A.KP_PAREN_LEFT = 105] = "KP_PAREN_LEFT", A[A.KP_PAREN_RIGHT = 106] = "KP_PAREN_RIGHT", A[A.KP_MINUS = 107] = "KP_MINUS", A[A.KP_SEPARATOR = 108] = "KP_SEPARATOR", A[A.NUMPAD_UP = 109] = "NUMPAD_UP", A[A.NUMPAD_DOWN = 110] = "NUMPAD_DOWN", A[A.NUMPAD_RIGHT = 111] = "NUMPAD_RIGHT", A[A.NUMPAD_LEFT = 112] = "NUMPAD_LEFT", A[A.NUMPAD_BEGIN = 113] = "NUMPAD_BEGIN", A[A.NUMPAD_HOME = 114] = "NUMPAD_HOME", A[A.NUMPAD_END = 115] = "NUMPAD_END", A[A.NUMPAD_INSERT = 116] = "NUMPAD_INSERT", A[A.NUMPAD_DELETE = 117] = "NUMPAD_DELETE", A[A.NUMPAD_PAGE_UP = 118] = "NUMPAD_PAGE_UP", A[A.NUMPAD_PAGE_DOWN = 119] = "NUMPAD_PAGE_DOWN", A[A.ESCAPE = 120] = "ESCAPE", A[A.F1 = 121] = "F1", A[A.F2 = 122] = "F2", A[A.F3 = 123] = "F3", A[A.F4 = 124] = "F4", A[A.F5 = 125] = "F5", A[A.F6 = 126] = "F6", A[A.F7 = 127] = "F7", A[A.F8 = 128] = "F8", A[A.F9 = 129] = "F9", A[A.F10 = 130] = "F10", A[A.F11 = 131] = "F11", A[A.F12 = 132] = "F12", A[A.F13 = 133] = "F13", A[A.F14 = 134] = "F14", A[A.F15 = 135] = "F15", A[A.F16 = 136] = "F16", A[A.F17 = 137] = "F17", A[A.F18 = 138] = "F18", A[A.F19 = 139] = "F19", A[A.F20 = 140] = "F20", A[A.F21 = 141] = "F21", A[A.F22 = 142] = "F22", A[A.F23 = 143] = "F23", A[A.F24 = 144] = "F24", A[A.F25 = 145] = "F25", A[A.FN_LOCK = 146] = "FN_LOCK", A[A.PRINT_SCREEN = 147] = "PRINT_SCREEN", A[A.SCROLL_LOCK = 148] = "SCROLL_LOCK", A[A.PAUSE = 149] = "PAUSE", A[A.BROWSER_BACK = 150] = "BROWSER_BACK", A[A.BROWSER_FAVORITES = 151] = "BROWSER_FAVORITES", A[A.BROWSER_FORWARD = 152] = "BROWSER_FORWARD", A[A.BROWSER_HOME = 153] = "BROWSER_HOME", A[A.BROWSER_REFRESH = 154] = "BROWSER_REFRESH", A[A.BROWSER_SEARCH = 155] = "BROWSER_SEARCH", A[A.BROWSER_STOP = 156] = "BROWSER_STOP", A[A.EJECT = 157] = "EJECT", A[A.LAUNCH_APP_1 = 158] = "LAUNCH_APP_1", A[A.LAUNCH_APP_2 = 159] = "LAUNCH_APP_2", A[A.LAUNCH_MAIL = 160] = "LAUNCH_MAIL", A[A.MEDIA_PLAY_PAUSE = 161] = "MEDIA_PLAY_PAUSE", A[A.MEDIA_SELECT = 162] = "MEDIA_SELECT", A[A.MEDIA_STOP = 163] = "MEDIA_STOP", A[A.MEDIA_TRACK_NEXT = 164] = "MEDIA_TRACK_NEXT", A[A.MEDIA_TRACK_PREVIOUS = 165] = "MEDIA_TRACK_PREVIOUS", A[A.POWER = 166] = "POWER", A[A.SLEEP = 167] = "SLEEP", A[A.AUDIO_VOLUME_DOWN = 168] = "AUDIO_VOLUME_DOWN", A[A.AUDIO_VOLUME_MUTE = 169] = "AUDIO_VOLUME_MUTE", A[A.AUDIO_VOLUME_UP = 170] = "AUDIO_VOLUME_UP", A[A.WAKE_UP = 171] = "WAKE_UP", A[A.COPY = 172] = "COPY", A[A.CUT = 173] = "CUT", A[A.PASTE = 174] = "PASTE", A))(M || {}), KA = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.SHIFT = 1] = "SHIFT", A[A.CTRL = 2] = "CTRL", A[A.ALT = 4] = "ALT", A[A.SUPER = 8] = "SUPER", A[A.CAPSLOCK = 16] = "CAPSLOCK", A[A.NUMLOCK = 32] = "NUMLOCK", A))(KA || {}), Tg = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.PARTIAL = 1] = "PARTIAL", A[A.FULL = 2] = "FULL", A))(Tg || {}), DA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.DIRTY = 3] = "DIRTY", A[A.ROW_ITERATOR = 4] = "ROW_ITERATOR", A[A.COLOR_BACKGROUND = 5] = "COLOR_BACKGROUND", A[A.COLOR_FOREGROUND = 6] = "COLOR_FOREGROUND", A[A.COLOR_CURSOR = 7] = "COLOR_CURSOR", A[A.COLOR_CURSOR_HAS_VALUE = 8] = "COLOR_CURSOR_HAS_VALUE", A[A.COLOR_PALETTE = 9] = "COLOR_PALETTE", A[A.CURSOR_VISUAL_STYLE = 10] = "CURSOR_VISUAL_STYLE", A[A.CURSOR_VISIBLE = 11] = "CURSOR_VISIBLE", A[A.CURSOR_BLINKING = 12] = "CURSOR_BLINKING", A[A.CURSOR_PASSWORD_INPUT = 13] = "CURSOR_PASSWORD_INPUT", A[A.CURSOR_VIEWPORT_HAS_VALUE = 14] = "CURSOR_VIEWPORT_HAS_VALUE", A[A.CURSOR_VIEWPORT_X = 15] = "CURSOR_VIEWPORT_X", A[A.CURSOR_VIEWPORT_Y = 16] = "CURSOR_VIEWPORT_Y", A[A.CURSOR_VIEWPORT_WIDE_TAIL = 17] = "CURSOR_VIEWPORT_WIDE_TAIL", A))(DA || {}), Ii = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Ii || {}), gB = /* @__PURE__ */ ((A) => (A[A.BAR = 0] = "BAR", A[A.BLOCK = 1] = "BLOCK", A[A.UNDERLINE = 2] = "UNDERLINE", A[A.BLOCK_HOLLOW = 3] = "BLOCK_HOLLOW", A))(gB || {}), ZA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.CURSOR_X = 3] = "CURSOR_X", A[A.CURSOR_Y = 4] = "CURSOR_Y", A[A.CURSOR_PENDING_WRAP = 5] = "CURSOR_PENDING_WRAP", A[A.ACTIVE_SCREEN = 6] = "ACTIVE_SCREEN", A[A.CURSOR_VISIBLE = 7] = "CURSOR_VISIBLE", A[A.KITTY_KEYBOARD_FLAGS = 8] = "KITTY_KEYBOARD_FLAGS", A[A.SCROLLBAR = 9] = "SCROLLBAR", A[A.CURSOR_STYLE = 10] = "CURSOR_STYLE", A[A.MOUSE_TRACKING = 11] = "MOUSE_TRACKING", A[A.TITLE = 12] = "TITLE", A[A.PWD = 13] = "PWD", A[A.TOTAL_ROWS = 14] = "TOTAL_ROWS", A[A.SCROLLBACK_ROWS = 15] = "SCROLLBACK_ROWS", A[A.WIDTH_PX = 16] = "WIDTH_PX", A[A.HEIGHT_PX = 17] = "HEIGHT_PX", A[A.COLOR_FOREGROUND = 18] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 19] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 20] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 21] = "COLOR_PALETTE", A[A.COLOR_FOREGROUND_DEFAULT = 22] = "COLOR_FOREGROUND_DEFAULT", A[A.COLOR_BACKGROUND_DEFAULT = 23] = "COLOR_BACKGROUND_DEFAULT", A[A.COLOR_CURSOR_DEFAULT = 24] = "COLOR_CURSOR_DEFAULT", A[A.COLOR_PALETTE_DEFAULT = 25] = "COLOR_PALETTE_DEFAULT", A[A.KITTY_IMAGE_STORAGE_LIMIT = 26] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_GRAPHICS = 30] = "KITTY_GRAPHICS", A[A.MODE = 37] = "MODE", A))(ZA || {}), aA = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.WRITE_PTY = 1] = "WRITE_PTY", A[A.BELL = 2] = "BELL", A[A.ENQUIRY = 3] = "ENQUIRY", A[A.XTVERSION = 4] = "XTVERSION", A[A.TITLE_CHANGED = 5] = "TITLE_CHANGED", A[A.SIZE = 6] = "SIZE", A[A.COLOR_FOREGROUND = 11] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 12] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 13] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 14] = "COLOR_PALETTE", A[A.KITTY_IMAGE_STORAGE_LIMIT = 15] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_IMAGE_MEDIUM_SHARED_MEM = 18] = "KITTY_IMAGE_MEDIUM_SHARED_MEM", A[A.SCROLLBACK_MAX_BYTES = 27] = "SCROLLBACK_MAX_BYTES", A[A.SCROLLBACK_MAX_LINES = 28] = "SCROLLBACK_MAX_LINES", A[A.MODE_DEFAULT = 33] = "MODE_DEFAULT", A[A.MODE = 34] = "MODE", A[A.PROGRAM_STATUS = 46] = "PROGRAM_STATUS", A))(aA || {}), QB = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.DECODE_PNG = 1] = "DECODE_PNG", A[A.LOG = 2] = "LOG", A[A.RANDOM_SECURE = 3] = "RANDOM_SECURE", A[A.READ_SHARED_MEMORY = 4] = "READ_SHARED_MEMORY", A))(QB || {}), gi = /* @__PURE__ */ ((A) => (A[A.PLACEMENT_ITERATOR = 1] = "PLACEMENT_ITERATOR", A))(gi || {}), BB = /* @__PURE__ */ ((A) => (A[A.IMAGE_ID = 1] = "IMAGE_ID", A[A.PLACEMENT_ID = 2] = "PLACEMENT_ID", A[A.IS_VIRTUAL = 3] = "IS_VIRTUAL", A[A.X_OFFSET = 4] = "X_OFFSET", A[A.Y_OFFSET = 5] = "Y_OFFSET", A[A.SOURCE_X = 6] = "SOURCE_X", A[A.SOURCE_Y = 7] = "SOURCE_Y", A[A.SOURCE_WIDTH = 8] = "SOURCE_WIDTH", A[A.SOURCE_HEIGHT = 9] = "SOURCE_HEIGHT", A[A.COLUMNS = 10] = "COLUMNS", A[A.ROWS = 11] = "ROWS", A[A.Z = 12] = "Z", A))(BB || {}), FI = /* @__PURE__ */ ((A) => (A[A.ID = 1] = "ID", A[A.NUMBER = 2] = "NUMBER", A[A.WIDTH = 3] = "WIDTH", A[A.HEIGHT = 4] = "HEIGHT", A[A.FORMAT = 5] = "FORMAT", A[A.COMPRESSION = 6] = "COMPRESSION", A[A.DATA_PTR = 7] = "DATA_PTR", A[A.DATA_LEN = 8] = "DATA_LEN", A))(FI || {}), TA = /* @__PURE__ */ ((A) => (A[A.RGB = 0] = "RGB", A[A.RGBA = 1] = "RGBA", A[A.PNG = 2] = "PNG", A[A.GRAY_ALPHA = 3] = "GRAY_ALPHA", A[A.GRAY = 4] = "GRAY", A))(TA || {});
 const dg = 48;
-var gi = /* @__PURE__ */ ((A) => (A[A.PRIMARY = 0] = "PRIMARY", A[A.ALTERNATE = 1] = "ALTERNATE", A))(gi || {}), BI = /* @__PURE__ */ ((A) => (A[A.DIRTY = 1] = "DIRTY", A[A.RAW = 2] = "RAW", A[A.CELLS = 3] = "CELLS", A))(BI || {}), Qi = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Qi || {}), dA = /* @__PURE__ */ ((A) => (A[A.RAW = 1] = "RAW", A[A.STYLE = 2] = "STYLE", A[A.GRAPHEMES_LEN = 3] = "GRAPHEMES_LEN", A[A.GRAPHEMES_BUF = 4] = "GRAPHEMES_BUF", A[A.BG_COLOR = 5] = "BG_COLOR", A[A.FG_COLOR = 6] = "FG_COLOR", A))(dA || {}), BB = /* @__PURE__ */ ((A) => (A[A.WRAP = 1] = "WRAP", A[A.WRAP_CONTINUATION = 2] = "WRAP_CONTINUATION", A[A.GRAPHEME = 3] = "GRAPHEME", A[A.STYLED = 4] = "STYLED", A[A.HYPERLINK = 5] = "HYPERLINK", A))(BB || {}), ZI = /* @__PURE__ */ ((A) => (A[A.ACTIVE = 0] = "ACTIVE", A[A.VIEWPORT = 1] = "VIEWPORT", A[A.SCREEN = 2] = "SCREEN", A[A.HISTORY = 3] = "HISTORY", A))(ZI || {}), UI = /* @__PURE__ */ ((A) => (A[A.CODEPOINT = 1] = "CODEPOINT", A[A.CONTENT_TAG = 2] = "CONTENT_TAG", A[A.WIDE = 3] = "WIDE", A[A.HAS_TEXT = 4] = "HAS_TEXT", A[A.HAS_STYLING = 5] = "HAS_STYLING", A[A.STYLE_ID = 6] = "STYLE_ID", A[A.HAS_HYPERLINK = 7] = "HAS_HYPERLINK", A[A.PROTECTED = 8] = "PROTECTED", A[A.SEMANTIC_CONTENT = 9] = "SEMANTIC_CONTENT", A[A.COLOR_PALETTE = 10] = "COLOR_PALETTE", A[A.COLOR_RGB = 11] = "COLOR_RGB", A))(UI || {}), CI = /* @__PURE__ */ ((A) => (A[A.NARROW = 0] = "NARROW", A[A.WIDE = 1] = "WIDE", A[A.SPACER_TAIL = 2] = "SPACER_TAIL", A[A.SPACER_HEAD = 3] = "SPACER_HEAD", A))(CI || {});
-function VC(A, I) {
+var Qi = /* @__PURE__ */ ((A) => (A[A.PRIMARY = 0] = "PRIMARY", A[A.ALTERNATE = 1] = "ALTERNATE", A))(Qi || {}), BI = /* @__PURE__ */ ((A) => (A[A.DIRTY = 1] = "DIRTY", A[A.RAW = 2] = "RAW", A[A.CELLS = 3] = "CELLS", A))(BI || {}), Bi = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Bi || {}), dA = /* @__PURE__ */ ((A) => (A[A.RAW = 1] = "RAW", A[A.STYLE = 2] = "STYLE", A[A.GRAPHEMES_LEN = 3] = "GRAPHEMES_LEN", A[A.GRAPHEMES_BUF = 4] = "GRAPHEMES_BUF", A[A.BG_COLOR = 5] = "BG_COLOR", A[A.FG_COLOR = 6] = "FG_COLOR", A))(dA || {}), CB = /* @__PURE__ */ ((A) => (A[A.WRAP = 1] = "WRAP", A[A.WRAP_CONTINUATION = 2] = "WRAP_CONTINUATION", A[A.GRAPHEME = 3] = "GRAPHEME", A[A.STYLED = 4] = "STYLED", A[A.HYPERLINK = 5] = "HYPERLINK", A))(CB || {}), ZI = /* @__PURE__ */ ((A) => (A[A.ACTIVE = 0] = "ACTIVE", A[A.VIEWPORT = 1] = "VIEWPORT", A[A.SCREEN = 2] = "SCREEN", A[A.HISTORY = 3] = "HISTORY", A))(ZI || {}), UI = /* @__PURE__ */ ((A) => (A[A.CODEPOINT = 1] = "CODEPOINT", A[A.CONTENT_TAG = 2] = "CONTENT_TAG", A[A.WIDE = 3] = "WIDE", A[A.HAS_TEXT = 4] = "HAS_TEXT", A[A.HAS_STYLING = 5] = "HAS_STYLING", A[A.STYLE_ID = 6] = "STYLE_ID", A[A.HAS_HYPERLINK = 7] = "HAS_HYPERLINK", A[A.PROTECTED = 8] = "PROTECTED", A[A.SEMANTIC_CONTENT = 9] = "SEMANTIC_CONTENT", A[A.COLOR_PALETTE = 10] = "COLOR_PALETTE", A[A.COLOR_RGB = 11] = "COLOR_RGB", A))(UI || {}), CI = /* @__PURE__ */ ((A) => (A[A.NARROW = 0] = "NARROW", A[A.WIDE = 1] = "WIDE", A[A.SPACER_TAIL = 2] = "SPACER_TAIL", A[A.SPACER_HEAD = 3] = "SPACER_HEAD", A))(CI || {});
+function XC(A, I) {
   return A & 32767 | (I ? 32768 : 0);
 }
-var K = /* @__PURE__ */ ((A) => (A[A.BOLD = 1] = "BOLD", A[A.ITALIC = 2] = "ITALIC", A[A.UNDERLINE = 4] = "UNDERLINE", A[A.STRIKETHROUGH = 8] = "STRIKETHROUGH", A[A.INVERSE = 16] = "INVERSE", A[A.INVISIBLE = 32] = "INVISIBLE", A[A.BLINK = 64] = "BLINK", A[A.FAINT = 128] = "FAINT", A))(K || {});
-const Ko = new Uint8Array([
+var d = /* @__PURE__ */ ((A) => (A[A.BOLD = 1] = "BOLD", A[A.ITALIC = 2] = "ITALIC", A[A.UNDERLINE = 4] = "UNDERLINE", A[A.STRIKETHROUGH = 8] = "STRIKETHROUGH", A[A.INVERSE = 16] = "INVERSE", A[A.INVISIBLE = 32] = "INVISIBLE", A[A.BLINK = 64] = "BLINK", A[A.FAINT = 128] = "FAINT", A))(d || {});
+const qo = new Uint8Array([
   0,
   97,
   115,
@@ -3145,8 +3173,8 @@ const Ko = new Uint8Array([
   11
 ]);
 let mQ = null;
-function Oo(A, I, g, Q, B) {
-  mQ || (mQ = new WebAssembly.Module(Ko));
+function To(A, I, g, Q, B) {
+  mQ || (mQ = new WebAssembly.Module(qo));
   const C = new WebAssembly.Instance(mQ, {
     env: {
       write_pty_cb: A,
@@ -3169,10 +3197,10 @@ class $I {
     this.exports = I.exports, this.memory = this.exports.memory;
   }
   createKeyEncoder() {
-    return new qo(this.exports);
+    return new xo(this.exports);
   }
   createTerminal(I = 80, g = 24, Q) {
-    return new To(this.exports, this.memory, I, g, Q);
+    return new po(this.exports, this.memory, I, g, Q);
   }
   static async load(I) {
     if (I)
@@ -3230,7 +3258,7 @@ class $I {
     return new $I(B);
   }
 }
-class qo {
+class xo {
   constructor(I) {
     this.encoder = 0, this.exports = I;
     const g = this.exports.ghostty_wasm_alloc_opaque(), Q = this.exports.ghostty_key_encoder_new(0, g);
@@ -3244,7 +3272,7 @@ class qo {
     new DataView(this.exports.memory.buffer).setUint8(Q, typeof g == "boolean" ? g ? 1 : 0 : g), this.exports.ghostty_key_encoder_setopt(this.encoder, I, Q), this.exports.ghostty_wasm_free(Q, 1);
   }
   setKittyFlags(I) {
-    this.setOption(NB.KITTY_KEYBOARD_FLAGS, I);
+    this.setOption(kB.KITTY_KEYBOARD_FLAGS, I);
   }
   encode(I) {
     const g = this.exports.ghostty_wasm_alloc_opaque(), Q = this.exports.ghostty_key_event_new(0, g);
@@ -3252,8 +3280,8 @@ class qo {
       throw new Error(`Failed to create key event: ${Q}`);
     const B = new DataView(this.exports.memory.buffer), C = B.getUint32(g, !0);
     if (this.exports.ghostty_wasm_free_opaque(g), this.exports.ghostty_key_event_set_action(C, I.action), this.exports.ghostty_key_event_set_key(C, I.key), this.exports.ghostty_key_event_set_mods(C, I.mods), I.utf8) {
-      const e = new TextEncoder().encode(I.utf8), h = this.exports.ghostty_wasm_alloc(e.length);
-      new Uint8Array(this.exports.memory.buffer).set(e, h), this.exports.ghostty_key_event_set_utf8(C, h, e.length), this.exports.ghostty_wasm_free(h, e.length);
+      const e = new TextEncoder().encode(I.utf8), N = this.exports.ghostty_wasm_alloc(e.length);
+      new Uint8Array(this.exports.memory.buffer).set(e, N), this.exports.ghostty_key_event_set_utf8(C, N, e.length), this.exports.ghostty_wasm_free(N, e.length);
     }
     const E = 32, i = this.exports.ghostty_wasm_alloc(E), o = this.exports.ghostty_wasm_alloc(4), D = this.exports.ghostty_key_encoder_encode(
       this.encoder,
@@ -3264,16 +3292,16 @@ class qo {
     );
     if (D !== 0)
       throw this.exports.ghostty_wasm_free(i, E), this.exports.ghostty_wasm_free(o, 4), this.exports.ghostty_key_event_free(C), new Error(`Failed to encode key: ${D}`);
-    const w = B.getUint32(o, !0), t = new Uint8Array(this.exports.memory.buffer, i, w).slice();
-    return this.exports.ghostty_wasm_free(i, E), this.exports.ghostty_wasm_free(o, 4), this.exports.ghostty_key_event_free(C), t;
+    const w = B.getUint32(o, !0), s = new Uint8Array(this.exports.memory.buffer, i, w).slice();
+    return this.exports.ghostty_wasm_free(i, E), this.exports.ghostty_wasm_free(o, 4), this.exports.ghostty_key_event_free(C), s;
   }
   dispose() {
     this.encoder && (this.exports.ghostty_key_encoder_free(this.encoder), this.encoder = 0);
   }
 }
-const Bi = class CB {
+const Ci = class EB {
   constructor(I, g, Q = 80, B = 24, C) {
-    this.renderHandle = 0, this.rowIter = 0, this.rowCells = 0, this.cellPool = [], this.cellWidthPx = 0, this.cellHeightPx = 0, this.rowDirtyCache = null, this.rowWrapCache = null, this.pendingResponses = [], this.pendingProgramStatus = [], this.exports = I, this.memory = g, this._cols = Q, this._rows = B;
+    this.kittyRevision = new Oo(), this.renderHandle = 0, this.rowIter = 0, this.rowCells = 0, this.cellPool = [], this.cellWidthPx = 0, this.cellHeightPx = 0, this.rowDirtyCache = null, this.rowWrapCache = null, this.pendingResponses = [], this.pendingProgramStatus = [], this.exports = I, this.memory = g, this._cols = Q, this._rows = B;
     const E = this.exports.ghostty_wasm_alloc_opaque();
     if (E === 0)
       throw new Error("Failed to allocate terminal handle");
@@ -3305,27 +3333,27 @@ const Bi = class CB {
           (C == null ? void 0 : C.scrollbackLimit) ?? 1e4,
           !0
         );
-        const t = this.exports.ghostty_terminal_set(
+        const s = this.exports.ghostty_terminal_set(
           this.handle,
           aA.SCROLLBACK_MAX_LINES,
           o
         );
-        if (t !== 0)
-          throw new Error(`Setting scrollback limit failed: ${t}`);
+        if (s !== 0)
+          throw new Error(`Setting scrollback limit failed: ${s}`);
       } finally {
         this.exports.ghostty_wasm_free(o, 4);
       }
       const D = this.exports.ghostty_wasm_alloc(4);
       try {
-        const t = new DataView(this.memory.buffer);
-        t.setUint16(D, VC(2027, !1), !0), t.setUint8(D + 2, 1);
-        const s = this.exports.ghostty_terminal_set(
+        const s = new DataView(this.memory.buffer);
+        s.setUint16(D, XC(2027, !1), !0), s.setUint8(D + 2, 1);
+        const t = this.exports.ghostty_terminal_set(
           this.handle,
           aA.MODE_DEFAULT,
           D
         );
-        if (s !== 0)
-          throw new Error(`Enabling mode 2027 failed: ${s}`);
+        if (t !== 0)
+          throw new Error(`Enabling mode 2027 failed: ${t}`);
       } finally {
         this.exports.ghostty_wasm_free(D, 4);
       }
@@ -3335,13 +3363,13 @@ const Bi = class CB {
         throw new Error("Failed to allocate Kitty medium option");
       try {
         new Uint8Array(this.memory.buffer)[w] = 1;
-        const t = this.exports.ghostty_terminal_set(
+        const s = this.exports.ghostty_terminal_set(
           this.handle,
           aA.KITTY_IMAGE_MEDIUM_SHARED_MEM,
           w
         );
-        if (t !== 0)
-          throw new Error(`Enabling Kitty shared memory failed: ${t}`);
+        if (s !== 0)
+          throw new Error(`Enabling Kitty shared memory failed: ${s}`);
       } finally {
         this.exports.ghostty_wasm_free(w, 1);
       }
@@ -3501,7 +3529,7 @@ const Bi = class CB {
     const g = typeof I == "string" ? new TextEncoder().encode(I) : I, Q = this.exports.ghostty_wasm_alloc(g.length);
     new Uint8Array(this.memory.buffer).set(g, Q);
     try {
-      this.exports.ghostty_terminal_vt_write(this.handle, Q, g.length);
+      this.exports.ghostty_terminal_vt_write(this.handle, Q, g.length), this.kittyRevision.write(g);
     } finally {
       this.exports.ghostty_wasm_free(Q, g.length);
     }
@@ -3582,7 +3610,7 @@ const Bi = class CB {
       try {
         new DataView(this.memory.buffer).setUint32(E, B, !0), this.exports.ghostty_kitty_graphics_get(
           I,
-          Ii.PLACEMENT_ITERATOR,
+          gi.PLACEMENT_ITERATOR,
           E
         );
       } finally {
@@ -3594,7 +3622,7 @@ const Bi = class CB {
         for (; this.exports.ghostty_kitty_graphics_placement_next(B); ) {
           this.exports.ghostty_kitty_graphics_placement_get(
             B,
-            QB.IMAGE_ID,
+            BB.IMAGE_ID,
             i
           );
           const D = new DataView(this.memory.buffer).getUint32(i, !0), w = this.exports.ghostty_kitty_graphics_image(I, D);
@@ -3611,11 +3639,11 @@ const Bi = class CB {
             continue;
           this.exports.ghostty_kitty_graphics_placement_get(
             B,
-            QB.IS_VIRTUAL,
+            BB.IS_VIRTUAL,
             i
             // reuse the 4-byte slot; the value is a bool but written as u8
           );
-          const s = new DataView(this.memory.buffer).getUint8(i) !== 0, e = new DataView(this.memory.buffer), h = {
+          const t = new DataView(this.memory.buffer).getUint8(i) !== 0, e = new DataView(this.memory.buffer), N = {
             imageId: D,
             pixelWidth: e.getUint32(o + 4, !0),
             pixelHeight: e.getUint32(o + 8, !0),
@@ -3628,9 +3656,9 @@ const Bi = class CB {
             sourceY: e.getUint32(o + 36, !0),
             sourceWidth: e.getUint32(o + 40, !0),
             sourceHeight: e.getUint32(o + 44, !0),
-            isVirtual: s
+            isVirtual: t
           };
-          g && !h.viewportVisible || (yield h);
+          g && !N.viewportVisible || (yield N);
         }
       } finally {
         this.exports.ghostty_wasm_free(i, 4), this.exports.ghostty_wasm_free(o, dg);
@@ -3654,12 +3682,13 @@ const Bi = class CB {
       return null;
     const B = this.exports.ghostty_wasm_alloc(4);
     try {
-      const C = new DataView(this.memory.buffer), E = (s) => this.exports.ghostty_kitty_graphics_image_get(Q, s, B) !== 0 ? 0 : new DataView(this.memory.buffer).getUint32(B, !0), i = E(FI.WIDTH), o = E(FI.HEIGHT), D = E(FI.FORMAT), w = E(FI.DATA_PTR), t = E(FI.DATA_LEN);
-      return i === 0 || o === 0 || w === 0 || t === 0 ? null : {
+      const C = new DataView(this.memory.buffer), E = (t) => this.exports.ghostty_kitty_graphics_image_get(Q, t, B) !== 0 ? 0 : new DataView(this.memory.buffer).getUint32(B, !0), i = E(FI.WIDTH), o = E(FI.HEIGHT), D = E(FI.FORMAT), w = E(FI.DATA_PTR), s = E(FI.DATA_LEN);
+      return i === 0 || o === 0 || w === 0 || s === 0 ? null : {
         width: i,
         height: o,
         format: D,
-        data: new Uint8Array(this.memory.buffer, w, t)
+        data: new Uint8Array(this.memory.buffer, w, s),
+        revision: this.kittyRevision.value
       };
     } finally {
       this.exports.ghostty_wasm_free(B, 4);
@@ -3717,7 +3746,7 @@ const Bi = class CB {
    */
   getCursor() {
     this.update();
-    const I = this.rsGetU8(DA.CURSOR_VIEWPORT_HAS_VALUE) !== 0, g = this.rsGetU8(DA.CURSOR_VISIBLE) !== 0, Q = this.rsGetU8(DA.CURSOR_BLINKING) !== 0, B = this.rsGetU32(DA.CURSOR_VISUAL_STYLE), C = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_X) : -1, E = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_Y) : -1, i = B === IB.BAR ? "bar" : B === IB.UNDERLINE ? "underline" : "block";
+    const I = this.rsGetU8(DA.CURSOR_VIEWPORT_HAS_VALUE) !== 0, g = this.rsGetU8(DA.CURSOR_VISIBLE) !== 0, Q = this.rsGetU8(DA.CURSOR_BLINKING) !== 0, B = this.rsGetU32(DA.CURSOR_VISUAL_STYLE), C = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_X) : -1, E = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_Y) : -1, i = B === gB.BAR ? "bar" : B === gB.UNDERLINE ? "underline" : "block";
     return {
       x: Math.max(0, C),
       y: Math.max(0, E),
@@ -3784,7 +3813,7 @@ const Bi = class CB {
         const i = new DataView(this.memory.buffer);
         this.exports.ghostty_render_state_row_get(this.rowIter, BI.DIRTY, Q), I[E] = i.getUint8(Q) !== 0, this.exports.ghostty_render_state_row_get(this.rowIter, BI.RAW, B);
         const o = new DataView(this.memory.buffer).getBigUint64(B, !0);
-        this.exports.ghostty_row_get(o, BB.WRAP_CONTINUATION, C), g[E] = new DataView(this.memory.buffer).getUint8(C) !== 0, E++;
+        this.exports.ghostty_row_get(o, CB.WRAP_CONTINUATION, C), g[E] = new DataView(this.memory.buffer).getUint8(C) !== 0, E++;
       }
     } finally {
       this.exports.ghostty_wasm_free(Q, 1), this.exports.ghostty_wasm_free(B, 8), this.exports.ghostty_wasm_free(C, 1);
@@ -3802,13 +3831,13 @@ const Bi = class CB {
    */
   markClean() {
     const I = this.exports.ghostty_wasm_alloc(4);
-    new DataView(this.memory.buffer).setUint32(I, Tg.NONE, !0), this.exports.ghostty_render_state_set(this.renderHandle, Ai.DIRTY, I), this.exports.ghostty_wasm_free(I, 4), this.populateHandle(
+    new DataView(this.memory.buffer).setUint32(I, Tg.NONE, !0), this.exports.ghostty_render_state_set(this.renderHandle, Ii.DIRTY, I), this.exports.ghostty_wasm_free(I, 4), this.populateHandle(
       (Q) => this.exports.ghostty_render_state_get(this.renderHandle, DA.ROW_ITERATOR, Q),
       this.rowIter
     );
     const g = this.exports.ghostty_wasm_alloc(1);
     for (new DataView(this.memory.buffer).setUint8(g, 0); this.exports.ghostty_render_state_row_iterator_next(this.rowIter); )
-      this.exports.ghostty_render_state_row_set(this.rowIter, Qi.DIRTY, g);
+      this.exports.ghostty_render_state_row_set(this.rowIter, Bi.DIRTY, g);
     this.exports.ghostty_wasm_free(g, 1), this.rowDirtyCache = null;
   }
   /**
@@ -3841,68 +3870,68 @@ const Bi = class CB {
    */
   getViewport() {
     this.update(), this.zeroCellPool(), this.populateHandle(
-      (a) => this.exports.ghostty_render_state_get(this.renderHandle, DA.ROW_ITERATOR, a),
+      (h) => this.exports.ghostty_render_state_get(this.renderHandle, DA.ROW_ITERATOR, h),
       this.rowIter
     );
     const I = 72, g = this.exports.ghostty_wasm_alloc(4), Q = this.exports.ghostty_wasm_alloc(3), B = this.exports.ghostty_wasm_alloc(1), C = this.exports.ghostty_wasm_alloc(8), E = this.exports.ghostty_wasm_alloc(1), i = this.exports.ghostty_wasm_alloc(I);
     new DataView(this.memory.buffer).setUint32(i, I, !0);
-    const o = this.exports.ghostty_wasm_alloc(8), D = this.exports.ghostty_wasm_alloc(4), w = 32, t = w * 4, s = this.exports.ghostty_wasm_alloc(t), e = new Array(this._rows).fill(!1), h = new Array(this._rows).fill(!1);
+    const o = this.exports.ghostty_wasm_alloc(8), D = this.exports.ghostty_wasm_alloc(4), w = 32, s = w * 4, t = this.exports.ghostty_wasm_alloc(s), e = new Array(this._rows).fill(!1), N = new Array(this._rows).fill(!1);
     try {
-      let a = 0;
-      for (; a < this._rows && this.exports.ghostty_render_state_row_iterator_next(this.rowIter); ) {
-        this.exports.ghostty_render_state_row_get(this.rowIter, BI.DIRTY, B), e[a] = new DataView(this.memory.buffer).getUint8(B) !== 0, this.exports.ghostty_render_state_row_get(this.rowIter, BI.RAW, C);
-        const G = new DataView(this.memory.buffer).getBigUint64(C, !0);
-        this.exports.ghostty_row_get(G, BB.WRAP_CONTINUATION, E), h[a] = new DataView(this.memory.buffer).getUint8(E) !== 0, this.populateHandle(
-          (N) => this.exports.ghostty_render_state_row_get(this.rowIter, BI.CELLS, N),
+      let h = 0;
+      for (; h < this._rows && this.exports.ghostty_render_state_row_iterator_next(this.rowIter); ) {
+        this.exports.ghostty_render_state_row_get(this.rowIter, BI.DIRTY, B), e[h] = new DataView(this.memory.buffer).getUint8(B) !== 0, this.exports.ghostty_render_state_row_get(this.rowIter, BI.RAW, C);
+        const c = new DataView(this.memory.buffer).getBigUint64(C, !0);
+        this.exports.ghostty_row_get(c, CB.WRAP_CONTINUATION, E), N[h] = new DataView(this.memory.buffer).getUint8(E) !== 0, this.populateHandle(
+          (G) => this.exports.ghostty_render_state_row_get(this.rowIter, BI.CELLS, G),
           this.rowCells
         );
-        let R = 0;
-        for (; R < this._cols && this.exports.ghostty_render_state_row_cells_next(this.rowCells); ) {
-          const N = this.cellPool[a * this._cols + R];
+        let r = 0;
+        for (; r < this._cols && this.exports.ghostty_render_state_row_cells_next(this.rowCells); ) {
+          const G = this.cellPool[h * this._cols + r];
           this.exports.ghostty_render_state_row_cells_get(
             this.rowCells,
             dA.GRAPHEMES_LEN,
             g
           );
-          const J = new DataView(this.memory.buffer).getUint32(g, !0);
-          if (N.grapheme_len = J > 0 ? J - 1 : 0, J > 0) {
-            let M = s, k = !1;
-            const U = J * 4;
-            J > w && (M = this.exports.ghostty_wasm_alloc(U), k = !0);
+          const F = new DataView(this.memory.buffer).getUint32(g, !0);
+          if (G.grapheme_len = F > 0 ? F - 1 : 0, F > 0) {
+            let k = t, L = !1;
+            const J = F * 4;
+            F > w && (k = this.exports.ghostty_wasm_alloc(J), L = !0);
             try {
               this.exports.ghostty_render_state_row_cells_get(
                 this.rowCells,
                 dA.GRAPHEMES_BUF,
-                M
+                k
               );
-              const c = new DataView(this.memory.buffer);
-              if (N.codepoint = c.getUint32(M, !0), J > 1) {
-                const y = new Array(J - 1);
-                for (let T = 1; T < J; T++)
-                  y[T - 1] = c.getUint32(M + T * 4, !0);
-                N.grapheme = y;
+              const a = new DataView(this.memory.buffer);
+              if (G.codepoint = a.getUint32(k, !0), F > 1) {
+                const R = new Array(F - 1);
+                for (let f = 1; f < F; f++)
+                  R[f - 1] = a.getUint32(k + f * 4, !0);
+                G.grapheme = R;
               } else
-                N.grapheme = null;
+                G.grapheme = null;
             } finally {
-              k && this.exports.ghostty_wasm_free(M, U);
+              L && this.exports.ghostty_wasm_free(k, J);
             }
           } else
-            N.codepoint = 0, N.grapheme = null;
-          if (N.fg_r = N.fg_g = N.fg_b = 0, N.bg_r = N.bg_g = N.bg_b = 0, N.fgIsDefault = !0, N.bgIsDefault = !0, this.exports.ghostty_render_state_row_cells_get(
+            G.codepoint = 0, G.grapheme = null;
+          if (G.fg_r = G.fg_g = G.fg_b = 0, G.bg_r = G.bg_g = G.bg_b = 0, G.fgIsDefault = !0, G.bgIsDefault = !0, this.exports.ghostty_render_state_row_cells_get(
             this.rowCells,
             dA.FG_COLOR,
             Q
           ) === 0) {
-            const M = new Uint8Array(this.memory.buffer, Q, 3);
-            N.fg_r = M[0], N.fg_g = M[1], N.fg_b = M[2], N.fgIsDefault = !1;
+            const k = new Uint8Array(this.memory.buffer, Q, 3);
+            G.fg_r = k[0], G.fg_g = k[1], G.fg_b = k[2], G.fgIsDefault = !1;
           }
           if (this.exports.ghostty_render_state_row_cells_get(
             this.rowCells,
             dA.BG_COLOR,
             Q
           ) === 0) {
-            const M = new Uint8Array(this.memory.buffer, Q, 3);
-            N.bg_r = M[0], N.bg_g = M[1], N.bg_b = M[2], N.bgIsDefault = !1;
+            const k = new Uint8Array(this.memory.buffer, Q, 3);
+            G.bg_r = k[0], G.bg_g = k[1], G.bg_b = k[2], G.bgIsDefault = !1;
           }
           this.exports.ghostty_render_state_row_cells_get(
             this.rowCells,
@@ -3910,26 +3939,26 @@ const Bi = class CB {
             i
           );
           {
-            const M = new Uint8Array(this.memory.buffer, i, I);
-            let k = 0;
-            M[56] && (k |= K.BOLD), M[57] && (k |= K.ITALIC), M[58] && (k |= K.FAINT), M[59] && (k |= K.BLINK), M[60] && (k |= K.INVERSE), M[61] && (k |= K.INVISIBLE), M[62] && (k |= K.STRIKETHROUGH), new DataView(this.memory.buffer).getInt32(i + 64, !0) !== 0 && (k |= K.UNDERLINE), N.flags = k;
+            const k = new Uint8Array(this.memory.buffer, i, I);
+            let L = 0;
+            k[56] && (L |= d.BOLD), k[57] && (L |= d.ITALIC), k[58] && (L |= d.FAINT), k[59] && (L |= d.BLINK), k[60] && (L |= d.INVERSE), k[61] && (L |= d.INVISIBLE), k[62] && (L |= d.STRIKETHROUGH), new DataView(this.memory.buffer).getInt32(i + 64, !0) !== 0 && (L |= d.UNDERLINE), G.flags = L;
           }
           this.exports.ghostty_render_state_row_cells_get(
             this.rowCells,
             dA.RAW,
             o
           );
-          const r = new DataView(this.memory.buffer).getBigUint64(o, !0);
-          this.exports.ghostty_cell_get(r, UI.WIDE, D);
-          const n = new DataView(this.memory.buffer).getUint32(D, !0);
-          N.width = n === CI.WIDE ? 2 : n === CI.SPACER_TAIL || n === CI.SPACER_HEAD ? 0 : 1, this.exports.ghostty_cell_get(r, UI.HAS_HYPERLINK, D), N.hyperlink_id = new DataView(this.memory.buffer).getUint8(D) !== 0 ? 1 : 0, R++;
+          const y = new DataView(this.memory.buffer).getBigUint64(o, !0);
+          this.exports.ghostty_cell_get(y, UI.WIDE, D);
+          const S = new DataView(this.memory.buffer).getUint32(D, !0);
+          G.width = S === CI.WIDE ? 2 : S === CI.SPACER_TAIL || S === CI.SPACER_HEAD ? 0 : 1, this.exports.ghostty_cell_get(y, UI.HAS_HYPERLINK, D), G.hyperlink_id = new DataView(this.memory.buffer).getUint8(D) !== 0 ? 1 : 0, r++;
         }
-        a++;
+        h++;
       }
     } finally {
-      this.exports.ghostty_wasm_free(g, 4), this.exports.ghostty_wasm_free(Q, 3), this.exports.ghostty_wasm_free(B, 1), this.exports.ghostty_wasm_free(C, 8), this.exports.ghostty_wasm_free(E, 1), this.exports.ghostty_wasm_free(i, I), this.exports.ghostty_wasm_free(o, 8), this.exports.ghostty_wasm_free(D, 4), this.exports.ghostty_wasm_free(s, t);
+      this.exports.ghostty_wasm_free(g, 4), this.exports.ghostty_wasm_free(Q, 3), this.exports.ghostty_wasm_free(B, 1), this.exports.ghostty_wasm_free(C, 8), this.exports.ghostty_wasm_free(E, 1), this.exports.ghostty_wasm_free(i, I), this.exports.ghostty_wasm_free(o, 8), this.exports.ghostty_wasm_free(D, 4), this.exports.ghostty_wasm_free(t, s);
     }
-    return this.rowDirtyCache = e, this.rowWrapCache = h, this.cellPool;
+    return this.rowDirtyCache = e, this.rowWrapCache = N, this.cellPool;
   }
   /**
    * Helper for the in/out pointer pattern used by ROW_ITERATOR / ROW_DATA_CELLS:
@@ -3986,7 +4015,7 @@ const Bi = class CB {
   // Terminal modes
   // ==========================================================================
   isAlternateScreen() {
-    return this.tGetU32(ZA.ACTIVE_SCREEN) === gi.ALTERNATE;
+    return this.tGetU32(ZA.ACTIVE_SCREEN) === Qi.ALTERNATE;
   }
   hasBracketedPaste() {
     return this.getMode(2004, !1);
@@ -4058,44 +4087,44 @@ const Bi = class CB {
     try {
       if (this.exports.ghostty_terminal_grid_ref(this.handle, Q, B) !== 0)
         return null;
-      const C = 768, E = this.exports.ghostty_wasm_alloc(C), o = this.exports.ghostty_terminal_get(this.handle, ZA.COLOR_PALETTE, E) === 0 ? new Uint8Array(this.memory.buffer, E, C).slice() : null, D = new Array(this._cols), w = this.exports.ghostty_wasm_alloc(8), t = this.exports.ghostty_wasm_alloc(4), s = this.exports.ghostty_wasm_alloc(4), e = 72, h = this.exports.ghostty_wasm_alloc(e);
-      new DataView(this.memory.buffer).setUint32(h, e, !0);
+      const C = 768, E = this.exports.ghostty_wasm_alloc(C), o = this.exports.ghostty_terminal_get(this.handle, ZA.COLOR_PALETTE, E) === 0 ? new Uint8Array(this.memory.buffer, E, C).slice() : null, D = new Array(this._cols), w = this.exports.ghostty_wasm_alloc(8), s = this.exports.ghostty_wasm_alloc(4), t = this.exports.ghostty_wasm_alloc(4), e = 72, N = this.exports.ghostty_wasm_alloc(e);
+      new DataView(this.memory.buffer).setUint32(N, e, !0);
       try {
-        for (let a = 0; a < this._cols; a++) {
-          if (new DataView(this.memory.buffer).setUint16(B + 8, a, !0), this.exports.ghostty_grid_ref_cell(B, w) !== 0) {
-            D[a] = this.makeEmptyCell();
+        for (let h = 0; h < this._cols; h++) {
+          if (new DataView(this.memory.buffer).setUint16(B + 8, h, !0), this.exports.ghostty_grid_ref_cell(B, w) !== 0) {
+            D[h] = this.makeEmptyCell();
             continue;
           }
-          const R = new DataView(this.memory.buffer).getBigUint64(w, !0);
-          this.exports.ghostty_cell_get(R, UI.CODEPOINT, t);
-          const N = new DataView(this.memory.buffer).getUint32(t, !0);
-          this.exports.ghostty_cell_get(R, UI.WIDE, s);
-          const L = new DataView(this.memory.buffer).getUint32(s, !0), J = L === CI.WIDE ? 2 : L === CI.SPACER_TAIL || L === CI.SPACER_HEAD ? 0 : 1;
-          this.exports.ghostty_cell_get(R, UI.HAS_HYPERLINK, s);
-          const r = new DataView(this.memory.buffer).getUint8(s) !== 0;
-          new DataView(this.memory.buffer).setUint32(h, e, !0);
-          const n = this.exports.ghostty_grid_ref_style(B, h) === 0, M = this.makeEmptyCell();
-          if (M.codepoint = N, M.width = J, M.hyperlink_id = r ? 1 : 0, n) {
-            const k = new Uint8Array(this.memory.buffer, h, e), U = new DataView(this.memory.buffer);
-            let c = 0;
-            k[56] && (c |= K.BOLD), k[57] && (c |= K.ITALIC), k[58] && (c |= K.FAINT), k[59] && (c |= K.BLINK), k[60] && (c |= K.INVERSE), k[61] && (c |= K.INVISIBLE), k[62] && (c |= K.STRIKETHROUGH), U.getInt32(h + 64, !0) !== 0 && (c |= K.UNDERLINE), M.flags = c, this.resolveStyleColor(
-              h + 8,
+          const r = new DataView(this.memory.buffer).getBigUint64(w, !0);
+          this.exports.ghostty_cell_get(r, UI.CODEPOINT, s);
+          const G = new DataView(this.memory.buffer).getUint32(s, !0);
+          this.exports.ghostty_cell_get(r, UI.WIDE, t);
+          const U = new DataView(this.memory.buffer).getUint32(t, !0), F = U === CI.WIDE ? 2 : U === CI.SPACER_TAIL || U === CI.SPACER_HEAD ? 0 : 1;
+          this.exports.ghostty_cell_get(r, UI.HAS_HYPERLINK, t);
+          const y = new DataView(this.memory.buffer).getUint8(t) !== 0;
+          new DataView(this.memory.buffer).setUint32(N, e, !0);
+          const S = this.exports.ghostty_grid_ref_style(B, N) === 0, k = this.makeEmptyCell();
+          if (k.codepoint = G, k.width = F, k.hyperlink_id = y ? 1 : 0, S) {
+            const L = new Uint8Array(this.memory.buffer, N, e), J = new DataView(this.memory.buffer);
+            let a = 0;
+            L[56] && (a |= d.BOLD), L[57] && (a |= d.ITALIC), L[58] && (a |= d.FAINT), L[59] && (a |= d.BLINK), L[60] && (a |= d.INVERSE), L[61] && (a |= d.INVISIBLE), L[62] && (a |= d.STRIKETHROUGH), J.getInt32(N + 64, !0) !== 0 && (a |= d.UNDERLINE), k.flags = a, this.resolveStyleColor(
+              N + 8,
               o,
-              M,
+              k,
               /*isFg=*/
               !0
             ), this.resolveStyleColor(
-              h + 24,
+              N + 24,
               o,
-              M,
+              k,
               /*isFg=*/
               !1
             );
           }
-          D[a] = M;
+          D[h] = k;
         }
       } finally {
-        this.exports.ghostty_wasm_free(w, 8), this.exports.ghostty_wasm_free(t, 4), this.exports.ghostty_wasm_free(s, 4), this.exports.ghostty_wasm_free(h, e), this.exports.ghostty_wasm_free(E, C);
+        this.exports.ghostty_wasm_free(w, 8), this.exports.ghostty_wasm_free(s, 4), this.exports.ghostty_wasm_free(t, 4), this.exports.ghostty_wasm_free(N, e), this.exports.ghostty_wasm_free(E, C);
       }
       return D;
     } finally {
@@ -4114,8 +4143,8 @@ const Bi = class CB {
     let i = 0, o = 0, D = 0;
     const w = E === 0;
     if (E === 1 && g) {
-      const t = C.getUint8(I + 8);
-      i = g[t * 3 + 0], o = g[t * 3 + 1], D = g[t * 3 + 2];
+      const s = C.getUint8(I + 8);
+      i = g[s * 3 + 0], o = g[s * 3 + 1], D = g[s * 3 + 2];
     } else
       E === 2 && (i = C.getUint8(I + 8), o = C.getUint8(I + 9), D = C.getUint8(I + 10));
     B ? (Q.fg_r = i, Q.fg_g = o, Q.fg_b = D, Q.fgIsDefault = w) : (Q.bg_r = i, Q.bg_g = o, Q.bg_b = D, Q.bgIsDefault = w);
@@ -4136,8 +4165,8 @@ const Bi = class CB {
         try {
           if (this.exports.ghostty_grid_ref_hyperlink_uri(C, o, i, E) !== 0)
             return null;
-          const w = new DataView(this.memory.buffer).getUint32(E, !0), t = new Uint8Array(this.memory.buffer, o, w);
-          return new TextDecoder().decode(t.slice());
+          const w = new DataView(this.memory.buffer).getUint32(E, !0), s = new Uint8Array(this.memory.buffer, o, w);
+          return new TextDecoder().decode(s.slice());
         } finally {
           this.exports.ghostty_wasm_free(o, i);
         }
@@ -4215,104 +4244,104 @@ const Bi = class CB {
    */
   installCallbacks() {
     const I = this.exports.__indirect_function_table;
-    let g = CB.callbackRegistries.get(I);
+    let g = EB.callbackRegistries.get(I);
     if (!g) {
-      const Q = /* @__PURE__ */ new Map(), B = (n, M, k, U) => {
-        const c = Q.get(n);
-        c && c.pendingResponses.push(new Uint8Array(c.memory.buffer, k, U).slice());
-      }, C = (n, M, k) => {
-        const U = Q.get(n);
-        if (!U)
+      const Q = /* @__PURE__ */ new Map(), B = (S, k, L, J) => {
+        const a = Q.get(S);
+        a && a.pendingResponses.push(new Uint8Array(a.memory.buffer, L, J).slice());
+      }, C = (S, k, L) => {
+        const J = Q.get(S);
+        if (!J)
           return;
-        const c = new DataView(U.memory.buffer);
-        if (c.getUint32(k, !0) < 48)
+        const a = new DataView(J.memory.buffer);
+        if (a.getUint32(L, !0) < 48)
           return;
-        const y = ["idle", "working", "done", "blocked", "error", "clear"], T = [null, "permission", "question", "auth"], l = y[c.getUint32(k + 4, !0)], x = T[c.getUint32(k + 8, !0)];
+        const R = ["idle", "working", "done", "blocked", "error", "clear"], f = [null, "permission", "question", "auth"], l = R[a.getUint32(L + 4, !0)], x = f[a.getUint32(L + 8, !0)];
         if (l === void 0 || x === void 0)
           return;
-        const d = (u) => new TextDecoder().decode(
+        const O = (u) => new TextDecoder().decode(
           new Uint8Array(
-            U.memory.buffer,
-            c.getUint32(k + u, !0),
-            c.getUint32(k + u + 4, !0)
+            J.memory.buffer,
+            a.getUint32(L + u, !0),
+            a.getUint32(L + u + 4, !0)
           )
-        ), _ = c.getInt8(k + 12);
-        U.pendingProgramStatus.push({
+        ), _ = a.getInt8(L + 12);
+        J.pendingProgramStatus.push({
           state: l,
           kind: x,
           progress: _ < 0 ? null : _,
-          id: d(16),
-          app: d(24),
-          title: d(32),
-          message: d(40)
+          id: O(16),
+          app: O(24),
+          title: O(32),
+          message: O(40)
         });
-      }, E = (n, M, k) => {
-        const U = Q.get(n);
-        if (!U || U.cellWidthPx === 0 || U.cellHeightPx === 0)
+      }, E = (S, k, L) => {
+        const J = Q.get(S);
+        if (!J || J.cellWidthPx === 0 || J.cellHeightPx === 0)
           return 0;
-        const c = new DataView(U.memory.buffer);
-        return c.setUint16(k + 0, U._rows, !0), c.setUint16(k + 2, U._cols, !0), c.setUint32(k + 4, U.cellWidthPx, !0), c.setUint32(k + 8, U.cellHeightPx, !0), 1;
-      }, i = this.exports, o = this.memory, D = (n, M, k, U, c) => {
+        const a = new DataView(J.memory.buffer);
+        return a.setUint16(L + 0, J._rows, !0), a.setUint16(L + 2, J._cols, !0), a.setUint32(L + 4, J.cellWidthPx, !0), a.setUint32(L + 8, J.cellHeightPx, !0), 1;
+      }, i = this.exports, o = this.memory, D = (S, k, L, J, a) => {
         try {
-          const y = new Uint8Array(o.buffer, k, U).slice(), T = fo(y), l = xo(T);
+          const R = new Uint8Array(o.buffer, L, J).slice(), f = Ko(R), l = uo(f);
           if (!l)
             return 0;
-          const x = i.ghostty_alloc(M, l.length);
+          const x = i.ghostty_alloc(k, l.length);
           if (x === 0)
             return 0;
           new Uint8Array(o.buffer, x, l.length).set(l);
-          const d = new DataView(o.buffer);
-          return d.setUint32(c + 0, T.width, !0), d.setUint32(c + 4, T.height, !0), d.setUint32(c + 8, x, !0), d.setUint32(c + 12, l.length, !0), 1;
+          const O = new DataView(o.buffer);
+          return O.setUint32(a + 0, f.width, !0), O.setUint32(a + 4, f.height, !0), O.setUint32(a + 8, x, !0), O.setUint32(a + 12, l.length, !0), 1;
         } catch {
           return 0;
         }
-      }, w = (n, M, k, U, c) => {
-        const y = globalThis.ghosttyKittySharedMemory;
-        if (!(y instanceof Map))
+      }, w = (S, k, L, J, a) => {
+        const R = globalThis.ghosttyKittySharedMemory;
+        if (!(R instanceof Map))
           return 0;
-        const T = new TextDecoder().decode(new Uint8Array(o.buffer, k, U));
-        if (!y.has(T))
+        const f = new TextDecoder().decode(new Uint8Array(o.buffer, L, J));
+        if (!R.has(f))
           return 0;
-        const l = y.get(T);
-        let x = 0, d = 0;
+        const l = R.get(f);
+        let x = 0, O = 0;
         try {
-          if (!(l instanceof Uint8Array) || l.length === 0 || l.length > 400 * 1024 * 1024 || (d = l.length, x = i.ghostty_alloc(M, d), x === 0))
+          if (!(l instanceof Uint8Array) || l.length === 0 || l.length > 400 * 1024 * 1024 || (O = l.length, x = i.ghostty_alloc(k, O), x === 0))
             return 0;
-          new Uint8Array(o.buffer, x, d).set(l);
+          new Uint8Array(o.buffer, x, O).set(l);
           const _ = new DataView(o.buffer);
-          return _.setUint32(c + 0, 0, !0), _.setUint32(c + 4, 0, !0), _.setUint32(c + 8, x, !0), _.setUint32(c + 12, d, !0), 1;
+          return _.setUint32(a + 0, 0, !0), _.setUint32(a + 4, 0, !0), _.setUint32(a + 8, x, !0), _.setUint32(a + 12, O, !0), 1;
         } catch {
-          return x !== 0 && i.ghostty_free(M, x, d), 0;
+          return x !== 0 && i.ghostty_free(k, x, O), 0;
         } finally {
-          y.delete(T);
+          R.delete(f);
         }
-      }, { writePtyFwd: t, sizeFwd: s, decodePngFwd: e, readShmFwd: h, programStatusFwd: a } = Oo(
+      }, { writePtyFwd: s, sizeFwd: t, decodePngFwd: e, readShmFwd: N, programStatusFwd: h } = To(
         B,
         E,
         D,
         w,
         C
-      ), G = I.grow(1);
-      I.set(G, t);
-      const R = I.grow(1);
-      I.set(R, s);
-      const N = I.grow(1);
-      I.set(N, e);
-      const L = I.grow(1);
-      I.set(L, h);
-      const J = I.grow(1);
-      I.set(J, a), g = {
-        writePtyIndex: G,
-        sizeIndex: R,
-        decodePngIndex: N,
-        readShmIndex: L,
-        programStatusIndex: J,
+      ), c = I.grow(1);
+      I.set(c, s);
+      const r = I.grow(1);
+      I.set(r, t);
+      const G = I.grow(1);
+      I.set(G, e);
+      const U = I.grow(1);
+      I.set(U, N);
+      const F = I.grow(1);
+      I.set(F, h), g = {
+        writePtyIndex: c,
+        sizeIndex: r,
+        decodePngIndex: G,
+        readShmIndex: U,
+        programStatusIndex: F,
         instancesByHandle: Q
-      }, this.exports.ghostty_sys_set(gB.DECODE_PNG, N);
-      const r = this.exports.ghostty_sys_set(gB.READ_SHARED_MEMORY, L);
-      if (r !== 0)
-        throw new Error(`Installing Kitty shared memory failed: ${r}`);
-      globalThis.ghosttyKittySharedMemory ?? (globalThis.ghosttyKittySharedMemory = /* @__PURE__ */ new Map()), CB.callbackRegistries.set(I, g);
+      }, this.exports.ghostty_sys_set(QB.DECODE_PNG, G);
+      const y = this.exports.ghostty_sys_set(QB.READ_SHARED_MEMORY, U);
+      if (y !== 0)
+        throw new Error(`Installing Kitty shared memory failed: ${y}`);
+      globalThis.ghosttyKittySharedMemory ?? (globalThis.ghosttyKittySharedMemory = /* @__PURE__ */ new Map()), EB.callbackRegistries.set(I, g);
     }
     g.instancesByHandle.set(this.handle, this), this.callbackRegistry = g, this.exports.ghostty_terminal_set(
       this.handle,
@@ -4328,7 +4357,7 @@ const Bi = class CB {
   getMode(I, g = !1) {
     const Q = this.exports.ghostty_wasm_alloc(4);
     try {
-      return new DataView(this.memory.buffer).setUint16(Q, VC(I, g), !0), this.exports.ghostty_terminal_get(this.handle, ZA.MODE, Q) === 0 && new DataView(this.memory.buffer).getUint8(Q + 2) !== 0;
+      return new DataView(this.memory.buffer).setUint16(Q, XC(I, g), !0), this.exports.ghostty_terminal_get(this.handle, ZA.MODE, Q) === 0 && new DataView(this.memory.buffer).getUint8(Q + 2) !== 0;
     } finally {
       this.exports.ghostty_wasm_free(Q, 4);
     }
@@ -4454,44 +4483,44 @@ const Bi = class CB {
     return !Q || Q.length === 0 ? " " : String.fromCodePoint(...Q);
   }
 };
-Bi.callbackRegistries = /* @__PURE__ */ new WeakMap();
-let To = Bi;
-function xo(A) {
+Ci.callbackRegistries = /* @__PURE__ */ new WeakMap();
+let po = Ci;
+function uo(A) {
   const { width: I, height: g, channels: Q, depth: B, data: C, palette: E, transparency: i } = A, o = I * g, D = new Uint8Array(o * 4);
   if (E && E.length > 0) {
-    for (let t = 0, s = 0; t < o; t++, s += 4) {
-      const e = C[t] ?? 0, h = E[e] ?? E[0];
-      D[s] = h[0], D[s + 1] = h[1], D[s + 2] = h[2], D[s + 3] = h.length >= 4 ? h[3] : i && e < i.length ? i[e] : 255;
+    for (let s = 0, t = 0; s < o; s++, t += 4) {
+      const e = C[s] ?? 0, N = E[e] ?? E[0];
+      D[t] = N[0], D[t + 1] = N[1], D[t + 2] = N[2], D[t + 3] = N.length >= 4 ? N[3] : i && e < i.length ? i[e] : 255;
     }
     return D;
   }
-  const w = (t) => B === 16 ? C[t] >> 8 : C[t] ?? 0;
+  const w = (s) => B === 16 ? C[s] >> 8 : C[s] ?? 0;
   switch (Q) {
     case 4:
-      for (let t = 0, s = 0; t < o * 4; t += 4, s += 4)
-        D[s] = w(t), D[s + 1] = w(t + 1), D[s + 2] = w(t + 2), D[s + 3] = w(t + 3);
+      for (let s = 0, t = 0; s < o * 4; s += 4, t += 4)
+        D[t] = w(s), D[t + 1] = w(s + 1), D[t + 2] = w(s + 2), D[t + 3] = w(s + 3);
       return D;
     case 3:
-      for (let t = 0, s = 0; t < o * 3; t += 3, s += 4)
-        D[s] = w(t), D[s + 1] = w(t + 1), D[s + 2] = w(t + 2), D[s + 3] = 255;
+      for (let s = 0, t = 0; s < o * 3; s += 3, t += 4)
+        D[t] = w(s), D[t + 1] = w(s + 1), D[t + 2] = w(s + 2), D[t + 3] = 255;
       return D;
     case 2:
-      for (let t = 0, s = 0; t < o * 2; t += 2, s += 4) {
-        const e = w(t);
-        D[s] = e, D[s + 1] = e, D[s + 2] = e, D[s + 3] = w(t + 1);
+      for (let s = 0, t = 0; s < o * 2; s += 2, t += 4) {
+        const e = w(s);
+        D[t] = e, D[t + 1] = e, D[t + 2] = e, D[t + 3] = w(s + 1);
       }
       return D;
     case 1:
-      for (let t = 0, s = 0; t < o; t++, s += 4) {
-        const e = w(t);
-        D[s] = e, D[s + 1] = e, D[s + 2] = e, D[s + 3] = 255;
+      for (let s = 0, t = 0; s < o; s++, t += 4) {
+        const e = w(s);
+        D[t] = e, D[t + 1] = e, D[t + 2] = e, D[t + 3] = 255;
       }
       return D;
     default:
       return null;
   }
 }
-function po() {
+function bo() {
   var A = function(I) {
     var g = {
       R: "13k,1a,2,3,3,2+1j,ch+16,a+1,5+2,2+n,5,a,4,6+16,4+3,h+1b,4mo,179q,2+9,2+11,2i9+7y,2+68,4,3+4,5+13,4+3,2+4k,3+29,8+cf,1t+7z,w+17,3+3m,1t+3z,16o1+5r,8+30,8+mc,29+1r,29+4v,75+73",
@@ -4521,17 +4550,17 @@ function po() {
       Q[Y] = 1 << v + 1, B[Q[Y]] = Y;
     }), Object.freeze(Q);
     var C = Q.LRI | Q.RLI | Q.FSI, E = Q.L | Q.R | Q.AL, i = Q.B | Q.S | Q.WS | Q.ON | Q.FSI | Q.LRI | Q.RLI | Q.PDI, o = Q.BN | Q.RLE | Q.LRE | Q.RLO | Q.LRO | Q.PDF, D = Q.S | Q.WS | Q.B | C | Q.PDI | o, w = null;
-    function t() {
+    function s() {
       if (!w) {
         w = /* @__PURE__ */ new Map();
         var Y = function(P) {
           if (g.hasOwnProperty(P)) {
-            var S = 0;
+            var n = 0;
             g[P].split(",").forEach(function($) {
-              var f = $.split("+"), q = f[0], O = f[1];
-              q = parseInt(q, 36), O = O ? parseInt(O, 36) : 0, w.set(S += q, Q[P]);
-              for (var IA = 0; IA < O; IA++)
-                w.set(++S, Q[P]);
+              var K = $.split("+"), T = K[0], q = K[1];
+              T = parseInt(T, 36), q = q ? parseInt(q, 36) : 0, w.set(n += T, Q[P]);
+              for (var IA = 0; IA < q; IA++)
+                w.set(++n, Q[P]);
             });
           }
         };
@@ -4539,61 +4568,61 @@ function po() {
           Y(v);
       }
     }
-    function s(Y) {
-      return t(), w.get(Y.codePointAt(0)) || Q.L;
+    function t(Y) {
+      return s(), w.get(Y.codePointAt(0)) || Q.L;
     }
     function e(Y) {
-      return B[s(Y)];
+      return B[t(Y)];
     }
-    var h = {
+    var N = {
       pairs: "14>1,1e>2,u>2,2wt>1,1>1,1ge>1,1wp>1,1j>1,f>1,hm>1,1>1,u>1,u6>1,1>1,+5,28>1,w>1,1>1,+3,b8>1,1>1,+3,1>3,-1>-1,3>1,1>1,+2,1s>1,1>1,x>1,th>1,1>1,+2,db>1,1>1,+3,3>1,1>1,+2,14qm>1,1>1,+1,4q>1,1e>2,u>2,2>1,+1",
       canonical: "6f1>-6dx,6dy>-6dx,6ec>-6ed,6ee>-6ed,6ww>2jj,-2ji>2jj,14r4>-1e7l,1e7m>-1e7l,1e7m>-1e5c,1e5d>-1e5b,1e5c>-14qx,14qy>-14qx,14vn>-1ecg,1ech>-1ecg,1edu>-1ecg,1eci>-1ecg,1eda>-1ecg,1eci>-1ecg,1eci>-168q,168r>-168q,168s>-14ye,14yf>-14ye"
     };
-    function a(Y, v) {
-      var P = 36, S = 0, $ = /* @__PURE__ */ new Map(), f = v && /* @__PURE__ */ new Map(), q;
-      return Y.split(",").forEach(function O(IA) {
+    function h(Y, v) {
+      var P = 36, n = 0, $ = /* @__PURE__ */ new Map(), K = v && /* @__PURE__ */ new Map(), T;
+      return Y.split(",").forEach(function q(IA) {
         if (IA.indexOf("+") !== -1)
           for (var BA = +IA; BA--; )
-            O(q);
+            q(T);
         else {
-          q = IA;
+          T = IA;
           var m = IA.split(">"), AA = m[0], JA = m[1];
-          AA = String.fromCodePoint(S += parseInt(AA, P)), JA = String.fromCodePoint(S += parseInt(JA, P)), $.set(AA, JA), v && f.set(JA, AA);
+          AA = String.fromCodePoint(n += parseInt(AA, P)), JA = String.fromCodePoint(n += parseInt(JA, P)), $.set(AA, JA), v && K.set(JA, AA);
         }
-      }), { map: $, reverseMap: f };
+      }), { map: $, reverseMap: K };
     }
-    var G, R, N;
-    function L() {
-      if (!G) {
-        var Y = a(h.pairs, !0), v = Y.map, P = Y.reverseMap;
-        G = v, R = P, N = a(h.canonical, !1).map;
+    var c, r, G;
+    function U() {
+      if (!c) {
+        var Y = h(N.pairs, !0), v = Y.map, P = Y.reverseMap;
+        c = v, r = P, G = h(N.canonical, !1).map;
       }
     }
-    function J(Y) {
-      return L(), G.get(Y) || null;
+    function F(Y) {
+      return U(), c.get(Y) || null;
     }
-    function r(Y) {
-      return L(), R.get(Y) || null;
+    function y(Y) {
+      return U(), r.get(Y) || null;
     }
-    function n(Y) {
-      return L(), N.get(Y) || null;
+    function S(Y) {
+      return U(), G.get(Y) || null;
     }
-    var M = Q.L, k = Q.R, U = Q.EN, c = Q.ES, y = Q.ET, T = Q.AN, l = Q.CS, x = Q.B, d = Q.S, _ = Q.ON, u = Q.BN, Z = Q.NSM, AI = Q.AL, II = Q.LRO, lI = Q.RLO, X = Q.LRE, xA = Q.RLE, pA = Q.PDF, tI = Q.LRI, uA = Q.RLI, HA = Q.FSI, QA = Q.PDI;
+    var k = Q.L, L = Q.R, J = Q.EN, a = Q.ES, R = Q.ET, f = Q.AN, l = Q.CS, x = Q.B, O = Q.S, _ = Q.ON, u = Q.BN, Z = Q.NSM, AI = Q.AL, II = Q.LRO, lI = Q.RLO, X = Q.LRE, xA = Q.RLE, pA = Q.PDF, tI = Q.LRI, uA = Q.RLI, HA = Q.FSI, QA = Q.PDI;
     function tg(Y, v) {
-      for (var P = 125, S = new Uint32Array(Y.length), $ = 0; $ < Y.length; $++)
-        S[$] = s(Y[$]);
-      var f = /* @__PURE__ */ new Map();
-      function q(oA, UA) {
-        var sA = S[oA];
-        S[oA] = UA, f.set(sA, f.get(sA) - 1), sA & i && f.set(i, f.get(i) - 1), f.set(UA, (f.get(UA) || 0) + 1), UA & i && f.set(i, (f.get(i) || 0) + 1);
+      for (var P = 125, n = new Uint32Array(Y.length), $ = 0; $ < Y.length; $++)
+        n[$] = t(Y[$]);
+      var K = /* @__PURE__ */ new Map();
+      function T(oA, UA) {
+        var sA = n[oA];
+        n[oA] = UA, K.set(sA, K.get(sA) - 1), sA & i && K.set(i, K.get(i) - 1), K.set(UA, (K.get(UA) || 0) + 1), UA & i && K.set(i, (K.get(i) || 0) + 1);
       }
-      for (var O = new Uint8Array(Y.length), IA = /* @__PURE__ */ new Map(), BA = [], m = null, AA = 0; AA < Y.length; AA++)
+      for (var q = new Uint8Array(Y.length), IA = /* @__PURE__ */ new Map(), BA = [], m = null, AA = 0; AA < Y.length; AA++)
         m || BA.push(m = {
           start: AA,
           end: Y.length - 1,
           // 3.3.1 P2-P3: Determine the paragraph level
-          level: v === "rtl" ? 1 : v === "ltr" ? 0 : WB(AA, !1)
-        }), S[AA] & x && (m.end = AA, m = null);
+          level: v === "rtl" ? 1 : v === "ltr" ? 0 : _B(AA, !1)
+        }), n[AA] & x && (m.end = AA, m = null);
       for (var JA = xA | X | lI | II | C | QA | pA | x, gI = function(oA) {
         return oA + (oA & 1 ? 1 : 2);
       }, bA = function(oA) {
@@ -4607,12 +4636,12 @@ function po() {
           _isolate: 0
           //bool
         }], W = void 0, YA = 0, PA = 0, $g = 0;
-        f.clear();
+        K.clear();
         for (var CA = m.start; CA <= m.end; CA++) {
-          var EA = S[CA];
-          if (W = V[V.length - 1], f.set(EA, (f.get(EA) || 0) + 1), EA & i && f.set(i, (f.get(i) || 0) + 1), EA & JA)
+          var EA = n[CA];
+          if (W = V[V.length - 1], K.set(EA, (K.get(EA) || 0) + 1), EA & i && K.set(i, (K.get(i) || 0) + 1), EA & JA)
             if (EA & (xA | X)) {
-              O[CA] = W._level;
+              q[CA] = W._level;
               var RB = (EA === xA ? bA : gI)(W._level);
               RB <= P && !YA && !PA ? V.push({
                 _level: RB,
@@ -4620,18 +4649,18 @@ function po() {
                 _isolate: 0
               }) : YA || PA++;
             } else if (EA & (lI | II)) {
-              O[CA] = W._level;
-              var rB = (EA === lI ? bA : gI)(W._level);
-              rB <= P && !YA && !PA ? V.push({
-                _level: rB,
-                _override: EA & lI ? k : M,
+              q[CA] = W._level;
+              var yB = (EA === lI ? bA : gI)(W._level);
+              yB <= P && !YA && !PA ? V.push({
+                _level: yB,
+                _override: EA & lI ? L : k,
                 _isolate: 0
               }) : YA || PA++;
             } else if (EA & C) {
-              EA & HA && (EA = WB(CA + 1, !0) === 1 ? uA : tI), O[CA] = W._level, W._override && q(CA, W._override);
-              var yB = (EA === uA ? bA : gI)(W._level);
-              yB <= P && YA === 0 && PA === 0 ? ($g++, V.push({
-                _level: yB,
+              EA & HA && (EA = _B(CA + 1, !0) === 1 ? uA : tI), q[CA] = W._level, W._override && T(CA, W._override);
+              var nB = (EA === uA ? bA : gI)(W._level);
+              nB <= P && YA === 0 && PA === 0 ? ($g++, V.push({
+                _level: nB,
                 _override: 0,
                 _isolate: 1,
                 _isolInitIndex: CA
@@ -4645,239 +4674,239 @@ function po() {
                 var AQ = V[V.length - 1]._isolInitIndex;
                 AQ != null && (IA.set(AQ, CA), IA.set(CA, AQ)), V.pop(), $g--;
               }
-              W = V[V.length - 1], O[CA] = W._level, W._override && q(CA, W._override);
+              W = V[V.length - 1], q[CA] = W._level, W._override && T(CA, W._override);
             } else
-              EA & pA ? (YA === 0 && (PA > 0 ? PA-- : !W._isolate && V.length > 1 && (V.pop(), W = V[V.length - 1])), O[CA] = W._level) : EA & x && (O[CA] = m.level);
+              EA & pA ? (YA === 0 && (PA > 0 ? PA-- : !W._isolate && V.length > 1 && (V.pop(), W = V[V.length - 1])), q[CA] = W._level) : EA & x && (q[CA] = m.level);
           else
-            O[CA] = W._level, W._override && EA !== u && q(CA, W._override);
+            q[CA] = W._level, W._override && EA !== u && T(CA, W._override);
         }
         for (var eI = [], LA = null, QI = m.start; QI <= m.end; QI++) {
-          var IQ = S[QI];
+          var IQ = n[QI];
           if (!(IQ & o)) {
-            var nB = O[QI], SB = IQ & C, Fi = IQ === QA;
-            LA && nB === LA._level ? (LA._end = QI, LA._endsWithIsolInit = SB) : eI.push(LA = {
+            var SB = q[QI], HB = IQ & C, Ui = IQ === QA;
+            LA && SB === LA._level ? (LA._end = QI, LA._endsWithIsolInit = HB) : eI.push(LA = {
               _start: QI,
               _end: QI,
-              _level: nB,
-              _startsWithPDI: Fi,
-              _endsWithIsolInit: SB
+              _level: SB,
+              _startsWithPDI: Ui,
+              _endsWithIsolInit: HB
             });
           }
         }
         for (var gQ = [], eg = 0; eg < eI.length; eg++) {
           var hg = eI[eg];
           if (!hg._startsWithPDI || hg._startsWithPDI && !IA.has(hg._start)) {
-            for (var QQ = [LA = hg], HB = void 0; LA && LA._endsWithIsolInit && (HB = IA.get(LA._end)) != null; )
+            for (var QQ = [LA = hg], YB = void 0; LA && LA._endsWithIsolInit && (YB = IA.get(LA._end)) != null; )
               for (var ag = eg + 1; ag < eI.length; ag++)
-                if (eI[ag]._start === HB) {
+                if (eI[ag]._start === YB) {
                   QQ.push(LA = eI[ag]);
                   break;
                 }
             for (var hI = [], BQ = 0; BQ < QQ.length; BQ++)
-              for (var YB = QQ[BQ], CQ = YB._start; CQ <= YB._end; CQ++)
+              for (var lB = QQ[BQ], CQ = lB._start; CQ <= lB._end; CQ++)
                 hI.push(CQ);
-            for (var Ui = O[hI[0]], lB = m.level, Ng = hI[0] - 1; Ng >= 0; Ng--)
-              if (!(S[Ng] & o)) {
-                lB = O[Ng];
+            for (var Ji = q[hI[0]], fB = m.level, Ng = hI[0] - 1; Ng >= 0; Ng--)
+              if (!(n[Ng] & o)) {
+                fB = q[Ng];
                 break;
               }
-            var EQ = hI[hI.length - 1], Ji = O[EQ], fB = m.level;
-            if (!(S[EQ] & C)) {
+            var EQ = hI[hI.length - 1], Li = q[EQ], KB = m.level;
+            if (!(n[EQ] & C)) {
               for (var kg = EQ + 1; kg <= m.end; kg++)
-                if (!(S[kg] & o)) {
-                  fB = O[kg];
+                if (!(n[kg] & o)) {
+                  KB = q[kg];
                   break;
                 }
             }
             gQ.push({
               _seqIndices: hI,
-              _sosType: Math.max(lB, Ui) % 2 ? k : M,
-              _eosType: Math.max(fB, Ji) % 2 ? k : M
+              _sosType: Math.max(fB, Ji) % 2 ? L : k,
+              _eosType: Math.max(KB, Li) % 2 ? L : k
             });
           }
         }
         for (var iQ = 0; iQ < gQ.length; iQ++) {
-          var DQ = gQ[iQ], H = DQ._seqIndices, fI = DQ._sosType, Li = DQ._eosType, aI = O[H[0]] & 1 ? k : M;
-          if (f.get(Z))
+          var DQ = gQ[iQ], H = DQ._seqIndices, fI = DQ._sosType, ri = DQ._eosType, aI = q[H[0]] & 1 ? L : k;
+          if (K.get(Z))
             for (var Mg = 0; Mg < H.length; Mg++) {
-              var KB = H[Mg];
-              if (S[KB] & Z) {
+              var dB = H[Mg];
+              if (n[dB] & Z) {
                 for (var wQ = fI, Gg = Mg - 1; Gg >= 0; Gg--)
-                  if (!(S[H[Gg]] & o)) {
-                    wQ = S[H[Gg]];
+                  if (!(n[H[Gg]] & o)) {
+                    wQ = n[H[Gg]];
                     break;
                   }
-                q(KB, wQ & (C | QA) ? _ : wQ);
+                T(dB, wQ & (C | QA) ? _ : wQ);
               }
             }
-          if (f.get(U))
+          if (K.get(J))
             for (var cg = 0; cg < H.length; cg++) {
-              var dB = H[cg];
-              if (S[dB] & U)
+              var OB = H[cg];
+              if (n[OB] & J)
                 for (var Fg = cg - 1; Fg >= -1; Fg--) {
-                  var OB = Fg === -1 ? fI : S[H[Fg]];
-                  if (OB & E) {
-                    OB === AI && q(dB, T);
+                  var qB = Fg === -1 ? fI : n[H[Fg]];
+                  if (qB & E) {
+                    qB === AI && T(OB, f);
                     break;
                   }
                 }
             }
-          if (f.get(AI))
+          if (K.get(AI))
             for (var oQ = 0; oQ < H.length; oQ++) {
-              var qB = H[oQ];
-              S[qB] & AI && q(qB, k);
+              var TB = H[oQ];
+              n[TB] & AI && T(TB, L);
             }
-          if (f.get(c) || f.get(l))
+          if (K.get(a) || K.get(l))
             for (var KI = 1; KI < H.length - 1; KI++) {
               var sQ = H[KI];
-              if (S[sQ] & (c | l)) {
-                for (var NI = 0, tQ = 0, eQ = KI - 1; eQ >= 0 && (NI = S[H[eQ]], !!(NI & o)); eQ--)
+              if (n[sQ] & (a | l)) {
+                for (var NI = 0, tQ = 0, eQ = KI - 1; eQ >= 0 && (NI = n[H[eQ]], !!(NI & o)); eQ--)
                   ;
-                for (var hQ = KI + 1; hQ < H.length && (tQ = S[H[hQ]], !!(tQ & o)); hQ++)
+                for (var hQ = KI + 1; hQ < H.length && (tQ = n[H[hQ]], !!(tQ & o)); hQ++)
                   ;
-                NI === tQ && (S[sQ] === c ? NI === U : NI & (U | T)) && q(sQ, NI);
+                NI === tQ && (n[sQ] === a ? NI === J : NI & (J | f)) && T(sQ, NI);
               }
             }
-          if (f.get(U))
-            for (var RA = 0; RA < H.length; RA++) {
-              var Ri = H[RA];
-              if (S[Ri] & U) {
-                for (var Ug = RA - 1; Ug >= 0 && S[H[Ug]] & (y | o); Ug--)
-                  q(H[Ug], U);
-                for (RA++; RA < H.length && S[H[RA]] & (y | o | U); RA++)
-                  S[H[RA]] !== U && q(H[RA], U);
+          if (K.get(J))
+            for (var rA = 0; rA < H.length; rA++) {
+              var Ri = H[rA];
+              if (n[Ri] & J) {
+                for (var Ug = rA - 1; Ug >= 0 && n[H[Ug]] & (R | o); Ug--)
+                  T(H[Ug], J);
+                for (rA++; rA < H.length && n[H[rA]] & (R | o | J); rA++)
+                  n[H[rA]] !== J && T(H[rA], J);
               }
             }
-          if (f.get(y) || f.get(c) || f.get(l))
+          if (K.get(R) || K.get(a) || K.get(l))
             for (var dI = 0; dI < H.length; dI++) {
-              var TB = H[dI];
-              if (S[TB] & (y | c | l)) {
-                q(TB, _);
-                for (var Jg = dI - 1; Jg >= 0 && S[H[Jg]] & o; Jg--)
-                  q(H[Jg], _);
-                for (var Lg = dI + 1; Lg < H.length && S[H[Lg]] & o; Lg++)
-                  q(H[Lg], _);
+              var xB = H[dI];
+              if (n[xB] & (R | a | l)) {
+                T(xB, _);
+                for (var Jg = dI - 1; Jg >= 0 && n[H[Jg]] & o; Jg--)
+                  T(H[Jg], _);
+                for (var Lg = dI + 1; Lg < H.length && n[H[Lg]] & o; Lg++)
+                  T(H[Lg], _);
               }
             }
-          if (f.get(U))
-            for (var aQ = 0, xB = fI; aQ < H.length; aQ++) {
-              var pB = H[aQ], NQ = S[pB];
-              NQ & U ? xB === M && q(pB, M) : NQ & E && (xB = NQ);
+          if (K.get(J))
+            for (var aQ = 0, pB = fI; aQ < H.length; aQ++) {
+              var uB = H[aQ], NQ = n[uB];
+              NQ & J ? pB === k && T(uB, k) : NQ & E && (pB = NQ);
             }
-          if (f.get(i)) {
-            var OI = k | U | T, uB = OI | M, Rg = [];
+          if (K.get(i)) {
+            var OI = L | J | f, bB = OI | k, rg = [];
             {
               for (var kI = [], MI = 0; MI < H.length; MI++)
-                if (S[H[MI]] & i) {
-                  var qI = Y[H[MI]], bB = void 0;
-                  if (J(qI) !== null)
+                if (n[H[MI]] & i) {
+                  var qI = Y[H[MI]], mB = void 0;
+                  if (F(qI) !== null)
                     if (kI.length < 63)
                       kI.push({ char: qI, seqIndex: MI });
                     else
                       break;
-                  else if ((bB = r(qI)) !== null)
+                  else if ((mB = y(qI)) !== null)
                     for (var TI = kI.length - 1; TI >= 0; TI--) {
                       var kQ = kI[TI].char;
-                      if (kQ === bB || kQ === r(n(qI)) || J(n(kQ)) === qI) {
-                        Rg.push([kI[TI].seqIndex, MI]), kI.length = TI;
+                      if (kQ === mB || kQ === y(S(qI)) || F(S(kQ)) === qI) {
+                        rg.push([kI[TI].seqIndex, MI]), kI.length = TI;
                         break;
                       }
                     }
                 }
-              Rg.sort(function(oA, UA) {
+              rg.sort(function(oA, UA) {
                 return oA[0] - UA[0];
               });
             }
-            for (var MQ = 0; MQ < Rg.length; MQ++) {
-              for (var mB = Rg[MQ], rg = mB[0], GQ = mB[1], PB = !1, FA = 0, cQ = rg + 1; cQ < GQ; cQ++) {
-                var jB = H[cQ];
-                if (S[jB] & uB) {
-                  PB = !0;
-                  var VB = S[jB] & OI ? k : M;
-                  if (VB === aI) {
-                    FA = VB;
+            for (var MQ = 0; MQ < rg.length; MQ++) {
+              for (var PB = rg[MQ], Rg = PB[0], GQ = PB[1], jB = !1, FA = 0, cQ = Rg + 1; cQ < GQ; cQ++) {
+                var VB = H[cQ];
+                if (n[VB] & bB) {
+                  jB = !0;
+                  var ZB = n[VB] & OI ? L : k;
+                  if (ZB === aI) {
+                    FA = ZB;
                     break;
                   }
                 }
               }
-              if (PB && !FA) {
+              if (jB && !FA) {
                 FA = fI;
-                for (var FQ = rg - 1; FQ >= 0; FQ--) {
-                  var ZB = H[FQ];
-                  if (S[ZB] & uB) {
-                    var XB = S[ZB] & OI ? k : M;
-                    XB !== aI ? FA = XB : FA = aI;
+                for (var FQ = Rg - 1; FQ >= 0; FQ--) {
+                  var XB = H[FQ];
+                  if (n[XB] & bB) {
+                    var vB = n[XB] & OI ? L : k;
+                    vB !== aI ? FA = vB : FA = aI;
                     break;
                   }
                 }
               }
               if (FA) {
-                if (S[H[rg]] = S[H[GQ]] = FA, FA !== aI) {
-                  for (var xI = rg + 1; xI < H.length; xI++)
-                    if (!(S[H[xI]] & o)) {
-                      s(Y[H[xI]]) & Z && (S[H[xI]] = FA);
+                if (n[H[Rg]] = n[H[GQ]] = FA, FA !== aI) {
+                  for (var xI = Rg + 1; xI < H.length; xI++)
+                    if (!(n[H[xI]] & o)) {
+                      t(Y[H[xI]]) & Z && (n[H[xI]] = FA);
                       break;
                     }
                 }
                 if (FA !== aI) {
                   for (var pI = GQ + 1; pI < H.length; pI++)
-                    if (!(S[H[pI]] & o)) {
-                      s(Y[H[pI]]) & Z && (S[H[pI]] = FA);
+                    if (!(n[H[pI]] & o)) {
+                      t(Y[H[pI]]) & Z && (n[H[pI]] = FA);
                       break;
                     }
                 }
               }
             }
             for (var jA = 0; jA < H.length; jA++)
-              if (S[H[jA]] & i) {
-                for (var vB = jA, UQ = jA, JQ = fI, uI = jA - 1; uI >= 0; uI--)
-                  if (S[H[uI]] & o)
-                    vB = uI;
+              if (n[H[jA]] & i) {
+                for (var zB = jA, UQ = jA, JQ = fI, uI = jA - 1; uI >= 0; uI--)
+                  if (n[H[uI]] & o)
+                    zB = uI;
                   else {
-                    JQ = S[H[uI]] & OI ? k : M;
+                    JQ = n[H[uI]] & OI ? L : k;
                     break;
                   }
-                for (var zB = Li, bI = jA + 1; bI < H.length; bI++)
-                  if (S[H[bI]] & (i | o))
+                for (var WB = ri, bI = jA + 1; bI < H.length; bI++)
+                  if (n[H[bI]] & (i | o))
                     UQ = bI;
                   else {
-                    zB = S[H[bI]] & OI ? k : M;
+                    WB = n[H[bI]] & OI ? L : k;
                     break;
                   }
-                for (var LQ = vB; LQ <= UQ; LQ++)
-                  S[H[LQ]] = JQ === zB ? JQ : aI;
+                for (var LQ = zB; LQ <= UQ; LQ++)
+                  n[H[LQ]] = JQ === WB ? JQ : aI;
                 jA = UQ;
               }
           }
         }
         for (var eA = m.start; eA <= m.end; eA++) {
-          var ri = O[eA], yg = S[eA];
-          if (ri & 1 ? yg & (M | U | T) && O[eA]++ : yg & k ? O[eA]++ : yg & (T | U) && (O[eA] += 2), yg & o && (O[eA] = eA === 0 ? m.level : O[eA - 1]), eA === m.end || s(Y[eA]) & (d | x))
-            for (var ng = eA; ng >= 0 && s(Y[ng]) & D; ng--)
-              O[ng] = m.level;
+          var yi = q[eA], yg = n[eA];
+          if (yi & 1 ? yg & (k | J | f) && q[eA]++ : yg & L ? q[eA]++ : yg & (f | J) && (q[eA] += 2), yg & o && (q[eA] = eA === 0 ? m.level : q[eA - 1]), eA === m.end || t(Y[eA]) & (O | x))
+            for (var ng = eA; ng >= 0 && t(Y[ng]) & D; ng--)
+              q[ng] = m.level;
         }
       }
       return {
-        levels: O,
+        levels: q,
         paragraphs: BA
       };
-      function WB(oA, UA) {
+      function _B(oA, UA) {
         for (var sA = oA; sA < Y.length; sA++) {
-          var VA = S[sA];
-          if (VA & (k | AI))
+          var VA = n[sA];
+          if (VA & (L | AI))
             return 1;
-          if (VA & (x | M) || UA && VA === QA)
+          if (VA & (x | k) || UA && VA === QA)
             return 0;
           if (VA & C) {
-            var _B = yi(sA);
-            sA = _B === -1 ? Y.length : _B;
+            var $B = ni(sA);
+            sA = $B === -1 ? Y.length : $B;
           }
         }
         return 0;
       }
-      function yi(oA) {
+      function ni(oA) {
         for (var UA = 1, sA = oA + 1; sA < Y.length; sA++) {
-          var VA = S[sA];
+          var VA = n[sA];
           if (VA & x)
             break;
           if (VA & QA) {
@@ -4889,38 +4918,38 @@ function po() {
         return -1;
       }
     }
-    var ki = "14>1,j>2,t>2,u>2,1a>g,2v3>1,1>1,1ge>1,1wd>1,b>1,1j>1,f>1,ai>3,-2>3,+1,8>1k0,-1jq>1y7,-1y6>1hf,-1he>1h6,-1h5>1ha,-1h8>1qi,-1pu>1,6>3u,-3s>7,6>1,1>1,f>1,1>1,+2,3>1,1>1,+13,4>1,1>1,6>1eo,-1ee>1,3>1mg,-1me>1mk,-1mj>1mi,-1mg>1mi,-1md>1,1>1,+2,1>10k,-103>1,1>1,4>1,5>1,1>1,+10,3>1,1>8,-7>8,+1,-6>7,+1,a>1,1>1,u>1,u6>1,1>1,+5,26>1,1>1,2>1,2>2,8>1,7>1,4>1,1>1,+5,b8>1,1>1,+3,1>3,-2>1,2>1,1>1,+2,c>1,3>1,1>1,+2,h>1,3>1,a>1,1>1,2>1,3>1,1>1,d>1,f>1,3>1,1a>1,1>1,6>1,7>1,13>1,k>1,1>1,+19,4>1,1>1,+2,2>1,1>1,+18,m>1,a>1,1>1,lk>1,1>1,4>1,2>1,f>1,3>1,1>1,+3,db>1,1>1,+3,3>1,1>1,+2,14qm>1,1>1,+1,6>1,4j>1,j>2,t>2,u>2,2>1,+1", Wg;
-    function Mi() {
+    var Mi = "14>1,j>2,t>2,u>2,1a>g,2v3>1,1>1,1ge>1,1wd>1,b>1,1j>1,f>1,ai>3,-2>3,+1,8>1k0,-1jq>1y7,-1y6>1hf,-1he>1h6,-1h5>1ha,-1h8>1qi,-1pu>1,6>3u,-3s>7,6>1,1>1,f>1,1>1,+2,3>1,1>1,+13,4>1,1>1,6>1eo,-1ee>1,3>1mg,-1me>1mk,-1mj>1mi,-1mg>1mi,-1md>1,1>1,+2,1>10k,-103>1,1>1,4>1,5>1,1>1,+10,3>1,1>8,-7>8,+1,-6>7,+1,a>1,1>1,u>1,u6>1,1>1,+5,26>1,1>1,2>1,2>2,8>1,7>1,4>1,1>1,+5,b8>1,1>1,+3,1>3,-2>1,2>1,1>1,+2,c>1,3>1,1>1,+2,h>1,3>1,a>1,1>1,2>1,3>1,1>1,d>1,f>1,3>1,1a>1,1>1,6>1,7>1,13>1,k>1,1>1,+19,4>1,1>1,+2,2>1,1>1,+18,m>1,a>1,1>1,lk>1,1>1,4>1,2>1,f>1,3>1,1>1,+3,db>1,1>1,+3,3>1,1>1,+2,14qm>1,1>1,+1,6>1,4j>1,j>2,t>2,u>2,2>1,+1", Wg;
+    function Gi() {
       if (!Wg) {
-        var Y = a(ki, !0), v = Y.map, P = Y.reverseMap;
-        P.forEach(function(S, $) {
-          v.set($, S);
+        var Y = h(Mi, !0), v = Y.map, P = Y.reverseMap;
+        P.forEach(function(n, $) {
+          v.set($, n);
         }), Wg = v;
       }
     }
     function _g(Y) {
-      return Mi(), Wg.get(Y) || null;
+      return Gi(), Wg.get(Y) || null;
     }
-    function Gi(Y, v, P, S) {
+    function ci(Y, v, P, n) {
       var $ = Y.length;
-      P = Math.max(0, P == null ? 0 : +P), S = Math.min($ - 1, S == null ? $ - 1 : +S);
-      for (var f = /* @__PURE__ */ new Map(), q = P; q <= S; q++)
-        if (v[q] & 1) {
-          var O = _g(Y[q]);
-          O !== null && f.set(q, O);
+      P = Math.max(0, P == null ? 0 : +P), n = Math.min($ - 1, n == null ? $ - 1 : +n);
+      for (var K = /* @__PURE__ */ new Map(), T = P; T <= n; T++)
+        if (v[T] & 1) {
+          var q = _g(Y[T]);
+          q !== null && K.set(T, q);
         }
-      return f;
+      return K;
     }
-    function JB(Y, v, P, S) {
+    function LB(Y, v, P, n) {
       var $ = Y.length;
-      P = Math.max(0, P == null ? 0 : +P), S = Math.min($ - 1, S == null ? $ - 1 : +S);
-      var f = [];
-      return v.paragraphs.forEach(function(q) {
-        var O = Math.max(P, q.start), IA = Math.min(S, q.end);
-        if (O < IA) {
-          for (var BA = v.levels.slice(O, IA + 1), m = IA; m >= O && s(Y[m]) & D; m--)
-            BA[m] = q.level;
-          for (var AA = q.level, JA = 1 / 0, gI = 0; gI < BA.length; gI++) {
+      P = Math.max(0, P == null ? 0 : +P), n = Math.min($ - 1, n == null ? $ - 1 : +n);
+      var K = [];
+      return v.paragraphs.forEach(function(T) {
+        var q = Math.max(P, T.start), IA = Math.min(n, T.end);
+        if (q < IA) {
+          for (var BA = v.levels.slice(q, IA + 1), m = IA; m >= q && t(Y[m]) & D; m--)
+            BA[m] = T.level;
+          for (var AA = T.level, JA = 1 / 0, gI = 0; gI < BA.length; gI++) {
             var bA = BA[gI];
             bA > AA && (AA = bA), bA < JA && (JA = bA | 1);
           }
@@ -4929,30 +4958,30 @@ function po() {
               if (BA[V] >= mA) {
                 for (var W = V; V + 1 < BA.length && BA[V + 1] >= mA; )
                   V++;
-                V > W && f.push([W + O, V + O]);
+                V > W && K.push([W + q, V + q]);
               }
         }
-      }), f;
+      }), K;
     }
-    function ci(Y, v, P, S) {
-      var $ = LB(Y, v, P, S), f = [].concat(Y);
-      return $.forEach(function(q, O) {
-        f[O] = (v.levels[q] & 1 ? _g(Y[q]) : null) || Y[q];
-      }), f.join("");
+    function Fi(Y, v, P, n) {
+      var $ = rB(Y, v, P, n), K = [].concat(Y);
+      return $.forEach(function(T, q) {
+        K[q] = (v.levels[T] & 1 ? _g(Y[T]) : null) || Y[T];
+      }), K.join("");
     }
-    function LB(Y, v, P, S) {
-      for (var $ = JB(Y, v, P, S), f = [], q = 0; q < Y.length; q++)
-        f[q] = q;
-      return $.forEach(function(O) {
-        for (var IA = O[0], BA = O[1], m = f.slice(IA, BA + 1), AA = m.length; AA--; )
-          f[BA - AA] = m[AA];
-      }), f;
+    function rB(Y, v, P, n) {
+      for (var $ = LB(Y, v, P, n), K = [], T = 0; T < Y.length; T++)
+        K[T] = T;
+      return $.forEach(function(q) {
+        for (var IA = q[0], BA = q[1], m = K.slice(IA, BA + 1), AA = m.length; AA--; )
+          K[BA - AA] = m[AA];
+      }), K;
     }
-    return I.closingToOpeningBracket = r, I.getBidiCharType = s, I.getBidiCharTypeName = e, I.getCanonicalBracket = n, I.getEmbeddingLevels = tg, I.getMirroredCharacter = _g, I.getMirroredCharactersMap = Gi, I.getReorderSegments = JB, I.getReorderedIndices = LB, I.getReorderedString = ci, I.openingToClosingBracket = J, Object.defineProperty(I, "__esModule", { value: !0 }), I;
+    return I.closingToOpeningBracket = y, I.getBidiCharType = t, I.getBidiCharTypeName = e, I.getCanonicalBracket = S, I.getEmbeddingLevels = tg, I.getMirroredCharacter = _g, I.getMirroredCharactersMap = ci, I.getReorderSegments = LB, I.getReorderedIndices = rB, I.getReorderedString = Fi, I.openingToClosingBracket = F, Object.defineProperty(I, "__esModule", { value: !0 }), I;
   }({});
   return A;
 }
-const uo = [
+const mo = [
   773,
   781,
   782,
@@ -5250,19 +5279,19 @@ const uo = [
   119362,
   119363,
   119364
-], bo = new Map(uo.map((A, I) => [A, I]));
+], Po = new Map(mo.map((A, I) => [A, I]));
 function LI(A) {
-  return bo.get(A) ?? -1;
+  return Po.get(A) ?? -1;
 }
 const Pg = 1109742;
-function mo(A) {
+function jo(A) {
   return A < 1424 ? !1 : A <= 2303 || A === 8207 || A >= 8234 && A <= 8238 || A >= 8294 && A <= 8297 || A >= 64285 && A <= 65023 || A >= 65136 && A <= 65279 || A >= 67584 && A <= 69631 || A >= 124928 && A <= 126975;
 }
-const Ci = class Ei {
+const Ei = class ii {
   constructor() {
     this.identityByLen = /* @__PURE__ */ new Map(), this.cache = /* @__PURE__ */ new Map();
     try {
-      this.bidi = po();
+      this.bidi = bo();
     } catch {
       this.bidi = null;
     }
@@ -5271,7 +5300,7 @@ const Ci = class Ei {
     let g = !1;
     for (let i = 0; i < I.length; i++) {
       const o = I[i].codepoint;
-      if (o >= 1424 && o !== Pg && mo(o)) {
+      if (o >= 1424 && o !== Pg && jo(o)) {
         g = !0;
         break;
       }
@@ -5288,7 +5317,7 @@ const Ci = class Ei {
     if (C && C.key.length === Q.length && C.key.every((i, o) => i === Q[o]))
       return this.cache.delete(B), this.cache.set(B, C), C.map;
     const E = this.compute(I);
-    return this.cache.set(B, { key: Q, map: E }), this.cache.size > Ei.CACHE_MAX && this.cache.delete(this.cache.keys().next().value), E;
+    return this.cache.set(B, { key: Q, map: E }), this.cache.size > ii.CACHE_MAX && this.cache.delete(this.cache.keys().next().value), E;
   }
   identity(I) {
     let g = this.identityByLen.get(I);
@@ -5304,45 +5333,45 @@ const Ci = class Ei {
     const g = I.length, Q = this.bidi;
     let B = "";
     const C = [];
-    for (let a = 0; a < g; a++) {
-      const G = I[a];
-      if (G.width === 0)
+    for (let h = 0; h < g; h++) {
+      const c = I[h];
+      if (c.width === 0)
         continue;
-      const R = G.codepoint === Pg ? 65 : G.codepoint || 32, N = String.fromCodePoint(R);
-      B += N;
-      for (let L = 0; L < N.length; L++)
-        C.push(a);
+      const r = c.codepoint === Pg ? 65 : c.codepoint || 32, G = String.fromCodePoint(r);
+      B += G;
+      for (let U = 0; U < G.length; U++)
+        C.push(h);
     }
     const E = Q.getEmbeddingLevels(B, "ltr"), i = Q.getReorderedIndices(B, E), o = [], D = new Uint8Array(g);
-    for (let a = 0; a < i.length; a++) {
-      const G = C[i[a]];
-      D[G] || (D[G] = 1, o.push(G), I[G].width === 2 && G + 1 < g && I[G + 1].width === 0 && (D[G + 1] = 1, o.push(G + 1)));
+    for (let h = 0; h < i.length; h++) {
+      const c = C[i[h]];
+      D[c] || (D[c] = 1, o.push(c), I[c].width === 2 && c + 1 < g && I[c + 1].width === 0 && (D[c + 1] = 1, o.push(c + 1)));
     }
-    for (let a = 0; a < g; a++)
-      D[a] || o.push(a);
-    const w = new Uint16Array(g), t = new Uint16Array(g);
-    let s = !0;
-    for (let a = 0; a < g; a++) {
-      const G = o[a];
-      w[a] = G, t[G] = a, G !== a && (s = !1);
+    for (let h = 0; h < g; h++)
+      D[h] || o.push(h);
+    const w = new Uint16Array(g), s = new Uint16Array(g);
+    let t = !0;
+    for (let h = 0; h < g; h++) {
+      const c = o[h];
+      w[h] = c, s[c] = h, c !== h && (t = !1);
     }
     let e = null;
-    const h = Q.getMirroredCharactersMap(B, E.levels);
-    if (h.size > 0) {
+    const N = Q.getMirroredCharactersMap(B, E.levels);
+    if (N.size > 0) {
       e = /* @__PURE__ */ new Map();
-      for (const [a, G] of h)
-        e.set(C[a], G.codePointAt(0));
+      for (const [h, c] of N)
+        e.set(C[h], c.codePointAt(0));
     }
     return {
-      isIdentity: s && e === null,
+      isIdentity: t && e === null,
       visualToLogical: w,
-      logicalToVisual: t,
+      logicalToVisual: s,
       mirror: e
     };
   }
 };
-Ci.CACHE_MAX = 512;
-let Po = Ci;
+Ei.CACHE_MAX = 512;
+let Vo = Ei;
 class MA {
   constructor() {
     this.listeners = [], this.event = (I) => (this.listeners.push(I), {
@@ -5360,7 +5389,7 @@ class MA {
     this.listeners = [];
   }
 }
-class jo {
+class Zo {
   constructor(I) {
     this.bufferChangeEmitter = new MA(), this.terminal = I;
   }
@@ -5369,10 +5398,10 @@ class jo {
     return I ? I.isAlternateScreen() ? this.alternate : this.normal : this.normal;
   }
   get normal() {
-    return this._normalBuffer || (this._normalBuffer = new ZC(this.terminal, "normal")), this._normalBuffer;
+    return this._normalBuffer || (this._normalBuffer = new vC(this.terminal, "normal")), this._normalBuffer;
   }
   get alternate() {
-    return this._alternateBuffer || (this._alternateBuffer = new ZC(this.terminal, "alternate")), this._alternateBuffer;
+    return this._alternateBuffer || (this._alternateBuffer = new vC(this.terminal, "alternate")), this._alternateBuffer;
   }
   get onBufferChange() {
     return this.bufferChangeEmitter.event;
@@ -5385,7 +5414,7 @@ class jo {
     this.bufferChangeEmitter.fire(I);
   }
 }
-class ZC {
+class vC {
   constructor(I, g) {
     this.terminal = I, this.bufferType = g;
     const Q = {
@@ -5404,7 +5433,7 @@ class ZC {
       grapheme_len: 0,
       grapheme: null
     };
-    this.nullCell = new EB(Q, 0);
+    this.nullCell = new iB(Q, 0);
   }
   get type() {
     return this.bufferType;
@@ -5439,7 +5468,7 @@ class ZC {
     } else
       C = this.bufferType === "normal" ? I - Q : I, B = g.getLine(C), E = g.isRowWrapped(C);
     if (B)
-      return new Vo(B, E, g.cols);
+      return new Xo(B, E, g.cols);
   }
   getNullCell() {
     return this.nullCell;
@@ -5448,7 +5477,7 @@ class ZC {
     return this.terminal.wasmTerm;
   }
 }
-class Vo {
+class Xo {
   constructor(I, g, Q) {
     this.cells = I, this._isWrapped = g, this._length = Q;
   }
@@ -5460,7 +5489,7 @@ class Vo {
   }
   getCell(I) {
     if (!(I < 0 || I >= this._length))
-      return I >= this.cells.length ? new EB(
+      return I >= this.cells.length ? new iB(
         {
           codepoint: 0,
           fg_r: 0,
@@ -5478,7 +5507,7 @@ class Vo {
           grapheme: null
         },
         I
-      ) : new EB(this.cells[I], I);
+      ) : new iB(this.cells[I], I);
   }
   translateToString(I = !1, g = 0, Q = this._length) {
     const B = Math.max(0, Math.min(g, this._length)), C = Math.max(B, Math.min(Q, this._length));
@@ -5493,7 +5522,7 @@ class Vo {
     return I && (E = E.trimEnd()), E;
   }
 }
-class EB {
+class iB {
   constructor(I, g) {
     this.cell = I, this.x = g;
   }
@@ -5520,28 +5549,28 @@ class EB {
     return this.cell.bg_r << 16 | this.cell.bg_g << 8 | this.cell.bg_b;
   }
   isBold() {
-    return this.cell.flags & K.BOLD ? 1 : 0;
+    return this.cell.flags & d.BOLD ? 1 : 0;
   }
   isItalic() {
-    return this.cell.flags & K.ITALIC ? 1 : 0;
+    return this.cell.flags & d.ITALIC ? 1 : 0;
   }
   isUnderline() {
-    return this.cell.flags & K.UNDERLINE ? 1 : 0;
+    return this.cell.flags & d.UNDERLINE ? 1 : 0;
   }
   isStrikethrough() {
-    return this.cell.flags & K.STRIKETHROUGH ? 1 : 0;
+    return this.cell.flags & d.STRIKETHROUGH ? 1 : 0;
   }
   isBlink() {
-    return this.cell.flags & K.BLINK ? 1 : 0;
+    return this.cell.flags & d.BLINK ? 1 : 0;
   }
   isInverse() {
-    return this.cell.flags & K.INVERSE ? 1 : 0;
+    return this.cell.flags & d.INVERSE ? 1 : 0;
   }
   isInvisible() {
-    return this.cell.flags & K.INVISIBLE ? 1 : 0;
+    return this.cell.flags & d.INVISIBLE ? 1 : 0;
   }
   isFaint() {
-    return this.cell.flags & K.FAINT ? 1 : 0;
+    return this.cell.flags & d.FAINT ? 1 : 0;
   }
   /**
    * Get hyperlink ID for this cell (0 = no link)
@@ -5562,130 +5591,130 @@ class EB {
    * Added for IBufferCell compatibility
    */
   isDim() {
-    return (this.cell.flags & K.FAINT) !== 0;
+    return (this.cell.flags & d.FAINT) !== 0;
   }
 }
-const Zo = {
+const vo = {
   // Letters
-  KeyA: F.A,
-  KeyB: F.B,
-  KeyC: F.C,
-  KeyD: F.D,
-  KeyE: F.E,
-  KeyF: F.F,
-  KeyG: F.G,
-  KeyH: F.H,
-  KeyI: F.I,
-  KeyJ: F.J,
-  KeyK: F.K,
-  KeyL: F.L,
-  KeyM: F.M,
-  KeyN: F.N,
-  KeyO: F.O,
-  KeyP: F.P,
-  KeyQ: F.Q,
-  KeyR: F.R,
-  KeyS: F.S,
-  KeyT: F.T,
-  KeyU: F.U,
-  KeyV: F.V,
-  KeyW: F.W,
-  KeyX: F.X,
-  KeyY: F.Y,
-  KeyZ: F.Z,
+  KeyA: M.A,
+  KeyB: M.B,
+  KeyC: M.C,
+  KeyD: M.D,
+  KeyE: M.E,
+  KeyF: M.F,
+  KeyG: M.G,
+  KeyH: M.H,
+  KeyI: M.I,
+  KeyJ: M.J,
+  KeyK: M.K,
+  KeyL: M.L,
+  KeyM: M.M,
+  KeyN: M.N,
+  KeyO: M.O,
+  KeyP: M.P,
+  KeyQ: M.Q,
+  KeyR: M.R,
+  KeyS: M.S,
+  KeyT: M.T,
+  KeyU: M.U,
+  KeyV: M.V,
+  KeyW: M.W,
+  KeyX: M.X,
+  KeyY: M.Y,
+  KeyZ: M.Z,
   // Numbers
-  Digit1: F.ONE,
-  Digit2: F.TWO,
-  Digit3: F.THREE,
-  Digit4: F.FOUR,
-  Digit5: F.FIVE,
-  Digit6: F.SIX,
-  Digit7: F.SEVEN,
-  Digit8: F.EIGHT,
-  Digit9: F.NINE,
-  Digit0: F.ZERO,
+  Digit1: M.ONE,
+  Digit2: M.TWO,
+  Digit3: M.THREE,
+  Digit4: M.FOUR,
+  Digit5: M.FIVE,
+  Digit6: M.SIX,
+  Digit7: M.SEVEN,
+  Digit8: M.EIGHT,
+  Digit9: M.NINE,
+  Digit0: M.ZERO,
   // Special keys
-  Enter: F.ENTER,
-  Escape: F.ESCAPE,
-  Backspace: F.BACKSPACE,
-  Tab: F.TAB,
-  Space: F.SPACE,
+  Enter: M.ENTER,
+  Escape: M.ESCAPE,
+  Backspace: M.BACKSPACE,
+  Tab: M.TAB,
+  Space: M.SPACE,
   // Punctuation
-  Minus: F.MINUS,
-  Equal: F.EQUAL,
-  BracketLeft: F.BRACKET_LEFT,
-  BracketRight: F.BRACKET_RIGHT,
-  Backslash: F.BACKSLASH,
-  Semicolon: F.SEMICOLON,
-  Quote: F.QUOTE,
-  Backquote: F.GRAVE,
-  Comma: F.COMMA,
-  Period: F.PERIOD,
-  Slash: F.SLASH,
+  Minus: M.MINUS,
+  Equal: M.EQUAL,
+  BracketLeft: M.BRACKET_LEFT,
+  BracketRight: M.BRACKET_RIGHT,
+  Backslash: M.BACKSLASH,
+  Semicolon: M.SEMICOLON,
+  Quote: M.QUOTE,
+  Backquote: M.GRAVE,
+  Comma: M.COMMA,
+  Period: M.PERIOD,
+  Slash: M.SLASH,
   // Function keys
-  CapsLock: F.CAPS_LOCK,
-  F1: F.F1,
-  F2: F.F2,
-  F3: F.F3,
-  F4: F.F4,
-  F5: F.F5,
-  F6: F.F6,
-  F7: F.F7,
-  F8: F.F8,
-  F9: F.F9,
-  F10: F.F10,
-  F11: F.F11,
-  F12: F.F12,
+  CapsLock: M.CAPS_LOCK,
+  F1: M.F1,
+  F2: M.F2,
+  F3: M.F3,
+  F4: M.F4,
+  F5: M.F5,
+  F6: M.F6,
+  F7: M.F7,
+  F8: M.F8,
+  F9: M.F9,
+  F10: M.F10,
+  F11: M.F11,
+  F12: M.F12,
   // Special function keys
-  PrintScreen: F.PRINT_SCREEN,
-  ScrollLock: F.SCROLL_LOCK,
-  Pause: F.PAUSE,
-  Insert: F.INSERT,
-  Home: F.HOME,
-  PageUp: F.PAGE_UP,
-  Delete: F.DELETE,
-  End: F.END,
-  PageDown: F.PAGE_DOWN,
+  PrintScreen: M.PRINT_SCREEN,
+  ScrollLock: M.SCROLL_LOCK,
+  Pause: M.PAUSE,
+  Insert: M.INSERT,
+  Home: M.HOME,
+  PageUp: M.PAGE_UP,
+  Delete: M.DELETE,
+  End: M.END,
+  PageDown: M.PAGE_DOWN,
   // Arrow keys
-  ArrowRight: F.RIGHT,
-  ArrowLeft: F.LEFT,
-  ArrowDown: F.DOWN,
-  ArrowUp: F.UP,
+  ArrowRight: M.RIGHT,
+  ArrowLeft: M.LEFT,
+  ArrowDown: M.DOWN,
+  ArrowUp: M.UP,
   // Keypad
-  NumLock: F.NUM_LOCK,
-  NumpadDivide: F.KP_DIVIDE,
-  NumpadMultiply: F.KP_MULTIPLY,
-  NumpadSubtract: F.KP_MINUS,
-  NumpadAdd: F.KP_PLUS,
-  NumpadEnter: F.KP_ENTER,
-  Numpad1: F.KP_1,
-  Numpad2: F.KP_2,
-  Numpad3: F.KP_3,
-  Numpad4: F.KP_4,
-  Numpad5: F.KP_5,
-  Numpad6: F.KP_6,
-  Numpad7: F.KP_7,
-  Numpad8: F.KP_8,
-  Numpad9: F.KP_9,
-  Numpad0: F.KP_0,
-  NumpadDecimal: F.KP_PERIOD,
+  NumLock: M.NUM_LOCK,
+  NumpadDivide: M.KP_DIVIDE,
+  NumpadMultiply: M.KP_MULTIPLY,
+  NumpadSubtract: M.KP_MINUS,
+  NumpadAdd: M.KP_PLUS,
+  NumpadEnter: M.KP_ENTER,
+  Numpad1: M.KP_1,
+  Numpad2: M.KP_2,
+  Numpad3: M.KP_3,
+  Numpad4: M.KP_4,
+  Numpad5: M.KP_5,
+  Numpad6: M.KP_6,
+  Numpad7: M.KP_7,
+  Numpad8: M.KP_8,
+  Numpad9: M.KP_9,
+  Numpad0: M.KP_0,
+  NumpadDecimal: M.KP_PERIOD,
   // International
-  IntlBackslash: F.INTL_BACKSLASH,
-  ContextMenu: F.CONTEXT_MENU,
+  IntlBackslash: M.INTL_BACKSLASH,
+  ContextMenu: M.CONTEXT_MENU,
   // Additional function keys
-  F13: F.F13,
-  F14: F.F14,
-  F15: F.F15,
-  F16: F.F16,
-  F17: F.F17,
-  F18: F.F18,
-  F19: F.F19,
-  F20: F.F20,
-  F21: F.F21,
-  F22: F.F22,
-  F23: F.F23,
-  F24: F.F24
-}, ii = class XI {
+  F13: M.F13,
+  F14: M.F14,
+  F15: M.F15,
+  F16: M.F16,
+  F17: M.F17,
+  F18: M.F18,
+  F19: M.F19,
+  F20: M.F20,
+  F21: M.F21,
+  F22: M.F22,
+  F23: M.F23,
+  F24: M.F24
+}, Di = class XI {
   /**
    * Create a new InputHandler
    * @param ghostty - Ghostty instance (for creating KeyEncoder)
@@ -5720,7 +5749,7 @@ const Zo = {
    * @returns Key enum value or null if unmapped
    */
   mapKeyCode(I) {
-    return Zo[I] ?? null;
+    return vo[I] ?? null;
   }
   /**
    * Extract modifier flags from KeyboardEvent
@@ -5767,70 +5796,70 @@ const Zo = {
     if (Q === KA.NONE || Q === KA.SHIFT) {
       let C = null;
       switch (g) {
-        case F.ENTER:
+        case M.ENTER:
           C = "\r";
           break;
-        case F.TAB:
+        case M.TAB:
           Q === KA.SHIFT ? C = "\x1B[Z" : C = "	";
           break;
-        case F.BACKSPACE:
+        case M.BACKSPACE:
           C = "";
           break;
-        case F.ESCAPE:
+        case M.ESCAPE:
           C = "\x1B";
           break;
-        case F.HOME:
+        case M.HOME:
           C = "\x1B[H";
           break;
-        case F.END:
+        case M.END:
           C = "\x1B[F";
           break;
-        case F.INSERT:
+        case M.INSERT:
           C = "\x1B[2~";
           break;
-        case F.DELETE:
+        case M.DELETE:
           C = "\x1B[3~";
           break;
-        case F.PAGE_UP:
+        case M.PAGE_UP:
           C = "\x1B[5~";
           break;
-        case F.PAGE_DOWN:
+        case M.PAGE_DOWN:
           C = "\x1B[6~";
           break;
-        case F.F1:
+        case M.F1:
           C = "\x1BOP";
           break;
-        case F.F2:
+        case M.F2:
           C = "\x1BOQ";
           break;
-        case F.F3:
+        case M.F3:
           C = "\x1BOR";
           break;
-        case F.F4:
+        case M.F4:
           C = "\x1BOS";
           break;
-        case F.F5:
+        case M.F5:
           C = "\x1B[15~";
           break;
-        case F.F6:
+        case M.F6:
           C = "\x1B[17~";
           break;
-        case F.F7:
+        case M.F7:
           C = "\x1B[18~";
           break;
-        case F.F8:
+        case M.F8:
           C = "\x1B[19~";
           break;
-        case F.F9:
+        case M.F9:
           C = "\x1B[20~";
           break;
-        case F.F10:
+        case M.F10:
           C = "\x1B[21~";
           break;
-        case F.F11:
+        case M.F11:
           C = "\x1B[23~";
           break;
-        case F.F12:
+        case M.F12:
           C = "\x1B[24~";
           break;
       }
@@ -5839,11 +5868,11 @@ const Zo = {
         return;
       }
     }
-    const B = $E.PRESS;
+    const B = Ai.PRESS;
     try {
       if (this.getModeCallback) {
         const D = this.getModeCallback(1);
-        this.encoder.setOption(NB.CURSOR_KEY_APPLICATION, D);
+        this.encoder.setOption(kB.CURSOR_KEY_APPLICATION, D);
       }
       const C = I.key.length === 1 && I.key.charCodeAt(0) < 128 ? I.key.toLowerCase() : void 0, E = this.encoder.encode({
         action: B,
@@ -6015,8 +6044,8 @@ const Zo = {
     if (i)
       o = this.encodeMouseSGR(I, g, Q, B, E);
     else {
-      const t = B ? 3 : I;
-      o = this.encodeMouseX10(t, g, Q, E);
+      const s = B ? 3 : I;
+      o = this.encodeMouseX10(s, g, Q, E);
     }
     this.onDataCallback(o);
   }
@@ -6161,9 +6190,9 @@ const Zo = {
     return !this.isDisposed;
   }
 };
-ii.BEFORE_INPUT_IGNORE_MS = 100;
-let Xo = ii;
-class vo {
+Di.BEFORE_INPUT_IGNORE_MS = 100;
+let zo = Di;
+class Wo {
   // Terminal instance for buffer access
   constructor(I) {
     this.terminal = I, this.providers = [], this.linkCache = /* @__PURE__ */ new Map(), this.scannedRows = /* @__PURE__ */ new Set();
@@ -6258,7 +6287,7 @@ class vo {
     this.providers = [];
   }
 }
-class zo {
+class _o {
   constructor(I) {
     this.terminal = I;
   }
@@ -6279,26 +6308,26 @@ class zo {
       if (!i || i.getHyperlinkId() === 0 || !this.terminal.wasmTerm)
         continue;
       const D = this.terminal.wasmTerm.getScrollbackLength(), w = I - D;
-      let t;
-      if (w < 0 ? t = this.terminal.wasmTerm.getScrollbackHyperlinkUri(I, E) : t = this.terminal.wasmTerm.getHyperlinkUri(w, E), t) {
-        let s = E;
-        for (let h = E + 1; h < C.length; h++) {
-          const a = C.getCell(h);
-          if (!a || a.getHyperlinkId() === 0 || (w < 0 ? this.terminal.wasmTerm.getScrollbackHyperlinkUri(I, h) : this.terminal.wasmTerm.getHyperlinkUri(w, h)) !== t)
+      let s;
+      if (w < 0 ? s = this.terminal.wasmTerm.getScrollbackHyperlinkUri(I, E) : s = this.terminal.wasmTerm.getHyperlinkUri(w, E), s) {
+        let t = E;
+        for (let N = E + 1; N < C.length; N++) {
+          const h = C.getCell(N);
+          if (!h || h.getHyperlinkId() === 0 || (w < 0 ? this.terminal.wasmTerm.getScrollbackHyperlinkUri(I, N) : this.terminal.wasmTerm.getHyperlinkUri(w, N)) !== s)
             break;
-          s = h;
+          t = N;
         }
-        for (let h = E; h <= s; h++)
-          B.add(h);
+        for (let N = E; N <= t; N++)
+          B.add(N);
         const e = {
           start: { x: E, y: I },
-          end: { x: s, y: I }
+          end: { x: t, y: I }
         };
         Q.push({
-          text: t,
+          text: s,
           range: e,
-          activate: (h) => {
-            (h.ctrlKey || h.metaKey) && window.open(t, "_blank", "noopener,noreferrer");
+          activate: (N) => {
+            (N.ctrlKey || N.metaKey) && window.open(s, "_blank", "noopener,noreferrer");
           }
         });
       }
@@ -6316,24 +6345,24 @@ class zo {
       const w = B.getLine(C);
       if (!w)
         break;
-      const t = w.getCell(E - 1);
-      if (!t || t.getHyperlinkId() !== I)
+      const s = w.getCell(E - 1);
+      if (!s || s.getHyperlinkId() !== I)
         break;
       E--;
     }
     if (E === 0 && C > 0) {
       let w = C - 1;
       for (; w >= 0; ) {
-        const t = B.getLine(w);
-        if (!t || t.length === 0)
+        const s = B.getLine(w);
+        if (!s || s.length === 0)
           break;
-        const s = t.getCell(t.length - 1);
-        if (!s || s.getHyperlinkId() !== I)
+        const t = s.getCell(s.length - 1);
+        if (!t || t.getHyperlinkId() !== I)
           break;
         C = w, E = 0;
-        for (let e = t.length - 1; e >= 0; e--) {
-          const h = t.getCell(e);
-          if (!h || h.getHyperlinkId() !== I) {
+        for (let e = s.length - 1; e >= 0; e--) {
+          const N = s.getCell(e);
+          if (!N || N.getHyperlinkId() !== I) {
             E = e + 1;
             break;
           }
@@ -6355,26 +6384,26 @@ class zo {
       }
       if (o === D.length - 1) {
         let w = i + 1;
-        const t = B.length;
-        for (; w < t; ) {
-          const s = B.getLine(w);
-          if (!s || s.length === 0)
+        const s = B.length;
+        for (; w < s; ) {
+          const t = B.getLine(w);
+          if (!t || t.length === 0)
             break;
-          const e = s.getCell(0);
+          const e = t.getCell(0);
           if (!e || e.getHyperlinkId() !== I)
             break;
           i = w, o = 0;
-          for (let h = 0; h < s.length; h++) {
-            const a = s.getCell(h);
-            if (!a)
+          for (let N = 0; N < t.length; N++) {
+            const h = t.getCell(N);
+            if (!h)
               break;
-            if (a.getHyperlinkId() !== I) {
-              o = h - 1;
+            if (h.getHyperlinkId() !== I) {
+              o = N - 1;
               break;
             }
-            o = h;
+            o = N;
           }
-          if (o === s.length - 1)
+          if (o === t.length - 1)
             w++;
           else
             break;
@@ -6389,7 +6418,7 @@ class zo {
   dispose() {
   }
 }
-const kB = class vI {
+const MB = class vI {
   constructor(I) {
     this.terminal = I;
   }
@@ -6416,8 +6445,8 @@ const kB = class vI {
           start: { x: o, y: I },
           end: { x: D, y: I }
         },
-        activate: (t) => {
-          (t.ctrlKey || t.metaKey) && window.open(i, "_blank", "noopener,noreferrer");
+        activate: (s) => {
+          (s.ctrlKey || s.metaKey) && window.open(i, "_blank", "noopener,noreferrer");
         }
       }), E = vI.URL_REGEX.exec(C);
     }
@@ -6442,11 +6471,11 @@ const kB = class vI {
   dispose() {
   }
 };
-kB.URL_REGEX = /(?:https?:\/\/|mailto:|ftp:\/\/|ssh:\/\/|git:\/\/|tel:|magnet:|gemini:\/\/|gopher:\/\/|news:)[\w\-.~:\/?#@!$&*+,;=%]+/gi;
-kB.TRAILING_PUNCTUATION = /[.,;!?)\]]+$/;
-let Wo = kB;
-const _o = 530;
-class MB {
+MB.URL_REGEX = /(?:https?:\/\/|mailto:|ftp:\/\/|ssh:\/\/|git:\/\/|tel:|magnet:|gemini:\/\/|gopher:\/\/|news:)[\w\-.~:\/?#@!$&*+,;=%]+/gi;
+MB.TRAILING_PUNCTUATION = /[.,;!?)\]]+$/;
+let $o = MB;
+const As = 530;
+class GB {
   constructor() {
     this.enabled = !1, this.visible = !0, this.onRequestRender = null;
   }
@@ -6454,7 +6483,7 @@ class MB {
     this.enabled !== I && (this.enabled = I, I ? (this.visible = !0, this.intervalId = setInterval(() => {
       var g;
       this.visible = !this.visible, (g = this.onRequestRender) == null || g.call(this);
-    }, _o)) : (this.intervalId !== void 0 && clearInterval(this.intervalId), this.intervalId = void 0, this.visible = !0));
+    }, As)) : (this.intervalId !== void 0 && clearInterval(this.intervalId), this.intervalId = void 0, this.visible = !0));
   }
   isVisible() {
     return this.visible;
@@ -6466,7 +6495,7 @@ class MB {
     this.intervalId !== void 0 && clearInterval(this.intervalId), this.intervalId = void 0;
   }
 }
-const XC = 32, RI = 8, vC = 1, zC = 2, $o = 4, As = 8, Is = 16, gs = 32, WC = 64, Qs = 128, Bs = 256, Cs = 512, _C = 1024, $C = 2048, AE = 4096, IE = 8192, Es = 16384, $A = {
+const zC = 32, rI = 8, WC = 1, _C = 2, Is = 4, gs = 8, Qs = 16, Bs = 32, PQ = 64, Cs = 128, Es = 256, is = 512, $C = 1024, AE = 2048, IE = 4096, gE = 8192, Ds = 16384, $A = {
   foreground: "#d4d4d4",
   background: "#1e1e1e",
   cursor: "#ffffff",
@@ -6489,29 +6518,29 @@ const XC = 32, RI = 8, vC = 1, zC = 2, $o = 4, As = 8, Is = 16, gs = 32, WC = 64
   brightMagenta: "#d670d6",
   brightCyan: "#29b8db",
   brightWhite: "#ffffff"
-}, gE = /* @__PURE__ */ new Set();
-function GB(A) {
+}, QE = /* @__PURE__ */ new Set();
+function cB(A) {
   const I = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(A.trim());
-  return I ? [Number.parseInt(I[1], 16), Number.parseInt(I[2], 16), Number.parseInt(I[3], 16)] : (gE.has(A) || (gE.add(A), console.warn("[ghostty-web] unparseable theme color, falling back to black:", A)), [0, 0, 0]);
+  return I ? [Number.parseInt(I[1], 16), Number.parseInt(I[2], 16), Number.parseInt(I[3], 16)] : (QE.has(A) || (QE.add(A), console.warn("[ghostty-web] unparseable theme color, falling back to black:", A)), [0, 0, 0]);
 }
-function cB(A, I) {
+function FB(A, I) {
   const Q = document.createElement("canvas").getContext("2d");
   Q.font = `${A}px ${I}`;
   const B = Q.measureText("M"), C = Math.ceil(B.width), E = B.actualBoundingBoxAscent || A * 0.8, i = B.actualBoundingBoxDescent || A * 0.2, o = Math.ceil(E + i) + 2, D = Math.ceil(E) + 1;
   return { width: C, height: o, baseline: D };
 }
-function Di(A) {
+function wi(A) {
   const I = new Float32Array(96), g = (Q, B) => {
-    const [C, E, i] = GB(B);
+    const [C, E, i] = cB(B);
     I[Q * 4 + 0] = C / 255, I[Q * 4 + 1] = E / 255, I[Q * 4 + 2] = i / 255, I[Q * 4 + 3] = 1;
   };
   return g(0, A.black), g(1, A.red), g(2, A.green), g(3, A.yellow), g(4, A.blue), g(5, A.magenta), g(6, A.cyan), g(7, A.white), g(8, A.brightBlack), g(9, A.brightRed), g(10, A.brightGreen), g(11, A.brightYellow), g(12, A.brightBlue), g(13, A.brightMagenta), g(14, A.brightCyan), g(15, A.brightWhite), g(16, A.foreground), g(17, A.background), g(18, A.cursor), g(19, A.cursorAccent), g(20, A.selectionBackground), g(21, A.selectionForeground), g(22, "#4A90E2"), I;
 }
-function wi(A) {
+function oi(A) {
   const I = new Uint32Array(20), g = new Float32Array(I.buffer);
   return I[0] = A.cols, I[1] = A.rows, g[2] = A.cellWidth, g[3] = A.cellHeight, g[4] = A.dpr, I[5] = A.cursorVisible && A.cursorBlinkVisible ? 1 : 0, I[6] = A.cursorX, I[7] = A.cursorY, I[8] = A.cursorStyle === "block" ? 0 : A.cursorStyle === "underline" ? 1 : 2, I[9] = 0, I[10] = A.atlasSize, I;
 }
-class oi {
+class si {
   constructor(I, g, Q, B) {
     this.nextX = 0, this.nextY = 0, this.rowHeight = 0, this.cache = /* @__PURE__ */ new Map(), this.offscreen = document.createElement("canvas"), this.cellW = I, this.cellH = g, this.fontSize = Q, this.fontFamily = B, this.size = 1024, this.offscreen.width = I * 2, this.offscreen.height = g, this.offCtx = this.offscreen.getContext("2d", { willReadFrequently: !0 });
   }
@@ -6533,10 +6562,10 @@ class oi {
     this.nextX += i, o > this.rowHeight && (this.rowHeight = o), this.cache.set(C, D);
     const w = this.offCtx;
     w.clearRect(0, 0, i, o);
-    let t = "";
-    g & 1 && (t += "bold "), g & 2 && (t += "italic "), w.font = `${t}${this.fontSize}px ${this.fontFamily}`, w.textBaseline = "alphabetic", w.textAlign = "left", w.fillStyle = "#ffffff", w.fillText(I, 0, Q);
-    const s = w.getImageData(0, 0, i, o);
-    return this.uploadRegion(D, s.data, i, o), D;
+    let s = "";
+    g & 1 && (s += "bold "), g & 2 && (s += "italic "), w.font = `${s}${this.fontSize}px ${this.fontFamily}`, w.textBaseline = "alphabetic", w.textAlign = "left", w.fillStyle = "#ffffff", w.fillText(I, 0, Q);
+    const t = w.getImageData(0, 0, i, o);
+    return this.uploadRegion(D, t.data, i, o), D;
   }
   grow() {
     const I = this.size * 2;
@@ -6546,60 +6575,60 @@ class oi {
     return this.size;
   }
 }
-function si(A, I, g, Q, B) {
-  var n, M, k;
+function ti(A, I, g, Q, B) {
+  var S, k, L;
   const C = A;
   C.fill(0);
-  const E = I.getDimensions(), i = (Q == null ? void 0 : Q.getScrollbackLength()) ?? 0, o = I.getCursor(), D = ((n = B.selectionManager) == null ? void 0 : n.getSelectionCoords()) ?? null, w = ((M = B.selectionManager) == null ? void 0 : M.getSelectionColumnSpace()) === "logical";
-  let t = -1, s = -1;
-  const e = (U) => {
+  const E = I.getDimensions(), i = (Q == null ? void 0 : Q.getScrollbackLength()) ?? 0, o = I.getCursor(), D = ((S = B.selectionManager) == null ? void 0 : S.getSelectionCoords()) ?? null, w = ((k = B.selectionManager) == null ? void 0 : k.getSelectionColumnSpace()) === "logical";
+  let s = -1, t = -1;
+  const e = (J) => {
     if (!D) {
-      t = -1, s = -1;
+      s = -1, t = -1;
       return;
     }
     if (D.startRow === D.endRow) {
-      U === D.startRow ? (t = D.startCol, s = D.endCol) : (t = -1, s = -1);
+      J === D.startRow ? (s = D.startCol, t = D.endCol) : (s = -1, t = -1);
       return;
     }
-    U === D.startRow ? (t = D.startCol, s = Number.MAX_SAFE_INTEGER) : U === D.endRow ? (t = 0, s = D.endCol) : U > D.startRow && U < D.endRow ? (t = 0, s = Number.MAX_SAFE_INTEGER) : (t = -1, s = -1);
-  }, h = B.maxKittyImages ?? 16, a = /* @__PURE__ */ new Map(), G = [], R = /* @__PURE__ */ new Map();
+    J === D.startRow ? (s = D.startCol, t = Number.MAX_SAFE_INTEGER) : J === D.endRow ? (s = 0, t = D.endCol) : J > D.startRow && J < D.endRow ? (s = 0, t = Number.MAX_SAFE_INTEGER) : (s = -1, t = -1);
+  }, N = B.maxKittyImages ?? 16, h = /* @__PURE__ */ new Map(), c = [], r = /* @__PURE__ */ new Map();
   if (B.kittyEnabled && I.getKittyGraphics && I.iterPlacements) {
-    const U = I.getKittyGraphics();
-    if (U !== null)
-      for (const c of I.iterPlacements(U, !1))
-        c.isVirtual && (a.set(c.imageId, c), !R.has(c.imageId) && G.length < h && (R.set(c.imageId, G.length), G.push(c.imageId)));
+    const J = I.getKittyGraphics();
+    if (J !== null)
+      for (const a of I.iterPlacements(J, !1))
+        a.isVirtual && (h.set(a.imageId, a), !r.has(a.imageId) && c.length < N && (r.set(a.imageId, c.length), c.push(a.imageId)));
   }
-  const N = (AE | IE) >>> 0, L = B.metrics.width, J = B.metrics.height, r = I.getViewport();
-  for (let U = 0; U < E.rows; U++) {
-    e(U);
-    let c = null;
+  const G = (IE | gE) >>> 0, U = B.metrics.width, F = B.metrics.height, y = I.getViewport();
+  for (let J = 0; J < E.rows; J++) {
+    e(J);
+    let a = null;
     if (g > 0)
-      if (U < g && Q) {
-        const x = i - Math.floor(g) + U;
-        c = Q.getScrollbackLine(x);
+      if (J < g && Q) {
+        const x = i - Math.floor(g) + J;
+        a = Q.getScrollbackLine(x);
       } else {
-        const d = (U - Math.floor(g)) * E.cols;
-        c = r.slice(d, d + E.cols);
+        const O = (J - Math.floor(g)) * E.cols;
+        a = y.slice(O, O + E.cols);
       }
     else {
-      const x = U * E.cols;
-      c = r.slice(x, x + E.cols);
+      const x = J * E.cols;
+      a = y.slice(x, x + E.cols);
     }
-    const y = B.bidiMapper && c ? B.bidiMapper.getMap(c) : null, T = y !== null && !y.isIdentity;
+    const R = B.bidiMapper && a ? B.bidiMapper.getMap(a) : null, f = R !== null && !R.isIdentity;
     let l = null;
     for (let x = 0; x < E.cols; x++) {
-      const d = (U * E.cols + x) * RI, _ = T && x < y.visualToLogical.length ? y.visualToLogical[x] : x, u = c && _ < c.length ? c[_] : null;
+      const O = (J * E.cols + x) * rI, _ = f && x < R.visualToLogical.length ? R.visualToLogical[x] : x, u = a && _ < a.length ? a[_] : null;
       if (!u || u.width === 0) {
-        l ? (C[d + 0] = l.fgPacked, C[d + 1] = l.bgPacked, C[d + 2] = l.slotU + L & 65535 | (l.slotV & 65535) << 16, C[d + 3] = L & 65535 | (l.slotH & 65535) << 16, C[d + 4] = l.flags, l = null) : C[d + 4] = N;
+        l ? (C[O + 0] = l.fgPacked, C[O + 1] = l.bgPacked, C[O + 2] = l.slotU + U & 65535 | (l.slotV & 65535) << 16, C[O + 3] = U & 65535 | (l.slotH & 65535) << 16, C[O + 4] = l.flags, l = null) : C[O + 4] = G;
         continue;
       }
       l = null;
       let Z = 0;
-      u.flags & K.BOLD && (Z |= vC), u.flags & K.ITALIC && (Z |= zC), u.flags & K.UNDERLINE && (Z |= $o), u.flags & K.STRIKETHROUGH && (Z |= As), u.flags & K.INVERSE && (Z |= Is), u.flags & K.FAINT && (Z |= gs), u.flags & K.INVISIBLE && (Z |= WC), u.fgIsDefault && (Z |= AE), u.bgIsDefault && (Z |= IE);
+      u.flags & d.BOLD && (Z |= WC), u.flags & d.ITALIC && (Z |= _C), u.flags & d.UNDERLINE && (Z |= Is), u.flags & d.STRIKETHROUGH && (Z |= gs), u.flags & d.INVERSE && (Z |= Qs), u.flags & d.FAINT && (Z |= Bs), u.flags & d.INVISIBLE && (Z |= PQ), u.fgIsDefault && (Z |= IE), u.bgIsDefault && (Z |= gE);
       const AI = w ? _ : x;
-      if (AI >= t && AI <= s && (Z |= Qs), u.hyperlink_id !== 0 && u.hyperlink_id === B.hoveredHyperlinkId && (Z |= Bs), B.hoveredLinkRange) {
+      if (AI >= s && AI <= t && (Z |= Cs), u.hyperlink_id !== 0 && u.hyperlink_id === B.hoveredHyperlinkId && (Z |= Es), B.hoveredLinkRange) {
         const X = B.hoveredLinkRange;
-        (U === X.startY && _ >= X.startX && (U < X.endY || _ <= X.endX) || U > X.startY && U < X.endY || U === X.endY && _ <= X.endX && (U > X.startY || _ >= X.startX)) && (Z |= Cs);
+        (J === X.startY && _ >= X.startX && (J < X.endY || _ <= X.endX) || J > X.startY && J < X.endY || J === X.endY && _ <= X.endX && (J > X.startY || _ >= X.startX)) && (Z |= is);
       }
       const II = u.codepoint || 0;
       if (B.kittyEnabled && II === Pg) {
@@ -6613,37 +6642,37 @@ function si(A, I, g, Q, B) {
               const tg = LI(X[2]);
               tg >= 0 && (uA = tg << 24 | tI);
             }
-            const HA = a.get(uA), QA = R.get(uA);
-            HA && QA !== void 0 && (Z |= $C, C[d + 5] = pA & 65535 | (xA & 65535) << 16, C[d + 6] = QA, C[d + 7] = HA.gridCols & 65535 | (HA.gridRows & 65535) << 16);
+            const HA = h.get(uA), QA = r.get(uA);
+            HA && QA !== void 0 ? (Z |= AE, C[O + 5] = pA & 65535 | (xA & 65535) << 16, C[O + 6] = QA, C[O + 7] = HA.gridCols & 65535 | (HA.gridRows & 65535) << 16) : Z |= PQ;
           }
         }
       }
-      if (B.blockElementShaderEnabled && II >= 9600 && II <= 9631 && u.grapheme_len === 0 && (Z |= _C, C[d + 5] = II - 9600), C[d + 0] = u.fg_r | u.fg_g << 8 | u.fg_b << 16, C[d + 1] = u.bg_r | u.bg_g << 8 | u.bg_b << 16, !((Z & (WC | $C | _C)) !== 0) && B.atlas) {
-        const X = u.grapheme, pA = (T ? (k = y.mirror) == null ? void 0 : k.get(_) : void 0) ?? (u.codepoint || 32), tI = X && X.length > 0 ? String.fromCodePoint(pA, ...X) : String.fromCodePoint(pA), uA = (Z & vC ? 1 : 0) | (Z & zC ? 2 : 0), HA = u.width === 2 ? 2 : 1, QA = B.atlas.getOrRaster(tI, uA, B.metrics.baseline, HA);
-        C[d + 2] = QA.u & 65535 | (QA.v & 65535) << 16, C[d + 3] = HA === 2 ? L & 65535 | (J & 65535) << 16 : QA.w & 65535 | (QA.h & 65535) << 16, HA === 2 && (l = {
+      if (B.blockElementShaderEnabled && II >= 9600 && II <= 9631 && u.grapheme_len === 0 && (Z |= $C, C[O + 5] = II - 9600), C[O + 0] = u.fg_r | u.fg_g << 8 | u.fg_b << 16, C[O + 1] = u.bg_r | u.bg_g << 8 | u.bg_b << 16, !((Z & (PQ | AE | $C)) !== 0) && B.atlas) {
+        const X = u.grapheme, pA = (f ? (L = R.mirror) == null ? void 0 : L.get(_) : void 0) ?? (u.codepoint || 32), tI = X && X.length > 0 ? String.fromCodePoint(pA, ...X) : String.fromCodePoint(pA), uA = (Z & WC ? 1 : 0) | (Z & _C ? 2 : 0), HA = u.width === 2 ? 2 : 1, QA = B.atlas.getOrRaster(tI, uA, B.metrics.baseline, HA);
+        C[O + 2] = QA.u & 65535 | (QA.v & 65535) << 16, C[O + 3] = HA === 2 ? U & 65535 | (F & 65535) << 16 : QA.w & 65535 | (QA.h & 65535) << 16, HA === 2 && (l = {
           slotU: QA.u,
           slotV: QA.v,
           slotH: QA.h,
-          fgPacked: C[d + 0],
-          bgPacked: C[d + 1],
+          fgPacked: C[O + 0],
+          bgPacked: C[O + 1],
           flags: 0
         });
       }
-      C[d + 4] = Z >>> 0, l && (l.flags = Z >>> 0);
+      C[O + 4] = Z >>> 0, l && (l.flags = Z >>> 0);
     }
   }
   if (o.visible && B.cursorBlinkVisible && B.cursorStyle === "block") {
-    let U = o.x;
+    let J = o.x;
     if (B.bidiMapper) {
-      const y = o.y * E.cols, T = r.slice(y, y + E.cols), l = B.bidiMapper.getMap(T);
-      !l.isIdentity && o.x < l.logicalToVisual.length && (U = l.logicalToVisual[o.x]);
+      const R = o.y * E.cols, f = y.slice(R, R + E.cols), l = B.bidiMapper.getMap(f);
+      !l.isIdentity && o.x < l.logicalToVisual.length && (J = l.logicalToVisual[o.x]);
     }
-    const c = (o.y * E.cols + U) * RI;
-    C[c + 4] = (C[c + 4] | Es) >>> 0;
+    const a = (o.y * E.cols + J) * rI;
+    C[a + 4] = (C[a + 4] | Ds) >>> 0;
   }
-  return { usedKittyImageIds: G };
+  return { usedKittyImageIds: c };
 }
-function ti(A, I, g) {
+function ei(A, I, g) {
   if (!g)
     return I.x;
   const Q = A.getLine(I.y);
@@ -6652,7 +6681,7 @@ function ti(A, I, g) {
   const B = g.getMap(Q);
   return B.isIdentity || I.x >= B.logicalToVisual.length ? I.x : B.logicalToVisual[I.x];
 }
-function ei(A) {
+function hi(A) {
   const { width: I, height: g, format: Q, data: B } = A;
   if (I === 0 || g === 0)
     return null;
@@ -6680,7 +6709,7 @@ function ei(A) {
       return null;
   }
 }
-class hi {
+class ai {
   constructor() {
     this.cache = /* @__PURE__ */ new Map();
   }
@@ -6689,7 +6718,7 @@ class hi {
    * Returns null if the image cannot be converted (e.g. undecoded PNG) or
    * if texture allocation fails.
    *
-   * Signature: width × height × format × data.byteOffset × data.length ×
+   * Signature: revision × width × height × format × data.byteOffset × data.length ×
    * data.buffer (object identity). In practice the WASM heap never moves so
    * byteOffset/length alone would be stable, but including the buffer
    * reference ensures correctness in test environments where each
@@ -6697,9 +6726,9 @@ class hi {
    */
   getOrUpload(I, g) {
     const Q = this.cache.get(I);
-    if (Q && Q.width === g.width && Q.height === g.height && Q.format === g.format && Q.dataPtr === g.data.byteOffset && Q.dataLen === g.data.length && Q.dataBuf === g.data.buffer)
+    if (Q && Q.width === g.width && Q.height === g.height && Q.format === g.format && Q.dataPtr === g.data.byteOffset && Q.dataLen === g.data.length && Q.dataBuf === g.data.buffer && Q.revision === (g.revision ?? 0))
       return Q.handle;
-    const C = ei(g);
+    const C = hi(g);
     if (!C)
       return null;
     Q && this.destroyTexture(Q.handle);
@@ -6711,6 +6740,7 @@ class hi {
       format: g.format,
       dataPtr: g.data.byteOffset,
       dataLen: g.data.length,
+      revision: g.revision ?? 0,
       dataBuf: g.data.buffer
     }), E) : null;
   }
@@ -6726,14 +6756,14 @@ class hi {
     this.cache.clear();
   }
 }
-const is = 8192;
-function Ds(A) {
+const ws = 8192;
+function os(A) {
   let I = 1;
   for (; I < A; )
     I <<= 1;
   return I;
 }
-class ai {
+class Ni {
   constructor(I = 1024) {
     this.nextX = 0, this.nextY = 0, this.rowHeight = 0, this.cache = /* @__PURE__ */ new Map(), this.size = I;
   }
@@ -6747,15 +6777,15 @@ class ai {
    */
   addOrUpdate(I, g) {
     const Q = this.cache.get(I);
-    if (Q && Q.signature.width === g.width && Q.signature.height === g.height && Q.signature.format === g.format && Q.signature.dataPtr === g.data.byteOffset && Q.signature.dataLen === g.data.length && Q.signature.dataBuf === g.data.buffer)
+    if (Q && Q.signature.width === g.width && Q.signature.height === g.height && Q.signature.format === g.format && Q.signature.dataPtr === g.data.byteOffset && Q.signature.dataLen === g.data.length && Q.signature.dataBuf === g.data.buffer && Q.signature.revision === (g.revision ?? 0))
       return Q;
-    const C = ei(g);
+    const C = hi(g);
     if (!C)
       return null;
-    let E = this.tryPack(g.width, g.height);
+    let E = Q && Q.slot.w === g.width && Q.slot.h === g.height ? Q.slot : this.tryPack(g.width, g.height);
     if (E || (this.clearAndReset(), E = this.tryPack(g.width, g.height)), !E) {
-      const o = Math.max(g.width, g.height), D = Ds(o);
-      if (D > is || D <= this.size || (this.size = D, this.clearAndReset(), this.growTexture(D), E = this.tryPack(g.width, g.height), !E))
+      const o = Math.max(g.width, g.height), D = os(o);
+      if (D > ws || D <= this.size || (this.size = D, this.clearAndReset(), this.growTexture(D), E = this.tryPack(g.width, g.height), !E))
         return null;
     }
     this.uploadRegion(E, C, g.width, g.height);
@@ -6767,6 +6797,7 @@ class ai {
         format: g.format,
         dataPtr: g.data.byteOffset,
         dataLen: g.data.length,
+        revision: g.revision ?? 0,
         dataBuf: g.data.buffer
       }
     };
@@ -6790,12 +6821,12 @@ class ai {
     return this.nextX += I, g > this.rowHeight && (this.rowHeight = g), Q;
   }
 }
-function QE(A, I) {
-  return A.width === I.width && A.height === I.height && A.format === I.format && A.dataPtr === I.data.byteOffset && A.dataLen === I.data.length;
+function BE(A, I) {
+  return A.width === I.width && A.height === I.height && A.format === I.format && A.dataPtr === I.data.byteOffset && A.dataLen === I.data.length && A.revision === (I.revision ?? 0);
 }
-class BE {
+class CE {
   constructor(I, g = {}) {
-    this.backend = "canvas2d", this.cursorBlink_ = new MB(), this.lastCursorPosition = { x: 0, y: 0 }, this.onRequestRender = null, this.lastViewportY = 0, this.currentBuffer = null, this.kittyImageCache = /* @__PURE__ */ new Map(), this.kittyVirtualPlacements = /* @__PURE__ */ new Map(), this.currentDirectPlacements = [], this.lastKittyDirectSigs = /* @__PURE__ */ new Map(), this.lastKittyVirtualSigs = /* @__PURE__ */ new Map(), this.kittyDamagedRows = /* @__PURE__ */ new Set(), this.currentRenderBuffer = null, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.currentKittyGraphics = null, this.bidiMapper = null, this.currentSelectionCoords = null, this.currentSelectionColumnSpace = "visual", this.hoveredHyperlinkId = 0, this.previousHoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.previousHoveredLinkRange = null, this.invalidateNext = !0, this.canvasEl = I;
+    this.backend = "canvas2d", this.cursorBlink_ = new GB(), this.lastCursorPosition = { x: 0, y: 0 }, this.onRequestRender = null, this.lastViewportY = 0, this.currentBuffer = null, this.kittyImageCache = /* @__PURE__ */ new Map(), this.frameKittyPixels = /* @__PURE__ */ new Map(), this.kittyVirtualPlacements = /* @__PURE__ */ new Map(), this.currentDirectPlacements = [], this.lastKittyDirectSigs = /* @__PURE__ */ new Map(), this.lastKittyVirtualSigs = /* @__PURE__ */ new Map(), this.kittyDamagedRows = /* @__PURE__ */ new Set(), this.currentRenderBuffer = null, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.currentKittyGraphics = null, this.bidiMapper = null, this.currentSelectionCoords = null, this.currentSelectionColumnSpace = "visual", this.hoveredHyperlinkId = 0, this.previousHoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.previousHoveredLinkRange = null, this.invalidateNext = !0, this.canvasEl = I;
     const Q = I.getContext("2d", { alpha: !0 });
     if (!Q)
       throw new Error("Failed to get 2D rendering context");
@@ -6824,13 +6855,13 @@ class BE {
   }
   /** @internal Test-only entry to precomputeKittyState. Not part of the public API. */
   _testPrecomputeKittyState(I, g) {
-    this.precomputeKittyState(I, g);
+    this.frameKittyPixels.clear(), this.precomputeKittyState(I, g);
   }
   // ==========================================================================
   // Font Metrics Measurement
   // ==========================================================================
   measureFont() {
-    return cB(this.fontSize, this.fontFamily);
+    return FB(this.fontSize, this.fontFamily);
   }
   /**
    * Remeasure font metrics (call after font loads or changes)
@@ -6852,7 +6883,7 @@ class BE {
    */
   resize(I, g) {
     const Q = I * this.metrics.width, B = g * this.metrics.height;
-    this.canvasEl.style.width = `${Q}px`, this.canvasEl.style.height = `${B}px`, this.canvasEl.width = Q * this.devicePixelRatio, this.canvasEl.height = B * this.devicePixelRatio, this.ctx.scale(this.devicePixelRatio, this.devicePixelRatio), this.ctx.textBaseline = "alphabetic", this.ctx.textAlign = "left", this.ctx.fillStyle = this.theme.background, this.ctx.fillRect(0, 0, Q, B), this.invalidateNext = !0;
+    this.canvasEl.style.width = `${Q}px`, this.canvasEl.style.height = `${B}px`, this.canvasEl.width = Math.floor(Q * this.devicePixelRatio), this.canvasEl.height = Math.floor(B * this.devicePixelRatio), this.ctx.scale(this.devicePixelRatio, this.devicePixelRatio), this.ctx.textBaseline = "alphabetic", this.ctx.textAlign = "left", this.ctx.fillStyle = this.theme.background, this.ctx.fillRect(0, 0, Q, B), this.invalidateNext = !0;
   }
   invalidate() {
     this.invalidateNext = !0;
@@ -6879,21 +6910,21 @@ class BE {
   }
   /** See WebGPURenderer.computeKittyPlacementSig. */
   computeKittyPlacementSig(I) {
-    var B;
     if (!I.getKittyGraphics || !I.iterPlacements)
       return null;
     const g = I.getKittyGraphics();
     if (g === null)
       return null;
     let Q = "";
-    for (const C of I.iterPlacements(g, !1)) {
-      const E = (B = I.getKittyImagePixels) == null ? void 0 : B.call(I, g, C.imageId);
-      Q += `${C.imageId}|${C.isVirtual ? 1 : 0}|${C.viewportCol},${C.viewportRow}|${C.pixelWidth}x${C.pixelHeight}|${C.sourceX},${C.sourceY},${C.sourceWidth}x${C.sourceHeight}|${(E == null ? void 0 : E.width) ?? 0}x${(E == null ? void 0 : E.height) ?? 0}|${(E == null ? void 0 : E.format) ?? 0}|${(E == null ? void 0 : E.data.byteOffset) ?? 0}+${(E == null ? void 0 : E.data.length) ?? 0};`;
+    for (const B of I.iterPlacements(g, !1)) {
+      const C = this.getFrameKittyPixels(I, g, B.imageId);
+      Q += `${B.imageId}|${B.isVirtual ? 1 : 0}|${B.viewportCol},${B.viewportRow}|${B.pixelWidth}x${B.pixelHeight}|${B.sourceX},${B.sourceY},${B.sourceWidth}x${B.sourceHeight}|${(C == null ? void 0 : C.width) ?? 0}x${(C == null ? void 0 : C.height) ?? 0}|${(C == null ? void 0 : C.format) ?? 0}|${(C == null ? void 0 : C.data.byteOffset) ?? 0}+${(C == null ? void 0 : C.data.length) ?? 0}|${(C == null ? void 0 : C.revision) ?? 0};`;
     }
     return Q;
   }
   render(I, g = 0, Q) {
-    var M;
+    var J;
+    this.frameKittyPixels.clear();
     const B = I.getCursor(), C = this.cursorBlink_.isVisible();
     let E = this.invalidateNext || B.x !== this.lastCursorPosition.x || B.y !== this.lastCursorPosition.y || B.visible !== this.lastCursorVisible || C !== this.lastCursorBlinkVisible || g !== this.lastViewportY || this.bufferAnyDirty(I);
     const i = E ? null : this.computeSelectionSig();
@@ -6904,91 +6935,93 @@ class BE {
     this.lastCursorVisible = B.visible, this.lastCursorBlinkVisible = C, this.lastSelectionSig = i ?? this.computeSelectionSig(), this.lastKittyPlacementSig = o ?? this.computeKittyPlacementSig(I);
     const D = this.invalidateNext;
     this.invalidateNext = !1, this.currentBuffer = I, this.currentRenderBuffer = I;
-    const w = I.getCursor(), t = I.getDimensions();
-    this.precomputeKittyState(I, t.rows);
-    const s = Q ? Q.getScrollbackLength() : 0;
-    let e = D;
-    (M = I.needsFullRedraw) != null && M.call(I) && (e = !0), (this.canvasEl.width !== t.cols * this.metrics.width * this.devicePixelRatio || this.canvasEl.height !== t.rows * this.metrics.height * this.devicePixelRatio) && (this.resize(t.cols, t.rows), e = !0), g !== this.lastViewportY && (e = !0, this.lastViewportY = g);
-    const a = w.x !== this.lastCursorPosition.x || w.y !== this.lastCursorPosition.y;
-    if (a || this.cursorBlink) {
-      if (!e && !I.isRowDirty(w.y)) {
-        const k = I.getLine(w.y);
-        k && this.renderLine(k, w.y, t.cols);
+    const w = I.getCursor(), s = I.getDimensions();
+    let t;
+    const e = (a) => a < 0 || a >= s.rows ? null : (t ?? (t = I.getViewport()), t.slice(a * s.cols, (a + 1) * s.cols));
+    this.precomputeKittyState(I, s.rows);
+    const N = Q ? Q.getScrollbackLength() : 0;
+    let h = D;
+    (J = I.needsFullRedraw) != null && J.call(I) && (h = !0), (this.canvasEl.width !== Math.floor(s.cols * this.metrics.width * this.devicePixelRatio) || this.canvasEl.height !== Math.floor(s.rows * this.metrics.height * this.devicePixelRatio)) && (this.resize(s.cols, s.rows), h = !0), g !== this.lastViewportY && (h = !0, this.lastViewportY = g);
+    const r = w.x !== this.lastCursorPosition.x || w.y !== this.lastCursorPosition.y;
+    if (r || this.cursorBlink) {
+      if (!h && !I.isRowDirty(w.y)) {
+        const a = e(w.y);
+        a && this.renderLine(a, w.y, s.cols);
       }
-      if (a && this.lastCursorPosition.y !== w.y && !e && !I.isRowDirty(this.lastCursorPosition.y)) {
-        const k = I.getLine(this.lastCursorPosition.y);
-        k && this.renderLine(k, this.lastCursorPosition.y, t.cols);
+      if (r && this.lastCursorPosition.y !== w.y && !h && !I.isRowDirty(this.lastCursorPosition.y)) {
+        const a = e(this.lastCursorPosition.y);
+        a && this.renderLine(a, this.lastCursorPosition.y, s.cols);
       }
     }
-    const G = this.selectionManager && this.selectionManager.hasSelection(), R = /* @__PURE__ */ new Set();
+    const G = this.selectionManager && this.selectionManager.hasSelection(), U = /* @__PURE__ */ new Set();
     if (this.currentSelectionCoords = G ? this.selectionManager.getSelectionCoords() : null, this.currentSelectionColumnSpace = G ? this.selectionManager.getSelectionColumnSpace() : "visual", this.currentSelectionCoords) {
-      const k = this.currentSelectionCoords;
-      for (let U = k.startRow; U <= k.endRow; U++)
-        R.add(U);
+      const a = this.currentSelectionCoords;
+      for (let R = a.startRow; R <= a.endRow; R++)
+        U.add(R);
     }
     if (this.selectionManager) {
-      const k = this.selectionManager.getDirtySelectionRows();
-      if (k.size > 0) {
-        for (const U of k)
-          R.add(U);
+      const a = this.selectionManager.getDirtySelectionRows();
+      if (a.size > 0) {
+        for (const R of a)
+          U.add(R);
         this.selectionManager.clearDirtySelectionRows();
       }
     }
-    const N = /* @__PURE__ */ new Set(), L = this.hoveredHyperlinkId !== this.previousHoveredHyperlinkId, J = JSON.stringify(this.hoveredLinkRange) !== JSON.stringify(this.previousHoveredLinkRange);
-    if (L) {
-      for (let k = 0; k < t.rows; k++) {
-        let U = null;
+    const F = /* @__PURE__ */ new Set(), y = this.hoveredHyperlinkId !== this.previousHoveredHyperlinkId, S = JSON.stringify(this.hoveredLinkRange) !== JSON.stringify(this.previousHoveredLinkRange);
+    if (y) {
+      for (let a = 0; a < s.rows; a++) {
+        let R = null;
         if (g > 0)
-          if (k < g && Q) {
-            const c = s - Math.floor(g) + k;
-            U = Q.getScrollbackLine(c);
+          if (a < g && Q) {
+            const f = N - Math.floor(g) + a;
+            R = Q.getScrollbackLine(f);
           } else {
-            const c = k - Math.floor(g);
-            U = I.getLine(c);
+            const f = a - Math.floor(g);
+            R = e(f);
           }
         else
-          U = I.getLine(k);
-        if (U) {
-          for (const c of U)
-            if (c.hyperlink_id === this.hoveredHyperlinkId || c.hyperlink_id === this.previousHoveredHyperlinkId) {
-              N.add(k);
+          R = e(a);
+        if (R) {
+          for (const f of R)
+            if (f.hyperlink_id === this.hoveredHyperlinkId || f.hyperlink_id === this.previousHoveredHyperlinkId) {
+              F.add(a);
               break;
             }
         }
       }
       this.previousHoveredHyperlinkId = this.hoveredHyperlinkId;
     }
-    if (J) {
+    if (S) {
       if (this.previousHoveredLinkRange)
-        for (let k = this.previousHoveredLinkRange.startY; k <= this.previousHoveredLinkRange.endY; k++)
-          N.add(k);
+        for (let a = this.previousHoveredLinkRange.startY; a <= this.previousHoveredLinkRange.endY; a++)
+          F.add(a);
       if (this.hoveredLinkRange)
-        for (let k = this.hoveredLinkRange.startY; k <= this.hoveredLinkRange.endY; k++)
-          N.add(k);
+        for (let a = this.hoveredLinkRange.startY; a <= this.hoveredLinkRange.endY; a++)
+          F.add(a);
       this.previousHoveredLinkRange = this.hoveredLinkRange;
     }
-    let r = !1;
-    const n = /* @__PURE__ */ new Set();
-    for (let k = 0; k < t.rows; k++)
-      (g > 0 ? !0 : e || I.isRowDirty(k) || R.has(k) || N.has(k) || this.kittyDamagedRows.has(k)) && (n.add(k), k > 0 && n.add(k - 1), k < t.rows - 1 && n.add(k + 1));
-    for (let k = 0; k < t.rows; k++) {
-      if (!n.has(k))
+    let k = !1;
+    const L = /* @__PURE__ */ new Set();
+    for (let a = 0; a < s.rows; a++)
+      (g > 0 ? !0 : h || I.isRowDirty(a) || U.has(a) || F.has(a) || this.kittyDamagedRows.has(a)) && (L.add(a), a > 0 && L.add(a - 1), a < s.rows - 1 && L.add(a + 1));
+    for (let a = 0; a < s.rows; a++) {
+      if (!L.has(a))
         continue;
-      r = !0;
-      let U = null;
+      k = !0;
+      let R = null;
       if (g > 0)
-        if (k < g && Q) {
-          const c = s - Math.floor(g) + k;
-          U = Q.getScrollbackLine(c);
+        if (a < g && Q) {
+          const f = N - Math.floor(g) + a;
+          R = Q.getScrollbackLine(f);
         } else {
-          const c = g > 0 ? k - Math.floor(g) : k;
-          U = I.getLine(c);
+          const f = g > 0 ? a - Math.floor(g) : a;
+          R = e(f);
         }
       else
-        U = I.getLine(k);
-      U && this.renderLine(U, k, t.cols);
+        R = e(a);
+      R && this.renderLine(R, a, s.cols);
     }
-    this.currentDirectPlacements.length > 0 && r && this.renderKittyImages(), g === 0 && w.visible && this.cursorBlink_.isVisible() && this.renderCursor(w.x, w.y), this.lastCursorPosition = { x: w.x, y: w.y }, I.clearDirty();
+    this.currentDirectPlacements.length > 0 && k && this.renderKittyImages(), g === 0 && w.visible && this.cursorBlink_.isVisible() && this.renderCursor(w.x, w.y), this.lastCursorPosition = { x: w.x, y: w.y }, I.clearDirty();
   }
   /**
    * Render a single line using two-pass approach:
@@ -7007,12 +7040,12 @@ class BE {
     this.ctx.clearRect(0, B, C, this.metrics.height), this.ctx.fillStyle = this.theme.background, this.ctx.fillRect(0, B, C, this.metrics.height);
     const E = ((o = this.bidiMapper) == null ? void 0 : o.getMap(I)) ?? null, i = E !== null && !E.isIdentity;
     for (let w = 0; w < I.length; w++) {
-      const t = i ? E.visualToLogical[w] : w, s = I[t];
-      s.width !== 0 && this.renderCellBackground(s, w, g, t);
+      const s = i ? E.visualToLogical[w] : w, t = I[s];
+      t.width !== 0 && this.renderCellBackground(t, w, g, s);
     }
     for (let w = 0; w < I.length; w++) {
-      const t = i ? E.visualToLogical[w] : w, s = I[t];
-      s.width !== 0 && this.renderCellText(s, w, g, void 0, i ? (D = E.mirror) == null ? void 0 : D.get(t) : void 0, t);
+      const s = i ? E.visualToLogical[w] : w, t = I[s];
+      t.width !== 0 && this.renderCellText(t, w, g, void 0, i ? (D = E.mirror) == null ? void 0 : D.get(s) : void 0, s);
     }
   }
   /**
@@ -7026,8 +7059,8 @@ class BE {
       this.ctx.fillStyle = this.theme.selectionBackground, this.ctx.fillRect(C, E, i, this.metrics.height);
       return;
     }
-    let D = I.bg_r, w = I.bg_g, t = I.bg_b;
-    I.flags & K.INVERSE && (D = I.fg_r, w = I.fg_g, t = I.fg_b), (I.flags & K.INVERSE ? I.fgIsDefault : I.bgIsDefault) || (this.ctx.fillStyle = this.rgbToCSS(D, w, t), this.ctx.fillRect(C, E, i, this.metrics.height));
+    let D = I.bg_r, w = I.bg_g, s = I.bg_b;
+    I.flags & d.INVERSE && (D = I.fg_r, w = I.fg_g, s = I.fg_b), (I.flags & d.INVERSE ? I.fgIsDefault : I.bgIsDefault) || (this.ctx.fillStyle = this.rgbToCSS(D, w, s), this.ctx.fillRect(C, E, i, this.metrics.height));
   }
   /**
    * Render a cell's text and decorations (Pass 2 of two-pass rendering)
@@ -7035,39 +7068,39 @@ class BE {
    */
   renderCellText(I, g, Q, B, C, E) {
     const i = E ?? g, o = g * this.metrics.width, D = Q * this.metrics.height, w = this.metrics.width * I.width;
-    if (I.codepoint === Pg && this.renderPlaceholderCell(I, g, Q) || I.flags & K.INVISIBLE)
+    if (I.codepoint === Pg && this.renderPlaceholderCell(I, g, Q) || I.flags & d.INVISIBLE)
       return;
-    const t = this.isInSelection(g, i, Q);
-    let s = "";
-    if (I.flags & K.ITALIC && (s += "italic "), I.flags & K.BOLD && (s += "bold "), this.ctx.font = `${s}${this.fontSize}px ${this.fontFamily}`, B)
+    const s = this.isInSelection(g, i, Q);
+    let t = "";
+    if (I.flags & d.ITALIC && (t += "italic "), I.flags & d.BOLD && (t += "bold "), this.ctx.font = `${t}${this.fontSize}px ${this.fontFamily}`, B)
       this.ctx.fillStyle = B;
-    else if (t)
+    else if (s)
       this.ctx.fillStyle = this.theme.selectionForeground;
     else {
-      let N = I.fg_r, L = I.fg_g, J = I.fg_b;
-      I.flags & K.INVERSE && (N = I.bg_r, L = I.bg_g, J = I.bg_b);
-      const r = I.flags & K.INVERSE ? I.bgIsDefault : I.fgIsDefault;
-      this.ctx.fillStyle = r ? this.theme.foreground : this.rgbToCSS(N, L, J);
+      let G = I.fg_r, U = I.fg_g, F = I.fg_b;
+      I.flags & d.INVERSE && (G = I.bg_r, U = I.bg_g, F = I.bg_b);
+      const y = I.flags & d.INVERSE ? I.bgIsDefault : I.fgIsDefault;
+      this.ctx.fillStyle = y ? this.theme.foreground : this.rgbToCSS(G, U, F);
     }
-    I.flags & K.FAINT && (this.ctx.globalAlpha = 0.5);
-    const e = o, h = D + this.metrics.baseline, a = I.grapheme, G = C ?? (I.codepoint || 32), R = a && a.length > 0 ? String.fromCodePoint(G, ...a) : String.fromCodePoint(G);
-    if (I.grapheme_len === 0 && this.renderBlockElement(I.codepoint, o, D, w) || this.ctx.fillText(R, e, h), I.flags & K.FAINT && (this.ctx.globalAlpha = 1), I.flags & K.UNDERLINE) {
-      const N = D + this.metrics.baseline + 2;
-      this.ctx.strokeStyle = this.ctx.fillStyle, this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, N), this.ctx.lineTo(o + w, N), this.ctx.stroke();
+    I.flags & d.FAINT && (this.ctx.globalAlpha = 0.5);
+    const e = o, N = D + this.metrics.baseline, h = I.grapheme, c = C ?? (I.codepoint || 32), r = h && h.length > 0 ? String.fromCodePoint(c, ...h) : String.fromCodePoint(c);
+    if (I.grapheme_len === 0 && this.renderBlockElement(I.codepoint, o, D, w) || this.ctx.fillText(r, e, N), I.flags & d.FAINT && (this.ctx.globalAlpha = 1), I.flags & d.UNDERLINE) {
+      const G = D + this.metrics.baseline + 2;
+      this.ctx.strokeStyle = this.ctx.fillStyle, this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, G), this.ctx.lineTo(o + w, G), this.ctx.stroke();
     }
-    if (I.flags & K.STRIKETHROUGH) {
-      const N = D + this.metrics.height / 2;
-      this.ctx.strokeStyle = this.ctx.fillStyle, this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, N), this.ctx.lineTo(o + w, N), this.ctx.stroke();
+    if (I.flags & d.STRIKETHROUGH) {
+      const G = D + this.metrics.height / 2;
+      this.ctx.strokeStyle = this.ctx.fillStyle, this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, G), this.ctx.lineTo(o + w, G), this.ctx.stroke();
     }
     if (I.hyperlink_id > 0 && I.hyperlink_id === this.hoveredHyperlinkId) {
-      const L = D + this.metrics.baseline + 2;
-      this.ctx.strokeStyle = "#4A90E2", this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, L), this.ctx.lineTo(o + w, L), this.ctx.stroke();
+      const U = D + this.metrics.baseline + 2;
+      this.ctx.strokeStyle = "#4A90E2", this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, U), this.ctx.lineTo(o + w, U), this.ctx.stroke();
     }
     if (this.hoveredLinkRange) {
-      const N = this.hoveredLinkRange;
-      if (Q === N.startY && i >= N.startX && (Q < N.endY || i <= N.endX) || Q > N.startY && Q < N.endY || Q === N.endY && i <= N.endX && (Q > N.startY || i >= N.startX)) {
-        const J = D + this.metrics.baseline + 2;
-        this.ctx.strokeStyle = "#4A90E2", this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, J), this.ctx.lineTo(o + w, J), this.ctx.stroke();
+      const G = this.hoveredLinkRange;
+      if (Q === G.startY && i >= G.startX && (Q < G.endY || i <= G.endX) || Q > G.startY && Q < G.endY || Q === G.endY && i <= G.endX && (Q > G.startY || i >= G.startX)) {
+        const F = D + this.metrics.baseline + 2;
+        this.ctx.strokeStyle = "#4A90E2", this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, F), this.ctx.lineTo(o + w, F), this.ctx.stroke();
       }
     }
   }
@@ -7086,74 +7119,76 @@ class BE {
    * per-cell hot path doesn't have to re-resolve it.
    */
   precomputeKittyState(I, g) {
-    var D, w, t;
     this.kittyVirtualPlacements.clear(), this.currentDirectPlacements = [], this.kittyDamagedRows.clear(), this.currentKittyGraphics = null;
-    const Q = /* @__PURE__ */ new Map(), B = this.metrics.height, C = (s, e) => {
-      const h = Math.max(0, Math.floor(s)), a = Math.min(g, Math.ceil(s + e / B));
-      for (let G = h; G < a; G++)
-        this.kittyDamagedRows.add(G);
+    const Q = /* @__PURE__ */ new Map(), B = this.metrics.height, C = (D, w) => {
+      const s = Math.max(0, Math.floor(D)), t = Math.min(g, Math.ceil(D + w / B));
+      for (let e = s; e < t; e++)
+        this.kittyDamagedRows.add(e);
     }, E = /* @__PURE__ */ new Map();
     let i = !1;
     const o = () => {
-      for (let s = 0; s < g; s++)
-        this.kittyDamagedRows.add(s);
+      for (let D = 0; D < g; D++)
+        this.kittyDamagedRows.add(D);
     };
     if (I.getKittyGraphics && I.iterPlacements) {
-      const s = I.getKittyGraphics();
-      if (s !== null) {
-        this.currentKittyGraphics = s;
-        for (const e of I.iterPlacements(s, !1)) {
-          if (e.isVirtual) {
-            if (this.kittyVirtualPlacements.set(e.imageId, e), i) {
-              const N = (w = I.getKittyImagePixels) == null ? void 0 : w.call(I, s, e.imageId);
-              E.set(e.imageId, {
-                imgWidth: (N == null ? void 0 : N.width) ?? 0,
-                imgHeight: (N == null ? void 0 : N.height) ?? 0,
-                imgFormat: (N == null ? void 0 : N.format) ?? 0,
-                dataPtr: (N == null ? void 0 : N.data.byteOffset) ?? 0,
-                dataLen: (N == null ? void 0 : N.data.length) ?? 0
+      const D = I.getKittyGraphics();
+      if (D !== null) {
+        this.currentKittyGraphics = D;
+        for (const w of I.iterPlacements(D, !1)) {
+          if (w.isVirtual) {
+            if (this.kittyVirtualPlacements.set(w.imageId, w), i) {
+              const h = this.getFrameKittyPixels(I, D, w.imageId);
+              E.set(w.imageId, {
+                imgWidth: (h == null ? void 0 : h.width) ?? 0,
+                imgHeight: (h == null ? void 0 : h.height) ?? 0,
+                imgFormat: (h == null ? void 0 : h.format) ?? 0,
+                dataPtr: (h == null ? void 0 : h.data.byteOffset) ?? 0,
+                dataLen: (h == null ? void 0 : h.data.length) ?? 0,
+                revision: (h == null ? void 0 : h.revision) ?? 0
               });
             } else {
-              const N = (D = I.getKittyImagePixels) == null ? void 0 : D.call(I, s, e.imageId), L = {
-                imgWidth: (N == null ? void 0 : N.width) ?? 0,
-                imgHeight: (N == null ? void 0 : N.height) ?? 0,
-                imgFormat: (N == null ? void 0 : N.format) ?? 0,
-                dataPtr: (N == null ? void 0 : N.data.byteOffset) ?? 0,
-                dataLen: (N == null ? void 0 : N.data.length) ?? 0
+              const h = this.getFrameKittyPixels(I, D, w.imageId), c = {
+                imgWidth: (h == null ? void 0 : h.width) ?? 0,
+                imgHeight: (h == null ? void 0 : h.height) ?? 0,
+                imgFormat: (h == null ? void 0 : h.format) ?? 0,
+                dataPtr: (h == null ? void 0 : h.data.byteOffset) ?? 0,
+                dataLen: (h == null ? void 0 : h.data.length) ?? 0,
+                revision: (h == null ? void 0 : h.revision) ?? 0
               };
-              E.set(e.imageId, L);
-              const J = this.lastKittyVirtualSigs.get(e.imageId);
-              (!J || J.imgWidth !== L.imgWidth || J.imgHeight !== L.imgHeight || J.imgFormat !== L.imgFormat || J.dataPtr !== L.dataPtr || J.dataLen !== L.dataLen) && (i = !0);
+              E.set(w.imageId, c);
+              const r = this.lastKittyVirtualSigs.get(w.imageId);
+              (!r || r.imgWidth !== c.imgWidth || r.imgHeight !== c.imgHeight || r.imgFormat !== c.imgFormat || r.dataPtr !== c.dataPtr || r.dataLen !== c.dataLen || r.revision !== c.revision) && (i = !0);
             }
             continue;
           }
-          this.currentDirectPlacements.push(e);
-          const h = (t = I.getKittyImagePixels) == null ? void 0 : t.call(I, s, e.imageId), a = {
-            viewportCol: e.viewportCol,
-            viewportRow: e.viewportRow,
-            pixelWidth: e.pixelWidth,
-            pixelHeight: e.pixelHeight,
-            sourceX: e.sourceX,
-            sourceY: e.sourceY,
-            sourceWidth: e.sourceWidth,
-            sourceHeight: e.sourceHeight,
-            imgWidth: (h == null ? void 0 : h.width) ?? 0,
-            imgHeight: (h == null ? void 0 : h.height) ?? 0,
-            imgFormat: (h == null ? void 0 : h.format) ?? 0,
-            dataPtr: (h == null ? void 0 : h.data.byteOffset) ?? 0,
-            dataLen: (h == null ? void 0 : h.data.length) ?? 0
+          this.currentDirectPlacements.push(w);
+          const s = this.getFrameKittyPixels(I, D, w.imageId), t = {
+            viewportCol: w.viewportCol,
+            viewportRow: w.viewportRow,
+            pixelWidth: w.pixelWidth,
+            pixelHeight: w.pixelHeight,
+            sourceX: w.sourceX,
+            sourceY: w.sourceY,
+            sourceWidth: w.sourceWidth,
+            sourceHeight: w.sourceHeight,
+            imgWidth: (s == null ? void 0 : s.width) ?? 0,
+            imgHeight: (s == null ? void 0 : s.height) ?? 0,
+            imgFormat: (s == null ? void 0 : s.format) ?? 0,
+            dataPtr: (s == null ? void 0 : s.data.byteOffset) ?? 0,
+            dataLen: (s == null ? void 0 : s.data.length) ?? 0,
+            revision: (s == null ? void 0 : s.revision) ?? 0
           };
-          Q.set(e.imageId, a);
-          const G = this.lastKittyDirectSigs.get(e.imageId);
-          (!G || G.viewportCol !== a.viewportCol || G.viewportRow !== a.viewportRow || G.pixelWidth !== a.pixelWidth || G.pixelHeight !== a.pixelHeight || G.sourceX !== a.sourceX || G.sourceY !== a.sourceY || G.sourceWidth !== a.sourceWidth || G.sourceHeight !== a.sourceHeight || G.imgWidth !== a.imgWidth || G.imgHeight !== a.imgHeight || G.imgFormat !== a.imgFormat || G.dataPtr !== a.dataPtr || G.dataLen !== a.dataLen) && (C(a.viewportRow, a.pixelHeight), G && C(G.viewportRow, G.pixelHeight));
+          Q.set(w.imageId, t);
+          const e = this.lastKittyDirectSigs.get(w.imageId);
+          (!e || e.viewportCol !== t.viewportCol || e.viewportRow !== t.viewportRow || e.pixelWidth !== t.pixelWidth || e.pixelHeight !== t.pixelHeight || e.sourceX !== t.sourceX || e.sourceY !== t.sourceY || e.sourceWidth !== t.sourceWidth || e.sourceHeight !== t.sourceHeight || e.imgWidth !== t.imgWidth || e.imgHeight !== t.imgHeight || e.imgFormat !== t.imgFormat || e.dataPtr !== t.dataPtr || e.dataLen !== t.dataLen || e.revision !== t.revision) && (C(t.viewportRow, t.pixelHeight), e && C(e.viewportRow, e.pixelHeight));
         }
       }
     }
-    for (const [s, e] of this.lastKittyDirectSigs)
-      Q.has(s) || C(e.viewportRow, e.pixelHeight);
+    for (const [D, w] of this.lastKittyDirectSigs)
+      Q.has(D) || C(w.viewportRow, w.pixelHeight);
     if (this.lastKittyDirectSigs = Q, !i) {
-      for (const s of this.lastKittyVirtualSigs.keys())
-        if (!E.has(s)) {
+      for (const D of this.lastKittyVirtualSigs.keys())
+        if (!E.has(D)) {
           i = !0;
           break;
         }
@@ -7166,12 +7201,15 @@ class BE {
    * renderKittyImages (direct placements) and renderPlaceholderCell
    * (unicode-placeholder cells).
    */
+  getFrameKittyPixels(I, g, Q) {
+    var B;
+    return this.frameKittyPixels.has(Q) || this.frameKittyPixels.set(Q, ((B = I.getKittyImagePixels) == null ? void 0 : B.call(I, g, Q)) ?? null), this.frameKittyPixels.get(Q) ?? null;
+  }
   getOrDecodeKittyImage(I, g, Q) {
-    var i;
-    const B = this.kittyImageCache.get(Q), C = (i = I.getKittyImagePixels) == null ? void 0 : i.call(I, g, Q);
+    const B = this.kittyImageCache.get(Q), C = this.getFrameKittyPixels(I, g, Q);
     if (!C)
       return (B == null ? void 0 : B.canvas) ?? null;
-    if (B && QE(B, C))
+    if (B && BE(B, C))
       return B.canvas;
     const E = this.decodeKittyImageToCanvas(C);
     return E ? (this.kittyImageCache.set(Q, {
@@ -7180,7 +7218,8 @@ class BE {
       height: C.height,
       format: C.format,
       dataPtr: C.data.byteOffset,
-      dataLen: C.data.length
+      dataLen: C.data.length,
+      revision: C.revision ?? 0
     }), E) : null;
   }
   /**
@@ -7207,28 +7246,28 @@ class BE {
     if (I === 9600)
       return this.ctx.fillRect(g, Q, C, Math.round(E / 2)), !0;
     if (I >= 9601 && I <= 9608) {
-      const a = I - 9600, G = Math.round(E * a / 8);
-      return this.ctx.fillRect(g, Q + E - G, C, G), !0;
+      const h = I - 9600, c = Math.round(E * h / 8);
+      return this.ctx.fillRect(g, Q + E - c, C, c), !0;
     }
     if (I >= 9609 && I <= 9615) {
-      const a = 9616 - I, G = Math.round(C * a / 8);
-      return this.ctx.fillRect(g, Q, G, E), !0;
+      const h = 9616 - I, c = Math.round(C * h / 8);
+      return this.ctx.fillRect(g, Q, c, E), !0;
     }
     if (I === 9616) {
-      const a = Math.round(C / 2);
-      return this.ctx.fillRect(g + a, Q, C - a, E), !0;
+      const h = Math.round(C / 2);
+      return this.ctx.fillRect(g + h, Q, C - h, E), !0;
     }
     if (I >= 9617 && I <= 9619) {
-      const a = [0.25, 0.5, 0.75][I - 9617], G = this.ctx.globalAlpha;
-      return this.ctx.globalAlpha = G * a, this.ctx.fillRect(g, Q, C, E), this.ctx.globalAlpha = G, !0;
+      const h = [0.25, 0.5, 0.75][I - 9617], c = this.ctx.globalAlpha;
+      return this.ctx.globalAlpha = c * h, this.ctx.fillRect(g, Q, C, E), this.ctx.globalAlpha = c, !0;
     }
     if (I === 9620)
       return this.ctx.fillRect(g, Q, C, Math.round(E / 8)), !0;
     if (I === 9621) {
-      const a = Math.round(C * 7 / 8);
-      return this.ctx.fillRect(g + a, Q, C - a, E), !0;
+      const h = Math.round(C * 7 / 8);
+      return this.ctx.fillRect(g + h, Q, C - h, E), !0;
     }
-    const i = 8, o = 4, D = 2, w = 1, s = {
+    const i = 8, o = 4, D = 2, w = 1, t = {
       // biome-ignore lint/complexity/useSimpleNumberKeys: unicode codepoints
       9622: D,
       // biome-ignore lint/complexity/useSimpleNumberKeys: unicode codepoints
@@ -7250,10 +7289,10 @@ class BE {
       // biome-ignore lint/complexity/useSimpleNumberKeys: unicode codepoints
       9631: o | D | w
     }[I];
-    if (s === void 0)
+    if (t === void 0)
       return !1;
-    const e = Math.round(C / 2), h = Math.round(E / 2);
-    return s & i && this.ctx.fillRect(g, Q, e, h), s & o && this.ctx.fillRect(g + e, Q, C - e, h), s & D && this.ctx.fillRect(g, Q + h, e, E - h), s & w && this.ctx.fillRect(g + e, Q + h, C - e, E - h), !0;
+    const e = Math.round(C / 2), N = Math.round(E / 2);
+    return t & i && this.ctx.fillRect(g, Q, e, N), t & o && this.ctx.fillRect(g + e, Q, C - e, N), t & D && this.ctx.fillRect(g, Q + N, e, E - N), t & w && this.ctx.fillRect(g + e, Q + N, C - e, E - N), !0;
   }
   /**
    * Substitute a cell's text rendering with a slice of a kitty graphics
@@ -7267,56 +7306,54 @@ class BE {
    * draws the matching slice scaled to one terminal cell.
    *
    * Returns true if the cell was handled as a placeholder; false to
-   * fall through to normal text rendering (e.g., unknown image, no
-   * matching virtual placement, or malformed diacritics).
+   * fall through to normal text rendering for malformed diacritics.
+   * A valid placeholder without its image/placement paints background only.
    */
   renderPlaceholderCell(I, g, Q) {
-    var r;
-    const B = this.currentRenderBuffer, C = this.currentKittyGraphics;
-    if (!B || C === null)
-      return !1;
-    const E = I.grapheme;
+    const B = this.currentRenderBuffer, C = this.currentKittyGraphics, E = I.grapheme;
     if (!E || E.length < 2)
       return !1;
     const i = LI(E[0]), o = LI(E[1]);
     if (i < 0 || o < 0)
       return !1;
+    if (!B || C === null)
+      return !0;
     const D = I.fg_r << 16 | I.fg_g << 8 | I.fg_b;
     let w = D;
     if (E.length >= 3) {
-      const n = LI(E[2]);
-      n >= 0 && (w = n << 24 | D);
+      const y = LI(E[2]);
+      y >= 0 && (w = y << 24 | D);
     }
-    const t = this.kittyVirtualPlacements.get(w);
-    if (!t)
-      return !1;
-    const s = (r = B.getKittyImagePixels) == null ? void 0 : r.call(B, C, w);
+    const s = this.kittyVirtualPlacements.get(w);
     if (!s)
-      return !1;
+      return !0;
+    const t = this.getFrameKittyPixels(B, C, w);
+    if (!t)
+      return !0;
     const e = this.getOrDecodeKittyImage(B, C, w);
     if (!e)
-      return !1;
-    const h = s.width / t.gridCols, a = s.height / t.gridRows, G = o * h, R = i * a, N = g * this.metrics.width, L = Q * this.metrics.height, J = this.ctx.imageSmoothingEnabled;
+      return !0;
+    const N = t.width / s.gridCols, h = t.height / s.gridRows, c = o * N, r = i * h, G = g * this.metrics.width, U = Q * this.metrics.height, F = this.ctx.imageSmoothingEnabled;
     return this.ctx.imageSmoothingEnabled = !1, this.ctx.drawImage(
       e,
-      G,
-      R,
-      h,
-      a,
+      c,
+      r,
       N,
-      L,
+      h,
+      G,
+      U,
       this.metrics.width,
       this.metrics.height
-    ), this.ctx.imageSmoothingEnabled = J, !0;
+    ), this.ctx.imageSmoothingEnabled = F, !0;
   }
   renderKittyImages() {
     const I = this.currentRenderBuffer, g = this.currentKittyGraphics;
     if (!(!I || g === null || !I.getKittyImagePixels))
       for (const Q of this.currentDirectPlacements) {
         let B = this.kittyImageCache.get(Q.imageId);
-        const C = I.getKittyImagePixels(g, Q.imageId);
+        const C = this.getFrameKittyPixels(I, g, Q.imageId);
         if (C) {
-          if (!B || !QE(B, C)) {
+          if (!B || !BE(B, C)) {
             const E = this.decodeKittyImageToCanvas(C);
             if (!E)
               continue;
@@ -7326,7 +7363,8 @@ class BE {
               height: C.height,
               format: C.format,
               dataPtr: C.data.byteOffset,
-              dataLen: C.data.length
+              dataLen: C.data.length,
+              revision: C.revision ?? 0
             }, this.kittyImageCache.set(Q.imageId, B);
           }
           this.ctx.drawImage(
@@ -7364,14 +7402,14 @@ class BE {
         break;
       case TA.GRAY:
         for (let D = 0, w = 0; D < C.length; D++, w += 4) {
-          const t = C[D];
-          E[w] = t, E[w + 1] = t, E[w + 2] = t, E[w + 3] = 255;
+          const s = C[D];
+          E[w] = s, E[w + 1] = s, E[w + 2] = s, E[w + 3] = 255;
         }
         break;
       case TA.GRAY_ALPHA:
         for (let D = 0, w = 0; D < C.length; D += 2, w += 4) {
-          const t = C[D];
-          E[w] = t, E[w + 1] = t, E[w + 2] = t, E[w + 3] = C[D + 1];
+          const s = C[D];
+          E[w] = s, E[w + 1] = s, E[w + 2] = s, E[w + 3] = C[D + 1];
         }
         break;
       default:
@@ -7393,17 +7431,17 @@ class BE {
         this.ctx.fillRect(E, i, this.metrics.width, this.metrics.height), Q != null && Q[I] && (this.ctx.save(), this.ctx.beginPath(), this.ctx.rect(E, i, this.metrics.width, this.metrics.height), this.ctx.clip(), this.renderCellText(Q[I], C, g, this.theme.cursorAccent, (w = B == null ? void 0 : B.mirror) == null ? void 0 : w.get(I), I), this.ctx.restore());
         break;
       case "underline":
-        const t = Math.max(2, Math.floor(this.metrics.height * 0.15));
+        const s = Math.max(2, Math.floor(this.metrics.height * 0.15));
         this.ctx.fillRect(
           E,
-          i + this.metrics.height - t,
+          i + this.metrics.height - s,
           this.metrics.width,
-          t
+          s
         );
         break;
       case "bar":
-        const s = Math.max(2, Math.floor(this.metrics.width * 0.15));
-        this.ctx.fillRect(E, i, s, this.metrics.height);
+        const t = Math.max(2, Math.floor(this.metrics.width * 0.15));
+        this.ctx.fillRect(E, i, t, this.metrics.height);
         break;
     }
   }
@@ -7559,7 +7597,7 @@ layout(std140) uniform GridUBO {
   uint _r1; uint _r2; uint _r3; uint _r4;
   uint _r5; uint _r6; uint _r7; uint _r8; uint _r9;
 } grid;
-`, Ni = `
+`, ki = `
 layout(std140) uniform PaletteUBO {
   vec4 ansi[16];
   vec4 defaultFg;
@@ -7571,7 +7609,7 @@ layout(std140) uniform PaletteUBO {
   vec4 linkUnderlineColor;
   vec4 _pad;
 } pal;
-`, ws = `#version 300 es
+`, ss = `#version 300 es
 precision highp float;
 precision highp int;
 ${vg}
@@ -7595,12 +7633,12 @@ void main() {
   vUv = local;
   vCellIdx = gl_InstanceID;
 }
-`, os = `#version 300 es
+`, ts = `#version 300 es
 precision highp float;
 precision highp int;
 precision highp usampler2D;
 ${vg}
-${Ni}
+${ki}
 const uint FLAG_UNDERLINE = 1u << 2;
 const uint FLAG_STRIKETHROUGH = 1u << 3;
 const uint FLAG_INVERSE = 1u << 4;
@@ -7681,7 +7719,7 @@ void main() {
   }
   fragColor = vec4(outRgb, 1.0);
 }
-`, ss = `#version 300 es
+`, es = `#version 300 es
 precision highp float;
 precision highp int;
 ${vg}
@@ -7699,11 +7737,11 @@ void main() {
   gl_Position = vec4((cssX / canvasW) * 2.0 - 1.0, 1.0 - (cssY / canvasH) * 2.0, 0.0, 1.0);
   vUv = local;
 }
-`, ts = `#version 300 es
+`, hs = `#version 300 es
 precision highp float;
 precision highp int;
 ${vg}
-${Ni}
+${ki}
 in vec2 vUv;
 out vec4 fragColor;
 void main() {
@@ -7719,7 +7757,7 @@ void main() {
   }
   fragColor = vec4(0.0);
 }
-`, es = `#version 300 es
+`, as = `#version 300 es
 precision highp float;
 precision highp int;
 layout(std140) uniform KittyParamsUBO {
@@ -7746,7 +7784,7 @@ void main() {
   );
   vUv = (kp.srcOrigin + local * kp.srcSize) / kp.imgSize;
 }
-`, hs = `#version 300 es
+`, Ns = `#version 300 es
 precision highp float;
 precision highp int;
 uniform highp sampler2D uKittyImg;
@@ -7756,7 +7794,7 @@ void main() {
   fragColor = texture(uKittyImg, vUv);
 }
 `;
-class as extends oi {
+class ks extends si {
   constructor(I, g, Q, B, C) {
     super(g, Q, B, C), this.gl = I;
     const E = this.createBackingTexture(this.size);
@@ -7792,7 +7830,7 @@ class as extends oi {
     (B = (Q = this.gl).deleteTexture) == null || B.call(Q, this.texture), this.texture = g;
   }
 }
-class Ns extends hi {
+class Ms extends ai {
   constructor(I) {
     super(), this.gl = I;
   }
@@ -7812,7 +7850,7 @@ class Ns extends hi {
     this.gl.deleteTexture(I);
   }
 }
-class ks extends ai {
+class Gs extends Ni {
   constructor(I, g = 1024) {
     super(g), this.gl = I;
     const Q = I.createTexture();
@@ -7843,9 +7881,9 @@ class ks extends ai {
     this.texture = Q, g.bindTexture(g.TEXTURE_2D, Q), g.texStorage2D(g.TEXTURE_2D, 1, g.RGBA8, I, I), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MIN_FILTER, g.LINEAR), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MAG_FILTER, g.LINEAR), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_S, g.CLAMP_TO_EDGE), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_T, g.CLAMP_TO_EDGE);
   }
 }
-class FB {
+class UB {
   constructor(I, g) {
-    this.backend = "webgl", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new MB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.contextLostListeners = [], this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.cellArray = new Uint32Array(0), this.kittyAtlasRects = new Float32Array(256 * 4), this.cellTexW = 0, this.cellTexH = 0, this.textProgramUniforms = {
+    this.backend = "webgl", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new GB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.contextLostListeners = [], this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.cellArray = new Uint32Array(0), this.kittyAtlasRects = new Float32Array(256 * 4), this.cellTexW = 0, this.cellTexH = 0, this.textProgramUniforms = {
       cellTex: null,
       atlasTex: null
     }, this.kittyProgramUniforms = {
@@ -7853,7 +7891,7 @@ class FB {
     }, this.kittyParamsRing = [], this.canvas = I, this.fontSize = g.fontSize ?? 15, this.fontFamily = g.fontFamily ?? "monospace", this.cursorStyle = g.cursorStyle ?? "block", this.dpr = g.devicePixelRatio ?? (typeof window < "u" ? window.devicePixelRatio : 1) ?? 1, this.theme = { ...$A, ...g.theme }, this.cursorBlink_.setEnabled(g.cursorBlink ?? !1);
   }
   static async create(I, g) {
-    const Q = new FB(I, g);
+    const Q = new UB(I, g);
     return await Q.initialize(), Q;
   }
   async initialize() {
@@ -7864,7 +7902,7 @@ class FB {
     });
     if (!I)
       throw new Error("WebGL2Renderer: failed to acquire webgl2 context");
-    if (this.gl = I, this.kittyTextures = new Ns(this.gl), this.paletteUBO = I.createBuffer() ?? void 0, !this.paletteUBO)
+    if (this.gl = I, this.kittyTextures = new Ms(this.gl), this.paletteUBO = I.createBuffer() ?? void 0, !this.paletteUBO)
       throw new Error("WebGL2Renderer: createBuffer failed (paletteUBO)");
     if (I.bindBuffer(I.UNIFORM_BUFFER, this.paletteUBO), I.bufferData(I.UNIFORM_BUFFER, 384, I.DYNAMIC_DRAW), this.gridUBO = I.createBuffer() ?? void 0, !this.gridUBO)
       throw new Error("WebGL2Renderer: createBuffer failed (gridUBO)");
@@ -7886,7 +7924,7 @@ class FB {
   }
   // -------- Font metrics --------
   measureFont() {
-    return cB(this.fontSize, this.fontFamily);
+    return FB(this.fontSize, this.fontFamily);
   }
   compileShader(I, g, Q) {
     const B = this.gl, C = B.createShader(g);
@@ -7909,7 +7947,7 @@ class FB {
     return B.deleteShader(C), B.deleteShader(E), i;
   }
   setupTextProgram() {
-    const I = this.gl, g = this.buildProgram(ws, os, "text");
+    const I = this.gl, g = this.buildProgram(ss, ts, "text");
     this.textProgram = g;
     const Q = I.getUniformBlockIndex(g, "GridUBO"), B = I.getUniformBlockIndex(g, "PaletteUBO");
     I.uniformBlockBinding(g, Q, 0), I.uniformBlockBinding(g, B, 1), I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "KittyAtlasUBO"), 2), this.textProgramUniforms.cellTex = I.getUniformLocation(g, "uCellTex"), this.textProgramUniforms.atlasTex = I.getUniformLocation(g, "uAtlasTex"), I.useProgram(g), I.uniform1i(this.textProgramUniforms.cellTex, 0), I.uniform1i(this.textProgramUniforms.atlasTex, 1);
@@ -7917,11 +7955,11 @@ class FB {
     I.uniform1i(C, 2);
   }
   setupCursorProgram() {
-    const I = this.gl, g = this.buildProgram(ss, ts, "cursor");
+    const I = this.gl, g = this.buildProgram(es, hs, "cursor");
     this.cursorProgram = g, I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "GridUBO"), 0), I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "PaletteUBO"), 1);
   }
   setupKittyProgram() {
-    const I = this.gl, g = this.buildProgram(es, hs, "kitty");
+    const I = this.gl, g = this.buildProgram(as, Ns, "kitty");
     this.kittyProgram = g, I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "KittyParamsUBO"), 0), this.kittyProgramUniforms.kittyImg = I.getUniformLocation(g, "uKittyImg"), I.useProgram(g), I.uniform1i(this.kittyProgramUniforms.kittyImg, 0);
   }
   ensureKittyRingSize(I) {
@@ -7934,11 +7972,11 @@ class FB {
     }
   }
   parseHexColor(I) {
-    return GB(I);
+    return cB(I);
   }
   // -------- Cell encoding --------
   encodeCells(I, g, Q) {
-    const { usedKittyImageIds: B } = si(this.cellArray, I, g, Q, {
+    const { usedKittyImageIds: B } = ti(this.cellArray, I, g, Q, {
       metrics: this.metrics,
       selectionManager: this.selectionManager,
       bidiMapper: this.bidiMapper,
@@ -7957,14 +7995,14 @@ class FB {
   uploadPaletteUBO() {
     if (!this.paletteUBO)
       return;
-    const I = this.gl, g = Di(this.theme);
+    const I = this.gl, g = wi(this.theme);
     I.bindBuffer(I.UNIFORM_BUFFER, this.paletteUBO), I.bufferSubData(I.UNIFORM_BUFFER, 0, g);
   }
   uploadGridUBO(I, g) {
     var C;
     if (!this.gridUBO)
       return;
-    const Q = this.gl, B = wi({
+    const Q = this.gl, B = oi({
       cols: this.cols,
       rows: this.rows,
       cellWidth: this.metrics.width,
@@ -7987,14 +8025,14 @@ class FB {
     this.cols = I, this.rows = g;
     const Q = I * this.metrics.width, B = g * this.metrics.height;
     this.canvas.style.width = `${Q}px`, this.canvas.style.height = `${B}px`, this.canvas.width = Math.round(Q * this.dpr), this.canvas.height = Math.round(B * this.dpr), this.invalidateNext = !0;
-    const C = Math.max(1, I * g * RI);
-    this.cellArray.length !== C && (this.cellArray = new Uint32Array(C)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new as(
+    const C = Math.max(1, I * g * rI);
+    this.cellArray.length !== C && (this.cellArray = new Uint32Array(C)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new ks(
       this.gl,
       this.metrics.width,
       this.metrics.height,
       this.fontSize,
       this.fontFamily
-    ), this.kittyAtlas || (this.kittyAtlas = new ks(this.gl));
+    ), this.kittyAtlas || (this.kittyAtlas = new Gs(this.gl));
     const E = Math.max(1, I * 2), i = Math.max(1, g);
     if (!this.cellTex || this.cellTexW !== E || this.cellTexH !== i) {
       this.cellTex && this.gl.deleteTexture(this.cellTex);
@@ -8031,12 +8069,12 @@ class FB {
     let Q = "";
     for (const C of I.iterPlacements(g, !1)) {
       const E = (B = I.getKittyImagePixels) == null ? void 0 : B.call(I, g, C.imageId);
-      Q += `${C.imageId}|${C.isVirtual ? 1 : 0}|${C.viewportCol},${C.viewportRow}|${C.pixelWidth}x${C.pixelHeight}|${C.sourceX},${C.sourceY},${C.sourceWidth}x${C.sourceHeight}|${(E == null ? void 0 : E.width) ?? 0}x${(E == null ? void 0 : E.height) ?? 0}|${(E == null ? void 0 : E.format) ?? 0}|${(E == null ? void 0 : E.data.byteOffset) ?? 0}+${(E == null ? void 0 : E.data.length) ?? 0};`;
+      Q += `${C.imageId}|${C.isVirtual ? 1 : 0}|${C.viewportCol},${C.viewportRow}|${C.pixelWidth}x${C.pixelHeight}|${C.sourceX},${C.sourceY},${C.sourceWidth}x${C.sourceHeight}|${(E == null ? void 0 : E.width) ?? 0}x${(E == null ? void 0 : E.height) ?? 0}|${(E == null ? void 0 : E.format) ?? 0}|${(E == null ? void 0 : E.data.byteOffset) ?? 0}+${(E == null ? void 0 : E.data.length) ?? 0}@${(E == null ? void 0 : E.revision) ?? 0};`;
     }
     return Q;
   }
   render(I, g = 0, Q) {
-    var G, R, N;
+    var c, r, G;
     if (this.cols === 0 || this.rows === 0)
       return;
     const B = this.gl, C = I.getCursor(), E = this.cursorBlink_.isVisible();
@@ -8050,40 +8088,40 @@ class FB {
     const { usedKittyImageIds: w } = this.encodeCells(I, g, Q);
     this.uploadGridUBO(g, {
       ...C,
-      x: ti(I, C, this.bidiMapper)
+      x: ei(I, C, this.bidiMapper)
     }), this.kittyAtlasRects.fill(0);
-    const t = ((G = I.getKittyGraphics) == null ? void 0 : G.call(I)) ?? null;
-    if (t !== null && this.kittyAtlas && w.length > 0)
-      for (let L = 0; L < w.length; L++) {
-        const J = w[L], r = (R = I.getKittyImagePixels) == null ? void 0 : R.call(I, t, J);
-        if (!r)
+    const s = ((c = I.getKittyGraphics) == null ? void 0 : c.call(I)) ?? null;
+    if (s !== null && this.kittyAtlas && w.length > 0)
+      for (let U = 0; U < w.length; U++) {
+        const F = w[U], y = (r = I.getKittyImagePixels) == null ? void 0 : r.call(I, s, F);
+        if (!y)
           continue;
-        const n = this.kittyAtlas.addOrUpdate(J, r);
-        if (!n)
+        const S = this.kittyAtlas.addOrUpdate(F, y);
+        if (!S)
           continue;
-        const M = this.kittyAtlas.atlasSize;
-        this.kittyAtlasRects[L * 4 + 0] = n.slot.u / M, this.kittyAtlasRects[L * 4 + 1] = n.slot.v / M, this.kittyAtlasRects[L * 4 + 2] = (n.slot.u + n.slot.w) / M, this.kittyAtlasRects[L * 4 + 3] = (n.slot.v + n.slot.h) / M;
+        const k = this.kittyAtlas.atlasSize;
+        this.kittyAtlasRects[U * 4 + 0] = S.slot.u / k, this.kittyAtlasRects[U * 4 + 1] = S.slot.v / k, this.kittyAtlasRects[U * 4 + 2] = (S.slot.u + S.slot.w) / k, this.kittyAtlasRects[U * 4 + 3] = (S.slot.v + S.slot.h) / k;
       }
     this.kittyAtlasUBO && (B.bindBuffer(B.UNIFORM_BUFFER, this.kittyAtlasUBO), B.bufferSubData(B.UNIFORM_BUFFER, 0, this.kittyAtlasRects));
-    const s = [];
-    if (t !== null && I.iterPlacements) {
-      const L = this.cols * this.metrics.width, J = this.rows * this.metrics.height;
-      for (const r of I.iterPlacements(t, !0)) {
-        if (r.isVirtual)
+    const t = [];
+    if (s !== null && I.iterPlacements) {
+      const U = this.cols * this.metrics.width, F = this.rows * this.metrics.height;
+      for (const y of I.iterPlacements(s, !0)) {
+        if (y.isVirtual)
           continue;
-        const n = (N = I.getKittyImagePixels) == null ? void 0 : N.call(I, t, r.imageId);
-        if (!n)
+        const S = (G = I.getKittyImagePixels) == null ? void 0 : G.call(I, s, y.imageId);
+        if (!S)
           continue;
-        const M = this.kittyTextures.getOrUpload(r.imageId, n);
-        if (!M)
+        const k = this.kittyTextures.getOrUpload(y.imageId, S);
+        if (!k)
           continue;
-        const k = new Float32Array(16);
-        k[0] = r.sourceX, k[1] = r.sourceY, k[2] = r.sourceWidth, k[3] = r.sourceHeight, k[4] = r.viewportCol * this.metrics.width, k[5] = r.viewportRow * this.metrics.height, k[6] = r.pixelWidth, k[7] = r.pixelHeight, k[8] = n.width, k[9] = n.height, k[10] = L, k[11] = J, s.push({ params: k, tex: M });
+        const L = new Float32Array(16);
+        L[0] = y.sourceX, L[1] = y.sourceY, L[2] = y.sourceWidth, L[3] = y.sourceHeight, L[4] = y.viewportCol * this.metrics.width, L[5] = y.viewportRow * this.metrics.height, L[6] = y.pixelWidth, L[7] = y.pixelHeight, L[8] = S.width, L[9] = S.height, L[10] = U, L[11] = F, t.push({ params: L, tex: k });
       }
     }
-    this.ensureKittyRingSize(s.length);
-    for (let L = 0; L < s.length; L++)
-      B.bindBuffer(B.UNIFORM_BUFFER, this.kittyParamsRing[L]), B.bufferSubData(B.UNIFORM_BUFFER, 0, s[L].params);
+    this.ensureKittyRingSize(t.length);
+    for (let U = 0; U < t.length; U++)
+      B.bindBuffer(B.UNIFORM_BUFFER, this.kittyParamsRing[U]), B.bufferSubData(B.UNIFORM_BUFFER, 0, t[U].params);
     this.cellTex && (B.bindTexture(B.TEXTURE_2D, this.cellTex), B.pixelStorei(
       /* UNPACK_ALIGNMENT */
       3317,
@@ -8099,11 +8137,11 @@ class FB {
       B.UNSIGNED_INT,
       this.cellArray
     ));
-    const [e, h, a] = this.parseHexColor(this.theme.background);
-    if (B.viewport(0, 0, this.canvas.width, this.canvas.height), B.clearColor(e / 255, h / 255, a / 255, 1), B.clear(B.COLOR_BUFFER_BIT), this.textProgram && this.vao && this.cellTex && this.atlas && this.gridUBO && this.paletteUBO && this.kittyAtlas && this.kittyAtlasUBO && (B.useProgram(this.textProgram), B.bindVertexArray(this.vao), B.bindBufferBase(B.UNIFORM_BUFFER, 0, this.gridUBO), B.bindBufferBase(B.UNIFORM_BUFFER, 1, this.paletteUBO), B.bindBufferBase(B.UNIFORM_BUFFER, 2, this.kittyAtlasUBO), B.activeTexture(B.TEXTURE0), B.bindTexture(B.TEXTURE_2D, this.cellTex), B.activeTexture(B.TEXTURE1), B.bindTexture(B.TEXTURE_2D, this.atlas.glTexture()), B.activeTexture(B.TEXTURE2), B.bindTexture(B.TEXTURE_2D, this.kittyAtlas.glTexture()), B.disable(B.BLEND), B.drawArraysInstanced(B.TRIANGLES, 0, 6, this.cols * this.rows)), this.kittyProgram && s.length > 0) {
+    const [e, N, h] = this.parseHexColor(this.theme.background);
+    if (B.viewport(0, 0, this.canvas.width, this.canvas.height), B.clearColor(e / 255, N / 255, h / 255, 1), B.clear(B.COLOR_BUFFER_BIT), this.textProgram && this.vao && this.cellTex && this.atlas && this.gridUBO && this.paletteUBO && this.kittyAtlas && this.kittyAtlasUBO && (B.useProgram(this.textProgram), B.bindVertexArray(this.vao), B.bindBufferBase(B.UNIFORM_BUFFER, 0, this.gridUBO), B.bindBufferBase(B.UNIFORM_BUFFER, 1, this.paletteUBO), B.bindBufferBase(B.UNIFORM_BUFFER, 2, this.kittyAtlasUBO), B.activeTexture(B.TEXTURE0), B.bindTexture(B.TEXTURE_2D, this.cellTex), B.activeTexture(B.TEXTURE1), B.bindTexture(B.TEXTURE_2D, this.atlas.glTexture()), B.activeTexture(B.TEXTURE2), B.bindTexture(B.TEXTURE_2D, this.kittyAtlas.glTexture()), B.disable(B.BLEND), B.drawArraysInstanced(B.TRIANGLES, 0, 6, this.cols * this.rows)), this.kittyProgram && t.length > 0) {
       B.useProgram(this.kittyProgram), B.bindVertexArray(this.vao), B.enable(B.BLEND), B.blendFuncSeparate(B.SRC_ALPHA, B.ONE_MINUS_SRC_ALPHA, B.ONE, B.ONE_MINUS_SRC_ALPHA), B.blendEquation(B.FUNC_ADD);
-      for (let L = 0; L < s.length; L++)
-        B.bindBufferBase(B.UNIFORM_BUFFER, 0, this.kittyParamsRing[L]), B.activeTexture(B.TEXTURE0), B.bindTexture(B.TEXTURE_2D, s[L].tex), B.drawArrays(B.TRIANGLES, 0, 6);
+      for (let U = 0; U < t.length; U++)
+        B.bindBufferBase(B.UNIFORM_BUFFER, 0, this.kittyParamsRing[U]), B.activeTexture(B.TEXTURE0), B.bindTexture(B.TEXTURE_2D, t[U].tex), B.drawArrays(B.TRIANGLES, 0, 6);
       B.disable(B.BLEND);
     }
     this.cursorProgram && this.vao && this.gridUBO && this.paletteUBO && C.visible && this.cursorBlink_.isVisible() && this.cursorStyle !== "block" && (B.useProgram(this.cursorProgram), B.bindVertexArray(this.vao), B.bindBufferBase(B.UNIFORM_BUFFER, 0, this.gridUBO), B.bindBufferBase(B.UNIFORM_BUFFER, 1, this.paletteUBO), B.enable(B.BLEND), B.blendFuncSeparate(B.SRC_ALPHA, B.ONE_MINUS_SRC_ALPHA, B.ONE, B.ONE_MINUS_SRC_ALPHA), B.blendEquation(B.FUNC_ADD), B.drawArrays(B.TRIANGLES, 0, 6), B.disable(B.BLEND)), I.clearDirty(), this.invalidateNext = !1;
@@ -8163,7 +8201,7 @@ class FB {
     this.contextLostListeners.push(I);
   }
 }
-const Ms = (
+const cs = (
   /* wgsl */
   `
 struct GridUBO {
@@ -8399,7 +8437,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
   return vec4<f32>(outRgb, 1.0);
 }
 `
-), Gs = (
+), Fs = (
   /* wgsl */
   `
 struct GridUBO {
@@ -8467,7 +8505,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
   return vec4<f32>(0.0);
 }
 `
-), cs = (
+), Us = (
   /* wgsl */
   `
 struct KittyParams {
@@ -8513,7 +8551,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
 }
 `
 );
-class Fs extends hi {
+class Js extends ai {
   constructor(I) {
     super(), this.device = I;
   }
@@ -8537,7 +8575,7 @@ class Fs extends hi {
     I.destroy();
   }
 }
-class Us extends ai {
+class Ls extends Ni {
   constructor(I, g = 1024) {
     super(g), this.device = I, this.texture = I.createTexture({
       size: { width: g, height: g },
@@ -8569,7 +8607,7 @@ class Us extends ai {
     });
   }
 }
-class Js extends oi {
+class rs extends si {
   constructor(I, g, Q, B, C) {
     super(g, Q, B, C), this.device = I, this.texture = this.createBackingTexture(this.size);
   }
@@ -8600,9 +8638,9 @@ class Js extends oi {
     this.texture.destroy(), this.texture = g;
   }
 }
-class UB {
+class JB {
   constructor(I, g, Q, B) {
-    this.backend = "webgpu", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new MB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = I, this.device = g, this.kittyTextures = new Fs(g), this.fontSize = Q.fontSize ?? 15, this.fontFamily = Q.fontFamily ?? "monospace", this.cursorStyle = Q.cursorStyle ?? "block", this.dpr = Q.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...$A, ...Q.theme }, this.cursorBlink_.setEnabled(Q.cursorBlink ?? !1), this.ownsDevice = B;
+    this.backend = "webgpu", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new GB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = I, this.device = g, this.kittyTextures = new Js(g), this.fontSize = Q.fontSize ?? 15, this.fontFamily = Q.fontFamily ?? "monospace", this.cursorStyle = Q.cursorStyle ?? "block", this.dpr = Q.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...$A, ...Q.theme }, this.cursorBlink_.setEnabled(Q.cursorBlink ?? !1), this.ownsDevice = B;
   }
   /**
    * Create a WebGPURenderer.
@@ -8619,7 +8657,7 @@ class UB {
    *   across renderers should pass `false` (the default).
    */
   static async create(I, g, Q, B = !1) {
-    const C = new UB(I, g, Q, B);
+    const C = new JB(I, g, Q, B);
     return await C.initialize(), C;
   }
   async initialize() {
@@ -8679,7 +8717,7 @@ class UB {
         }
       ]
     });
-    const g = this.device.createShaderModule({ code: Ms, label: "textShader" }), Q = this.device.createPipelineLayout({
+    const g = this.device.createShaderModule({ code: cs, label: "textShader" }), Q = this.device.createPipelineLayout({
       bindGroupLayouts: [this.textBindGroupLayout]
     });
     this.textPipeline = this.device.createRenderPipeline({
@@ -8711,7 +8749,7 @@ class UB {
       ]
     });
     const B = this.device.createShaderModule({
-      code: Gs,
+      code: Fs,
       label: "cursorShader"
     }), C = this.device.createPipelineLayout({
       bindGroupLayouts: [this.cursorBindGroupLayout]
@@ -8752,7 +8790,7 @@ class UB {
       ]
     });
     const E = this.device.createShaderModule({
-      code: cs,
+      code: Us,
       label: "kittyShader"
     }), i = this.device.createPipelineLayout({
       bindGroupLayouts: [this.kittyBindGroupLayout]
@@ -8789,20 +8827,20 @@ class UB {
   }
   // -------- Font metrics (same logic as CanvasRenderer.measureFont) --------
   measureFont() {
-    return cB(this.fontSize, this.fontFamily);
+    return FB(this.fontSize, this.fontFamily);
   }
   // -------- Buffer helpers --------
   uploadPaletteUBO() {
     if (!this.paletteUBO)
       return;
-    const I = Di(this.theme);
+    const I = wi(this.theme);
     this.device.queue.writeBuffer(this.paletteUBO, 0, I.buffer);
   }
   uploadGridUBO(I, g) {
     var B;
     if (!this.gridUBO)
       return;
-    const Q = wi({
+    const Q = oi({
       cols: this.cols,
       rows: this.rows,
       cellWidth: this.metrics.width,
@@ -8837,7 +8875,7 @@ class UB {
     }
   }
   encodeCells(I, g, Q) {
-    const B = I.getDimensions(), C = si(this.cellArray, I, g, Q, {
+    const B = I.getDimensions(), C = ti(this.cellArray, I, g, Q, {
       metrics: this.metrics,
       selectionManager: this.selectionManager,
       bidiMapper: this.bidiMapper,
@@ -8855,7 +8893,7 @@ class UB {
       0,
       this.cellArray.buffer,
       0,
-      B.cols * B.rows * XC
+      B.cols * B.rows * zC
     ), C;
   }
   // -------- Renderer interface --------
@@ -8867,18 +8905,18 @@ class UB {
     this.cols = I, this.rows = g;
     const Q = I * this.metrics.width, B = g * this.metrics.height;
     this.canvas.style.width = `${Q}px`, this.canvas.style.height = `${B}px`, this.canvas.width = Math.round(Q * this.dpr), this.canvas.height = Math.round(B * this.dpr), this.invalidateNext = !0;
-    const C = Math.max(1, I * g * XC);
+    const C = Math.max(1, I * g * zC);
     !this.cellBuffer || this.cellBufferCapacity < C ? ((E = this.cellBuffer) == null || E.destroy(), this.cellBuffer = this.device.createBuffer({
       size: C,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       label: "cellBuffer"
-    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(I * g * RI)) : this.cellArray.length !== I * g * RI && (this.cellArray = new Uint32Array(I * g * RI)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new Js(
+    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(I * g * rI)) : this.cellArray.length !== I * g * rI && (this.cellArray = new Uint32Array(I * g * rI)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new rs(
       this.device,
       this.metrics.width,
       this.metrics.height,
       this.fontSize,
       this.fontFamily
-    ), this.kittyAtlas || (this.kittyAtlas = new Us(this.device)), this.rebuildBindGroup();
+    ), this.kittyAtlas || (this.kittyAtlas = new Ls(this.device)), this.rebuildBindGroup();
   }
   /**
    * True when no buffer row reports dirty AND no full-redraw is pending.
@@ -8917,12 +8955,12 @@ class UB {
     let Q = "";
     for (const C of I.iterPlacements(g, !1)) {
       const E = (B = I.getKittyImagePixels) == null ? void 0 : B.call(I, g, C.imageId);
-      Q += `${C.imageId}|${C.isVirtual ? 1 : 0}|${C.viewportCol},${C.viewportRow}|${C.pixelWidth}x${C.pixelHeight}|${C.sourceX},${C.sourceY},${C.sourceWidth}x${C.sourceHeight}|${(E == null ? void 0 : E.width) ?? 0}x${(E == null ? void 0 : E.height) ?? 0}|${(E == null ? void 0 : E.format) ?? 0}|${(E == null ? void 0 : E.data.byteOffset) ?? 0}+${(E == null ? void 0 : E.data.length) ?? 0};`;
+      Q += `${C.imageId}|${C.isVirtual ? 1 : 0}|${C.viewportCol},${C.viewportRow}|${C.pixelWidth}x${C.pixelHeight}|${C.sourceX},${C.sourceY},${C.sourceWidth}x${C.sourceHeight}|${(E == null ? void 0 : E.width) ?? 0}x${(E == null ? void 0 : E.height) ?? 0}|${(E == null ? void 0 : E.format) ?? 0}|${(E == null ? void 0 : E.data.byteOffset) ?? 0}+${(E == null ? void 0 : E.data.length) ?? 0}@${(E == null ? void 0 : E.revision) ?? 0};`;
     }
     return Q;
   }
   render(I, g = 0, Q) {
-    var J, r, n;
+    var F, y, S;
     if (this.cols === 0 || this.rows === 0)
       return;
     const B = I.getCursor(), C = this.cursorBlink_.isVisible();
@@ -8936,22 +8974,22 @@ class UB {
     const { usedKittyImageIds: D } = this.encodeCells(I, g, Q);
     this.uploadGridUBO(g, {
       ...B,
-      x: ti(I, B, this.bidiMapper)
+      x: ei(I, B, this.bidiMapper)
     }), this.kittyAtlasRects.fill(0);
-    const w = ((J = I.getKittyGraphics) == null ? void 0 : J.call(I)) ?? null;
+    const w = ((F = I.getKittyGraphics) == null ? void 0 : F.call(I)) ?? null;
     if (w !== null && this.kittyAtlas && D.length > 0)
-      for (let M = 0; M < D.length; M++) {
-        const k = D[M], U = (r = I.getKittyImagePixels) == null ? void 0 : r.call(I, w, k);
-        if (!U)
+      for (let k = 0; k < D.length; k++) {
+        const L = D[k], J = (y = I.getKittyImagePixels) == null ? void 0 : y.call(I, w, L);
+        if (!J)
           continue;
-        const c = this.kittyAtlas.addOrUpdate(k, U);
-        if (!c)
+        const a = this.kittyAtlas.addOrUpdate(L, J);
+        if (!a)
           continue;
-        const y = this.kittyAtlas.atlasSize;
-        this.kittyAtlasRects[M * 4 + 0] = c.slot.u / y, this.kittyAtlasRects[M * 4 + 1] = c.slot.v / y, this.kittyAtlasRects[M * 4 + 2] = (c.slot.u + c.slot.w) / y, this.kittyAtlasRects[M * 4 + 3] = (c.slot.v + c.slot.h) / y;
+        const R = this.kittyAtlas.atlasSize;
+        this.kittyAtlasRects[k * 4 + 0] = a.slot.u / R, this.kittyAtlasRects[k * 4 + 1] = a.slot.v / R, this.kittyAtlasRects[k * 4 + 2] = (a.slot.u + a.slot.w) / R, this.kittyAtlasRects[k * 4 + 3] = (a.slot.v + a.slot.h) / R;
       }
     this.kittyAtlasUBO && this.device.queue.writeBuffer(this.kittyAtlasUBO, 0, this.kittyAtlasRects.buffer);
-    const t = this.textBindGroupLayout && this.gridUBO && this.paletteUBO && this.cellBuffer && this.atlas && this.atlasSampler && this.kittyAtlas && this.kittySampler && this.kittyAtlasUBO ? this.device.createBindGroup({
+    const s = this.textBindGroupLayout && this.gridUBO && this.paletteUBO && this.cellBuffer && this.atlas && this.atlasSampler && this.kittyAtlas && this.kittySampler && this.kittyAtlasUBO ? this.device.createBindGroup({
       layout: this.textBindGroupLayout,
       entries: [
         { binding: 0, resource: { buffer: this.gridUBO } },
@@ -8963,58 +9001,58 @@ class UB {
         { binding: 6, resource: this.kittySampler },
         { binding: 7, resource: { buffer: this.kittyAtlasUBO } }
       ]
-    }) : null, s = [];
+    }) : null, t = [];
     if (this.kittyPipeline && I.getKittyGraphics && I.iterPlacements) {
-      const M = I.getKittyGraphics();
-      if (M !== null) {
-        const k = this.cols * this.metrics.width, U = this.rows * this.metrics.height;
-        for (const c of I.iterPlacements(M, !0)) {
-          if (c.isVirtual)
+      const k = I.getKittyGraphics();
+      if (k !== null) {
+        const L = this.cols * this.metrics.width, J = this.rows * this.metrics.height;
+        for (const a of I.iterPlacements(k, !0)) {
+          if (a.isVirtual)
             continue;
-          const y = (n = I.getKittyImagePixels) == null ? void 0 : n.call(I, M, c.imageId);
-          if (!y)
+          const R = (S = I.getKittyImagePixels) == null ? void 0 : S.call(I, k, a.imageId);
+          if (!R)
             continue;
-          const T = this.kittyTextures.getOrUpload(c.imageId, y);
-          if (!T)
+          const f = this.kittyTextures.getOrUpload(a.imageId, R);
+          if (!f)
             continue;
           const l = new Float32Array(16);
-          l[0] = c.sourceX, l[1] = c.sourceY, l[2] = c.sourceWidth, l[3] = c.sourceHeight, l[4] = c.viewportCol * this.metrics.width, l[5] = c.viewportRow * this.metrics.height, l[6] = c.pixelWidth, l[7] = c.pixelHeight, l[8] = y.width, l[9] = y.height, l[10] = k, l[11] = U, s.push({ params: l, view: T.createView() });
+          l[0] = a.sourceX, l[1] = a.sourceY, l[2] = a.sourceWidth, l[3] = a.sourceHeight, l[4] = a.viewportCol * this.metrics.width, l[5] = a.viewportRow * this.metrics.height, l[6] = a.pixelWidth, l[7] = a.pixelHeight, l[8] = R.width, l[9] = R.height, l[10] = L, l[11] = J, t.push({ params: l, view: f.createView() });
         }
       }
     }
-    this.ensureKittyRingSize(s.length);
-    for (let M = 0; M < s.length; M++)
+    this.ensureKittyRingSize(t.length);
+    for (let k = 0; k < t.length; k++)
       this.device.queue.writeBuffer(
-        this.kittyParamsRing[M],
+        this.kittyParamsRing[k],
         0,
-        s[M].params.buffer
+        t[k].params.buffer
       );
-    const e = s.map(
-      (M, k) => this.device.createBindGroup({
+    const e = t.map(
+      (k, L) => this.device.createBindGroup({
         layout: this.kittyBindGroupLayout,
         entries: [
-          { binding: 0, resource: { buffer: this.kittyParamsRing[k] } },
-          { binding: 1, resource: M.view },
+          { binding: 0, resource: { buffer: this.kittyParamsRing[L] } },
+          { binding: 1, resource: k.view },
           { binding: 2, resource: this.kittySampler }
         ]
       })
-    ), h = this.context.getCurrentTexture().createView(), [a, G, R] = this.parseHexColor(this.theme.background), N = this.device.createCommandEncoder(), L = N.beginRenderPass({
+    ), N = this.context.getCurrentTexture().createView(), [h, c, r] = this.parseHexColor(this.theme.background), G = this.device.createCommandEncoder(), U = G.beginRenderPass({
       colorAttachments: [
         {
-          view: h,
-          clearValue: { r: a / 255, g: G / 255, b: R / 255, a: 1 },
+          view: N,
+          clearValue: { r: h / 255, g: c / 255, b: r / 255, a: 1 },
           loadOp: "clear",
           storeOp: "store"
         }
       ]
     });
-    this.textPipeline && t && (L.setPipeline(this.textPipeline), L.setBindGroup(0, t), L.draw(6, this.cols * this.rows));
-    for (let M = 0; M < e.length; M++)
-      L.setPipeline(this.kittyPipeline), L.setBindGroup(0, e[M]), L.draw(6);
-    this.cursorPipeline && this.cursorBindGroup && (L.setPipeline(this.cursorPipeline), L.setBindGroup(0, this.cursorBindGroup), L.draw(6)), L.end(), this.device.queue.submit([N.finish()]), I.clearDirty(), this.invalidateNext = !1;
+    this.textPipeline && s && (U.setPipeline(this.textPipeline), U.setBindGroup(0, s), U.draw(6, this.cols * this.rows));
+    for (let k = 0; k < e.length; k++)
+      U.setPipeline(this.kittyPipeline), U.setBindGroup(0, e[k]), U.draw(6);
+    this.cursorPipeline && this.cursorBindGroup && (U.setPipeline(this.cursorPipeline), U.setBindGroup(0, this.cursorBindGroup), U.draw(6)), U.end(), this.device.queue.submit([G.finish()]), I.clearDirty(), this.invalidateNext = !1;
   }
   parseHexColor(I) {
-    return GB(I);
+    return cB(I);
   }
   setTheme(I) {
     var g;
@@ -9067,8 +9105,8 @@ class UB {
     this.kittyParamsRing.length = 0, (I = this.kittyAtlas) == null || I.destroy(), this.kittyAtlasUBO && this.kittyAtlasUBO.destroy(), (g = this.cellBuffer) == null || g.destroy(), (Q = this.paletteUBO) == null || Q.destroy(), (B = this.gridUBO) == null || B.destroy(), (C = this.atlas) == null || C.destroy(), this.ownsDevice && this.device.destroy();
   }
 }
-let CE = !1, EE = !1;
-async function iE(A, I, g) {
+let EE = !1, iE = !1;
+async function DE(A, I, g) {
   const Q = navigator.gpu;
   if (!Q) {
     if (g)
@@ -9083,7 +9121,7 @@ async function iE(A, I, g) {
       return null;
     }
     const C = await B.requestDevice();
-    return await UB.create(
+    return await JB.create(
       A,
       C,
       I,
@@ -9093,41 +9131,41 @@ async function iE(A, I, g) {
   } catch (B) {
     if (g)
       throw B;
-    return CE || (CE = !0, console.warn("[ghostty-web] WebGPU init failed, trying WebGL2:", B)), null;
+    return EE || (EE = !0, console.warn("[ghostty-web] WebGPU init failed, trying WebGL2:", B)), null;
   }
 }
-async function DE(A, I, g) {
+async function wE(A, I, g) {
   try {
-    return await FB.create(A, I);
+    return await UB.create(A, I);
   } catch (Q) {
     if (g)
       throw Q;
-    return EE || (EE = !0, console.warn("[ghostty-web] WebGL2 init failed, falling back to Canvas2D:", Q)), null;
+    return iE || (iE = !0, console.warn("[ghostty-web] WebGL2 init failed, falling back to Canvas2D:", Q)), null;
   }
 }
-async function PQ(A, I, g) {
+async function jQ(A, I, g) {
   if (A === "canvas2d")
-    return new BE(I, g);
+    return new CE(I, g);
   if (A === "webgpu") {
-    const C = await iE(I, g, !0);
+    const C = await DE(I, g, !0);
     if (!C)
       throw new Error("WebGPU initialization failed");
     return C;
   }
   if (A === "webgl") {
-    const C = await DE(I, g, !0);
+    const C = await wE(I, g, !0);
     if (!C)
       throw new Error("WebGL2 initialization failed");
     return C;
   }
-  const Q = await iE(I, g, !1);
+  const Q = await DE(I, g, !1);
   if (Q)
     return Q;
-  const B = await DE(I, g, !1);
-  return B || new BE(I, g);
+  const B = await wE(I, g, !1);
+  return B || new CE(I, g);
 }
 const PI = 8, fA = 4;
-class Ls {
+class Rs {
   constructor(I, g) {
     this.canvas = I, this.dpr = g;
     const Q = I.getContext("2d", { alpha: !0 });
@@ -9150,10 +9188,10 @@ class Ls {
     const C = Q - PI - fA, E = fA, i = B - fA * 2;
     if (i <= 0)
       return;
-    const o = I.scrollbackLength + I.visibleRows, D = Math.max(20, I.visibleRows / o * i), w = I.viewportY / I.scrollbackLength, t = E + (i - D) * (1 - w);
+    const o = I.scrollbackLength + I.visibleRows, D = Math.max(20, I.visibleRows / o * i), w = I.viewportY / I.scrollbackLength, s = E + (i - D) * (1 - w);
     g.fillStyle = `rgba(128, 128, 128, ${0.1 * I.opacity})`, g.fillRect(C, E, PI, i);
     const e = I.viewportY > 0 ? 0.5 : 0.3;
-    g.fillStyle = `rgba(128, 128, 128, ${e * I.opacity})`, g.fillRect(C, t, PI, D);
+    g.fillStyle = `rgba(128, 128, 128, ${e * I.opacity})`, g.fillRect(C, s, PI, D);
   }
   /**
    * Test hook: returns what render() *would* draw without touching ctx state.
@@ -9224,37 +9262,37 @@ const zg = class xg {
       if (i < C)
         o = this.wasmTerm.getScrollbackLine(i);
       else {
-        const h = i - C;
-        o = this.wasmTerm.getLine(h);
+        const N = i - C;
+        o = this.wasmTerm.getLine(N);
       }
       if (!o)
         continue;
       let D = -1;
-      const w = i === g ? I : 0, t = i === B ? Q : o.length - 1, s = [];
+      const w = i === g ? I : 0, s = i === B ? Q : o.length - 1, t = [];
       if (this.selectionColumnSpace === "logical")
-        for (let h = w; h <= t && h < o.length; h++)
-          h >= 0 && s.push(h);
+        for (let N = w; N <= s && N < o.length; N++)
+          N >= 0 && t.push(N);
       else {
-        const h = this.bidiMapper.getMap(o);
-        for (let a = w; a <= t && a < o.length; a++)
-          a < 0 || s.push(h.isIdentity ? a : h.visualToLogical[a]);
-        s.sort((a, G) => a - G);
+        const N = this.bidiMapper.getMap(o);
+        for (let h = w; h <= s && h < o.length; h++)
+          h < 0 || t.push(N.isIdentity ? h : N.visualToLogical[h]);
+        t.sort((h, c) => h - c);
       }
       let e = "";
-      for (const h of s) {
-        const a = o[h];
-        if (a && a.codepoint !== 0) {
-          let G;
-          if (a.grapheme_len > 0)
+      for (const N of t) {
+        const h = o[N];
+        if (h && h.codepoint !== 0) {
+          let c;
+          if (h.grapheme_len > 0)
             if (i < C)
-              G = this.wasmTerm.getScrollbackGraphemeString(i, h);
+              c = this.wasmTerm.getScrollbackGraphemeString(i, N);
             else {
-              const R = i - C;
-              G = this.wasmTerm.getGraphemeString(R, h);
+              const r = i - C;
+              c = this.wasmTerm.getGraphemeString(r, N);
             }
           else
-            G = String.fromCodePoint(a.codepoint);
-          e += G, G.trim() && (D = e.length);
+            c = String.fromCodePoint(h.codepoint);
+          e += c, c.trim() && (D = e.length);
         } else
           e += " ";
       }
@@ -9575,16 +9613,16 @@ const zg = class xg {
     if (Q < B)
       C = this.wasmTerm.getScrollbackLine(Q);
     else {
-      const t = Q - B;
-      C = this.wasmTerm.getLine(t);
+      const s = Q - B;
+      C = this.wasmTerm.getLine(s);
     }
     if (!C)
       return null;
-    const E = this.bidiMapper.getMap(C), i = E.isIdentity || I >= E.visualToLogical.length ? I : E.visualToLogical[I], o = (t) => {
-      if (!t || t.codepoint === 0)
+    const E = this.bidiMapper.getMap(C), i = E.isIdentity || I >= E.visualToLogical.length ? I : E.visualToLogical[I], o = (s) => {
+      if (!s || s.codepoint === 0)
         return !1;
-      const s = String.fromCodePoint(t.codepoint);
-      return /[\p{L}\p{N}_\-./~@+]/u.test(s);
+      const t = String.fromCodePoint(s.codepoint);
+      return /[\p{L}\p{N}_\-./~@+]/u.test(t);
     };
     if (!o(C[i]))
       return null;
@@ -9656,15 +9694,15 @@ const zg = class xg {
 zg.AUTO_SCROLL_EDGE_SIZE = 30;
 zg.AUTO_SCROLL_SPEED = 3;
 zg.AUTO_SCROLL_INTERVAL = 50;
-let wE = zg;
-class Ts {
+let oE = zg;
+class ps {
   // 200ms fade animation
   constructor(I = {}) {
     this.kittyAPCState = 0, this.unicode = {
       get activeVersion() {
         return "15.1";
       }
-    }, this.previousHoveredHyperlinkId = 0, this.bidiMapper = new Po(), this.dataEmitter = new MA(), this.resizeEmitter = new MA(), this.bellEmitter = new MA(), this.selectionChangeEmitter = new MA(), this.keyEmitter = new MA(), this.titleChangeEmitter = new MA(), this.scrollEmitter = new MA(), this.renderEmitter = new MA(), this.cursorMoveEmitter = new MA(), this.onData = this.dataEmitter.event, this.onResize = this.resizeEmitter.event, this.onBell = this.bellEmitter.event, this.onSelectionChange = this.selectionChangeEmitter.event, this.onKey = this.keyEmitter.event, this.programStatusEmitter = new MA(), this.programStatusListeners = 0, this.onProgramStatus = (Q) => {
+    }, this.previousHoveredHyperlinkId = 0, this.bidiMapper = new Vo(), this.dataEmitter = new MA(), this.resizeEmitter = new MA(), this.bellEmitter = new MA(), this.selectionChangeEmitter = new MA(), this.keyEmitter = new MA(), this.titleChangeEmitter = new MA(), this.scrollEmitter = new MA(), this.renderEmitter = new MA(), this.cursorMoveEmitter = new MA(), this.onData = this.dataEmitter.event, this.onResize = this.resizeEmitter.event, this.onBell = this.bellEmitter.event, this.onSelectionChange = this.selectionChangeEmitter.event, this.onKey = this.keyEmitter.event, this.programStatusEmitter = new MA(), this.programStatusListeners = 0, this.onProgramStatus = (Q) => {
       const B = this.programStatusEmitter.event(Q);
       this.programStatusListeners++, this.syncProgramStatusHandler();
       let C = !1;
@@ -9687,9 +9725,9 @@ class Ts {
       this.scrollEmitter.fire(o), this.getScrollbackLength() > 0 && this.showScrollbar(), this.requestRender(), this.scrollAnimationFrame = requestAnimationFrame(this.animateScroll);
     }, this.renderTick = () => {
       var B;
-      if (this.animationFrameId = void 0, this.isDisposed || !this.isOpen)
+      if (this.animationFrameId = void 0, this.isDisposed || !this.isOpen || !this.renderFrame())
         return;
-      this.renderer.render(this.wasmTerm, this.viewportY, this), (B = this.scrollbarOverlay) == null || B.render({
+      (B = this.scrollbarOverlay) == null || B.render({
         viewportY: this.viewportY,
         scrollbackLength: this.getScrollbackLength(),
         visibleRows: this.rows,
@@ -9723,19 +9761,19 @@ class Ts {
       if (!this.canvas || !this.renderer || !this.linkDetector || !this.wasmTerm)
         return;
       const B = this.canvas.getBoundingClientRect(), { width: C, height: E } = this.renderer.getMetrics(), i = Math.floor((Q.clientX - B.left) / C), D = Math.floor((Q.clientY - B.top) / E), w = this.wasmTerm.getScrollbackLength();
-      let t, s;
-      const e = this.getViewportY(), h = Math.max(0, Math.floor(e));
-      if (h > 0)
-        if (D < h)
-          t = w - h + D, s = this.wasmTerm.getScrollbackLine(t);
+      let s, t;
+      const e = this.getViewportY(), N = Math.max(0, Math.floor(e));
+      if (N > 0)
+        if (D < N)
+          s = w - N + D, t = this.wasmTerm.getScrollbackLine(s);
         else {
-          const R = D - h;
-          t = w + R, s = this.wasmTerm.getLine(R);
+          const r = D - N;
+          s = w + r, t = this.wasmTerm.getLine(r);
         }
       else
-        t = w + D, s = this.wasmTerm.getLine(D);
-      const a = s ? this.visualColToLogical(s, i) : i, G = await this.linkDetector.getLinkAt(a, t);
-      G && (G.activate(Q), (Q.ctrlKey || Q.metaKey) && Q.preventDefault());
+        s = w + D, t = this.wasmTerm.getLine(D);
+      const h = t ? this.visualColToLogical(t, i) : i, c = await this.linkDetector.getLinkAt(h, s);
+      c && (c.activate(Q), (Q.ctrlKey || Q.metaKey) && Q.preventDefault());
     }, this.handleWheel = (Q) => {
       var C, E, i;
       if (Q.preventDefault(), Q.stopPropagation(), this.customWheelEventHandler && this.customWheelEventHandler(Q))
@@ -9766,17 +9804,17 @@ class Ts {
       const C = this.canvas.getBoundingClientRect(), E = Q.clientX - C.left, i = Q.clientY - C.top;
       if (((o = this.scrollbarOverlay) == null ? void 0 : o.hitTest(E, i, B)) === "thumb") {
         Q.preventDefault(), Q.stopPropagation(), Q.stopImmediatePropagation();
-        const D = C.height, w = 4, t = D - w * 2, s = this.rows, e = B + s, h = Math.max(20, s / e * t), a = this.viewportY / B, G = w + (t - h) * (1 - a);
-        if (i >= G && i <= G + h)
+        const D = C.height, w = 4, s = D - w * 2, t = this.rows, e = B + t, N = Math.max(20, t / e * s), h = this.viewportY / B, c = w + (s - N) * (1 - h);
+        if (i >= c && i <= c + N)
           this.isDraggingScrollbar = !0, this.scrollbarDragStart = i, this.scrollbarDragStartViewportY = this.viewportY, this.canvas && (this.canvas.style.userSelect = "none", this.canvas.style.webkitUserSelect = "none");
         else {
-          const N = 1 - (i - w) / t, L = Math.round(N * B);
-          this.scrollToLine(Math.max(0, Math.min(B, L)));
+          const G = 1 - (i - w) / s, U = Math.round(G * B);
+          this.scrollToLine(Math.max(0, Math.min(B, U)));
         }
       }
     }, this.handleMouseUp = () => {
       this.isDraggingScrollbar && (this.isDraggingScrollbar = !1, this.scrollbarDragStart = null, this.canvas && (this.canvas.style.userSelect = "", this.canvas.style.webkitUserSelect = ""), this.scrollbarVisible && this.getScrollbackLength() > 0 && this.showScrollbar());
-    }, this.ghostty = I.ghostty ?? Ks();
+    }, this.ghostty = I.ghostty ?? Os();
     const g = {
       cols: I.cols ?? 80,
       rows: I.rows ?? 24,
@@ -9798,7 +9836,7 @@ class Ts {
         const E = Q[B];
         return Q[B] = C, this.isOpen && this.handleOptionChange(B, C, E), !0;
       }
-    }), this.cols = this.options.cols, this.rows = this.options.rows, this.buffer = new jo(this);
+    }), this.cols = this.options.cols, this.rows = this.options.rows, this.buffer = new Zo(this);
   }
   writtenKittyGraphics(I) {
     let g = this.kittyAPCState >= 3;
@@ -9871,7 +9909,7 @@ class Ts {
       return;
     this.selectionManager && this.selectionManager.clearSelection(), this.renderer.resize(this.cols, this.rows);
     const I = this.renderer.getMetrics();
-    (g = this.scrollbarOverlay) == null || g.resize(this.cols * I.width, this.rows * I.height), this.updateWasmPixelSize(), this.renderer.invalidate(), this.renderer.render(this.wasmTerm, this.viewportY, this), (Q = this.scrollbarOverlay) == null || Q.render({
+    (g = this.scrollbarOverlay) == null || g.resize(this.cols * I.width, this.rows * I.height), this.updateWasmPixelSize(), this.renderer.invalidate(), this.renderFrame(), (Q = this.scrollbarOverlay) == null || Q.render({
       viewportY: this.viewportY,
       scrollbackLength: this.getScrollbackLength(),
       visibleRows: this.rows,
@@ -9964,7 +10002,7 @@ class Ts {
       const g = this.buildWasmConfig();
       this.wasmTerm = this.ghostty.createTerminal(this.cols, this.rows, g), this.syncProgramStatusHandler(), this.canvas = document.createElement("canvas"), this.canvas.style.display = "block", this.canvas.style.cursor = "text", I.appendChild(this.canvas), this.textarea = document.createElement("textarea"), this.textarea.setAttribute("autocorrect", "off"), this.textarea.setAttribute("autocapitalize", "off"), this.textarea.setAttribute("spellcheck", "false"), this.textarea.setAttribute("tabindex", "0"), this.textarea.setAttribute("aria-label", "Terminal input"), this.textarea.style.position = "absolute", this.textarea.style.left = "0", this.textarea.style.top = "0", this.textarea.style.width = "1px", this.textarea.style.height = "1px", this.textarea.style.padding = "0", this.textarea.style.border = "none", this.textarea.style.margin = "0", this.textarea.style.opacity = "0", this.textarea.style.clipPath = "inset(50%)", this.textarea.style.overflow = "hidden", this.textarea.style.whiteSpace = "nowrap", this.textarea.style.resize = "none", I.appendChild(this.textarea), this.attachCanvasFocusListeners(this.canvas, this.textarea);
       const Q = document.createElement("canvas");
-      Q.style.position = "absolute", Q.style.left = "0", Q.style.top = "0", Q.style.pointerEvents = "none", Q.style.zIndex = "2", I.style.position = I.style.position || "relative", I.appendChild(Q), this.scrollbarCanvas = Q, this.scrollbarOverlay = new Ls(Q, window.devicePixelRatio || 1), this.renderer = await PQ(this.options.renderer ?? "auto", this.canvas, {
+      Q.style.position = "absolute", Q.style.left = "0", Q.style.top = "0", Q.style.pointerEvents = "none", Q.style.zIndex = "2", I.style.position = I.style.position || "relative", I.appendChild(Q), this.scrollbarCanvas = Q, this.scrollbarOverlay = new Rs(Q, window.devicePixelRatio || 1), this.renderer = await jQ(this.options.renderer ?? "auto", this.canvas, {
         fontSize: this.options.fontSize,
         fontFamily: this.options.fontFamily,
         cursorStyle: this.options.cursorStyle,
@@ -10010,22 +10048,22 @@ class Ts {
           const w = this.canvas.getBoundingClientRect();
           return { left: w.left, top: w.top };
         },
-        visualToLogicalCol: (w, t) => {
+        visualToLogicalCol: (w, s) => {
           if (!this.wasmTerm)
             return w;
-          const s = this.wasmTerm.getDimensions();
-          if (t >= s.rows || w >= s.cols)
+          const t = this.wasmTerm.getDimensions();
+          if (s >= t.rows || w >= t.cols)
             return w;
-          const e = this.getViewportLine(t);
+          const e = this.getViewportLine(s);
           return e ? this.visualColToLogical(e, w) : w;
         }
       };
-      this.inputHandler = new Xo(
+      this.inputHandler = new zo(
         this.ghostty,
         I,
         (w) => {
-          var t;
-          this.options.disableStdin || ((t = this.selectionManager) == null || t.clearSelection(), this.awaitingEcho = !0, this.dataEmitter.fire(w));
+          var s;
+          this.options.disableStdin || ((s = this.selectionManager) == null || s.clearSelection(), this.awaitingEcho = !0, this.dataEmitter.fire(w));
         },
         () => {
           this.bellEmitter.fire();
@@ -10035,13 +10073,13 @@ class Ts {
         },
         this.customKeyEventHandler,
         (w) => {
-          var t;
-          return ((t = this.wasmTerm) == null ? void 0 : t.getMode(w, !1)) ?? !1;
+          var s;
+          return ((s = this.wasmTerm) == null ? void 0 : s.getMode(w, !1)) ?? !1;
         },
         () => this.copySelection(),
         this.textarea,
         i
-      ), this.selectionManager = new wE(
+      ), this.selectionManager = new oE(
         this,
         this.renderer,
         this.wasmTerm,
@@ -10049,7 +10087,7 @@ class Ts {
         this.bidiMapper
       ), this.renderer.setSelectionManager(this.selectionManager), (B = (Q = this.renderer).setBidiMapper) == null || B.call(Q, this.bidiMapper), this.selectionManager.onSelectionChange(() => {
         this.selectionChangeEmitter.fire(), this.requestRender();
-      }), this.linkDetector = new vo(this), this.linkDetector.registerProvider(new zo(this)), this.linkDetector.registerProvider(new Wo(this)), I.addEventListener("mousedown", this.handleMouseDown, { capture: !0 }), I.addEventListener("mousemove", this.handleMouseMove), I.addEventListener("mouseleave", this.handleMouseLeave), I.addEventListener("click", this.handleClick), document.addEventListener("mouseup", this.handleMouseUp), I.addEventListener("wheel", this.handleWheel, { passive: !1, capture: !0 }), this.renderer.invalidate(), this.renderer.render(this.wasmTerm, this.viewportY, this), (C = this.scrollbarOverlay) == null || C.render({
+      }), this.linkDetector = new Wo(this), this.linkDetector.registerProvider(new _o(this)), this.linkDetector.registerProvider(new $o(this)), I.addEventListener("mousedown", this.handleMouseDown, { capture: !0 }), I.addEventListener("mousemove", this.handleMouseMove), I.addEventListener("mouseleave", this.handleMouseLeave), I.addEventListener("click", this.handleClick), document.addEventListener("mouseup", this.handleMouseUp), I.addEventListener("wheel", this.handleWheel, { passive: !1, capture: !0 }), this.renderer.invalidate(), this.renderFrame(), (C = this.scrollbarOverlay) == null || C.render({
         viewportY: this.viewportY,
         scrollbackLength: this.getScrollbackLength(),
         visibleRows: this.rows,
@@ -10061,24 +10099,24 @@ class Ts {
         }) : this.renderer.backend === "webgl" && this.renderer.onContextLost(async (w) => {
           await D("canvas2d", `WebGL context lost (${w.reason})`);
         }));
-      }, D = async (w, t) => {
-        var s, e, h, a;
+      }, D = async (w, s) => {
+        var t, e, N, h;
         if (!(this.isDisposed || !this.canvas || !this.textarea || !this.wasmTerm) && !this.isSwapping) {
           this.isSwapping = !0;
           try {
-            console.warn(`[ghostty-web] renderer falling back to ${w}:`, t), (s = this.renderer) == null || s.destroy(), (e = this.selectionManager) == null || e.dispose();
-            const G = this.canvas;
-            this.canvas = this.replaceCanvas(G), this.attachCanvasFocusListeners(this.canvas, this.textarea);
+            console.warn(`[ghostty-web] renderer falling back to ${w}:`, s), (t = this.renderer) == null || t.destroy(), (e = this.selectionManager) == null || e.dispose();
+            const c = this.canvas;
+            this.canvas = this.replaceCanvas(c), this.attachCanvasFocusListeners(this.canvas, this.textarea);
             try {
-              this.renderer = await PQ(w, this.canvas, {
+              this.renderer = await jQ(w, this.canvas, {
                 fontSize: this.options.fontSize,
                 fontFamily: this.options.fontFamily,
                 cursorStyle: this.options.cursorStyle,
                 cursorBlink: this.options.cursorBlink,
                 theme: this.options.theme
               });
-            } catch (R) {
-              console.warn(`[ghostty-web] ${w} fallback failed; using canvas2d:`, R), this.renderer = await PQ("canvas2d", this.canvas, {
+            } catch (r) {
+              console.warn(`[ghostty-web] ${w} fallback failed; using canvas2d:`, r), this.renderer = await jQ("canvas2d", this.canvas, {
                 fontSize: this.options.fontSize,
                 fontFamily: this.options.fontFamily,
                 cursorStyle: this.options.cursorStyle,
@@ -10086,13 +10124,13 @@ class Ts {
                 theme: this.options.theme
               });
             }
-            this.renderer.resize(this.cols, this.rows), this.renderer.setOnRequestRender(() => this.requestRender()), this.selectionManager = new wE(
+            this.renderer.resize(this.cols, this.rows), this.renderer.setOnRequestRender(() => this.requestRender()), this.selectionManager = new oE(
               this,
               this.renderer,
               this.wasmTerm,
               this.textarea,
               this.bidiMapper
-            ), this.renderer.setSelectionManager(this.selectionManager), (a = (h = this.renderer).setBidiMapper) == null || a.call(h, this.bidiMapper), this.selectionManager.onSelectionChange(() => {
+            ), this.renderer.setSelectionManager(this.selectionManager), (h = (N = this.renderer).setBidiMapper) == null || h.call(N, this.bidiMapper), this.selectionManager.onSelectionChange(() => {
               this.selectionChangeEmitter.fire(), this.requestRender();
             }), this.renderer.invalidate(), this.requestRender(), o();
           } finally {
@@ -10120,7 +10158,7 @@ class Ts {
    */
   writeInternal(I, g) {
     var Q, B;
-    this.wasmTerm.write(I), !this.isDisposed && (this.writtenKittyGraphics(I) && ((Q = this.renderer) == null || Q.invalidate()), this.processTerminalResponses(), typeof I == "string" && I.includes("\x07") ? this.bellEmitter.fire() : I instanceof Uint8Array && I.includes(7) && this.bellEmitter.fire(), (B = this.linkDetector) == null || B.invalidateCache(), this.viewportY !== 0 && this.scrollToBottom(), typeof I == "string" && I.includes("\x1B]") && this.checkForTitleChange(I), g && requestAnimationFrame(g), this.awaitingEcho && (this.awaitingEcho = !1, this.renderer && this.wasmTerm && this.renderer.render(this.wasmTerm, this.viewportY, this)), this.requestRender());
+    this.wasmTerm.write(I), !this.isDisposed && (this.holdSynchronizedOutput(), this.writtenKittyGraphics(I) && ((Q = this.renderer) == null || Q.invalidate()), this.processTerminalResponses(), typeof I == "string" && I.includes("\x07") ? this.bellEmitter.fire() : I instanceof Uint8Array && I.includes(7) && this.bellEmitter.fire(), (B = this.linkDetector) == null || B.invalidateCache(), this.viewportY !== 0 && this.scrollToBottom(), typeof I == "string" && I.includes("\x1B]") && this.checkForTitleChange(I), g && requestAnimationFrame(g), this.awaitingEcho && !this.holdSynchronizedOutput() && (this.awaitingEcho = !1, this.renderer && this.wasmTerm && this.renderFrame()), this.requestRender());
   }
   /**
    * Write data with newline
@@ -10159,7 +10197,7 @@ class Ts {
       try {
         this.cols = I, this.rows = g, this.wasmTerm.resize(I, g), this.renderer.resize(I, g);
         const C = this.renderer.getMetrics();
-        (Q = this.scrollbarOverlay) == null || Q.resize(I * C.width, g * C.height), this.updateWasmPixelSize(), this.resizeEmitter.fire({ cols: I, rows: g }), this.renderer.invalidate(), this.renderer.render(this.wasmTerm, this.viewportY, this), (B = this.scrollbarOverlay) == null || B.render({
+        (Q = this.scrollbarOverlay) == null || Q.resize(I * C.width, g * C.height), this.updateWasmPixelSize(), this.resizeEmitter.fire({ cols: I, rows: g }), this.renderer.invalidate(), this.renderFrame(), (B = this.scrollbarOverlay) == null || B.render({
           viewportY: this.viewportY,
           scrollbackLength: this.getScrollbackLength(),
           visibleRows: this.rows,
@@ -10452,6 +10490,18 @@ class Ts {
   requestRender() {
     this.animationFrameId === void 0 && (this.isDisposed || !this.isOpen || (this.animationFrameId = requestAnimationFrame(this.renderTick)));
   }
+  // DEC mode 2026 brackets an atomic screen update. VT parsing continues
+  // while it is held, but none of our paint paths may expose that partial
+  // state. A bounded hold also recovers from a missing closing marker.
+  holdSynchronizedOutput() {
+    var I;
+    return (I = this.wasmTerm) != null && I.getMode(2026) ? (this.syncOutputDeadline === void 0 && (this.syncOutputDeadline = Date.now() + 1e3, this.syncOutputTimer = setTimeout(() => {
+      this.syncOutputTimer = void 0, this.requestRender();
+    }, 1e3)), Date.now() < this.syncOutputDeadline) : (this.syncOutputTimer !== void 0 && clearTimeout(this.syncOutputTimer), this.syncOutputTimer = void 0, this.syncOutputDeadline = void 0, !1);
+  }
+  renderFrame() {
+    return !this.renderer || !this.wasmTerm || this.holdSynchronizedOutput() ? !1 : (this.renderer.render(this.wasmTerm, this.viewportY, this), !0);
+  }
   /**
    * Get a line from native WASM scrollback buffer
    * Implements IScrollbackProvider
@@ -10497,7 +10547,7 @@ class Ts {
    */
   cleanupComponents() {
     var I, g;
-    this.selectionManager && (this.selectionManager.dispose(), this.selectionManager = void 0), this.inputHandler && (this.inputHandler.dispose(), this.inputHandler = void 0), this.renderer && (this.renderer.destroy(), this.renderer = void 0), (I = this.scrollbarOverlay) == null || I.destroy(), this.scrollbarOverlay = void 0, (g = this.scrollbarCanvas) != null && g.parentElement && this.scrollbarCanvas.parentElement.removeChild(this.scrollbarCanvas), this.scrollbarCanvas = void 0, this.canvas && this.canvas.parentNode && (this.canvas.parentNode.removeChild(this.canvas), this.canvas = void 0), this.textarea && this.textarea.parentNode && (this.textarea.parentNode.removeChild(this.textarea), this.textarea = void 0), this.element && (this.element.removeEventListener("wheel", this.handleWheel), this.element.removeEventListener("mousedown", this.handleMouseDown, { capture: !0 }), this.element.removeEventListener("mousemove", this.handleMouseMove), this.element.removeEventListener("mouseleave", this.handleMouseLeave), this.element.removeEventListener("click", this.handleClick), this.element.removeAttribute("contenteditable"), this.element.removeAttribute("role"), this.element.removeAttribute("aria-label"), this.element.removeAttribute("aria-multiline")), typeof document < "u" && document.removeEventListener("mouseup", this.handleMouseUp), this.scrollbarHideTimeout && (window.clearTimeout(this.scrollbarHideTimeout), this.scrollbarHideTimeout = void 0), this.linkDetector && (this.linkDetector.dispose(), this.linkDetector = void 0), this.wasmTerm && (this.wasmTerm.free(), this.wasmTerm = void 0), this.ghostty = void 0, this.element = void 0, this.textarea = void 0;
+    this.syncOutputTimer !== void 0 && clearTimeout(this.syncOutputTimer), this.syncOutputTimer = void 0, this.syncOutputDeadline = void 0, this.selectionManager && (this.selectionManager.dispose(), this.selectionManager = void 0), this.inputHandler && (this.inputHandler.dispose(), this.inputHandler = void 0), this.renderer && (this.renderer.destroy(), this.renderer = void 0), (I = this.scrollbarOverlay) == null || I.destroy(), this.scrollbarOverlay = void 0, (g = this.scrollbarCanvas) != null && g.parentElement && this.scrollbarCanvas.parentElement.removeChild(this.scrollbarCanvas), this.scrollbarCanvas = void 0, this.canvas && this.canvas.parentNode && (this.canvas.parentNode.removeChild(this.canvas), this.canvas = void 0), this.textarea && this.textarea.parentNode && (this.textarea.parentNode.removeChild(this.textarea), this.textarea = void 0), this.element && (this.element.removeEventListener("wheel", this.handleWheel), this.element.removeEventListener("mousedown", this.handleMouseDown, { capture: !0 }), this.element.removeEventListener("mousemove", this.handleMouseMove), this.element.removeEventListener("mouseleave", this.handleMouseLeave), this.element.removeEventListener("click", this.handleClick), this.element.removeAttribute("contenteditable"), this.element.removeAttribute("role"), this.element.removeAttribute("aria-label"), this.element.removeAttribute("aria-multiline")), typeof document < "u" && document.removeEventListener("mouseup", this.handleMouseUp), this.scrollbarHideTimeout && (window.clearTimeout(this.scrollbarHideTimeout), this.scrollbarHideTimeout = void 0), this.linkDetector && (this.linkDetector.dispose(), this.linkDetector = void 0), this.wasmTerm && (this.wasmTerm.free(), this.wasmTerm = void 0), this.ghostty = void 0, this.element = void 0, this.textarea = void 0;
   }
   /**
    * Assert terminal is open (throw if not)
@@ -10550,53 +10600,53 @@ class Ts {
       return;
     const g = this.canvas.getBoundingClientRect(), { width: Q, height: B } = this.renderer.getMetrics(), C = Math.floor((I.clientX - g.left) / Q), i = Math.floor((I.clientY - g.top) / B);
     let o = 0, D = null;
-    const w = this.getViewportY(), t = Math.max(0, Math.floor(w));
-    if (t > 0) {
-      const N = this.wasmTerm.getScrollbackLength();
-      if (i < t) {
-        const L = N - t + i;
-        D = this.wasmTerm.getScrollbackLine(L);
+    const w = this.getViewportY(), s = Math.max(0, Math.floor(w));
+    if (s > 0) {
+      const G = this.wasmTerm.getScrollbackLength();
+      if (i < s) {
+        const U = G - s + i;
+        D = this.wasmTerm.getScrollbackLine(U);
       } else {
-        const L = i - t;
-        D = this.wasmTerm.getLine(L);
+        const U = i - s;
+        D = this.wasmTerm.getLine(U);
       }
     } else
       D = this.wasmTerm.getLine(i);
-    const s = D ? this.visualColToLogical(D, C) : C;
-    D && s >= 0 && s < D.length && (o = D[s].hyperlink_id);
+    const t = D ? this.visualColToLogical(D, C) : C;
+    D && t >= 0 && t < D.length && (o = D[t].hyperlink_id);
     const e = this.previousHoveredHyperlinkId;
     o !== e && (this.renderer.setHoveredHyperlinkId(o), this.previousHoveredHyperlinkId = o);
-    const h = this.wasmTerm.getScrollbackLength();
-    let a;
-    const G = this.getViewportY(), R = Math.max(0, Math.floor(G));
-    if (R > 0)
-      if (i < R)
-        a = h - R + i;
+    const N = this.wasmTerm.getScrollbackLength();
+    let h;
+    const c = this.getViewportY(), r = Math.max(0, Math.floor(c));
+    if (r > 0)
+      if (i < r)
+        h = N - r + i;
       else {
-        const N = i - R;
-        a = h + N;
+        const G = i - r;
+        h = N + G;
       }
     else
-      a = h + i;
-    this.linkDetector.getLinkAt(s, a).then((N) => {
-      var L, J, r, n;
-      if (N !== this.currentHoveredLink) {
-        (J = (L = this.currentHoveredLink) == null ? void 0 : L.hover) == null || J.call(L, !1), this.currentHoveredLink = N, (r = N == null ? void 0 : N.hover) == null || r.call(N, !0);
-        const M = N ? "pointer" : "text";
-        if (this.element && (this.element.style.cursor = M), this.canvas && (this.canvas.style.cursor = M), this.renderer)
-          if (N) {
-            const k = ((n = this.wasmTerm) == null ? void 0 : n.getScrollbackLength()) || 0, U = this.getViewportY(), c = Math.max(0, Math.floor(U)), y = N.range.start.y - k + c, T = N.range.end.y - k + c;
-            y < this.rows && T >= 0 ? this.renderer.setHoveredLinkRange({
-              startX: N.range.start.x,
-              startY: Math.max(0, y),
-              endX: N.range.end.x,
-              endY: Math.min(this.rows - 1, T)
+      h = N + i;
+    this.linkDetector.getLinkAt(t, h).then((G) => {
+      var U, F, y, S;
+      if (G !== this.currentHoveredLink) {
+        (F = (U = this.currentHoveredLink) == null ? void 0 : U.hover) == null || F.call(U, !1), this.currentHoveredLink = G, (y = G == null ? void 0 : G.hover) == null || y.call(G, !0);
+        const k = G ? "pointer" : "text";
+        if (this.element && (this.element.style.cursor = k), this.canvas && (this.canvas.style.cursor = k), this.renderer)
+          if (G) {
+            const L = ((S = this.wasmTerm) == null ? void 0 : S.getScrollbackLength()) || 0, J = this.getViewportY(), a = Math.max(0, Math.floor(J)), R = G.range.start.y - L + a, f = G.range.end.y - L + a;
+            R < this.rows && f >= 0 ? this.renderer.setHoveredLinkRange({
+              startX: G.range.start.x,
+              startY: Math.max(0, R),
+              endX: G.range.end.x,
+              endY: Math.min(this.rows - 1, f)
             }) : this.renderer.setHoveredLinkRange(null);
           } else
             this.renderer.setHoveredLinkRange(null);
       }
-    }).catch((N) => {
-      console.warn("Link detection error:", N);
+    }).catch((G) => {
+      console.warn("Link detection error:", G);
     });
   }
   /**
@@ -10608,8 +10658,8 @@ class Ts {
     const g = this.wasmTerm.getScrollbackLength();
     if (g === 0)
       return;
-    const Q = this.canvas.getBoundingClientRect(), C = I.clientY - Q.top - this.scrollbarDragStart, o = Q.height - 4 * 2, D = this.rows, w = g + D, t = Math.max(20, D / w * o), s = -C / (o - t), e = Math.round(s * g), h = this.scrollbarDragStartViewportY + e;
-    this.scrollToLine(Math.max(0, Math.min(g, h)));
+    const Q = this.canvas.getBoundingClientRect(), C = I.clientY - Q.top - this.scrollbarDragStart, o = Q.height - 4 * 2, D = this.rows, w = g + D, s = Math.max(20, D / w * o), t = -C / (o - s), e = Math.round(t * g), N = this.scrollbarDragStartViewportY + e;
+    this.scrollToLine(Math.max(0, Math.min(g, N)));
   }
   /**
    * Show scrollbar with fade-in and schedule auto-hide
@@ -10632,7 +10682,7 @@ class Ts {
     const I = Date.now(), g = () => {
       var C;
       const Q = Date.now() - I, B = Math.min(Q / this.SCROLLBAR_FADE_DURATION_MS, 1);
-      this.scrollbarOpacity = B, this.renderer && this.wasmTerm && (this.renderer.render(this.wasmTerm, this.viewportY, this), (C = this.scrollbarOverlay) == null || C.render({
+      this.scrollbarOpacity = B, this.renderer && this.wasmTerm && (this.renderFrame(), (C = this.scrollbarOverlay) == null || C.render({
         viewportY: this.viewportY,
         scrollbackLength: this.getScrollbackLength(),
         visibleRows: this.rows,
@@ -10648,12 +10698,12 @@ class Ts {
     const I = Date.now(), g = this.scrollbarOpacity, Q = () => {
       var E, i;
       const B = Date.now() - I, C = Math.min(B / this.SCROLLBAR_FADE_DURATION_MS, 1);
-      this.scrollbarOpacity = g * (1 - C), this.renderer && this.wasmTerm && (this.renderer.render(this.wasmTerm, this.viewportY, this), (E = this.scrollbarOverlay) == null || E.render({
+      this.scrollbarOpacity = g * (1 - C), this.renderer && this.wasmTerm && (this.renderFrame(), (E = this.scrollbarOverlay) == null || E.render({
         viewportY: this.viewportY,
         scrollbackLength: this.getScrollbackLength(),
         visibleRows: this.rows,
         opacity: this.scrollbarOpacity
-      })), C < 1 ? requestAnimationFrame(Q) : (this.scrollbarVisible = !1, this.scrollbarOpacity = 0, this.renderer && this.wasmTerm && (this.renderer.render(this.wasmTerm, this.viewportY, this), (i = this.scrollbarOverlay) == null || i.render({
+      })), C < 1 ? requestAnimationFrame(Q) : (this.scrollbarVisible = !1, this.scrollbarOpacity = 0, this.renderer && this.wasmTerm && (this.renderFrame(), (i = this.scrollbarOverlay) == null || i.render({
         viewportY: this.viewportY,
         scrollbackLength: this.getScrollbackLength(),
         visibleRows: this.rows,
@@ -10730,8 +10780,8 @@ class Ts {
     return this.assertOpen(), this.wasmTerm.hasMouseTracking();
   }
 }
-const Rs = 2, rs = 1, ys = 15, ns = 100;
-class xs {
+const ys = 2, ns = 1, Ss = 15, Hs = 100;
+class us {
   constructor() {
     this._isResizing = !1;
   }
@@ -10783,8 +10833,8 @@ class xs {
    * @returns Proposed dimensions or undefined if cannot calculate
    */
   proposeDimensions() {
-    var G;
-    if (!((G = this._terminal) != null && G.element))
+    var c;
+    if (!((c = this._terminal) != null && c.element))
       return;
     const g = this._terminal.renderer;
     if (!g || typeof g.getMetrics != "function")
@@ -10795,11 +10845,11 @@ class xs {
     const B = this._terminal.element;
     if (typeof B.clientWidth > "u")
       return;
-    const C = window.getComputedStyle(B), E = Number.parseInt(C.getPropertyValue("padding-top")) || 0, i = Number.parseInt(C.getPropertyValue("padding-bottom")) || 0, o = Number.parseInt(C.getPropertyValue("padding-left")) || 0, D = Number.parseInt(C.getPropertyValue("padding-right")) || 0, w = B.clientWidth, t = B.clientHeight;
-    if (w === 0 || t === 0)
+    const C = window.getComputedStyle(B), E = Number.parseInt(C.getPropertyValue("padding-top")) || 0, i = Number.parseInt(C.getPropertyValue("padding-bottom")) || 0, o = Number.parseInt(C.getPropertyValue("padding-left")) || 0, D = Number.parseInt(C.getPropertyValue("padding-right")) || 0, w = B.clientWidth, s = B.clientHeight;
+    if (w === 0 || s === 0)
       return;
-    const s = w - o - D - ys, e = t - E - i, h = Math.max(Rs, Math.floor(s / Q.width)), a = Math.max(rs, Math.floor(e / Q.height));
-    return { cols: h, rows: a };
+    const t = w - o - D - Ss, e = s - E - i, N = Math.max(ys, Math.floor(t / Q.width)), h = Math.max(ns, Math.floor(e / Q.height));
+    return { cols: N, rows: h };
   }
   /**
    * Observe the terminal's container for resize events
@@ -10815,36 +10865,36 @@ class xs {
     (I = this._terminal) != null && I.element && (this._resizeObserver || (this._resizeObserver = new ResizeObserver((g) => {
       this._isResizing || !g[0] || (this._resizeDebounceTimer && clearTimeout(this._resizeDebounceTimer), this._resizeDebounceTimer = setTimeout(() => {
         this.fit();
-      }, ns));
+      }, Hs));
     }), this._resizeObserver.observe(this._terminal.element)));
   }
 }
-const pg = "ghostty-renderer-hud", iB = "ghostty-renderer-hud-styles", Ss = [
+const pg = "ghostty-renderer-hud", DB = "ghostty-renderer-hud-styles", Ys = [
   "webgpu",
   "webgl",
   "canvas2d"
 ];
-function Hs(A) {
+function ls(A) {
   return A === "webgpu" || A === "webgl" || A === "canvas2d";
 }
-function jQ(A) {
-  return A === "auto" || Hs(A);
+function VQ(A) {
+  return A === "auto" || ls(A);
 }
-function ps() {
+function bs() {
   const I = new URLSearchParams(window.location.search).get("renderer");
-  if (jQ(I))
+  if (VQ(I))
     return I;
   const g = window.__ghosttyDefaultRenderer;
-  if (jQ(g))
+  if (VQ(g))
     return g;
   const Q = window.__boobaDefaultRenderer;
-  return jQ(Q) ? Q : "auto";
+  return VQ(Q) ? Q : "auto";
 }
-function Ys() {
-  if (document.getElementById(iB))
+function fs() {
+  if (document.getElementById(DB))
     return;
   const A = document.createElement("style");
-  A.id = iB, A.textContent = `
+  A.id = DB, A.textContent = `
     :where(#${pg}) {
       bottom: 12px;
       right: 12px;
@@ -10859,15 +10909,15 @@ function Ys() {
     }
   `, document.head.appendChild(A);
 }
-function ls(A, I) {
+function Ks(A, I) {
   const g = A === void 0 ? -1 : I.indexOf(A);
   return g < 0 ? I[0] : I[(g + 1) % I.length];
 }
-function fs(A) {
+function ds(A) {
   const I = new URL(window.location.href);
   I.searchParams.set("renderer", A), window.location.href = I.toString();
 }
-function us(A, I = {}) {
+function ms(A, I = {}) {
   if (!A)
     throw new Error(
       "installRendererHud: terminal is null/undefined — call after term.open() so terminal.renderer exists."
@@ -10877,41 +10927,41 @@ function us(A, I = {}) {
       `installRendererHud: a HUD with id "${pg}" is already installed. Uninstall first if you need to reinstall.`
     ), () => {
     };
-  const g = I.parent ?? document.body, Q = I.position ?? "fixed", B = I.clickToToggle ?? !0, C = I.bindToggleHotkey ?? !0, E = I.cycle && I.cycle.length > 0 ? I.cycle : Ss;
-  Ys();
+  const g = I.parent ?? document.body, Q = I.position ?? "fixed", B = I.clickToToggle ?? !0, C = I.bindToggleHotkey ?? !0, E = I.cycle && I.cycle.length > 0 ? I.cycle : Ys;
+  fs();
   const i = document.createElement("div");
   i.id = pg, i.style.position = Q, I.className && (i.className = I.className), B && C ? i.title = "Click or Alt+Shift+R: cycle renderer" : B ? i.title = "Click: cycle renderer" : C && (i.title = "Alt+Shift+R: cycle renderer"), B ? (i.style.cursor = "pointer", i.style.pointerEvents = "auto") : i.style.pointerEvents = "none", g.appendChild(i);
   let o = 0, D = performance.now(), w = null;
-  const t = () => {
-    var G;
-    o += 1;
-    const a = performance.now();
-    if (a - D >= 1e3) {
-      const R = ((G = A.renderer) == null ? void 0 : G.backend) ?? "?";
-      i.textContent = `${R} ${o} fps`, o = 0, D = a;
-    }
-    w = requestAnimationFrame(t);
-  };
-  w = requestAnimationFrame(t);
   const s = () => {
-    var G;
-    const a = ls((G = A.renderer) == null ? void 0 : G.backend, E);
-    fs(a);
-  }, e = () => s();
-  B && i.addEventListener("click", e);
-  const h = (a) => {
-    a.altKey && a.shiftKey && a.code === "KeyR" && (a.preventDefault(), s());
+    var c;
+    o += 1;
+    const h = performance.now();
+    if (h - D >= 1e3) {
+      const r = ((c = A.renderer) == null ? void 0 : c.backend) ?? "?";
+      i.textContent = `${r} ${o} fps`, o = 0, D = h;
+    }
+    w = requestAnimationFrame(s);
   };
-  return C && window.addEventListener("keydown", h), () => {
-    var a;
-    w !== null && cancelAnimationFrame(w), B && i.removeEventListener("click", e), C && window.removeEventListener("keydown", h), i.remove(), (a = document.getElementById(iB)) == null || a.remove();
+  w = requestAnimationFrame(s);
+  const t = () => {
+    var c;
+    const h = Ks((c = A.renderer) == null ? void 0 : c.backend, E);
+    ds(h);
+  }, e = () => t();
+  B && i.addEventListener("click", e);
+  const N = (h) => {
+    h.altKey && h.shiftKey && h.code === "KeyR" && (h.preventDefault(), t());
+  };
+  return C && window.addEventListener("keydown", N), () => {
+    var h;
+    w !== null && cancelAnimationFrame(w), B && i.removeEventListener("click", e), C && window.removeEventListener("keydown", N), i.remove(), (h = document.getElementById(DB)) == null || h.remove();
   };
 }
 let jg = null;
-async function bs() {
+async function Ps() {
   jg || (jg = await $I.load());
 }
-function Ks() {
+function Os() {
   if (!jg)
     throw new Error(
       `ghostty-web not initialized. Call init() before creating Terminal instances.
@@ -10928,30 +10978,30 @@ For tests, pass a Ghostty instance directly:
   return jg;
 }
 export {
-  BE as CanvasRenderer,
-  K as CellFlags,
-  MB as CursorBlink,
+  CE as CanvasRenderer,
+  d as CellFlags,
+  GB as CursorBlink,
   Tg as DirtyState,
   MA as EventEmitter,
-  xs as FitAddon,
+  us as FitAddon,
   $I as Ghostty,
-  To as GhosttyTerminal,
-  Xo as InputHandler,
-  F as Key,
-  $E as KeyAction,
-  qo as KeyEncoder,
-  NB as KeyEncoderOption,
-  vo as LinkDetector,
+  po as GhosttyTerminal,
+  zo as InputHandler,
+  M as Key,
+  Ai as KeyAction,
+  xo as KeyEncoder,
+  kB as KeyEncoderOption,
+  Wo as LinkDetector,
   KA as Mods,
-  zo as OSC8LinkProvider,
-  Ls as ScrollbarOverlay,
-  wE as SelectionManager,
-  Ts as Terminal,
-  Wo as UrlRegexProvider,
-  UB as WebGPURenderer,
-  Ks as getGhostty,
-  bs as init,
-  us as installRendererHud,
-  ps as parseRendererFromURL,
-  PQ as pickRenderer
+  _o as OSC8LinkProvider,
+  Rs as ScrollbarOverlay,
+  oE as SelectionManager,
+  ps as Terminal,
+  $o as UrlRegexProvider,
+  JB as WebGPURenderer,
+  Os as getGhostty,
+  Ps as init,
+  ms as installRendererHud,
+  bs as parseRendererFromURL,
+  jQ as pickRenderer
 };
