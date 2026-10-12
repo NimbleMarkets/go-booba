@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.9.2] - 2026-10-12
+
 - Refresh ghostty-web to fix retransmitted-image caches, honor synchronized
   output, suppress missing-image placeholder boxes, and reduce Canvas2D redraw
   costs and repeated clears at fractional display scaling.
