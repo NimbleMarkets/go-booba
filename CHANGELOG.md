@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.10.0] - 2026-10-17
+
 ### Terminal Actions (experimental)
 
 - Add `actions/termhost`, which hosts Terminal Actions inside the program when
