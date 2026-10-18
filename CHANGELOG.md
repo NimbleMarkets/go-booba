@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## [0.10.1] - 2026-10-18
+
+### Terminal Actions (experimental)
+
+- Add `bubblehelp.NewModelWithFallback` for applications where action metadata
+  is optional. Invalid or oversized descriptions produce a diagnostic without
+  blocking native startup or WASM bridge registration. Failed publication clears
+  stale controls and retries on later updates; keyboard bindings remain intact.
+  Existing `NewModel` callers retain strict validation and must opt in.
+- Keep OSC 7501's 2,048-byte decoded message limit, including the UTF-8 summary,
+  marker, and serialized JSON. Never truncate payloads or partially advertise
+  oversized descriptions. The Go receiver now rejects oversized messages,
+  matching browser enforcement.
+- Document action-bar sizing and migration, and add regression coverage for
+  exact byte boundaries, Unicode, oversized help maps, recovery, native startup,
+  and WASM bridge registration.
+
+### Development
+
+- Check SIP client shutdown errors in tests to satisfy repository lint checks.
+
 ## [0.10.0] - 2026-10-17
 
 ### Terminal Actions (experimental)
