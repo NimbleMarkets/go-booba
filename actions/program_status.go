@@ -82,3 +82,85 @@ func ClearProgramStatus(instance string) (string, error) {
 	}
 	return "\x1b]7501;state=clear:id=" + id + "\x1b\\", nil
 }
+
+// Report is one decoded Program Status Protocol record: a report written by
+// EncodeProgramStatus or Bubble Tea's View.ProgramStatus, or a clear sequence.
+// Snapshot is set when the message carries the booba-actions convention.
+type Report struct {
+	Status  ProgramStatus
+	ID      string
+	Clear   bool
+	Message string // Complete decoded msg field, including any JSON suffix.
+	// Snapshot holds the actions carried after MessageMarker, if any.
+	Snapshot *Snapshot
+}
+
+// IsProgramStatusQuery reports whether sequence is the OSC 7501 capability
+// query, terminated by either BEL or ST.
+func IsProgramStatusQuery(sequence string) bool {
+	payload, ok := programStatusPayload(sequence)
+	return ok && payload == "?"
+}
+
+func programStatusPayload(sequence string) (string, bool) {
+	const prefix = "\x1b]7501;"
+	if !strings.HasPrefix(sequence, prefix) {
+		return "", false
+	}
+	payload := sequence[len(prefix):]
+	switch {
+	case strings.HasSuffix(payload, "\x1b\\"):
+		return payload[:len(payload)-2], true
+	case strings.HasSuffix(payload, "\a"):
+		return payload[:len(payload)-1], true
+	}
+	return "", false
+}
+
+// DecodeProgramStatus parses one OSC 7501 report. Hosts use it to interpret
+// program output. Unknown fields are ignored; a msg without MessageMarker
+// leaves Snapshot nil and becomes the summary. Invalid action JSON is an error
+// so hosts can drop stale controls, as the browser does.
+func DecodeProgramStatus(sequence string) (Report, error) {
+	payload, ok := programStatusPayload(sequence)
+	if !ok {
+		return Report{}, fmt.Errorf("not an OSC 7501 sequence")
+	}
+	if payload == "?" {
+		return Report{}, fmt.Errorf("OSC 7501 capability query is not a report")
+	}
+	var r Report
+	for _, field := range strings.Split(payload, ":") {
+		key, value, _ := strings.Cut(field, "=")
+		switch key {
+		case "state":
+			r.Status.State = value
+		case "id":
+			r.ID = value
+		case "app":
+			r.Status.App = value
+		case "kind":
+			r.Status.Kind = value
+		case "msg":
+			decoded, err := base64.StdEncoding.DecodeString(value)
+			if err != nil {
+				return Report{}, fmt.Errorf("invalid OSC 7501 msg: %w", err)
+			}
+			r.Message = string(decoded)
+		}
+	}
+	if r.Status.State == "" {
+		return Report{}, fmt.Errorf("OSC 7501 report has no state")
+	}
+	r.Clear = r.Status.State == "clear"
+	r.Status.Summary = r.Message
+	if summary, data, ok := strings.Cut(r.Message, MessageMarker); ok {
+		s, err := Decode([]byte(data))
+		if err != nil {
+			return Report{}, fmt.Errorf("invalid booba-actions payload: %w", err)
+		}
+		r.Status.Summary = summary
+		r.Snapshot = &s
+	}
+	return r, nil
+}

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Terminal Actions (experimental)
+
+- Add `actions/termhost`, which hosts Terminal Actions inside the program when
+  the terminal does not answer the OSC 7501 capability query. It answers the
+  query itself after a timeout, filters the published reports out of the
+  program's output, draws them as a row of clickable buttons under the view,
+  and sends activations through the ordinary message loop as key presses.
+  A terminal that does answer is left alone.
+- Add `actions.DecodeProgramStatus`, `actions.Report`, and
+  `actions.IsProgramStatusQuery` for Go hosts that read OSC 7501 reports.
+
 ## [0.9.2] - 2026-10-12
 
 - Refresh ghostty-web to fix retransmitted-image caches, honor synchronized

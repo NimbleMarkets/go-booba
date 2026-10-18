@@ -84,6 +84,41 @@ Booba clears actions on adapter replacement, disconnect/reconnect, reset through
 
 Standard WebSocket/WebTransport options and `disableStdin` prevent activation through BoobaTerminal. Stale browser closures are rejected, but ordinary key input cannot guarantee that the remote application still has the advertised context. A future named-action reply would be needed for that guarantee.
 
+## Hosting actions in a plain terminal
+
+`actions/termhost` gives an application the same buttons when the terminal
+cannot. It wraps the model that `bubblehelp.NewModel` returns and takes over
+the program's output:
+
+```go
+published, err := bubblehelp.NewModel(app, describe, bubblehelp.ModelOptions{})
+host, output := termhost.New(published, os.Stdout, termhost.Options{})
+p := tea.NewProgram(host, tea.WithOutput(output))
+```
+
+The host waits `Options.Timeout` (250 ms by default) for the terminal's reply
+to the capability query. If Booba or another host answers, the wrapper passes
+every byte through and renders nothing. Otherwise it answers the query itself
+with `tea.ProgramStatusSupportMsg`, so the publisher starts reporting, and its
+writer removes each OSC 7501 report from the output stream before it reaches
+the terminal. The report is decoded with `actions.DecodeProgramStatus` and drawn
+as a row of buttons under the application's view: the short help in compact
+form, More/Less for the full groups, disabled controls shown but inert. The
+view turns on cell-motion mouse reporting. A click sends the action's preferred
+gesture as a `tea.KeyPressMsg` through the program loop, so wrappers and the
+application see ordinary input, exactly as with the browser bar. `KeyPress`
+is the in-process key encoder; gestures it cannot represent decline activation.
+
+Lifetimes follow the browser: a new capability query, a clear of the record
+or an ancestor, a malformed report, or a replacement without actions removes
+the controls. Bubble Tea's own `View.ProgramStatus` reports are decoded too,
+but only reports carrying the booba-actions marker produce buttons.
+
+The bar needs free rows below the content; the host does not scroll or shrink
+the application, so reserve a row in the layout. `Options.Styles` replaces the
+reverse-video defaults. The wrapper keeps terminal detection working by
+exposing the output's file descriptor when the output is a tty.
+
 ## Program status integration
 
 Bubble Tea v2.1 provides `View.ProgramStatus`, `RequestProgramStatusSupport`, and `ProgramStatusSupportMsg`. Booba's pinned WASM fork is based on v2.1.0 as of 0.8.0, so those APIs are available to WASM builds. The help adapter uses Bubbles v2.1.0.
