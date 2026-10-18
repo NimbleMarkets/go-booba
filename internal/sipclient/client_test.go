@@ -226,7 +226,10 @@ func TestRunInteractive_NoGoroutineLeakAfterShutdown(t *testing.T) {
 	go func() { done <- runInteractive(ctx, conn, blocking, opts, io.Discard) }()
 
 	select {
-	case <-done:
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("runInteractive: %v", err)
+		}
 		// runInteractive returned. The stdin goroutine should have exited
 		// because tty.Close() unblocked its Read.
 		if !blocking.closed() {

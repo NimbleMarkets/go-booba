@@ -119,7 +119,9 @@ collect:
 
 	// Let runInteractive tear down cleanly.
 	cancel()
-	<-done
+	if err := <-done; err != nil {
+		t.Fatalf("runInteractive: %v", err)
+	}
 
 	if len(got) < 2 {
 		t.Fatalf("got %d resizes; want 2. got=%+v", len(got), got)
