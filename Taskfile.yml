@@ -96,7 +96,7 @@ tasks:
   go-test-wasm:
     desc: 'Run the js/wasm Go tests under Node (the wasm package only builds for the browser)'
     cmds:
-      - PATH="$(go env GOROOT)/lib/wasm:$PATH" GOOS=js GOARCH=wasm go test ./wasm/
+      - PATH="$(go env GOROOT)/lib/wasm:$PATH" GOOS=js GOARCH=wasm go test ./wasm/ ./
 
 ###############################################################################
 # Assets

@@ -11,6 +11,9 @@ import (
 // reports. They are not part of the Program Status Protocol specification.
 const StatusNamespace = "booba-actions"
 const MessageMarker = " | booba-actions/v1 "
+
+// MaxStatusMessageBytes is OSC 7501's decoded msg budget, including summary,
+// MessageMarker and serialized JSON (UTF-8 bytes, before base64 encoding).
 const MaxStatusMessageBytes = 2048
 const QueryProgramStatus = "\x1b]7501;?\x1b\\"
 
@@ -62,7 +65,7 @@ func EncodeProgramStatus(s Snapshot, status ProgramStatus) (string, error) {
 	}
 	message := status.Summary + MessageMarker + string(data)
 	if len(message) > MaxStatusMessageBytes {
-		return "", fmt.Errorf("action status message exceeds %d decoded bytes", MaxStatusMessageBytes)
+		return "", fmt.Errorf("action status message exceeds %d decoded bytes (got %d)", MaxStatusMessageBytes, len(message))
 	}
 	id, _ := StatusID(s.Instance)
 	body := "state=" + status.State + ":id=" + id
@@ -145,6 +148,9 @@ func DecodeProgramStatus(sequence string) (Report, error) {
 			decoded, err := base64.StdEncoding.DecodeString(value)
 			if err != nil {
 				return Report{}, fmt.Errorf("invalid OSC 7501 msg: %w", err)
+			}
+			if len(decoded) > MaxStatusMessageBytes {
+				return Report{}, fmt.Errorf("status message exceeds %d decoded bytes (got %d)", MaxStatusMessageBytes, len(decoded))
 			}
 			r.Message = string(decoded)
 		}

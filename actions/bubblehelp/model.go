@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 
 	"charm.land/bubbles/v2/help"
@@ -40,16 +41,37 @@ type Model struct {
 	lastStatus actions.ProgramStatus
 	sequence   string
 	retry      bool
+	fallback   bool
+	lastError  string
 }
 
+// NewModel strictly validates the initial action description before startup.
+// Use NewModelWithFallback when action metadata is optional.
 func NewModel(inner tea.Model, describe Describe, opts ModelOptions) (*Model, error) {
+	return newModel(inner, describe, opts, false)
+}
+
+// NewModelWithFallback keeps the application usable when its action description
+// is invalid or oversized. It publishes no actions for a failing description,
+// clears stale controls, and retries on subsequent updates. Bindings and help in
+// Inner are unchanged. OnError reports each distinct consecutive failure; when
+// unset, diagnostics go to the standard logger. Configuration errors (nil model,
+// nil callback, invalid instance) still return an error.
+func NewModelWithFallback(inner tea.Model, describe Describe, opts ModelOptions) (*Model, error) {
+	if opts.OnError == nil {
+		opts.OnError = func(err error) { log.Print(err) }
+	}
+	return newModel(inner, describe, opts, true)
+}
+
+func newModel(inner tea.Model, describe Describe, opts ModelOptions, fallback bool) (*Model, error) {
 	if inner == nil || describe == nil {
 		return nil, fmt.Errorf("model and description callback are required")
 	}
 	if opts.Instance == "" {
 		opts.Instance = rand.Text()
 	}
-	m := &Model{Inner: inner, describe: describe, options: opts, alternate: inner.View().AltScreen}
+	m := &Model{Inner: inner, describe: describe, options: opts, alternate: inner.View().AltScreen, fallback: fallback}
 	publisher, err := actions.NewPublisher(opts.Instance, func(data []byte) error {
 		var s actions.Snapshot
 		if err := json.Unmarshal(data, &s); err != nil {
@@ -69,11 +91,14 @@ func NewModel(inner tea.Model, describe Describe, opts ModelOptions) (*Model, er
 	// Validate the initial description before any terminal output is emitted.
 	description := m.describe(m.Inner)
 	snapshot, err := m.snapshot(description, 1)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		_, err = actions.EncodeProgramStatus(snapshot, m.status)
 	}
-	if _, err := actions.EncodeProgramStatus(snapshot, m.status); err != nil {
-		return nil, err
+	if err != nil {
+		if !fallback {
+			return nil, err
+		}
+		m.reportError(err)
 	}
 	return m, nil
 }
@@ -126,6 +151,7 @@ func (m *Model) publish(force bool) tea.Cmd {
 		return m.fail(err)
 	}
 	m.retry = false
+	m.lastError = ""
 	m.lastStatus = m.status
 	if m.sequence == "" {
 		return nil
@@ -148,10 +174,21 @@ func (m *Model) snapshot(description Description, revision uint64) (actions.Snap
 
 func (m *Model) fail(err error) tea.Cmd {
 	m.retry = true
-	if m.options.OnError != nil {
-		m.options.OnError(err)
-	}
+	m.reportError(err)
 	// Invalid/oversized updates must not leave previous controls actionable.
 	clear, _ := actions.ClearProgramStatus(m.options.Instance)
 	return tea.Raw(clear)
+}
+
+func (m *Model) reportError(err error) {
+	if m.fallback {
+		if m.lastError == err.Error() {
+			return
+		}
+		m.lastError = err.Error()
+		err = fmt.Errorf("booba: action publication disabled for current description; keyboard controls remain available: %w", err)
+	}
+	if m.options.OnError != nil {
+		m.options.OnError(err)
+	}
 }

@@ -51,3 +51,19 @@ it('unrelated clear does not remove current controls', () => {
  bridge.receive({...report,state:'clear',id:'other'});
  expect(controller.snapshot).not.toBeNull();
 });
+it('counts decoded UTF-8 bytes at the exact 2048-byte boundary', () => {
+ for (const prefix of ['Status', '地図 🗺']) {
+  const {controller,bridge,report,errors} = setup();
+  const payload = ACTION_MESSAGE_MARKER + JSON.stringify(snapshot);
+  const remaining = 2048 - new TextEncoder().encode(prefix + payload).length;
+  const message = prefix + payload + ' '.repeat(remaining);
+  expect(new TextEncoder().encode(message).length).toBe(2048);
+  bridge.receive({...report,message});
+  expect(controller.snapshot).not.toBeNull();
+  const stale = controller.capture('open',0);
+  bridge.receive({...report,message:message+' '});
+  expect(controller.snapshot).toBeNull();
+  expect(stale()).toBe(false);
+  expect(errors).toHaveBeenCalledTimes(1);
+ }
+});

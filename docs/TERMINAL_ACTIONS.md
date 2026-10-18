@@ -25,6 +25,68 @@ Each key in a help entry is independently selectable. An entry with up/down must
 
 The publisher has no implicit stdout side effects. Do not print JSON or escapes concurrently with Bubble Tea's renderer. The `bubblehelp.NewModel` wrapper publishes through Bubble Tea’s `tea.Raw`, queries OSC 7501 support, and refreshes the current help map when the model changes.
 
+### Optional metadata and startup
+
+`NewModel` remains a strict constructor: an invalid or oversized initial
+snapshot returns an error before `booba.Run` can start. `OnError` does not turn
+that constructor error into a fallback. In a browser this can prevent the WASM
+bridge from ever registering.
+
+For applications where the action bar is optional, use the explicit fallback:
+
+```go
+published, err := bubblehelp.NewModelWithFallback(app, describe, bubblehelp.ModelOptions{
+    OnError: func(err error) { log.Print(err) },
+})
+if err != nil {
+    return err // Invalid wrapper configuration, such as a nil model/callback or invalid instance.
+}
+return booba.Run(published)
+```
+
+For example, migrate `ntcharts-osm/examples/internal/demorun` by replacing
+`bubblehelp.NewModel` with `bubblehelp.NewModelWithFallback`; keep its existing
+`OnError` callback and error handling. Existing callers of `NewModel` retain
+strict behavior and must opt in to this change.
+
+The fallback disables **all action publication for a failing description**;
+it does not select an arbitrary subset, rewrite bindings, or truncate JSON.
+The inner model's initialization, view, updates, and keyboard commands continue
+normally in native and WASM runtimes. On a supported host, failed updates clear
+stale controls. Later updates retry, and a valid description restores the bar.
+Metadata errors (including invalid status, schema, or customization errors) are
+reported through `OnError`, or the standard logger if no callback is supplied.
+Repeated identical failures are reported once until a successful publication or
+a different failure. Route the callback to an application log or browser
+console as appropriate; it must not write escape sequences to the renderer.
+
+### Size budget and action-bar design
+
+The 2,048-byte limit is the [OSC 7501 decoded `msg` limit](https://www.superlogical.com/rex/docs/build/program-status#limits),
+not the standalone action JSON schema's 64 KiB limit. The vendored libghostty
+parser (`ghostty/src/terminal/osc/parsers/program_status.zig`) and booba's
+TypeScript action receiver enforce it; the Go receiver also rejects oversized
+messages. Raising only the producer limit would emit reports receivers reject.
+
+After `data, err := json.Marshal(snapshot)`, the budget is
+`len(summary) + len(actions.MessageMarker) + len(data)` in Go: UTF-8 **bytes**, including JSON syntax, escaped text, IDs, reference
+arrays, and revision digits. Exactly 2,048 bytes is accepted; 2,049 is rejected.
+For example, `界` costs three UTF-8 bytes. JSON escaping can cost more than the
+original text. Base64 expansion and the surrounding OSC fields are outside
+this decoded-message budget. The actual serialized snapshot is checked on each
+publication, so revision growth and changing labels or summaries count too.
+
+Keep the action bar focused on a few primary controls and a small expanded set.
+`FullHelp` controls share the same budget as `ShortHelp`; expansion is not a
+separate transmission. Keep full keyboard help in the terminal application,
+and deliberately supply a smaller advertising help map when needed. Omitting
+optional expanded controls from that map leaves their keyboard handlers intact.
+Use short labels and summaries and leave headroom for dynamic content. Do not
+collapse distinct directional keys into a single preferred alias to save space.
+A realistic map viewer with 5 primary and 13 expanded controls exceeds the
+budget even with short labels; the fallback keeps that application usable
+without claiming to offer an incomplete or altered set of bindings.
+
 ## Browser controls
 
 The standalone `ActionController` accepts host callbacks for capability checks and complete key activation. `BoobaTerminal.actions` supplies a controller connected to booba's input and connection lifecycle. Install a key encoder explicitly: the current ghostty-web Terminal API does not expose enough keyboard state to assume a general-purpose encoder. Until an encoder is installed, buttons remain disabled.
