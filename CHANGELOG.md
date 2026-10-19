@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed
+
+- OSC 52 clipboard writes now work for in-browser (wasm) programs. The wasm
+  bridge delivers output as strings, which the scanner skipped; it now scans
+  bytes and strings alike, and decodes the payload as UTF-8 so non-ASCII text
+  copies intact.
+
 ## [0.10.1] - 2026-10-18
 
 ### Terminal Actions (experimental)
