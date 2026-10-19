@@ -107,3 +107,47 @@ describe('OSC52Scanner', () => {
         expect(writeText).toHaveBeenCalledWith('Hi');
     });
 });
+
+// The wasm adapter delivers program output as strings, not bytes: the
+// scanner must find OSC 52 in either, and decode the payload as UTF-8.
+describe('OSC52Scanner on string output', () => {
+    let writeText: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+        writeText = vi.fn().mockResolvedValue(undefined);
+        vi.stubGlobal('navigator', { clipboard: { writeText } });
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it('scans a string chunk', () => {
+        const scanner = new OSC52Scanner(true);
+        scanner.scan(`\x1b]52;c;${b64('from wasm')}\x07`);
+        expect(writeText).toHaveBeenCalledWith('from wasm');
+    });
+
+    it('handles an escape split across string chunks', () => {
+        const scanner = new OSC52Scanner(true);
+        const full = `\x1b]52;c;${b64('split string')}\x07`;
+        scanner.scan(full.slice(0, 9));
+        expect(writeText).not.toHaveBeenCalled();
+        scanner.scan(full.slice(9));
+        expect(writeText).toHaveBeenCalledWith('split string');
+    });
+
+    it('decodes a UTF-8 payload from bytes and from a string', () => {
+        const scanner = new OSC52Scanner(true);
+        scanner.scan(osc52(b64('café — naïve')));
+        expect(writeText).toHaveBeenLastCalledWith('café — naïve');
+        scanner.scan(`\x1b]52;c;${b64('résumé')}\x1b\\`);
+        expect(writeText).toHaveBeenLastCalledWith('résumé');
+    });
+
+    it('ignores a payload that is not base64', () => {
+        const scanner = new OSC52Scanner(true);
+        scanner.scan('\x1b]52;c;not*base64\x07');
+        expect(writeText).not.toHaveBeenCalled();
+    });
+});

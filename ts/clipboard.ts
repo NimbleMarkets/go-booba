@@ -2,9 +2,11 @@
  * OSC 52 clipboard handler.
  *
  * Scans terminal output for OSC 52 sequences and copies decoded
- * content to the system clipboard.
+ * content to the system clipboard. Output arrives as bytes from a
+ * WebSocket and as strings from the wasm bridge; both are scanned.
  *
  * OSC 52 format: \x1b]52;c;<base64-data>\a (or \x1b\\ as terminator)
+ * The base64 payload is UTF-8 text.
  */
 
 const OSC_START = '\x1b]52;';
@@ -17,9 +19,9 @@ export class OSC52Scanner {
     constructor(private allowOSC52: boolean = false) {}
 
     /** Process a chunk of output data, extracting OSC 52 clipboard sequences. */
-    scan(data: Uint8Array): void {
+    scan(data: Uint8Array | string): void {
         if (!this.allowOSC52) return;
-        const text = new TextDecoder().decode(data);
+        const text = typeof data === 'string' ? data : new TextDecoder().decode(data);
         this.buffer += text;
 
         let startIdx: number;
@@ -43,7 +45,7 @@ export class OSC52Scanner {
                 const base64Data = payload.substring(semiIdx + 1);
                 if (base64Data.length > 0) {
                     try {
-                        const decoded = atob(base64Data);
+                        const decoded = decodeUTF8Base64(base64Data);
                         navigator.clipboard.writeText(decoded).catch(() => {});
                     } catch {
                         // Invalid base64
@@ -59,4 +61,12 @@ export class OSC52Scanner {
             this.buffer = '';
         }
     }
+}
+
+/** Decode base64 whose bytes are UTF-8 text. atob alone yields one char per byte. */
+function decodeUTF8Base64(base64Data: string): string {
+    const binary = atob(base64Data);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
 }

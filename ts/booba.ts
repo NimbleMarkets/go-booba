@@ -341,9 +341,7 @@ export class BoobaTerminal {
         adapter.connect(
             (data: string | Uint8Array) => {
                 if (this.adapter !== adapter) return;
-                if (data instanceof Uint8Array) {
-                    this.osc52Scanner.scan(data);
-                }
+                this.osc52Scanner.scan(data);
                 this.writeLiveOutput(data);
             },
             (state: BoobaConnectionState, message: string) => {
