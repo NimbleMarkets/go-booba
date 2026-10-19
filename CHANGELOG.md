@@ -8,6 +8,10 @@
   bridge delivers output as strings, which the scanner skipped; it now scans
   bytes and strings alike, and decodes the payload as UTF-8 so non-ASCII text
   copies intact.
+- Update the embedded ghostty-web to the fork build from 919b01d, which
+  reports wheel events as SGR mouse buttons when the program tracks the
+  mouse, forwards Ctrl+V and Cmd+V as 0x16 before the paste event, and
+  follows DECSCUSR cursor shapes at runtime (coder/ghostty-web#145).
 
 ## [0.10.1] - 2026-10-18
 

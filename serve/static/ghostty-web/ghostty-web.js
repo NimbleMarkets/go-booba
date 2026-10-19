@@ -1,7 +1,7 @@
 var Si = Object.defineProperty;
 var Hi = (A, I, g) => I in A ? Si(A, I, { enumerable: !0, configurable: !0, writable: !0, value: g }) : A[I] = g;
 var j = (A, I, g) => (Hi(A, typeof I != "symbol" ? I + "" : I, g), g);
-function AC(A, I = "utf8") {
+function IC(A, I = "utf8") {
   return new TextDecoder(I).decode(A);
 }
 const Yi = new TextEncoder();
@@ -11,7 +11,7 @@ function li(A) {
 const fi = 1024 * 8, Ki = (() => {
   const A = new Uint8Array(4), I = new Uint32Array(A.buffer);
   return !((I[0] = 1) & A[0]);
-})(), rQ = {
+})(), LQ = {
   int8: globalThis.Int8Array,
   uint8: globalThis.Uint8Array,
   int16: globalThis.Int16Array,
@@ -23,7 +23,7 @@ const fi = 1024 * 8, Ki = (() => {
   float32: globalThis.Float32Array,
   float64: globalThis.Float64Array
 };
-class wB {
+class oB {
   /**
    * Create a new IOBuffer.
    * @param data - The data to construct the IOBuffer with.
@@ -64,7 +64,7 @@ class wB {
     typeof I == "number" ? I = new ArrayBuffer(I) : (Q = !0, this.lastWrittenByte = I.byteLength);
     const B = g.offset ? g.offset >>> 0 : 0, C = I.byteLength - B;
     let E = B;
-    (ArrayBuffer.isView(I) || I instanceof wB) && (I.byteLength !== I.buffer.byteLength && (E = I.byteOffset + B), I = I.buffer), Q ? this.lastWrittenByte = C : this.lastWrittenByte = 0, this.buffer = I, this.length = C, this.byteLength = C, this.byteOffset = E, this.offset = 0, this.littleEndian = !0, this._data = new DataView(this.buffer, E, C), this._mark = 0, this._marks = [];
+    (ArrayBuffer.isView(I) || I instanceof oB) && (I.byteLength !== I.buffer.byteLength && (E = I.byteOffset + B), I = I.buffer), Q ? this.lastWrittenByte = C : this.lastWrittenByte = 0, this.buffer = I, this.length = C, this.byteLength = C, this.byteOffset = E, this.offset = 0, this.littleEndian = !0, this._data = new DataView(this.buffer, E, C), this._mark = 0, this._marks = [];
   }
   /**
    * Checks if the memory allocated to the buffer is sufficient to store more
@@ -231,14 +231,14 @@ class wB {
    * @returns The read array.
    */
   readArray(I, g) {
-    const Q = rQ[g].BYTES_PER_ELEMENT * I, B = this.byteOffset + this.offset, C = this.buffer.slice(B, B + Q);
+    const Q = LQ[g].BYTES_PER_ELEMENT * I, B = this.byteOffset + this.offset, C = this.buffer.slice(B, B + Q);
     if (this.littleEndian === Ki && g !== "uint8" && g !== "int8") {
       const i = new Uint8Array(this.buffer.slice(B, B + Q));
       i.reverse();
-      const o = new rQ[g](i.buffer);
+      const o = new LQ[g](i.buffer);
       return this.offset += Q, o.reverse(), o;
     }
-    const E = new rQ[g](C);
+    const E = new LQ[g](C);
     return this.offset += Q, E;
   }
   /**
@@ -330,7 +330,7 @@ class wB {
    * @returns The decoded string.
    */
   readUtf8(I = 1) {
-    return AC(this.readBytes(I));
+    return IC(this.readBytes(I));
   }
   /**
    * Read the next `n` bytes, return a string decoded with `encoding` and move pointer
@@ -341,7 +341,7 @@ class wB {
    * @returns The decoded string.
    */
   decodeText(I = 1, g = "utf8") {
-    return AC(this.readBytes(I), g);
+    return IC(this.readBytes(I), g);
   }
   /**
    * Write 0xff if the passed value is truthy, 0x00 otherwise and move pointer
@@ -515,13 +515,13 @@ class wB {
   }
 }
 /*! pako 2.1.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */
-const di = 4, IC = 0, gC = 1, Oi = 2;
+const di = 4, gC = 0, QC = 1, Oi = 2;
 function SI(A) {
   let I = A.length;
   for (; --I >= 0; )
     A[I] = 0;
 }
-const qi = 0, sE = 1, Ti = 2, xi = 3, pi = 258, oB = 29, Dg = 256, Ag = Dg + 1 + oB, JI = 30, sB = 19, tE = 2 * Ag + 1, EI = 15, RQ = 16, ui = 7, tB = 256, eE = 16, hE = 17, aE = 18, ZQ = (
+const qi = 0, tE = 1, Ti = 2, xi = 3, pi = 258, sB = 29, Dg = 256, Ag = Dg + 1 + sB, JI = 30, tB = 19, eE = 2 * Ag + 1, EI = 15, RQ = 16, ui = 7, eB = 256, hE = 16, aE = 17, NE = 18, ZQ = (
   /* extra bits for each length code */
   new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0])
 ), Og = (
@@ -530,7 +530,7 @@ const qi = 0, sE = 1, Ti = 2, xi = 3, pi = 258, oB = 29, Dg = 256, Ag = Dg + 1 +
 ), bi = (
   /* extra bits for each bit length code */
   new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7])
-), NE = new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]), mi = 512, OA = new Array((Ag + 2) * 2);
+), kE = new Uint8Array([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]), mi = 512, OA = new Array((Ag + 2) * 2);
 SI(OA);
 const zI = new Array(JI * 2);
 SI(zI);
@@ -538,29 +538,29 @@ const Ig = new Array(mi);
 SI(Ig);
 const gg = new Array(pi - xi + 1);
 SI(gg);
-const eB = new Array(oB);
-SI(eB);
+const hB = new Array(sB);
+SI(hB);
 const ug = new Array(JI);
 SI(ug);
 function yQ(A, I, g, Q, B) {
   this.static_tree = A, this.extra_bits = I, this.extra_base = g, this.elems = Q, this.max_length = B, this.has_stree = A && A.length;
 }
-let kE, ME, GE;
+let ME, GE, cE;
 function nQ(A, I) {
   this.dyn_tree = A, this.max_code = 0, this.stat_desc = I;
 }
-const cE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
+const FE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
   A.pending_buf[A.pending++] = I & 255, A.pending_buf[A.pending++] = I >>> 8 & 255;
 }, tA = (A, I, g) => {
   A.bi_valid > RQ - g ? (A.bi_buf |= I << A.bi_valid & 65535, Qg(A, A.bi_buf), A.bi_buf = I >> RQ - A.bi_valid, A.bi_valid += g - RQ) : (A.bi_buf |= I << A.bi_valid & 65535, A.bi_valid += g);
-}, yA = (A, I, g) => {
+}, nA = (A, I, g) => {
   tA(
     A,
     g[I * 2],
     g[I * 2 + 1]
     /*.Len*/
   );
-}, FE = (A, I) => {
+}, UE = (A, I) => {
   let g = 0;
   do
     g |= A & 1, A >>>= 1, g <<= 1;
@@ -573,7 +573,7 @@ const cE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
   let D, w, s, t, e, N, h = 0;
   for (t = 0; t <= EI; t++)
     A.bl_count[t] = 0;
-  for (g[A.heap[A.heap_max] * 2 + 1] = 0, D = A.heap_max + 1; D < tE; D++)
+  for (g[A.heap[A.heap_max] * 2 + 1] = 0, D = A.heap_max + 1; D < eE; D++)
     w = A.heap[D], t = g[g[w * 2 + 1] * 2 + 1] + 1, t > o && (t = o, h++), g[w * 2 + 1] = t, !(w > Q) && (A.bl_count[t]++, e = 0, w >= i && (e = E[w - i]), N = g[w * 2], A.opt_len += N * (t + e), C && (A.static_len += N * (B[w * 2 + 1] + e)));
   if (h !== 0) {
     do {
@@ -585,20 +585,20 @@ const cE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
       for (w = A.bl_count[t]; w !== 0; )
         s = A.heap[--D], !(s > Q) && (g[s * 2 + 1] !== t && (A.opt_len += (t - g[s * 2 + 1]) * g[s * 2], g[s * 2 + 1] = t), w--);
   }
-}, UE = (A, I, g) => {
+}, JE = (A, I, g) => {
   const Q = new Array(EI + 1);
   let B = 0, C, E;
   for (C = 1; C <= EI; C++)
     B = B + g[C - 1] << 1, Q[C] = B;
   for (E = 0; E <= I; E++) {
     let i = A[E * 2 + 1];
-    i !== 0 && (A[E * 2] = FE(Q[i]++, i));
+    i !== 0 && (A[E * 2] = UE(Q[i]++, i));
   }
 }, Vi = () => {
   let A, I, g, Q, B;
   const C = new Array(EI + 1);
-  for (g = 0, Q = 0; Q < oB - 1; Q++)
-    for (eB[Q] = g, A = 0; A < 1 << ZQ[Q]; A++)
+  for (g = 0, Q = 0; Q < sB - 1; Q++)
+    for (hB[Q] = g, A = 0; A < 1 << ZQ[Q]; A++)
       gg[g++] = Q;
   for (gg[g - 1] = Q, B = 0, Q = 0; Q < 16; Q++)
     for (ug[Q] = B, A = 0; A < 1 << Og[Q]; A++)
@@ -616,40 +616,40 @@ const cE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
     OA[A * 2 + 1] = 7, A++, C[7]++;
   for (; A <= 287; )
     OA[A * 2 + 1] = 8, A++, C[8]++;
-  for (UE(OA, Ag + 1, C), A = 0; A < JI; A++)
-    zI[A * 2 + 1] = 5, zI[A * 2] = FE(A, 5);
-  kE = new yQ(OA, ZQ, Dg + 1, Ag, EI), ME = new yQ(zI, Og, 0, JI, EI), GE = new yQ(new Array(0), bi, 0, sB, ui);
-}, JE = (A) => {
+  for (JE(OA, Ag + 1, C), A = 0; A < JI; A++)
+    zI[A * 2 + 1] = 5, zI[A * 2] = UE(A, 5);
+  ME = new yQ(OA, ZQ, Dg + 1, Ag, EI), GE = new yQ(zI, Og, 0, JI, EI), cE = new yQ(new Array(0), bi, 0, tB, ui);
+}, rE = (A) => {
   let I;
   for (I = 0; I < Ag; I++)
     A.dyn_ltree[I * 2] = 0;
   for (I = 0; I < JI; I++)
     A.dyn_dtree[I * 2] = 0;
-  for (I = 0; I < sB; I++)
+  for (I = 0; I < tB; I++)
     A.bl_tree[I * 2] = 0;
-  A.dyn_ltree[tB * 2] = 1, A.opt_len = A.static_len = 0, A.sym_next = A.matches = 0;
+  A.dyn_ltree[eB * 2] = 1, A.opt_len = A.static_len = 0, A.sym_next = A.matches = 0;
 }, LE = (A) => {
   A.bi_valid > 8 ? Qg(A, A.bi_buf) : A.bi_valid > 0 && (A.pending_buf[A.pending++] = A.bi_buf), A.bi_buf = 0, A.bi_valid = 0;
-}, QC = (A, I, g, Q) => {
+}, BC = (A, I, g, Q) => {
   const B = I * 2, C = g * 2;
   return A[B] < A[C] || A[B] === A[C] && Q[I] <= Q[g];
 }, SQ = (A, I, g) => {
   const Q = A.heap[g];
   let B = g << 1;
-  for (; B <= A.heap_len && (B < A.heap_len && QC(I, A.heap[B + 1], A.heap[B], A.depth) && B++, !QC(I, Q, A.heap[B], A.depth)); )
+  for (; B <= A.heap_len && (B < A.heap_len && BC(I, A.heap[B + 1], A.heap[B], A.depth) && B++, !BC(I, Q, A.heap[B], A.depth)); )
     A.heap[g] = A.heap[B], g = B, B <<= 1;
   A.heap[g] = Q;
-}, BC = (A, I, g) => {
+}, CC = (A, I, g) => {
   let Q, B, C = 0, E, i;
   if (A.sym_next !== 0)
     do
-      Q = A.pending_buf[A.sym_buf + C++] & 255, Q += (A.pending_buf[A.sym_buf + C++] & 255) << 8, B = A.pending_buf[A.sym_buf + C++], Q === 0 ? yA(A, B, I) : (E = gg[B], yA(A, E + Dg + 1, I), i = ZQ[E], i !== 0 && (B -= eB[E], tA(A, B, i)), Q--, E = cE(Q), yA(A, E, g), i = Og[E], i !== 0 && (Q -= ug[E], tA(A, Q, i)));
+      Q = A.pending_buf[A.sym_buf + C++] & 255, Q += (A.pending_buf[A.sym_buf + C++] & 255) << 8, B = A.pending_buf[A.sym_buf + C++], Q === 0 ? nA(A, B, I) : (E = gg[B], nA(A, E + Dg + 1, I), i = ZQ[E], i !== 0 && (B -= hB[E], tA(A, B, i)), Q--, E = FE(Q), nA(A, E, g), i = Og[E], i !== 0 && (Q -= ug[E], tA(A, Q, i)));
     while (C < A.sym_next);
-  yA(A, tB, I);
+  nA(A, eB, I);
 }, XQ = (A, I) => {
   const g = I.dyn_tree, Q = I.stat_desc.static_tree, B = I.stat_desc.has_stree, C = I.stat_desc.elems;
   let E, i, o = -1, D;
-  for (A.heap_len = 0, A.heap_max = tE, E = 0; E < C; E++)
+  for (A.heap_len = 0, A.heap_max = eE, E = 0; E < C; E++)
     g[E * 2] !== 0 ? (A.heap[++A.heap_len] = o = E, A.depth[E] = 0) : g[E * 2 + 1] = 0;
   for (; A.heap_len < 2; )
     D = A.heap[++A.heap_len] = o < 2 ? ++o : 0, g[D * 2] = 1, A.depth[D] = 0, A.opt_len--, B && (A.static_len -= Q[D * 2 + 1]);
@@ -684,57 +684,57 @@ const cE = (A) => A < 256 ? Ig[A] : Ig[256 + (A >>> 7)], Qg = (A, I) => {
   A.heap[--A.heap_max] = A.heap[
     1
     /*SMALLEST*/
-  ], ji(A, I), UE(g, o, A.bl_count);
-}, CC = (A, I, g) => {
+  ], ji(A, I), JE(g, o, A.bl_count);
+}, EC = (A, I, g) => {
   let Q, B = -1, C, E = I[0 * 2 + 1], i = 0, o = 7, D = 4;
   for (E === 0 && (o = 138, D = 3), I[(g + 1) * 2 + 1] = 65535, Q = 0; Q <= g; Q++)
-    C = E, E = I[(Q + 1) * 2 + 1], !(++i < o && C === E) && (i < D ? A.bl_tree[C * 2] += i : C !== 0 ? (C !== B && A.bl_tree[C * 2]++, A.bl_tree[eE * 2]++) : i <= 10 ? A.bl_tree[hE * 2]++ : A.bl_tree[aE * 2]++, i = 0, B = C, E === 0 ? (o = 138, D = 3) : C === E ? (o = 6, D = 3) : (o = 7, D = 4));
-}, EC = (A, I, g) => {
+    C = E, E = I[(Q + 1) * 2 + 1], !(++i < o && C === E) && (i < D ? A.bl_tree[C * 2] += i : C !== 0 ? (C !== B && A.bl_tree[C * 2]++, A.bl_tree[hE * 2]++) : i <= 10 ? A.bl_tree[aE * 2]++ : A.bl_tree[NE * 2]++, i = 0, B = C, E === 0 ? (o = 138, D = 3) : C === E ? (o = 6, D = 3) : (o = 7, D = 4));
+}, iC = (A, I, g) => {
   let Q, B = -1, C, E = I[0 * 2 + 1], i = 0, o = 7, D = 4;
   for (E === 0 && (o = 138, D = 3), Q = 0; Q <= g; Q++)
     if (C = E, E = I[(Q + 1) * 2 + 1], !(++i < o && C === E)) {
       if (i < D)
         do
-          yA(A, C, A.bl_tree);
+          nA(A, C, A.bl_tree);
         while (--i !== 0);
       else
-        C !== 0 ? (C !== B && (yA(A, C, A.bl_tree), i--), yA(A, eE, A.bl_tree), tA(A, i - 3, 2)) : i <= 10 ? (yA(A, hE, A.bl_tree), tA(A, i - 3, 3)) : (yA(A, aE, A.bl_tree), tA(A, i - 11, 7));
+        C !== 0 ? (C !== B && (nA(A, C, A.bl_tree), i--), nA(A, hE, A.bl_tree), tA(A, i - 3, 2)) : i <= 10 ? (nA(A, aE, A.bl_tree), tA(A, i - 3, 3)) : (nA(A, NE, A.bl_tree), tA(A, i - 11, 7));
       i = 0, B = C, E === 0 ? (o = 138, D = 3) : C === E ? (o = 6, D = 3) : (o = 7, D = 4);
     }
 }, Zi = (A) => {
   let I;
-  for (CC(A, A.dyn_ltree, A.l_desc.max_code), CC(A, A.dyn_dtree, A.d_desc.max_code), XQ(A, A.bl_desc), I = sB - 1; I >= 3 && A.bl_tree[NE[I] * 2 + 1] === 0; I--)
+  for (EC(A, A.dyn_ltree, A.l_desc.max_code), EC(A, A.dyn_dtree, A.d_desc.max_code), XQ(A, A.bl_desc), I = tB - 1; I >= 3 && A.bl_tree[kE[I] * 2 + 1] === 0; I--)
     ;
   return A.opt_len += 3 * (I + 1) + 5 + 5 + 4, I;
 }, Xi = (A, I, g, Q) => {
   let B;
   for (tA(A, I - 257, 5), tA(A, g - 1, 5), tA(A, Q - 4, 4), B = 0; B < Q; B++)
-    tA(A, A.bl_tree[NE[B] * 2 + 1], 3);
-  EC(A, A.dyn_ltree, I - 1), EC(A, A.dyn_dtree, g - 1);
+    tA(A, A.bl_tree[kE[B] * 2 + 1], 3);
+  iC(A, A.dyn_ltree, I - 1), iC(A, A.dyn_dtree, g - 1);
 }, vi = (A) => {
   let I = 4093624447, g;
   for (g = 0; g <= 31; g++, I >>>= 1)
     if (I & 1 && A.dyn_ltree[g * 2] !== 0)
-      return IC;
+      return gC;
   if (A.dyn_ltree[9 * 2] !== 0 || A.dyn_ltree[10 * 2] !== 0 || A.dyn_ltree[13 * 2] !== 0)
-    return gC;
+    return QC;
   for (g = 32; g < Dg; g++)
     if (A.dyn_ltree[g * 2] !== 0)
-      return gC;
-  return IC;
+      return QC;
+  return gC;
 };
-let iC = !1;
+let DC = !1;
 const zi = (A) => {
-  iC || (Vi(), iC = !0), A.l_desc = new nQ(A.dyn_ltree, kE), A.d_desc = new nQ(A.dyn_dtree, ME), A.bl_desc = new nQ(A.bl_tree, GE), A.bi_buf = 0, A.bi_valid = 0, JE(A);
-}, rE = (A, I, g, Q) => {
+  DC || (Vi(), DC = !0), A.l_desc = new nQ(A.dyn_ltree, ME), A.d_desc = new nQ(A.dyn_dtree, GE), A.bl_desc = new nQ(A.bl_tree, cE), A.bi_buf = 0, A.bi_valid = 0, rE(A);
+}, RE = (A, I, g, Q) => {
   tA(A, (qi << 1) + (Q ? 1 : 0), 3), LE(A), Qg(A, g), Qg(A, ~g), g && A.pending_buf.set(A.window.subarray(I, I + g), A.pending), A.pending += g;
 }, Wi = (A) => {
-  tA(A, sE << 1, 3), yA(A, tB, OA), Pi(A);
+  tA(A, tE << 1, 3), nA(A, eB, OA), Pi(A);
 }, _i = (A, I, g, Q) => {
   let B, C, E = 0;
-  A.level > 0 ? (A.strm.data_type === Oi && (A.strm.data_type = vi(A)), XQ(A, A.l_desc), XQ(A, A.d_desc), E = Zi(A), B = A.opt_len + 3 + 7 >>> 3, C = A.static_len + 3 + 7 >>> 3, C <= B && (B = C)) : B = C = g + 5, g + 4 <= B && I !== -1 ? rE(A, I, g, Q) : A.strategy === di || C === B ? (tA(A, (sE << 1) + (Q ? 1 : 0), 3), BC(A, OA, zI)) : (tA(A, (Ti << 1) + (Q ? 1 : 0), 3), Xi(A, A.l_desc.max_code + 1, A.d_desc.max_code + 1, E + 1), BC(A, A.dyn_ltree, A.dyn_dtree)), JE(A), Q && LE(A);
-}, $i = (A, I, g) => (A.pending_buf[A.sym_buf + A.sym_next++] = I, A.pending_buf[A.sym_buf + A.sym_next++] = I >> 8, A.pending_buf[A.sym_buf + A.sym_next++] = g, I === 0 ? A.dyn_ltree[g * 2]++ : (A.matches++, I--, A.dyn_ltree[(gg[g] + Dg + 1) * 2]++, A.dyn_dtree[cE(I) * 2]++), A.sym_next === A.sym_end);
-var AD = zi, ID = rE, gD = _i, QD = $i, BD = Wi, CD = {
+  A.level > 0 ? (A.strm.data_type === Oi && (A.strm.data_type = vi(A)), XQ(A, A.l_desc), XQ(A, A.d_desc), E = Zi(A), B = A.opt_len + 3 + 7 >>> 3, C = A.static_len + 3 + 7 >>> 3, C <= B && (B = C)) : B = C = g + 5, g + 4 <= B && I !== -1 ? RE(A, I, g, Q) : A.strategy === di || C === B ? (tA(A, (tE << 1) + (Q ? 1 : 0), 3), CC(A, OA, zI)) : (tA(A, (Ti << 1) + (Q ? 1 : 0), 3), Xi(A, A.l_desc.max_code + 1, A.d_desc.max_code + 1, E + 1), CC(A, A.dyn_ltree, A.dyn_dtree)), rE(A), Q && LE(A);
+}, $i = (A, I, g) => (A.pending_buf[A.sym_buf + A.sym_next++] = I, A.pending_buf[A.sym_buf + A.sym_next++] = I >> 8, A.pending_buf[A.sym_buf + A.sym_next++] = g, I === 0 ? A.dyn_ltree[g * 2]++ : (A.matches++, I--, A.dyn_ltree[(gg[g] + Dg + 1) * 2]++, A.dyn_dtree[FE(I) * 2]++), A.sym_next === A.sym_end);
+var AD = zi, ID = RE, gD = _i, QD = $i, BD = Wi, CD = {
   _tr_init: AD,
   _tr_stored_block: ID,
   _tr_flush_block: gD,
@@ -833,10 +833,10 @@ const { _tr_init: oD, _tr_stored_block: vQ, _tr_flush_block: sD, _tr_tally: zA, 
   Z_PARTIAL_FLUSH: eD,
   Z_FULL_FLUSH: hD,
   Z_FINISH: GA,
-  Z_BLOCK: DC,
+  Z_BLOCK: wC,
   Z_OK: iA,
-  Z_STREAM_END: wC,
-  Z_STREAM_ERROR: nA,
+  Z_STREAM_END: oC,
+  Z_STREAM_ERROR: SA,
   Z_DATA_ERROR: aD,
   Z_BUF_ERROR: HQ,
   Z_DEFAULT_COMPRESSION: ND,
@@ -847,7 +847,7 @@ const { _tr_init: oD, _tr_stored_block: vQ, _tr_flush_block: sD, _tr_tally: zA, 
   Z_DEFAULT_STRATEGY: cD,
   Z_UNKNOWN: FD,
   Z_DEFLATED: Vg
-} = wg, UD = 9, JD = 15, LD = 8, rD = 29, RD = 256, zQ = RD + 1 + rD, yD = 30, nD = 19, SD = 2 * zQ + 1, HD = 15, p = 3, vA = 258, SA = vA + p + 1, YD = 32, yI = 42, hB = 57, WQ = 69, _Q = 73, $Q = 91, AB = 103, iI = 113, jI = 666, wA = 1, HI = 2, wI = 3, YI = 4, lD = 3, DI = (A, I) => (A.msg = RI[I], I), oC = (A) => A * 2 - (A > 4 ? 9 : 0), XA = (A) => {
+} = wg, UD = 9, JD = 15, rD = 8, LD = 29, RD = 256, zQ = RD + 1 + LD, yD = 30, nD = 19, SD = 2 * zQ + 1, HD = 15, p = 3, vA = 258, HA = vA + p + 1, YD = 32, yI = 42, aB = 57, WQ = 69, _Q = 73, $Q = 91, AB = 103, iI = 113, jI = 666, wA = 1, HI = 2, wI = 3, YI = 4, lD = 3, DI = (A, I) => (A.msg = RI[I], I), sC = (A) => A * 2 - (A > 4 ? 9 : 0), XA = (A) => {
   let I = A.length;
   for (; --I >= 0; )
     A[I] = 0;
@@ -876,9 +876,9 @@ const NA = (A) => {
 }, IB = (A, I, g, Q) => {
   let B = A.avail_in;
   return B > Q && (B = Q), B === 0 ? 0 : (A.avail_in -= B, I.set(A.input.subarray(A.next_in, A.next_in + B), g), A.state.wrap === 1 ? A.adler = Bg(A.adler, I, B, g) : A.state.wrap === 2 && (A.adler = gA(A.adler, I, B, g)), A.next_in += B, A.total_in += B, B);
-}, RE = (A, I) => {
+}, yE = (A, I) => {
   let g = A.max_chain_length, Q = A.strstart, B, C, E = A.prev_length, i = A.nice_match;
-  const o = A.strstart > A.w_size - SA ? A.strstart - (A.w_size - SA) : 0, D = A.window, w = A.w_mask, s = A.prev, t = A.strstart + vA;
+  const o = A.strstart > A.w_size - HA ? A.strstart - (A.w_size - HA) : 0, D = A.window, w = A.w_mask, s = A.prev, t = A.strstart + vA;
   let e = D[Q + E - 1], N = D[Q + E];
   A.prev_length >= A.good_match && (g >>= 2), i > A.lookahead && (i = A.lookahead);
   do
@@ -899,13 +899,13 @@ const NA = (A) => {
   const I = A.w_size;
   let g, Q, B;
   do {
-    if (Q = A.window_size - A.lookahead - A.strstart, A.strstart >= I + (I - SA) && (A.window.set(A.window.subarray(I, I + I - Q), 0), A.match_start -= I, A.strstart -= I, A.block_start -= I, A.insert > A.strstart && (A.insert = A.strstart), fD(A), Q += I), A.strm.avail_in === 0)
+    if (Q = A.window_size - A.lookahead - A.strstart, A.strstart >= I + (I - HA) && (A.window.set(A.window.subarray(I, I + I - Q), 0), A.match_start -= I, A.strstart -= I, A.block_start -= I, A.insert > A.strstart && (A.insert = A.strstart), fD(A), Q += I), A.strm.avail_in === 0)
       break;
     if (g = IB(A.strm, A.window, A.strstart + A.lookahead, Q), A.lookahead += g, A.lookahead + A.insert >= p)
       for (B = A.strstart - A.insert, A.ins_h = A.window[B], A.ins_h = _A(A, A.ins_h, A.window[B + 1]); A.insert && (A.ins_h = _A(A, A.ins_h, A.window[B + p - 1]), A.prev[B & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = B, B++, A.insert--, !(A.lookahead + A.insert < p)); )
         ;
-  } while (A.lookahead < SA && A.strm.avail_in !== 0);
-}, yE = (A, I) => {
+  } while (A.lookahead < HA && A.strm.avail_in !== 0);
+}, nE = (A, I) => {
   let g = A.pending_buf_size - 5 > A.w_size ? A.w_size : A.pending_buf_size - 5, Q, B, C, E = 0, i = A.strm.avail_in;
   do {
     if (Q = 65535, C = A.bi_valid + 42 >> 3, A.strm.avail_out < C || (C = A.strm.avail_out - C, B = A.strstart - A.block_start, Q > B + A.strm.avail_in && (Q = B + A.strm.avail_in), Q > C && (Q = C), Q < g && (Q === 0 && I !== GA || I === WA || Q !== B + A.strm.avail_in)))
@@ -916,13 +916,13 @@ const NA = (A) => {
 }, YQ = (A, I) => {
   let g, Q;
   for (; ; ) {
-    if (A.lookahead < SA) {
-      if (nI(A), A.lookahead < SA && I === WA)
+    if (A.lookahead < HA) {
+      if (nI(A), A.lookahead < HA && I === WA)
         return wA;
       if (A.lookahead === 0)
         break;
     }
-    if (g = 0, A.lookahead >= p && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart), g !== 0 && A.strstart - g <= A.w_size - SA && (A.match_length = RE(A, g)), A.match_length >= p)
+    if (g = 0, A.lookahead >= p && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart), g !== 0 && A.strstart - g <= A.w_size - HA && (A.match_length = yE(A, g)), A.match_length >= p)
       if (Q = zA(A, A.strstart - A.match_start, A.match_length - p), A.lookahead -= A.match_length, A.match_length <= A.max_lazy_match && A.lookahead >= p) {
         A.match_length--;
         do
@@ -940,13 +940,13 @@ const NA = (A) => {
 }, GI = (A, I) => {
   let g, Q, B;
   for (; ; ) {
-    if (A.lookahead < SA) {
-      if (nI(A), A.lookahead < SA && I === WA)
+    if (A.lookahead < HA) {
+      if (nI(A), A.lookahead < HA && I === WA)
         return wA;
       if (A.lookahead === 0)
         break;
     }
-    if (g = 0, A.lookahead >= p && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart), A.prev_length = A.match_length, A.prev_match = A.match_start, A.match_length = p - 1, g !== 0 && A.prev_length < A.max_lazy_match && A.strstart - g <= A.w_size - SA && (A.match_length = RE(A, g), A.match_length <= 5 && (A.strategy === kD || A.match_length === p && A.strstart - A.match_start > 4096) && (A.match_length = p - 1)), A.prev_length >= p && A.match_length <= A.prev_length) {
+    if (g = 0, A.lookahead >= p && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart), A.prev_length = A.match_length, A.prev_match = A.match_start, A.match_length = p - 1, g !== 0 && A.prev_length < A.max_lazy_match && A.strstart - g <= A.w_size - HA && (A.match_length = yE(A, g), A.match_length <= 5 && (A.strategy === kD || A.match_length === p && A.strstart - A.match_start > 4096) && (A.match_length = p - 1)), A.prev_length >= p && A.match_length <= A.prev_length) {
       B = A.strstart + A.lookahead - p, Q = zA(A, A.strstart - 1 - A.prev_match, A.prev_length - p), A.lookahead -= A.prev_length - 1, A.prev_length -= 2;
       do
         ++A.strstart <= B && (A.ins_h = _A(A, A.ins_h, A.window[A.strstart + p - 1]), g = A.prev[A.strstart & A.w_mask] = A.head[A.ins_h], A.head[A.ins_h] = A.strstart);
@@ -999,7 +999,7 @@ function RA(A, I, g, Q, B) {
 }
 const VI = [
   /*      good lazy nice chain */
-  new RA(0, 0, 0, 0, yE),
+  new RA(0, 0, 0, 0, nE),
   /* 0 store only */
   new RA(4, 4, 8, 4, YQ),
   /* 1 max speed, no lazy matches */
@@ -1030,41 +1030,41 @@ const og = (A) => {
     return 1;
   const I = A.state;
   return !I || I.strm !== A || I.status !== yI && //#ifdef GZIP
-  I.status !== hB && //#endif
+  I.status !== aB && //#endif
   I.status !== WQ && I.status !== _Q && I.status !== $Q && I.status !== AB && I.status !== iI && I.status !== jI ? 1 : 0;
-}, nE = (A) => {
+}, SE = (A) => {
   if (og(A))
-    return DI(A, nA);
+    return DI(A, SA);
   A.total_in = A.total_out = 0, A.data_type = FD;
   const I = A.state;
   return I.pending = 0, I.pending_out = 0, I.wrap < 0 && (I.wrap = -I.wrap), I.status = //#ifdef GZIP
-  I.wrap === 2 ? hB : (
+  I.wrap === 2 ? aB : (
     //#endif
     I.wrap ? yI : iI
   ), A.adler = I.wrap === 2 ? 0 : 1, I.last_flush = -2, oD(I), iA;
-}, SE = (A) => {
-  const I = nE(A);
+}, HE = (A) => {
+  const I = SE(A);
   return I === iA && qD(A.state), I;
-}, xD = (A, I) => og(A) || A.state.wrap !== 2 ? nA : (A.state.gzhead = I, iA), HE = (A, I, g, Q, B, C) => {
+}, xD = (A, I) => og(A) || A.state.wrap !== 2 ? SA : (A.state.gzhead = I, iA), YE = (A, I, g, Q, B, C) => {
   if (!A)
-    return nA;
+    return SA;
   let E = 1;
   if (I === ND && (I = 6), Q < 0 ? (E = 0, Q = -Q) : Q > 15 && (E = 2, Q -= 16), B < 1 || B > UD || g !== Vg || Q < 8 || Q > 15 || I < 0 || I > 9 || C < 0 || C > GD || Q === 8 && E !== 1)
-    return DI(A, nA);
+    return DI(A, SA);
   Q === 8 && (Q = 9);
   const i = new TD();
-  return A.state = i, i.strm = A, i.status = yI, i.wrap = E, i.gzhead = null, i.w_bits = Q, i.w_size = 1 << i.w_bits, i.w_mask = i.w_size - 1, i.hash_bits = B + 7, i.hash_size = 1 << i.hash_bits, i.hash_mask = i.hash_size - 1, i.hash_shift = ~~((i.hash_bits + p - 1) / p), i.window = new Uint8Array(i.w_size * 2), i.head = new Uint16Array(i.hash_size), i.prev = new Uint16Array(i.w_size), i.lit_bufsize = 1 << B + 6, i.pending_buf_size = i.lit_bufsize * 4, i.pending_buf = new Uint8Array(i.pending_buf_size), i.sym_buf = i.lit_bufsize, i.sym_end = (i.lit_bufsize - 1) * 3, i.level = I, i.strategy = C, i.method = g, SE(A);
-}, pD = (A, I) => HE(A, I, Vg, JD, LD, cD), uD = (A, I) => {
-  if (og(A) || I > DC || I < 0)
-    return A ? DI(A, nA) : nA;
+  return A.state = i, i.strm = A, i.status = yI, i.wrap = E, i.gzhead = null, i.w_bits = Q, i.w_size = 1 << i.w_bits, i.w_mask = i.w_size - 1, i.hash_bits = B + 7, i.hash_size = 1 << i.hash_bits, i.hash_mask = i.hash_size - 1, i.hash_shift = ~~((i.hash_bits + p - 1) / p), i.window = new Uint8Array(i.w_size * 2), i.head = new Uint16Array(i.hash_size), i.prev = new Uint16Array(i.w_size), i.lit_bufsize = 1 << B + 6, i.pending_buf_size = i.lit_bufsize * 4, i.pending_buf = new Uint8Array(i.pending_buf_size), i.sym_buf = i.lit_bufsize, i.sym_end = (i.lit_bufsize - 1) * 3, i.level = I, i.strategy = C, i.method = g, HE(A);
+}, pD = (A, I) => YE(A, I, Vg, JD, rD, cD), uD = (A, I) => {
+  if (og(A) || I > wC || I < 0)
+    return A ? DI(A, SA) : SA;
   const g = A.state;
   if (!A.output || A.avail_in !== 0 && !A.input || g.status === jI && I !== GA)
-    return DI(A, A.avail_out === 0 ? HQ : nA);
+    return DI(A, A.avail_out === 0 ? HQ : SA);
   const Q = g.last_flush;
   if (g.last_flush = I, g.pending !== 0) {
     if (NA(A), A.avail_out === 0)
       return g.last_flush = -1, iA;
-  } else if (A.avail_in === 0 && oC(I) <= oC(Q) && I !== GA)
+  } else if (A.avail_in === 0 && sC(I) <= sC(Q) && I !== GA)
     return DI(A, HQ);
   if (g.status === jI && A.avail_in !== 0)
     return DI(A, HQ);
@@ -1073,7 +1073,7 @@ const og = (A) => {
     if (g.strategy >= Sg || g.level < 2 ? C = 0 : g.level < 6 ? C = 1 : g.level === 6 ? C = 2 : C = 3, B |= C << 6, g.strstart !== 0 && (B |= YD), B += 31 - B % 31, mI(g, B), g.strstart !== 0 && (mI(g, A.adler >>> 16), mI(g, A.adler & 65535)), A.adler = 1, g.status = iI, NA(A), g.pending !== 0)
       return g.last_flush = -1, iA;
   }
-  if (g.status === hB) {
+  if (g.status === aB) {
     if (A.adler = 0, b(g, 31), b(g, 139), b(g, 8), g.gzhead)
       b(
         g,
@@ -1136,25 +1136,25 @@ const og = (A) => {
       return g.last_flush = -1, iA;
   }
   if (A.avail_in !== 0 || g.lookahead !== 0 || I !== WA && g.status !== jI) {
-    let B = g.level === 0 ? yE(g, I) : g.strategy === Sg ? OD(g, I) : g.strategy === MD ? dD(g, I) : VI[g.level].func(g, I);
+    let B = g.level === 0 ? nE(g, I) : g.strategy === Sg ? OD(g, I) : g.strategy === MD ? dD(g, I) : VI[g.level].func(g, I);
     if ((B === wI || B === YI) && (g.status = jI), B === wA || B === wI)
       return A.avail_out === 0 && (g.last_flush = -1), iA;
-    if (B === HI && (I === eD ? tD(g) : I !== DC && (vQ(g, 0, 0, !1), I === hD && (XA(g.head), g.lookahead === 0 && (g.strstart = 0, g.block_start = 0, g.insert = 0))), NA(A), A.avail_out === 0))
+    if (B === HI && (I === eD ? tD(g) : I !== wC && (vQ(g, 0, 0, !1), I === hD && (XA(g.head), g.lookahead === 0 && (g.strstart = 0, g.block_start = 0, g.insert = 0))), NA(A), A.avail_out === 0))
       return g.last_flush = -1, iA;
   }
-  return I !== GA ? iA : g.wrap <= 0 ? wC : (g.wrap === 2 ? (b(g, A.adler & 255), b(g, A.adler >> 8 & 255), b(g, A.adler >> 16 & 255), b(g, A.adler >> 24 & 255), b(g, A.total_in & 255), b(g, A.total_in >> 8 & 255), b(g, A.total_in >> 16 & 255), b(g, A.total_in >> 24 & 255)) : (mI(g, A.adler >>> 16), mI(g, A.adler & 65535)), NA(A), g.wrap > 0 && (g.wrap = -g.wrap), g.pending !== 0 ? iA : wC);
+  return I !== GA ? iA : g.wrap <= 0 ? oC : (g.wrap === 2 ? (b(g, A.adler & 255), b(g, A.adler >> 8 & 255), b(g, A.adler >> 16 & 255), b(g, A.adler >> 24 & 255), b(g, A.total_in & 255), b(g, A.total_in >> 8 & 255), b(g, A.total_in >> 16 & 255), b(g, A.total_in >> 24 & 255)) : (mI(g, A.adler >>> 16), mI(g, A.adler & 65535)), NA(A), g.wrap > 0 && (g.wrap = -g.wrap), g.pending !== 0 ? iA : oC);
 }, bD = (A) => {
   if (og(A))
-    return nA;
+    return SA;
   const I = A.state.status;
   return A.state = null, I === iI ? DI(A, aD) : iA;
 }, mD = (A, I) => {
   let g = I.length;
   if (og(A))
-    return nA;
+    return SA;
   const Q = A.state, B = Q.wrap;
   if (B === 2 || B === 1 && Q.status !== yI || Q.lookahead)
-    return nA;
+    return SA;
   if (B === 1 && (A.adler = Bg(A.adler, I, g, 0)), Q.wrap = 0, g >= Q.w_size) {
     B === 0 && (XA(Q.head), Q.strstart = 0, Q.block_start = 0, Q.insert = 0);
     let o = new Uint8Array(Q.w_size);
@@ -1170,7 +1170,7 @@ const og = (A) => {
   }
   return Q.strstart += Q.lookahead, Q.block_start = Q.strstart, Q.insert = Q.lookahead, Q.lookahead = 0, Q.match_length = Q.prev_length = p - 1, Q.match_available = 0, A.next_in = E, A.input = i, A.avail_in = C, Q.wrap = B, iA;
 };
-var PD = pD, jD = HE, VD = SE, ZD = nE, XD = xD, vD = uD, zD = bD, WD = mD, _D = "pako deflate (from Nodeca project)", WI = {
+var PD = pD, jD = YE, VD = HE, ZD = SE, XD = xD, vD = uD, zD = bD, WD = mD, _D = "pako deflate (from Nodeca project)", WI = {
   deflateInit: PD,
   deflateInit2: jD,
   deflateReset: VD,
@@ -1208,11 +1208,11 @@ var Aw = function(A) {
   assign: Aw,
   flattenChunks: Iw
 };
-let YE = !0;
+let lE = !0;
 try {
   String.fromCharCode.apply(null, new Uint8Array(1));
 } catch {
-  YE = !1;
+  lE = !1;
 }
 const Cg = new Uint8Array(256);
 for (let A = 0; A < 256; A++)
@@ -1229,7 +1229,7 @@ var gw = (A) => {
   return I;
 };
 const Qw = (A, I) => {
-  if (I < 65534 && A.subarray && YE)
+  if (I < 65534 && A.subarray && lE)
     return String.fromCharCode.apply(null, A.length === I ? A : A.subarray(0, I));
   let g = "";
   for (let Q = 0; Q < I; Q++)
@@ -1276,8 +1276,8 @@ var Bw = (A, I) => {
 function Ew() {
   this.input = null, this.next_in = 0, this.avail_in = 0, this.total_in = 0, this.output = null, this.next_out = 0, this.avail_out = 0, this.total_out = 0, this.msg = "", this.state = null, this.data_type = 2, this.adler = 0;
 }
-var lE = Ew;
-const fE = Object.prototype.toString, {
+var fE = Ew;
+const KE = Object.prototype.toString, {
   Z_NO_FLUSH: iw,
   Z_SYNC_FLUSH: Dw,
   Z_FULL_FLUSH: ww,
@@ -1288,7 +1288,7 @@ const fE = Object.prototype.toString, {
   Z_DEFAULT_STRATEGY: ew,
   Z_DEFLATED: hw
 } = wg;
-function aB(A) {
+function NB(A) {
   this.options = Zg.assign({
     level: tw,
     method: hw,
@@ -1298,7 +1298,7 @@ function aB(A) {
     strategy: ew
   }, A || {});
   let I = this.options;
-  I.raw && I.windowBits > 0 ? I.windowBits = -I.windowBits : I.gzip && I.windowBits > 0 && I.windowBits < 16 && (I.windowBits += 16), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new lE(), this.strm.avail_out = 0;
+  I.raw && I.windowBits > 0 ? I.windowBits = -I.windowBits : I.gzip && I.windowBits > 0 && I.windowBits < 16 && (I.windowBits += 16), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new fE(), this.strm.avail_out = 0;
   let g = WI.deflateInit2(
     this.strm,
     I.level,
@@ -1311,17 +1311,17 @@ function aB(A) {
     throw new Error(RI[g]);
   if (I.header && WI.deflateSetHeader(this.strm, I.header), I.dictionary) {
     let Q;
-    if (typeof I.dictionary == "string" ? Q = Eg.string2buf(I.dictionary) : fE.call(I.dictionary) === "[object ArrayBuffer]" ? Q = new Uint8Array(I.dictionary) : Q = I.dictionary, g = WI.deflateSetDictionary(this.strm, Q), g !== bg)
+    if (typeof I.dictionary == "string" ? Q = Eg.string2buf(I.dictionary) : KE.call(I.dictionary) === "[object ArrayBuffer]" ? Q = new Uint8Array(I.dictionary) : Q = I.dictionary, g = WI.deflateSetDictionary(this.strm, Q), g !== bg)
       throw new Error(RI[g]);
     this._dict_set = !0;
   }
 }
-aB.prototype.push = function(A, I) {
+NB.prototype.push = function(A, I) {
   const g = this.strm, Q = this.options.chunkSize;
   let B, C;
   if (this.ended)
     return !1;
-  for (I === ~~I ? C = I : C = I === !0 ? ow : iw, typeof A == "string" ? g.input = Eg.string2buf(A) : fE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
+  for (I === ~~I ? C = I : C = I === !0 ? ow : iw, typeof A == "string" ? g.input = Eg.string2buf(A) : KE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
     if (g.avail_out === 0 && (g.output = new Uint8Array(Q), g.next_out = 0, g.avail_out = Q), (C === Dw || C === ww) && g.avail_out <= 6) {
       this.onData(g.output.subarray(0, g.next_out)), g.avail_out = 0;
       continue;
@@ -1341,20 +1341,20 @@ aB.prototype.push = function(A, I) {
   }
   return !0;
 };
-aB.prototype.onData = function(A) {
+NB.prototype.onData = function(A) {
   this.chunks.push(A);
 };
-aB.prototype.onEnd = function(A) {
+NB.prototype.onEnd = function(A) {
   A === bg && (this.result = Zg.flattenChunks(this.chunks)), this.chunks = [], this.err = A, this.msg = this.strm.msg;
 };
 const Hg = 16209, aw = 16191;
 var Nw = function(I, g) {
-  let Q, B, C, E, i, o, D, w, s, t, e, N, h, c, r, G, U, F, y, S, k, L, J, a;
+  let Q, B, C, E, i, o, D, w, s, t, e, N, h, c, L, G, U, F, y, S, k, r, J, a;
   const R = I.state;
-  Q = I.next_in, J = I.input, B = Q + (I.avail_in - 5), C = I.next_out, a = I.output, E = C - (g - I.avail_out), i = C + (I.avail_out - 257), o = R.dmax, D = R.wsize, w = R.whave, s = R.wnext, t = R.window, e = R.hold, N = R.bits, h = R.lencode, c = R.distcode, r = (1 << R.lenbits) - 1, G = (1 << R.distbits) - 1;
+  Q = I.next_in, J = I.input, B = Q + (I.avail_in - 5), C = I.next_out, a = I.output, E = C - (g - I.avail_out), i = C + (I.avail_out - 257), o = R.dmax, D = R.wsize, w = R.whave, s = R.wnext, t = R.window, e = R.hold, N = R.bits, h = R.lencode, c = R.distcode, L = (1 << R.lenbits) - 1, G = (1 << R.distbits) - 1;
   A:
     do {
-      N < 15 && (e += J[Q++] << N, N += 8, e += J[Q++] << N, N += 8), U = h[e & r];
+      N < 15 && (e += J[Q++] << N, N += 8, e += J[Q++] << N, N += 8), U = h[e & L];
       I:
         for (; ; ) {
           if (F = U >>> 24, e >>>= F, N -= F, F = U >>> 16 & 255, F === 0)
@@ -1373,13 +1373,13 @@ var Nw = function(I, g) {
                       I.msg = "invalid distance too far back", R.mode = Hg;
                       break A;
                     }
-                    if (k = 0, L = t, s === 0) {
+                    if (k = 0, r = t, s === 0) {
                       if (k += D - F, F < y) {
                         y -= F;
                         do
                           a[C++] = t[k++];
                         while (--F);
-                        k = C - S, L = a;
+                        k = C - S, r = a;
                       }
                     } else if (s < F) {
                       if (k += D + s - F, F -= s, F < y) {
@@ -1392,7 +1392,7 @@ var Nw = function(I, g) {
                           do
                             a[C++] = t[k++];
                           while (--F);
-                          k = C - S, L = a;
+                          k = C - S, r = a;
                         }
                       }
                     } else if (k += s - F, F < y) {
@@ -1400,11 +1400,11 @@ var Nw = function(I, g) {
                       do
                         a[C++] = t[k++];
                       while (--F);
-                      k = C - S, L = a;
+                      k = C - S, r = a;
                     }
                     for (; y > 2; )
-                      a[C++] = L[k++], a[C++] = L[k++], a[C++] = L[k++], y -= 3;
-                    y && (a[C++] = L[k++], y > 1 && (a[C++] = L[k++]));
+                      a[C++] = r[k++], a[C++] = r[k++], a[C++] = r[k++], y -= 3;
+                    y && (a[C++] = r[k++], y > 1 && (a[C++] = r[k++]));
                   } else {
                     k = C - S;
                     do
@@ -1438,7 +1438,7 @@ var Nw = function(I, g) {
     } while (Q < B && C < i);
   y = N >> 3, Q -= y, N -= y << 3, e &= (1 << N) - 1, I.next_in = Q, I.next_out = C, I.avail_in = Q < B ? 5 + (B - Q) : 5 - (Q - B), I.avail_out = C < i ? 257 + (i - C) : 257 - (C - i), R.hold = e, R.bits = N;
 };
-const cI = 15, sC = 852, tC = 592, eC = 0, lQ = 1, hC = 2, kw = new Uint16Array([
+const cI = 15, tC = 852, eC = 592, hC = 0, lQ = 1, aC = 2, kw = new Uint16Array([
   /* Length codes 257..285 base */
   3,
   4,
@@ -1574,7 +1574,7 @@ const cI = 15, sC = 852, tC = 592, eC = 0, lQ = 1, hC = 2, kw = new Uint16Array(
   64
 ]), Fw = (A, I, g, Q, B, C, E, i) => {
   const o = i.bits;
-  let D = 0, w = 0, s = 0, t = 0, e = 0, N = 0, h = 0, c = 0, r = 0, G = 0, U, F, y, S, k, L = null, J;
+  let D = 0, w = 0, s = 0, t = 0, e = 0, N = 0, h = 0, c = 0, L = 0, G = 0, U, F, y, S, k, r = null, J;
   const a = new Uint16Array(cI + 1), R = new Uint16Array(cI + 1);
   let f = null, l, x, O;
   for (D = 0; D <= cI; D++)
@@ -1590,16 +1590,16 @@ const cI = 15, sC = 852, tC = 592, eC = 0, lQ = 1, hC = 2, kw = new Uint16Array(
   for (e < s && (e = s), c = 1, D = 1; D <= cI; D++)
     if (c <<= 1, c -= a[D], c < 0)
       return -1;
-  if (c > 0 && (A === eC || t !== 1))
+  if (c > 0 && (A === hC || t !== 1))
     return -1;
   for (R[1] = 0, D = 1; D < cI; D++)
     R[D + 1] = R[D] + a[D];
   for (w = 0; w < Q; w++)
     I[g + w] !== 0 && (E[R[I[g + w]]++] = w);
-  if (A === eC ? (L = f = E, J = 20) : A === lQ ? (L = kw, f = Mw, J = 257) : (L = Gw, f = cw, J = 0), G = 0, w = 0, D = s, k = C, N = e, h = 0, y = -1, r = 1 << e, S = r - 1, A === lQ && r > sC || A === hC && r > tC)
+  if (A === hC ? (r = f = E, J = 20) : A === lQ ? (r = kw, f = Mw, J = 257) : (r = Gw, f = cw, J = 0), G = 0, w = 0, D = s, k = C, N = e, h = 0, y = -1, L = 1 << e, S = L - 1, A === lQ && L > tC || A === aC && L > eC)
     return 1;
   for (; ; ) {
-    l = D - h, E[w] + 1 < J ? (x = 0, O = E[w]) : E[w] >= J ? (x = f[E[w] - J], O = L[E[w] - J]) : (x = 32 + 64, O = 0), U = 1 << D - h, F = 1 << N, s = F;
+    l = D - h, E[w] + 1 < J ? (x = 0, O = E[w]) : E[w] >= J ? (x = f[E[w] - J], O = r[E[w] - J]) : (x = 32 + 64, O = 0), U = 1 << D - h, F = 1 << N, s = F;
     do
       F -= U, B[k + (G >> h) + F] = l << 24 | x << 16 | O | 0;
     while (F !== 0);
@@ -1613,7 +1613,7 @@ const cI = 15, sC = 852, tC = 592, eC = 0, lQ = 1, hC = 2, kw = new Uint16Array(
     if (D > e && (G & S) !== y) {
       for (h === 0 && (h = e), k += s, N = D - h, c = 1 << N; N + h < t && (c -= a[N + h], !(c <= 0)); )
         N++, c <<= 1;
-      if (r += 1 << N, A === lQ && r > sC || A === hC && r > tC)
+      if (L += 1 << N, A === lQ && L > tC || A === aC && L > eC)
         return 1;
       y = G & S, B[y] = e << 24 | N << 16 | k - C | 0;
     }
@@ -1621,19 +1621,19 @@ const cI = 15, sC = 852, tC = 592, eC = 0, lQ = 1, hC = 2, kw = new Uint16Array(
   return G !== 0 && (B[k + G] = D - h << 24 | 64 << 16 | 0), i.bits = e, 0;
 };
 var _I = Fw;
-const Uw = 0, KE = 1, dE = 2, {
-  Z_FINISH: aC,
+const Uw = 0, dE = 1, OE = 2, {
+  Z_FINISH: NC,
   Z_BLOCK: Jw,
   Z_TREES: Yg,
   Z_OK: oI,
-  Z_STREAM_END: Lw,
-  Z_NEED_DICT: rw,
+  Z_STREAM_END: rw,
+  Z_NEED_DICT: Lw,
   Z_STREAM_ERROR: cA,
-  Z_DATA_ERROR: OE,
-  Z_MEM_ERROR: qE,
+  Z_DATA_ERROR: qE,
+  Z_MEM_ERROR: TE,
   Z_BUF_ERROR: Rw,
-  Z_DEFLATED: NC
-} = wg, Xg = 16180, kC = 16181, MC = 16182, GC = 16183, cC = 16184, FC = 16185, UC = 16186, JC = 16187, LC = 16188, rC = 16189, mg = 16190, lA = 16191, fQ = 16192, RC = 16193, KQ = 16194, yC = 16195, nC = 16196, SC = 16197, HC = 16198, lg = 16199, fg = 16200, YC = 16201, lC = 16202, fC = 16203, KC = 16204, dC = 16205, dQ = 16206, OC = 16207, qC = 16208, z = 16209, TE = 16210, xE = 16211, yw = 852, nw = 592, Sw = 15, Hw = Sw, TC = (A) => (A >>> 24 & 255) + (A >>> 8 & 65280) + ((A & 65280) << 8) + ((A & 255) << 24);
+  Z_DEFLATED: kC
+} = wg, Xg = 16180, MC = 16181, GC = 16182, cC = 16183, FC = 16184, UC = 16185, JC = 16186, rC = 16187, LC = 16188, RC = 16189, mg = 16190, fA = 16191, fQ = 16192, yC = 16193, KQ = 16194, nC = 16195, SC = 16196, HC = 16197, YC = 16198, lg = 16199, fg = 16200, lC = 16201, fC = 16202, KC = 16203, dC = 16204, OC = 16205, dQ = 16206, qC = 16207, TC = 16208, z = 16209, xE = 16210, pE = 16211, yw = 852, nw = 592, Sw = 15, Hw = Sw, xC = (A) => (A >>> 24 & 255) + (A >>> 8 & 65280) + ((A & 65280) << 8) + ((A & 255) << 24);
 function Yw() {
   this.strm = null, this.mode = 0, this.last = !1, this.wrap = 0, this.havedict = !1, this.flags = 0, this.dmax = 0, this.check = 0, this.total = 0, this.head = null, this.wbits = 0, this.wsize = 0, this.whave = 0, this.wnext = 0, this.window = null, this.hold = 0, this.bits = 0, this.length = 0, this.offset = 0, this.extra = 0, this.lencode = null, this.distcode = null, this.lenbits = 0, this.distbits = 0, this.ncode = 0, this.nlen = 0, this.ndist = 0, this.have = 0, this.next = null, this.lens = new Uint16Array(320), this.work = new Uint16Array(288), this.lendyn = null, this.distdyn = null, this.sane = 0, this.back = 0, this.was = 0;
 }
@@ -1641,34 +1641,34 @@ const sI = (A) => {
   if (!A)
     return 1;
   const I = A.state;
-  return !I || I.strm !== A || I.mode < Xg || I.mode > xE ? 1 : 0;
-}, pE = (A) => {
-  if (sI(A))
-    return cA;
-  const I = A.state;
-  return A.total_in = A.total_out = I.total = 0, A.msg = "", I.wrap && (A.adler = I.wrap & 1), I.mode = Xg, I.last = 0, I.havedict = 0, I.flags = -1, I.dmax = 32768, I.head = null, I.hold = 0, I.bits = 0, I.lencode = I.lendyn = new Int32Array(yw), I.distcode = I.distdyn = new Int32Array(nw), I.sane = 1, I.back = -1, oI;
+  return !I || I.strm !== A || I.mode < Xg || I.mode > pE ? 1 : 0;
 }, uE = (A) => {
   if (sI(A))
     return cA;
   const I = A.state;
-  return I.wsize = 0, I.whave = 0, I.wnext = 0, pE(A);
-}, bE = (A, I) => {
+  return A.total_in = A.total_out = I.total = 0, A.msg = "", I.wrap && (A.adler = I.wrap & 1), I.mode = Xg, I.last = 0, I.havedict = 0, I.flags = -1, I.dmax = 32768, I.head = null, I.hold = 0, I.bits = 0, I.lencode = I.lendyn = new Int32Array(yw), I.distcode = I.distdyn = new Int32Array(nw), I.sane = 1, I.back = -1, oI;
+}, bE = (A) => {
+  if (sI(A))
+    return cA;
+  const I = A.state;
+  return I.wsize = 0, I.whave = 0, I.wnext = 0, uE(A);
+}, mE = (A, I) => {
   let g;
   if (sI(A))
     return cA;
   const Q = A.state;
-  return I < 0 ? (g = 0, I = -I) : (g = (I >> 4) + 5, I < 48 && (I &= 15)), I && (I < 8 || I > 15) ? cA : (Q.window !== null && Q.wbits !== I && (Q.window = null), Q.wrap = g, Q.wbits = I, uE(A));
-}, mE = (A, I) => {
+  return I < 0 ? (g = 0, I = -I) : (g = (I >> 4) + 5, I < 48 && (I &= 15)), I && (I < 8 || I > 15) ? cA : (Q.window !== null && Q.wbits !== I && (Q.window = null), Q.wrap = g, Q.wbits = I, bE(A));
+}, PE = (A, I) => {
   if (!A)
     return cA;
   const g = new Yw();
   A.state = g, g.strm = A, g.window = null, g.mode = Xg;
-  const Q = bE(A, I);
+  const Q = mE(A, I);
   return Q !== oI && (A.state = null), Q;
-}, lw = (A) => mE(A, Hw);
-let xC = !0, OQ, qQ;
+}, lw = (A) => PE(A, Hw);
+let pC = !0, OQ, qQ;
 const fw = (A) => {
-  if (xC) {
+  if (pC) {
     OQ = new Int32Array(512), qQ = new Int32Array(32);
     let I = 0;
     for (; I < 144; )
@@ -1679,17 +1679,17 @@ const fw = (A) => {
       A.lens[I++] = 7;
     for (; I < 288; )
       A.lens[I++] = 8;
-    for (_I(KE, A.lens, 0, 288, OQ, 0, A.work, { bits: 9 }), I = 0; I < 32; )
+    for (_I(dE, A.lens, 0, 288, OQ, 0, A.work, { bits: 9 }), I = 0; I < 32; )
       A.lens[I++] = 5;
-    _I(dE, A.lens, 0, 32, qQ, 0, A.work, { bits: 5 }), xC = !1;
+    _I(OE, A.lens, 0, 32, qQ, 0, A.work, { bits: 5 }), pC = !1;
   }
   A.lencode = OQ, A.lenbits = 9, A.distcode = qQ, A.distbits = 5;
-}, PE = (A, I, g, Q) => {
+}, jE = (A, I, g, Q) => {
   let B;
   const C = A.state;
   return C.window === null && (C.wsize = 1 << C.wbits, C.wnext = 0, C.whave = 0, C.window = new Uint8Array(C.wsize)), Q >= C.wsize ? (C.window.set(I.subarray(g - C.wsize, g), 0), C.wnext = 0, C.whave = C.wsize) : (B = C.wsize - C.wnext, B > Q && (B = Q), C.window.set(I.subarray(g - Q, g - Q + B), C.wnext), Q -= B, Q ? (C.window.set(I.subarray(g - Q, g), 0), C.wnext = Q, C.whave = C.wsize) : (C.wnext += B, C.wnext === C.wsize && (C.wnext = 0), C.whave < C.wsize && (C.whave += B))), 0;
 }, Kw = (A, I) => {
-  let g, Q, B, C, E, i, o, D, w, s, t, e, N, h, c = 0, r, G, U, F, y, S, k, L;
+  let g, Q, B, C, E, i, o, D, w, s, t, e, N, h, c = 0, L, G, U, F, y, S, k, r;
   const J = new Uint8Array(4);
   let a, R;
   const f = (
@@ -1698,7 +1698,7 @@ const fw = (A) => {
   );
   if (sI(A) || !A.output || !A.input && A.avail_in !== 0)
     return cA;
-  g = A.state, g.mode === lA && (g.mode = fQ), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, s = i, t = o, L = oI;
+  g = A.state, g.mode === fA && (g.mode = fQ), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, s = i, t = o, r = oI;
   A:
     for (; ; )
       switch (g.mode) {
@@ -1713,7 +1713,7 @@ const fw = (A) => {
             i--, D += Q[C++] << w, w += 8;
           }
           if (g.wrap & 2 && D === 35615) {
-            g.wbits === 0 && (g.wbits = 15), g.check = 0, J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0), D = 0, w = 0, g.mode = kC;
+            g.wbits === 0 && (g.wbits = 15), g.check = 0, J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0), D = 0, w = 0, g.mode = MC;
             break;
           }
           if (g.head && (g.head.done = !1), !(g.wrap & 1) || /* check if zlib header allowed */
@@ -1721,7 +1721,7 @@ const fw = (A) => {
             A.msg = "incorrect header check", g.mode = z;
             break;
           }
-          if ((D & 15) !== NC) {
+          if ((D & 15) !== kC) {
             A.msg = "unknown compression method", g.mode = z;
             break;
           }
@@ -1729,15 +1729,15 @@ const fw = (A) => {
             A.msg = "invalid window size", g.mode = z;
             break;
           }
-          g.dmax = 1 << g.wbits, g.flags = 0, A.adler = g.check = 1, g.mode = D & 512 ? rC : lA, D = 0, w = 0;
+          g.dmax = 1 << g.wbits, g.flags = 0, A.adler = g.check = 1, g.mode = D & 512 ? RC : fA, D = 0, w = 0;
           break;
-        case kC:
+        case MC:
           for (; w < 16; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          if (g.flags = D, (g.flags & 255) !== NC) {
+          if (g.flags = D, (g.flags & 255) !== kC) {
             A.msg = "unknown compression method", g.mode = z;
             break;
           }
@@ -1745,22 +1745,22 @@ const fw = (A) => {
             A.msg = "unknown header flags set", g.mode = z;
             break;
           }
-          g.head && (g.head.text = D >> 8 & 1), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = MC;
-        case MC:
+          g.head && (g.head.text = D >> 8 & 1), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = GC;
+        case GC:
           for (; w < 32; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          g.head && (g.head.time = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, J[2] = D >>> 16 & 255, J[3] = D >>> 24 & 255, g.check = gA(g.check, J, 4, 0)), D = 0, w = 0, g.mode = GC;
-        case GC:
+          g.head && (g.head.time = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, J[2] = D >>> 16 & 255, J[3] = D >>> 24 & 255, g.check = gA(g.check, J, 4, 0)), D = 0, w = 0, g.mode = cC;
+        case cC:
           for (; w < 16; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          g.head && (g.head.xflags = D & 255, g.head.os = D >> 8), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = cC;
-        case cC:
+          g.head && (g.head.xflags = D & 255, g.head.os = D >> 8), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = FC;
+        case FC:
           if (g.flags & 1024) {
             for (; w < 16; ) {
               if (i === 0)
@@ -1770,8 +1770,8 @@ const fw = (A) => {
             g.length = D, g.head && (g.head.extra_len = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0;
           } else
             g.head && (g.head.extra = null);
-          g.mode = FC;
-        case FC:
+          g.mode = UC;
+        case UC:
           if (g.flags & 1024 && (e = g.length, e > i && (e = i), e && (g.head && (k = g.head.extra_len - g.length, g.head.extra || (g.head.extra = new Uint8Array(g.head.extra_len)), g.head.extra.set(
             Q.subarray(
               C,
@@ -1783,8 +1783,8 @@ const fw = (A) => {
             k
           )), g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, g.length -= e), g.length))
             break A;
-          g.length = 0, g.mode = UC;
-        case UC:
+          g.length = 0, g.mode = JC;
+        case JC:
           if (g.flags & 2048) {
             if (i === 0)
               break A;
@@ -1796,8 +1796,8 @@ const fw = (A) => {
               break A;
           } else
             g.head && (g.head.name = null);
-          g.length = 0, g.mode = JC;
-        case JC:
+          g.length = 0, g.mode = rC;
+        case rC:
           if (g.flags & 4096) {
             if (i === 0)
               break A;
@@ -1823,20 +1823,20 @@ const fw = (A) => {
             }
             D = 0, w = 0;
           }
-          g.head && (g.head.hcrc = g.flags >> 9 & 1, g.head.done = !0), A.adler = g.check = 0, g.mode = lA;
+          g.head && (g.head.hcrc = g.flags >> 9 & 1, g.head.done = !0), A.adler = g.check = 0, g.mode = fA;
           break;
-        case rC:
+        case RC:
           for (; w < 32; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          A.adler = g.check = TC(D), D = 0, w = 0, g.mode = mg;
+          A.adler = g.check = xC(D), D = 0, w = 0, g.mode = mg;
         case mg:
           if (g.havedict === 0)
-            return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, rw;
-          A.adler = g.check = 1, g.mode = lA;
-        case lA:
+            return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, Lw;
+          A.adler = g.check = 1, g.mode = fA;
+        case fA:
           if (I === Jw || I === Yg)
             break A;
         case fQ:
@@ -1851,7 +1851,7 @@ const fw = (A) => {
           }
           switch (g.last = D & 1, D >>>= 1, w -= 1, D & 3) {
             case 0:
-              g.mode = RC;
+              g.mode = yC;
               break;
             case 1:
               if (fw(g), g.mode = lg, I === Yg) {
@@ -1860,14 +1860,14 @@ const fw = (A) => {
               }
               break;
             case 2:
-              g.mode = nC;
+              g.mode = SC;
               break;
             case 3:
               A.msg = "invalid block type", g.mode = z;
           }
           D >>>= 2, w -= 2;
           break;
-        case RC:
+        case yC:
           for (D >>>= w & 7, w -= w & 7; w < 32; ) {
             if (i === 0)
               break A;
@@ -1880,17 +1880,17 @@ const fw = (A) => {
           if (g.length = D & 65535, D = 0, w = 0, g.mode = KQ, I === Yg)
             break A;
         case KQ:
-          g.mode = yC;
-        case yC:
+          g.mode = nC;
+        case nC:
           if (e = g.length, e) {
             if (e > i && (e = i), e > o && (e = o), e === 0)
               break A;
             B.set(Q.subarray(C, C + e), E), i -= e, C += e, o -= e, E += e, g.length -= e;
             break;
           }
-          g.mode = lA;
+          g.mode = fA;
           break;
-        case nC:
+        case SC:
           for (; w < 14; ) {
             if (i === 0)
               break A;
@@ -1900,8 +1900,8 @@ const fw = (A) => {
             A.msg = "too many length or distance symbols", g.mode = z;
             break;
           }
-          g.have = 0, g.mode = SC;
-        case SC:
+          g.have = 0, g.mode = HC;
+        case HC:
           for (; g.have < g.ncode; ) {
             for (; w < 3; ) {
               if (i === 0)
@@ -1912,46 +1912,46 @@ const fw = (A) => {
           }
           for (; g.have < 19; )
             g.lens[f[g.have++]] = 0;
-          if (g.lencode = g.lendyn, g.lenbits = 7, a = { bits: g.lenbits }, L = _I(Uw, g.lens, 0, 19, g.lencode, 0, g.work, a), g.lenbits = a.bits, L) {
+          if (g.lencode = g.lendyn, g.lenbits = 7, a = { bits: g.lenbits }, r = _I(Uw, g.lens, 0, 19, g.lencode, 0, g.work, a), g.lenbits = a.bits, r) {
             A.msg = "invalid code lengths set", g.mode = z;
             break;
           }
-          g.have = 0, g.mode = HC;
-        case HC:
+          g.have = 0, g.mode = YC;
+        case YC:
           for (; g.have < g.nlen + g.ndist; ) {
-            for (; c = g.lencode[D & (1 << g.lenbits) - 1], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(r <= w); ) {
+            for (; c = g.lencode[D & (1 << g.lenbits) - 1], L = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(L <= w); ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
             if (U < 16)
-              D >>>= r, w -= r, g.lens[g.have++] = U;
+              D >>>= L, w -= L, g.lens[g.have++] = U;
             else {
               if (U === 16) {
-                for (R = r + 2; w < R; ) {
+                for (R = L + 2; w < R; ) {
                   if (i === 0)
                     break A;
                   i--, D += Q[C++] << w, w += 8;
                 }
-                if (D >>>= r, w -= r, g.have === 0) {
+                if (D >>>= L, w -= L, g.have === 0) {
                   A.msg = "invalid bit length repeat", g.mode = z;
                   break;
                 }
                 k = g.lens[g.have - 1], e = 3 + (D & 3), D >>>= 2, w -= 2;
               } else if (U === 17) {
-                for (R = r + 3; w < R; ) {
+                for (R = L + 3; w < R; ) {
                   if (i === 0)
                     break A;
                   i--, D += Q[C++] << w, w += 8;
                 }
-                D >>>= r, w -= r, k = 0, e = 3 + (D & 7), D >>>= 3, w -= 3;
+                D >>>= L, w -= L, k = 0, e = 3 + (D & 7), D >>>= 3, w -= 3;
               } else {
-                for (R = r + 7; w < R; ) {
+                for (R = L + 7; w < R; ) {
                   if (i === 0)
                     break A;
                   i--, D += Q[C++] << w, w += 8;
                 }
-                D >>>= r, w -= r, k = 0, e = 11 + (D & 127), D >>>= 7, w -= 7;
+                D >>>= L, w -= L, k = 0, e = 11 + (D & 127), D >>>= 7, w -= 7;
               }
               if (g.have + e > g.nlen + g.ndist) {
                 A.msg = "invalid bit length repeat", g.mode = z;
@@ -1967,11 +1967,11 @@ const fw = (A) => {
             A.msg = "invalid code -- missing end-of-block", g.mode = z;
             break;
           }
-          if (g.lenbits = 9, a = { bits: g.lenbits }, L = _I(KE, g.lens, 0, g.nlen, g.lencode, 0, g.work, a), g.lenbits = a.bits, L) {
+          if (g.lenbits = 9, a = { bits: g.lenbits }, r = _I(dE, g.lens, 0, g.nlen, g.lencode, 0, g.work, a), g.lenbits = a.bits, r) {
             A.msg = "invalid literal/lengths set", g.mode = z;
             break;
           }
-          if (g.distbits = 6, g.distcode = g.distdyn, a = { bits: g.distbits }, L = _I(dE, g.lens, g.nlen, g.ndist, g.distcode, 0, g.work, a), g.distbits = a.bits, L) {
+          if (g.distbits = 6, g.distcode = g.distdyn, a = { bits: g.distbits }, r = _I(OE, g.lens, g.nlen, g.ndist, g.distcode, 0, g.work, a), g.distbits = a.bits, r) {
             A.msg = "invalid distances set", g.mode = z;
             break;
           }
@@ -1981,36 +1981,36 @@ const fw = (A) => {
           g.mode = fg;
         case fg:
           if (i >= 6 && o >= 258) {
-            A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, Nw(A, t), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, g.mode === lA && (g.back = -1);
+            A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, Nw(A, t), E = A.next_out, B = A.output, o = A.avail_out, C = A.next_in, Q = A.input, i = A.avail_in, D = g.hold, w = g.bits, g.mode === fA && (g.back = -1);
             break;
           }
-          for (g.back = 0; c = g.lencode[D & (1 << g.lenbits) - 1], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(r <= w); ) {
+          for (g.back = 0; c = g.lencode[D & (1 << g.lenbits) - 1], L = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(L <= w); ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
           if (G && !(G & 240)) {
-            for (F = r, y = G, S = U; c = g.lencode[S + ((D & (1 << F + y) - 1) >> F)], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(F + r <= w); ) {
+            for (F = L, y = G, S = U; c = g.lencode[S + ((D & (1 << F + y) - 1) >> F)], L = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(F + L <= w); ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
             D >>>= F, w -= F, g.back += F;
           }
-          if (D >>>= r, w -= r, g.back += r, g.length = U, G === 0) {
-            g.mode = dC;
+          if (D >>>= L, w -= L, g.back += L, g.length = U, G === 0) {
+            g.mode = OC;
             break;
           }
           if (G & 32) {
-            g.back = -1, g.mode = lA;
+            g.back = -1, g.mode = fA;
             break;
           }
           if (G & 64) {
             A.msg = "invalid literal/length code", g.mode = z;
             break;
           }
-          g.extra = G & 15, g.mode = YC;
-        case YC:
+          g.extra = G & 15, g.mode = lC;
+        case lC:
           if (g.extra) {
             for (R = g.extra; w < R; ) {
               if (i === 0)
@@ -2019,27 +2019,27 @@ const fw = (A) => {
             }
             g.length += D & (1 << g.extra) - 1, D >>>= g.extra, w -= g.extra, g.back += g.extra;
           }
-          g.was = g.length, g.mode = lC;
-        case lC:
-          for (; c = g.distcode[D & (1 << g.distbits) - 1], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(r <= w); ) {
+          g.was = g.length, g.mode = fC;
+        case fC:
+          for (; c = g.distcode[D & (1 << g.distbits) - 1], L = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(L <= w); ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
           if (!(G & 240)) {
-            for (F = r, y = G, S = U; c = g.distcode[S + ((D & (1 << F + y) - 1) >> F)], r = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(F + r <= w); ) {
+            for (F = L, y = G, S = U; c = g.distcode[S + ((D & (1 << F + y) - 1) >> F)], L = c >>> 24, G = c >>> 16 & 255, U = c & 65535, !(F + L <= w); ) {
               if (i === 0)
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
             D >>>= F, w -= F, g.back += F;
           }
-          if (D >>>= r, w -= r, g.back += r, G & 64) {
+          if (D >>>= L, w -= L, g.back += L, G & 64) {
             A.msg = "invalid distance code", g.mode = z;
             break;
           }
-          g.offset = U, g.extra = G & 15, g.mode = fC;
-        case fC:
+          g.offset = U, g.extra = G & 15, g.mode = KC;
+        case KC:
           if (g.extra) {
             for (R = g.extra; w < R; ) {
               if (i === 0)
@@ -2052,8 +2052,8 @@ const fw = (A) => {
             A.msg = "invalid distance too far back", g.mode = z;
             break;
           }
-          g.mode = KC;
-        case KC:
+          g.mode = dC;
+        case dC:
           if (o === 0)
             break A;
           if (e = t - o, g.offset > e) {
@@ -2070,7 +2070,7 @@ const fw = (A) => {
           while (--e);
           g.length === 0 && (g.mode = fg);
           break;
-        case dC:
+        case OC:
           if (o === 0)
             break A;
           B[E++] = g.length, o--, g.mode = fg;
@@ -2083,14 +2083,14 @@ const fw = (A) => {
               i--, D |= Q[C++] << w, w += 8;
             }
             if (t -= o, A.total_out += t, g.total += t, g.wrap & 4 && t && (A.adler = g.check = /*UPDATE_CHECK(state.check, put - _out, _out);*/
-            g.flags ? gA(g.check, B, t, E - t) : Bg(g.check, B, t, E - t)), t = o, g.wrap & 4 && (g.flags ? D : TC(D)) !== g.check) {
+            g.flags ? gA(g.check, B, t, E - t) : Bg(g.check, B, t, E - t)), t = o, g.wrap & 4 && (g.flags ? D : xC(D)) !== g.check) {
               A.msg = "incorrect data check", g.mode = z;
               break;
             }
             D = 0, w = 0;
           }
-          g.mode = OC;
-        case OC:
+          g.mode = qC;
+        case qC:
           if (g.wrap && g.flags) {
             for (; w < 32; ) {
               if (i === 0)
@@ -2103,21 +2103,21 @@ const fw = (A) => {
             }
             D = 0, w = 0;
           }
-          g.mode = qC;
-        case qC:
-          L = Lw;
+          g.mode = TC;
+        case TC:
+          r = rw;
           break A;
         case z:
-          L = OE;
+          r = qE;
           break A;
-        case TE:
-          return qE;
         case xE:
+          return TE;
+        case pE:
         default:
           return cA;
       }
-  return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, (g.wsize || t !== A.avail_out && g.mode < z && (g.mode < dQ || I !== aC)) && PE(A, A.output, A.next_out, t - A.avail_out), s -= A.avail_in, t -= A.avail_out, A.total_in += s, A.total_out += t, g.total += t, g.wrap & 4 && t && (A.adler = g.check = /*UPDATE_CHECK(state.check, strm.next_out - _out, _out);*/
-  g.flags ? gA(g.check, B, t, A.next_out - t) : Bg(g.check, B, t, A.next_out - t)), A.data_type = g.bits + (g.last ? 64 : 0) + (g.mode === lA ? 128 : 0) + (g.mode === lg || g.mode === KQ ? 256 : 0), (s === 0 && t === 0 || I === aC) && L === oI && (L = Rw), L;
+  return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, (g.wsize || t !== A.avail_out && g.mode < z && (g.mode < dQ || I !== NC)) && jE(A, A.output, A.next_out, t - A.avail_out), s -= A.avail_in, t -= A.avail_out, A.total_in += s, A.total_out += t, g.total += t, g.wrap & 4 && t && (A.adler = g.check = /*UPDATE_CHECK(state.check, strm.next_out - _out, _out);*/
+  g.flags ? gA(g.check, B, t, A.next_out - t) : Bg(g.check, B, t, A.next_out - t)), A.data_type = g.bits + (g.last ? 64 : 0) + (g.mode === fA ? 128 : 0) + (g.mode === lg || g.mode === KQ ? 256 : 0), (s === 0 && t === 0 || I === NC) && r === oI && (r = Rw), r;
 }, dw = (A) => {
   if (sI(A))
     return cA;
@@ -2131,9 +2131,9 @@ const fw = (A) => {
 }, qw = (A, I) => {
   const g = I.length;
   let Q, B, C;
-  return sI(A) || (Q = A.state, Q.wrap !== 0 && Q.mode !== mg) ? cA : Q.mode === mg && (B = 1, B = Bg(B, I, g, 0), B !== Q.check) ? OE : (C = PE(A, I, g, g), C ? (Q.mode = TE, qE) : (Q.havedict = 1, oI));
+  return sI(A) || (Q = A.state, Q.wrap !== 0 && Q.mode !== mg) ? cA : Q.mode === mg && (B = 1, B = Bg(B, I, g, 0), B !== Q.check) ? qE : (C = jE(A, I, g, g), C ? (Q.mode = xE, TE) : (Q.havedict = 1, oI));
 };
-var Tw = uE, xw = bE, pw = pE, uw = lw, bw = mE, mw = Kw, Pw = dw, jw = Ow, Vw = qw, Zw = "pako inflate (from Nodeca project)", qA = {
+var Tw = bE, xw = mE, pw = uE, uw = lw, bw = PE, mw = Kw, Pw = dw, jw = Ow, Vw = qw, Zw = "pako inflate (from Nodeca project)", qA = {
   inflateReset: Tw,
   inflateReset2: xw,
   inflateResetKeep: pw,
@@ -2149,14 +2149,14 @@ function Xw() {
   this.text = 0, this.time = 0, this.xflags = 0, this.os = 0, this.extra = null, this.extra_len = 0, this.name = "", this.comment = "", this.hcrc = 0, this.done = !1;
 }
 var vw = Xw;
-const jE = Object.prototype.toString, {
+const VE = Object.prototype.toString, {
   Z_NO_FLUSH: zw,
   Z_FINISH: Ww,
   Z_OK: ig,
   Z_STREAM_END: TQ,
   Z_NEED_DICT: xQ,
   Z_STREAM_ERROR: _w,
-  Z_DATA_ERROR: pC,
+  Z_DATA_ERROR: uC,
   Z_MEM_ERROR: $w
 } = wg;
 function sg(A) {
@@ -2166,14 +2166,14 @@ function sg(A) {
     to: ""
   }, A || {});
   const I = this.options;
-  I.raw && I.windowBits >= 0 && I.windowBits < 16 && (I.windowBits = -I.windowBits, I.windowBits === 0 && (I.windowBits = -15)), I.windowBits >= 0 && I.windowBits < 16 && !(A && A.windowBits) && (I.windowBits += 32), I.windowBits > 15 && I.windowBits < 48 && (I.windowBits & 15 || (I.windowBits |= 15)), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new lE(), this.strm.avail_out = 0;
+  I.raw && I.windowBits >= 0 && I.windowBits < 16 && (I.windowBits = -I.windowBits, I.windowBits === 0 && (I.windowBits = -15)), I.windowBits >= 0 && I.windowBits < 16 && !(A && A.windowBits) && (I.windowBits += 32), I.windowBits > 15 && I.windowBits < 48 && (I.windowBits & 15 || (I.windowBits |= 15)), this.err = 0, this.msg = "", this.ended = !1, this.chunks = [], this.strm = new fE(), this.strm.avail_out = 0;
   let g = qA.inflateInit2(
     this.strm,
     I.windowBits
   );
   if (g !== ig)
     throw new Error(RI[g]);
-  if (this.header = new vw(), qA.inflateGetHeader(this.strm, this.header), I.dictionary && (typeof I.dictionary == "string" ? I.dictionary = Eg.string2buf(I.dictionary) : jE.call(I.dictionary) === "[object ArrayBuffer]" && (I.dictionary = new Uint8Array(I.dictionary)), I.raw && (g = qA.inflateSetDictionary(this.strm, I.dictionary), g !== ig)))
+  if (this.header = new vw(), qA.inflateGetHeader(this.strm, this.header), I.dictionary && (typeof I.dictionary == "string" ? I.dictionary = Eg.string2buf(I.dictionary) : VE.call(I.dictionary) === "[object ArrayBuffer]" && (I.dictionary = new Uint8Array(I.dictionary)), I.raw && (g = qA.inflateSetDictionary(this.strm, I.dictionary), g !== ig)))
     throw new Error(RI[g]);
 }
 sg.prototype.push = function(A, I) {
@@ -2181,12 +2181,12 @@ sg.prototype.push = function(A, I) {
   let C, E, i;
   if (this.ended)
     return !1;
-  for (I === ~~I ? E = I : E = I === !0 ? Ww : zw, jE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
-    for (g.avail_out === 0 && (g.output = new Uint8Array(Q), g.next_out = 0, g.avail_out = Q), C = qA.inflate(g, E), C === xQ && B && (C = qA.inflateSetDictionary(g, B), C === ig ? C = qA.inflate(g, E) : C === pC && (C = xQ)); g.avail_in > 0 && C === TQ && g.state.wrap > 0 && A[g.next_in] !== 0; )
+  for (I === ~~I ? E = I : E = I === !0 ? Ww : zw, VE.call(A) === "[object ArrayBuffer]" ? g.input = new Uint8Array(A) : g.input = A, g.next_in = 0, g.avail_in = g.input.length; ; ) {
+    for (g.avail_out === 0 && (g.output = new Uint8Array(Q), g.next_out = 0, g.avail_out = Q), C = qA.inflate(g, E), C === xQ && B && (C = qA.inflateSetDictionary(g, B), C === ig ? C = qA.inflate(g, E) : C === uC && (C = xQ)); g.avail_in > 0 && C === TQ && g.state.wrap > 0 && A[g.next_in] !== 0; )
       qA.inflateReset(g), C = qA.inflate(g, E);
     switch (C) {
       case _w:
-      case pC:
+      case uC:
       case xQ:
       case $w:
         return this.onEnd(C), this.ended = !0, !1;
@@ -2212,16 +2212,16 @@ sg.prototype.onData = function(A) {
 sg.prototype.onEnd = function(A) {
   A === ig && (this.options.to === "string" ? this.result = this.chunks.join("") : this.result = Zg.flattenChunks(this.chunks)), this.chunks = [], this.err = A, this.msg = this.strm.msg;
 };
-function NB(A, I) {
+function kB(A, I) {
   const g = new sg(I);
   if (g.push(A), g.err)
     throw g.msg || RI[g.err];
   return g.result;
 }
 function Ao(A, I) {
-  return I = I || {}, I.raw = !0, NB(A, I);
+  return I = I || {}, I.raw = !0, kB(A, I);
 }
-var Io = sg, go = NB, Qo = Ao, Bo = NB, Co = wg, Eo = {
+var Io = sg, go = kB, Qo = Ao, Bo = kB, Co = wg, Eo = {
   Inflate: Io,
   inflate: go,
   inflateRaw: Qo,
@@ -2229,41 +2229,41 @@ var Io = sg, go = NB, Qo = Ao, Bo = NB, Co = wg, Eo = {
   constants: Co
 };
 const { Inflate: io, inflate: Do, inflateRaw: Ts, ungzip: xs } = Eo;
-var uC = io, wo = Do;
-const VE = [];
+var bC = io, wo = Do;
+const ZE = [];
 for (let A = 0; A < 256; A++) {
   let I = A;
   for (let g = 0; g < 8; g++)
     I & 1 ? I = 3988292384 ^ I >>> 1 : I = I >>> 1;
-  VE[A] = I;
+  ZE[A] = I;
 }
-const bC = 4294967295;
+const mC = 4294967295;
 function oo(A, I, g) {
   let Q = A;
   for (let B = 0; B < g; B++)
-    Q = VE[(Q ^ I[B]) & 255] ^ Q >>> 8;
+    Q = ZE[(Q ^ I[B]) & 255] ^ Q >>> 8;
   return Q;
 }
 function so(A, I) {
-  return (oo(bC, A, I) ^ bC) >>> 0;
+  return (oo(mC, A, I) ^ mC) >>> 0;
 }
-function mC(A, I, g) {
+function PC(A, I, g) {
   const Q = A.readUint32(), B = so(new Uint8Array(A.buffer, A.byteOffset + A.offset - I - 4, I), I);
   if (B !== Q)
     throw new Error(`CRC mismatch for chunk ${g}. Expected ${Q}, found ${B}`);
 }
-function ZE(A, I, g) {
+function XE(A, I, g) {
   for (let Q = 0; Q < g; Q++)
     I[Q] = A[Q];
 }
-function XE(A, I, g, Q) {
+function vE(A, I, g, Q) {
   let B = 0;
   for (; B < Q; B++)
     I[B] = A[B];
   for (; B < g; B++)
     I[B] = A[B] + I[B - Q] & 255;
 }
-function vE(A, I, g, Q) {
+function zE(A, I, g, Q) {
   let B = 0;
   if (g.length === 0)
     for (; B < Q; B++)
@@ -2272,7 +2272,7 @@ function vE(A, I, g, Q) {
     for (; B < Q; B++)
       I[B] = A[B] + g[B] & 255;
 }
-function zE(A, I, g, Q, B) {
+function WE(A, I, g, Q, B) {
   let C = 0;
   if (g.length === 0) {
     for (; C < B; C++)
@@ -2286,7 +2286,7 @@ function zE(A, I, g, Q, B) {
       I[C] = A[C] + (I[C - B] + g[C] >> 1) & 255;
   }
 }
-function WE(A, I, g, Q, B) {
+function _E(A, I, g, Q, B) {
   let C = 0;
   if (g.length === 0) {
     for (; C < B; C++)
@@ -2307,19 +2307,19 @@ function to(A, I, g) {
 function eo(A, I, g, Q, B, C) {
   switch (A) {
     case 0:
-      ZE(I, g, B);
+      XE(I, g, B);
       break;
     case 1:
-      XE(I, g, B, C);
+      vE(I, g, B, C);
       break;
     case 2:
-      vE(I, g, Q, B);
+      zE(I, g, Q, B);
       break;
     case 3:
-      zE(I, g, Q, B, C);
+      WE(I, g, Q, B, C);
       break;
     case 4:
-      WE(I, g, Q, B, C);
+      _E(I, g, Q, B, C);
       break;
     default:
       throw new Error(`Unsupported filter: ${A}`);
@@ -2350,10 +2350,10 @@ function ko(A) {
       continue;
     const N = t * i, h = new Uint8Array(N);
     for (let c = 0; c < e; c++) {
-      const r = I[D++], G = I.subarray(D, D + N);
+      const L = I[D++], G = I.subarray(D, D + N);
       D += N;
       const U = new Uint8Array(N);
-      eo(r, G, U, h, N, i), h.set(U);
+      eo(L, G, U, h, N, i), h.set(U);
       for (let F = 0; F < t; F++) {
         const y = s.x + F * s.xStep, S = s.y + c * s.yStep;
         if (!(y >= g || S >= Q))
@@ -2375,25 +2375,25 @@ function Mo(A) {
   return (A & 255) << 8 | A >> 8 & 255;
 }
 const Go = new Uint16Array([255]), co = new Uint8Array(Go.buffer), Fo = co[0] === 255, Uo = new Uint8Array(0);
-function PC(A) {
+function jC(A) {
   const { data: I, width: g, height: Q, channels: B, depth: C } = A, E = Math.ceil(C / 8) * B, i = Math.ceil(C / 8 * B * g), o = new Uint8Array(Q * i);
   let D = Uo, w = 0, s, t;
   for (let e = 0; e < Q; e++) {
     switch (s = I.subarray(w + 1, w + 1 + i), t = o.subarray(e * i, (e + 1) * i), I[w]) {
       case 0:
-        ZE(s, t, i);
+        XE(s, t, i);
         break;
       case 1:
-        XE(s, t, i, E);
+        vE(s, t, i, E);
         break;
       case 2:
-        vE(s, t, D, i);
+        zE(s, t, D, i);
         break;
       case 3:
-        zE(s, t, D, i, E);
+        WE(s, t, D, i, E);
         break;
       case 4:
-        WE(s, t, D, i, E);
+        _E(s, t, D, i, E);
         break;
       default:
         throw new Error(`Unsupported filter: ${I[w]}`);
@@ -2413,11 +2413,11 @@ function Jo(A) {
   return (A & 255) << 8 | A >> 8 & 255;
 }
 const qg = Uint8Array.of(137, 80, 78, 71, 13, 10, 26, 10);
-function jC(A) {
-  if (!Lo(A.readBytes(qg.length)))
+function VC(A) {
+  if (!ro(A.readBytes(qg.length)))
     throw new Error("wrong PNG signature");
 }
-function Lo(A) {
+function ro(A) {
   if (A.length < qg.length)
     return !1;
   for (let I = 0; I < qg.length; I++)
@@ -2425,7 +2425,7 @@ function Lo(A) {
       return !1;
   return !0;
 }
-const ro = "tEXt", Ro = 0, _E = new TextDecoder("latin1");
+const Lo = "tEXt", Ro = 0, $E = new TextDecoder("latin1");
 function yo(A) {
   if (So(A), A.length === 0 || A.length > 79)
     throw new Error("keyword length must be between 1 and 79");
@@ -2436,19 +2436,19 @@ function So(A) {
     throw new Error("invalid latin1 text");
 }
 function Ho(A, I, g) {
-  const Q = $E(I);
+  const Q = Ai(I);
   A[Q] = Yo(I, g - Q.length - 1);
 }
-function $E(A) {
+function Ai(A) {
   for (A.mark(); A.readByte() !== Ro; )
     ;
   const I = A.offset;
   A.reset();
-  const g = _E.decode(A.readBytes(I - A.offset - 1));
+  const g = $E.decode(A.readBytes(I - A.offset - 1));
   return A.skip(1), yo(g), g;
 }
 function Yo(A, I) {
-  return _E.decode(A.readBytes(I));
+  return $E.decode(A.readBytes(I));
 }
 const hA = {
   UNKNOWN: -1,
@@ -2460,7 +2460,7 @@ const hA = {
 }, pQ = {
   UNKNOWN: -1,
   DEFLATE: 0
-}, VC = {
+}, ZC = {
   UNKNOWN: -1,
   ADAPTIVE: 0
 }, uQ = {
@@ -2475,7 +2475,7 @@ const hA = {
   SOURCE: 0,
   OVER: 1
 };
-class lo extends wB {
+class lo extends oB {
   constructor(g, Q = {}) {
     super(g);
     j(this, "_checkCrc");
@@ -2497,7 +2497,7 @@ class lo extends wB {
     j(this, "_frames");
     j(this, "_writingDataChunks");
     const { checkCrc: B = !1 } = Q;
-    this._checkCrc = B, this._inflator = new uC(), this._png = {
+    this._checkCrc = B, this._inflator = new bC(), this._png = {
       width: -1,
       height: -1,
       channels: -1,
@@ -2513,17 +2513,17 @@ class lo extends wB {
       numberOfPlays: 0,
       text: {},
       frames: []
-    }, this._end = !1, this._hasPalette = !1, this._palette = [], this._hasTransparency = !1, this._transparency = new Uint16Array(0), this._compressionMethod = pQ.UNKNOWN, this._filterMethod = VC.UNKNOWN, this._interlaceMethod = uQ.UNKNOWN, this._colorType = hA.UNKNOWN, this._isAnimated = !1, this._numberOfFrames = 1, this._numberOfPlays = 0, this._frames = [], this._writingDataChunks = !1, this.setBigEndian();
+    }, this._end = !1, this._hasPalette = !1, this._palette = [], this._hasTransparency = !1, this._transparency = new Uint16Array(0), this._compressionMethod = pQ.UNKNOWN, this._filterMethod = ZC.UNKNOWN, this._interlaceMethod = uQ.UNKNOWN, this._colorType = hA.UNKNOWN, this._isAnimated = !1, this._numberOfFrames = 1, this._numberOfPlays = 0, this._frames = [], this._writingDataChunks = !1, this.setBigEndian();
   }
   decode() {
-    for (jC(this); !this._end; ) {
+    for (VC(this); !this._end; ) {
       const g = this.readUint32(), Q = this.readChars(4);
       this.decodeChunk(g, Q);
     }
     return this.decodeImage(), this._png;
   }
   decodeApng() {
-    for (jC(this); !this._end; ) {
+    for (VC(this); !this._end; ) {
       const g = this.readUint32(), Q = this.readChars(4);
       this.decodeApngChunk(g, Q);
     }
@@ -2551,7 +2551,7 @@ class lo extends wB {
       case "iCCP":
         this.decodeiCCP(g);
         break;
-      case ro:
+      case Lo:
         Ho(this._png.text, this, g);
         break;
       case "pHYs":
@@ -2563,7 +2563,7 @@ class lo extends wB {
     }
     if (this.offset - B !== g)
       throw new Error(`Length mismatch while decoding chunk ${Q}`);
-    this._checkCrc ? mC(this, g + 4, Q) : this.skip(4);
+    this._checkCrc ? PC(this, g + 4, Q) : this.skip(4);
   }
   decodeApngChunk(g, Q) {
     const B = this.offset;
@@ -2583,7 +2583,7 @@ class lo extends wB {
     }
     if (this.offset - B !== g)
       throw new Error(`Length mismatch while decoding chunk ${Q}`);
-    this._checkCrc ? mC(this, g + 4, Q) : this.skip(4);
+    this._checkCrc ? PC(this, g + 4, Q) : this.skip(4);
   }
   // https://www.w3.org/TR/PNG/#11IHDR
   decodeIHDR() {
@@ -2695,7 +2695,7 @@ class lo extends wB {
   }
   // https://www.w3.org/TR/PNG/#11iCCP
   decodeiCCP(g) {
-    const Q = $E(this), B = this.readUint8();
+    const Q = Ai(this), B = this.readUint8();
     if (B !== pQ.DEFLATE)
       throw new Error(`Unsupported iCCP compression method: ${B}`);
     const C = this.readBytes(g - Q.length - 2);
@@ -2723,7 +2723,7 @@ class lo extends wB {
         data: this._apng.depth === 8 ? new Uint8Array(this._apng.width * this._apng.height * this._apng.channels) : new Uint16Array(this._apng.width * this._apng.height * this._apng.channels)
       }, B = this._frames.at(g);
       if (B) {
-        if (B.data = PC({
+        if (B.data = jC({
           data: B.data,
           width: B.width,
           height: B.height,
@@ -2792,10 +2792,10 @@ class lo extends wB {
     if (this._inflator.err)
       throw new Error(`Error while decompressing the data: ${this._inflator.err}`);
     const g = this._isAnimated ? ((Q = this._frames) == null ? void 0 : Q.at(0)).data : this._inflator.result;
-    if (this._filterMethod !== VC.ADAPTIVE)
+    if (this._filterMethod !== ZC.ADAPTIVE)
       throw new Error(`Filter method ${this._filterMethod} not supported`);
     if (this._interlaceMethod === uQ.NO_INTERLACE)
-      this._png.data = PC({
+      this._png.data = jC({
         data: g,
         width: this._png.width,
         height: this._png.height,
@@ -2827,7 +2827,7 @@ class lo extends wB {
       disposeOp: Kg.NONE,
       blendOp: bQ.SOURCE,
       data: g
-    }), this._inflator = new uC(), this._writingDataChunks = !1;
+    }), this._inflator = new bC(), this._writingDataChunks = !1;
   }
 }
 function fo(A) {
@@ -2838,10 +2838,10 @@ function fo(A) {
 function Ko(A, I) {
   return new lo(A, I).decode();
 }
-let ZC = 0;
+let XC = 0;
 class Oo {
   constructor() {
-    this.value = ++ZC, this.state = 0;
+    this.value = ++XC, this.state = 0;
   }
   write(I) {
     for (let g = 0; g < I.length; g++) {
@@ -2860,16 +2860,16 @@ class Oo {
           Q === 27 && (this.state = 4);
           break;
         case 4:
-          Q === 92 ? (this.value = ++ZC, this.state = 0) : this.state = Q === 27 ? 4 : 3;
+          Q === 92 ? (this.value = ++XC, this.state = 0) : this.state = Q === 27 ? 4 : 3;
           break;
       }
     }
   }
 }
-var kB = /* @__PURE__ */ ((A) => (A[A.CURSOR_KEY_APPLICATION = 0] = "CURSOR_KEY_APPLICATION", A[A.KEYPAD_KEY_APPLICATION = 1] = "KEYPAD_KEY_APPLICATION", A[A.IGNORE_KEYPAD_WITH_NUMLOCK = 2] = "IGNORE_KEYPAD_WITH_NUMLOCK", A[A.ALT_ESC_PREFIX = 3] = "ALT_ESC_PREFIX", A[A.MODIFY_OTHER_KEYS_STATE_2 = 4] = "MODIFY_OTHER_KEYS_STATE_2", A[A.KITTY_KEYBOARD_FLAGS = 5] = "KITTY_KEYBOARD_FLAGS", A))(kB || {}), Ai = /* @__PURE__ */ ((A) => (A[A.RELEASE = 0] = "RELEASE", A[A.PRESS = 1] = "PRESS", A[A.REPEAT = 2] = "REPEAT", A))(Ai || {}), M = /* @__PURE__ */ ((A) => (A[A.UNIDENTIFIED = 0] = "UNIDENTIFIED", A[A.GRAVE = 1] = "GRAVE", A[A.BACKSLASH = 2] = "BACKSLASH", A[A.BRACKET_LEFT = 3] = "BRACKET_LEFT", A[A.BRACKET_RIGHT = 4] = "BRACKET_RIGHT", A[A.COMMA = 5] = "COMMA", A[A.ZERO = 6] = "ZERO", A[A.ONE = 7] = "ONE", A[A.TWO = 8] = "TWO", A[A.THREE = 9] = "THREE", A[A.FOUR = 10] = "FOUR", A[A.FIVE = 11] = "FIVE", A[A.SIX = 12] = "SIX", A[A.SEVEN = 13] = "SEVEN", A[A.EIGHT = 14] = "EIGHT", A[A.NINE = 15] = "NINE", A[A.EQUAL = 16] = "EQUAL", A[A.INTL_BACKSLASH = 17] = "INTL_BACKSLASH", A[A.INTL_RO = 18] = "INTL_RO", A[A.INTL_YEN = 19] = "INTL_YEN", A[A.A = 20] = "A", A[A.B = 21] = "B", A[A.C = 22] = "C", A[A.D = 23] = "D", A[A.E = 24] = "E", A[A.F = 25] = "F", A[A.G = 26] = "G", A[A.H = 27] = "H", A[A.I = 28] = "I", A[A.J = 29] = "J", A[A.K = 30] = "K", A[A.L = 31] = "L", A[A.M = 32] = "M", A[A.N = 33] = "N", A[A.O = 34] = "O", A[A.P = 35] = "P", A[A.Q = 36] = "Q", A[A.R = 37] = "R", A[A.S = 38] = "S", A[A.T = 39] = "T", A[A.U = 40] = "U", A[A.V = 41] = "V", A[A.W = 42] = "W", A[A.X = 43] = "X", A[A.Y = 44] = "Y", A[A.Z = 45] = "Z", A[A.MINUS = 46] = "MINUS", A[A.PERIOD = 47] = "PERIOD", A[A.QUOTE = 48] = "QUOTE", A[A.SEMICOLON = 49] = "SEMICOLON", A[A.SLASH = 50] = "SLASH", A[A.ALT_LEFT = 51] = "ALT_LEFT", A[A.ALT_RIGHT = 52] = "ALT_RIGHT", A[A.BACKSPACE = 53] = "BACKSPACE", A[A.CAPS_LOCK = 54] = "CAPS_LOCK", A[A.CONTEXT_MENU = 55] = "CONTEXT_MENU", A[A.CONTROL_LEFT = 56] = "CONTROL_LEFT", A[A.CONTROL_RIGHT = 57] = "CONTROL_RIGHT", A[A.ENTER = 58] = "ENTER", A[A.META_LEFT = 59] = "META_LEFT", A[A.META_RIGHT = 60] = "META_RIGHT", A[A.SHIFT_LEFT = 61] = "SHIFT_LEFT", A[A.SHIFT_RIGHT = 62] = "SHIFT_RIGHT", A[A.SPACE = 63] = "SPACE", A[A.TAB = 64] = "TAB", A[A.CONVERT = 65] = "CONVERT", A[A.KANA_MODE = 66] = "KANA_MODE", A[A.NON_CONVERT = 67] = "NON_CONVERT", A[A.DELETE = 68] = "DELETE", A[A.END = 69] = "END", A[A.HELP = 70] = "HELP", A[A.HOME = 71] = "HOME", A[A.INSERT = 72] = "INSERT", A[A.PAGE_DOWN = 73] = "PAGE_DOWN", A[A.PAGE_UP = 74] = "PAGE_UP", A[A.DOWN = 75] = "DOWN", A[A.LEFT = 76] = "LEFT", A[A.RIGHT = 77] = "RIGHT", A[A.UP = 78] = "UP", A[A.NUM_LOCK = 79] = "NUM_LOCK", A[A.KP_0 = 80] = "KP_0", A[A.KP_1 = 81] = "KP_1", A[A.KP_2 = 82] = "KP_2", A[A.KP_3 = 83] = "KP_3", A[A.KP_4 = 84] = "KP_4", A[A.KP_5 = 85] = "KP_5", A[A.KP_6 = 86] = "KP_6", A[A.KP_7 = 87] = "KP_7", A[A.KP_8 = 88] = "KP_8", A[A.KP_9 = 89] = "KP_9", A[A.KP_PLUS = 90] = "KP_PLUS", A[A.KP_BACKSPACE = 91] = "KP_BACKSPACE", A[A.KP_CLEAR = 92] = "KP_CLEAR", A[A.KP_CLEAR_ENTRY = 93] = "KP_CLEAR_ENTRY", A[A.KP_COMMA = 94] = "KP_COMMA", A[A.KP_PERIOD = 95] = "KP_PERIOD", A[A.KP_DIVIDE = 96] = "KP_DIVIDE", A[A.KP_ENTER = 97] = "KP_ENTER", A[A.KP_EQUAL = 98] = "KP_EQUAL", A[A.KP_MEMORY_ADD = 99] = "KP_MEMORY_ADD", A[A.KP_MEMORY_CLEAR = 100] = "KP_MEMORY_CLEAR", A[A.KP_MEMORY_RECALL = 101] = "KP_MEMORY_RECALL", A[A.KP_MEMORY_STORE = 102] = "KP_MEMORY_STORE", A[A.KP_MEMORY_SUBTRACT = 103] = "KP_MEMORY_SUBTRACT", A[A.KP_MULTIPLY = 104] = "KP_MULTIPLY", A[A.KP_PAREN_LEFT = 105] = "KP_PAREN_LEFT", A[A.KP_PAREN_RIGHT = 106] = "KP_PAREN_RIGHT", A[A.KP_MINUS = 107] = "KP_MINUS", A[A.KP_SEPARATOR = 108] = "KP_SEPARATOR", A[A.NUMPAD_UP = 109] = "NUMPAD_UP", A[A.NUMPAD_DOWN = 110] = "NUMPAD_DOWN", A[A.NUMPAD_RIGHT = 111] = "NUMPAD_RIGHT", A[A.NUMPAD_LEFT = 112] = "NUMPAD_LEFT", A[A.NUMPAD_BEGIN = 113] = "NUMPAD_BEGIN", A[A.NUMPAD_HOME = 114] = "NUMPAD_HOME", A[A.NUMPAD_END = 115] = "NUMPAD_END", A[A.NUMPAD_INSERT = 116] = "NUMPAD_INSERT", A[A.NUMPAD_DELETE = 117] = "NUMPAD_DELETE", A[A.NUMPAD_PAGE_UP = 118] = "NUMPAD_PAGE_UP", A[A.NUMPAD_PAGE_DOWN = 119] = "NUMPAD_PAGE_DOWN", A[A.ESCAPE = 120] = "ESCAPE", A[A.F1 = 121] = "F1", A[A.F2 = 122] = "F2", A[A.F3 = 123] = "F3", A[A.F4 = 124] = "F4", A[A.F5 = 125] = "F5", A[A.F6 = 126] = "F6", A[A.F7 = 127] = "F7", A[A.F8 = 128] = "F8", A[A.F9 = 129] = "F9", A[A.F10 = 130] = "F10", A[A.F11 = 131] = "F11", A[A.F12 = 132] = "F12", A[A.F13 = 133] = "F13", A[A.F14 = 134] = "F14", A[A.F15 = 135] = "F15", A[A.F16 = 136] = "F16", A[A.F17 = 137] = "F17", A[A.F18 = 138] = "F18", A[A.F19 = 139] = "F19", A[A.F20 = 140] = "F20", A[A.F21 = 141] = "F21", A[A.F22 = 142] = "F22", A[A.F23 = 143] = "F23", A[A.F24 = 144] = "F24", A[A.F25 = 145] = "F25", A[A.FN_LOCK = 146] = "FN_LOCK", A[A.PRINT_SCREEN = 147] = "PRINT_SCREEN", A[A.SCROLL_LOCK = 148] = "SCROLL_LOCK", A[A.PAUSE = 149] = "PAUSE", A[A.BROWSER_BACK = 150] = "BROWSER_BACK", A[A.BROWSER_FAVORITES = 151] = "BROWSER_FAVORITES", A[A.BROWSER_FORWARD = 152] = "BROWSER_FORWARD", A[A.BROWSER_HOME = 153] = "BROWSER_HOME", A[A.BROWSER_REFRESH = 154] = "BROWSER_REFRESH", A[A.BROWSER_SEARCH = 155] = "BROWSER_SEARCH", A[A.BROWSER_STOP = 156] = "BROWSER_STOP", A[A.EJECT = 157] = "EJECT", A[A.LAUNCH_APP_1 = 158] = "LAUNCH_APP_1", A[A.LAUNCH_APP_2 = 159] = "LAUNCH_APP_2", A[A.LAUNCH_MAIL = 160] = "LAUNCH_MAIL", A[A.MEDIA_PLAY_PAUSE = 161] = "MEDIA_PLAY_PAUSE", A[A.MEDIA_SELECT = 162] = "MEDIA_SELECT", A[A.MEDIA_STOP = 163] = "MEDIA_STOP", A[A.MEDIA_TRACK_NEXT = 164] = "MEDIA_TRACK_NEXT", A[A.MEDIA_TRACK_PREVIOUS = 165] = "MEDIA_TRACK_PREVIOUS", A[A.POWER = 166] = "POWER", A[A.SLEEP = 167] = "SLEEP", A[A.AUDIO_VOLUME_DOWN = 168] = "AUDIO_VOLUME_DOWN", A[A.AUDIO_VOLUME_MUTE = 169] = "AUDIO_VOLUME_MUTE", A[A.AUDIO_VOLUME_UP = 170] = "AUDIO_VOLUME_UP", A[A.WAKE_UP = 171] = "WAKE_UP", A[A.COPY = 172] = "COPY", A[A.CUT = 173] = "CUT", A[A.PASTE = 174] = "PASTE", A))(M || {}), KA = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.SHIFT = 1] = "SHIFT", A[A.CTRL = 2] = "CTRL", A[A.ALT = 4] = "ALT", A[A.SUPER = 8] = "SUPER", A[A.CAPSLOCK = 16] = "CAPSLOCK", A[A.NUMLOCK = 32] = "NUMLOCK", A))(KA || {}), Tg = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.PARTIAL = 1] = "PARTIAL", A[A.FULL = 2] = "FULL", A))(Tg || {}), DA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.DIRTY = 3] = "DIRTY", A[A.ROW_ITERATOR = 4] = "ROW_ITERATOR", A[A.COLOR_BACKGROUND = 5] = "COLOR_BACKGROUND", A[A.COLOR_FOREGROUND = 6] = "COLOR_FOREGROUND", A[A.COLOR_CURSOR = 7] = "COLOR_CURSOR", A[A.COLOR_CURSOR_HAS_VALUE = 8] = "COLOR_CURSOR_HAS_VALUE", A[A.COLOR_PALETTE = 9] = "COLOR_PALETTE", A[A.CURSOR_VISUAL_STYLE = 10] = "CURSOR_VISUAL_STYLE", A[A.CURSOR_VISIBLE = 11] = "CURSOR_VISIBLE", A[A.CURSOR_BLINKING = 12] = "CURSOR_BLINKING", A[A.CURSOR_PASSWORD_INPUT = 13] = "CURSOR_PASSWORD_INPUT", A[A.CURSOR_VIEWPORT_HAS_VALUE = 14] = "CURSOR_VIEWPORT_HAS_VALUE", A[A.CURSOR_VIEWPORT_X = 15] = "CURSOR_VIEWPORT_X", A[A.CURSOR_VIEWPORT_Y = 16] = "CURSOR_VIEWPORT_Y", A[A.CURSOR_VIEWPORT_WIDE_TAIL = 17] = "CURSOR_VIEWPORT_WIDE_TAIL", A))(DA || {}), Ii = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Ii || {}), gB = /* @__PURE__ */ ((A) => (A[A.BAR = 0] = "BAR", A[A.BLOCK = 1] = "BLOCK", A[A.UNDERLINE = 2] = "UNDERLINE", A[A.BLOCK_HOLLOW = 3] = "BLOCK_HOLLOW", A))(gB || {}), ZA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.CURSOR_X = 3] = "CURSOR_X", A[A.CURSOR_Y = 4] = "CURSOR_Y", A[A.CURSOR_PENDING_WRAP = 5] = "CURSOR_PENDING_WRAP", A[A.ACTIVE_SCREEN = 6] = "ACTIVE_SCREEN", A[A.CURSOR_VISIBLE = 7] = "CURSOR_VISIBLE", A[A.KITTY_KEYBOARD_FLAGS = 8] = "KITTY_KEYBOARD_FLAGS", A[A.SCROLLBAR = 9] = "SCROLLBAR", A[A.CURSOR_STYLE = 10] = "CURSOR_STYLE", A[A.MOUSE_TRACKING = 11] = "MOUSE_TRACKING", A[A.TITLE = 12] = "TITLE", A[A.PWD = 13] = "PWD", A[A.TOTAL_ROWS = 14] = "TOTAL_ROWS", A[A.SCROLLBACK_ROWS = 15] = "SCROLLBACK_ROWS", A[A.WIDTH_PX = 16] = "WIDTH_PX", A[A.HEIGHT_PX = 17] = "HEIGHT_PX", A[A.COLOR_FOREGROUND = 18] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 19] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 20] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 21] = "COLOR_PALETTE", A[A.COLOR_FOREGROUND_DEFAULT = 22] = "COLOR_FOREGROUND_DEFAULT", A[A.COLOR_BACKGROUND_DEFAULT = 23] = "COLOR_BACKGROUND_DEFAULT", A[A.COLOR_CURSOR_DEFAULT = 24] = "COLOR_CURSOR_DEFAULT", A[A.COLOR_PALETTE_DEFAULT = 25] = "COLOR_PALETTE_DEFAULT", A[A.KITTY_IMAGE_STORAGE_LIMIT = 26] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_GRAPHICS = 30] = "KITTY_GRAPHICS", A[A.MODE = 37] = "MODE", A))(ZA || {}), aA = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.WRITE_PTY = 1] = "WRITE_PTY", A[A.BELL = 2] = "BELL", A[A.ENQUIRY = 3] = "ENQUIRY", A[A.XTVERSION = 4] = "XTVERSION", A[A.TITLE_CHANGED = 5] = "TITLE_CHANGED", A[A.SIZE = 6] = "SIZE", A[A.COLOR_FOREGROUND = 11] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 12] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 13] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 14] = "COLOR_PALETTE", A[A.KITTY_IMAGE_STORAGE_LIMIT = 15] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_IMAGE_MEDIUM_SHARED_MEM = 18] = "KITTY_IMAGE_MEDIUM_SHARED_MEM", A[A.SCROLLBACK_MAX_BYTES = 27] = "SCROLLBACK_MAX_BYTES", A[A.SCROLLBACK_MAX_LINES = 28] = "SCROLLBACK_MAX_LINES", A[A.MODE_DEFAULT = 33] = "MODE_DEFAULT", A[A.MODE = 34] = "MODE", A[A.PROGRAM_STATUS = 46] = "PROGRAM_STATUS", A))(aA || {}), QB = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.DECODE_PNG = 1] = "DECODE_PNG", A[A.LOG = 2] = "LOG", A[A.RANDOM_SECURE = 3] = "RANDOM_SECURE", A[A.READ_SHARED_MEMORY = 4] = "READ_SHARED_MEMORY", A))(QB || {}), gi = /* @__PURE__ */ ((A) => (A[A.PLACEMENT_ITERATOR = 1] = "PLACEMENT_ITERATOR", A))(gi || {}), BB = /* @__PURE__ */ ((A) => (A[A.IMAGE_ID = 1] = "IMAGE_ID", A[A.PLACEMENT_ID = 2] = "PLACEMENT_ID", A[A.IS_VIRTUAL = 3] = "IS_VIRTUAL", A[A.X_OFFSET = 4] = "X_OFFSET", A[A.Y_OFFSET = 5] = "Y_OFFSET", A[A.SOURCE_X = 6] = "SOURCE_X", A[A.SOURCE_Y = 7] = "SOURCE_Y", A[A.SOURCE_WIDTH = 8] = "SOURCE_WIDTH", A[A.SOURCE_HEIGHT = 9] = "SOURCE_HEIGHT", A[A.COLUMNS = 10] = "COLUMNS", A[A.ROWS = 11] = "ROWS", A[A.Z = 12] = "Z", A))(BB || {}), FI = /* @__PURE__ */ ((A) => (A[A.ID = 1] = "ID", A[A.NUMBER = 2] = "NUMBER", A[A.WIDTH = 3] = "WIDTH", A[A.HEIGHT = 4] = "HEIGHT", A[A.FORMAT = 5] = "FORMAT", A[A.COMPRESSION = 6] = "COMPRESSION", A[A.DATA_PTR = 7] = "DATA_PTR", A[A.DATA_LEN = 8] = "DATA_LEN", A))(FI || {}), TA = /* @__PURE__ */ ((A) => (A[A.RGB = 0] = "RGB", A[A.RGBA = 1] = "RGBA", A[A.PNG = 2] = "PNG", A[A.GRAY_ALPHA = 3] = "GRAY_ALPHA", A[A.GRAY = 4] = "GRAY", A))(TA || {});
+var MB = /* @__PURE__ */ ((A) => (A[A.CURSOR_KEY_APPLICATION = 0] = "CURSOR_KEY_APPLICATION", A[A.KEYPAD_KEY_APPLICATION = 1] = "KEYPAD_KEY_APPLICATION", A[A.IGNORE_KEYPAD_WITH_NUMLOCK = 2] = "IGNORE_KEYPAD_WITH_NUMLOCK", A[A.ALT_ESC_PREFIX = 3] = "ALT_ESC_PREFIX", A[A.MODIFY_OTHER_KEYS_STATE_2 = 4] = "MODIFY_OTHER_KEYS_STATE_2", A[A.KITTY_KEYBOARD_FLAGS = 5] = "KITTY_KEYBOARD_FLAGS", A))(MB || {}), gB = /* @__PURE__ */ ((A) => (A[A.RELEASE = 0] = "RELEASE", A[A.PRESS = 1] = "PRESS", A[A.REPEAT = 2] = "REPEAT", A))(gB || {}), M = /* @__PURE__ */ ((A) => (A[A.UNIDENTIFIED = 0] = "UNIDENTIFIED", A[A.GRAVE = 1] = "GRAVE", A[A.BACKSLASH = 2] = "BACKSLASH", A[A.BRACKET_LEFT = 3] = "BRACKET_LEFT", A[A.BRACKET_RIGHT = 4] = "BRACKET_RIGHT", A[A.COMMA = 5] = "COMMA", A[A.ZERO = 6] = "ZERO", A[A.ONE = 7] = "ONE", A[A.TWO = 8] = "TWO", A[A.THREE = 9] = "THREE", A[A.FOUR = 10] = "FOUR", A[A.FIVE = 11] = "FIVE", A[A.SIX = 12] = "SIX", A[A.SEVEN = 13] = "SEVEN", A[A.EIGHT = 14] = "EIGHT", A[A.NINE = 15] = "NINE", A[A.EQUAL = 16] = "EQUAL", A[A.INTL_BACKSLASH = 17] = "INTL_BACKSLASH", A[A.INTL_RO = 18] = "INTL_RO", A[A.INTL_YEN = 19] = "INTL_YEN", A[A.A = 20] = "A", A[A.B = 21] = "B", A[A.C = 22] = "C", A[A.D = 23] = "D", A[A.E = 24] = "E", A[A.F = 25] = "F", A[A.G = 26] = "G", A[A.H = 27] = "H", A[A.I = 28] = "I", A[A.J = 29] = "J", A[A.K = 30] = "K", A[A.L = 31] = "L", A[A.M = 32] = "M", A[A.N = 33] = "N", A[A.O = 34] = "O", A[A.P = 35] = "P", A[A.Q = 36] = "Q", A[A.R = 37] = "R", A[A.S = 38] = "S", A[A.T = 39] = "T", A[A.U = 40] = "U", A[A.V = 41] = "V", A[A.W = 42] = "W", A[A.X = 43] = "X", A[A.Y = 44] = "Y", A[A.Z = 45] = "Z", A[A.MINUS = 46] = "MINUS", A[A.PERIOD = 47] = "PERIOD", A[A.QUOTE = 48] = "QUOTE", A[A.SEMICOLON = 49] = "SEMICOLON", A[A.SLASH = 50] = "SLASH", A[A.ALT_LEFT = 51] = "ALT_LEFT", A[A.ALT_RIGHT = 52] = "ALT_RIGHT", A[A.BACKSPACE = 53] = "BACKSPACE", A[A.CAPS_LOCK = 54] = "CAPS_LOCK", A[A.CONTEXT_MENU = 55] = "CONTEXT_MENU", A[A.CONTROL_LEFT = 56] = "CONTROL_LEFT", A[A.CONTROL_RIGHT = 57] = "CONTROL_RIGHT", A[A.ENTER = 58] = "ENTER", A[A.META_LEFT = 59] = "META_LEFT", A[A.META_RIGHT = 60] = "META_RIGHT", A[A.SHIFT_LEFT = 61] = "SHIFT_LEFT", A[A.SHIFT_RIGHT = 62] = "SHIFT_RIGHT", A[A.SPACE = 63] = "SPACE", A[A.TAB = 64] = "TAB", A[A.CONVERT = 65] = "CONVERT", A[A.KANA_MODE = 66] = "KANA_MODE", A[A.NON_CONVERT = 67] = "NON_CONVERT", A[A.DELETE = 68] = "DELETE", A[A.END = 69] = "END", A[A.HELP = 70] = "HELP", A[A.HOME = 71] = "HOME", A[A.INSERT = 72] = "INSERT", A[A.PAGE_DOWN = 73] = "PAGE_DOWN", A[A.PAGE_UP = 74] = "PAGE_UP", A[A.DOWN = 75] = "DOWN", A[A.LEFT = 76] = "LEFT", A[A.RIGHT = 77] = "RIGHT", A[A.UP = 78] = "UP", A[A.NUM_LOCK = 79] = "NUM_LOCK", A[A.KP_0 = 80] = "KP_0", A[A.KP_1 = 81] = "KP_1", A[A.KP_2 = 82] = "KP_2", A[A.KP_3 = 83] = "KP_3", A[A.KP_4 = 84] = "KP_4", A[A.KP_5 = 85] = "KP_5", A[A.KP_6 = 86] = "KP_6", A[A.KP_7 = 87] = "KP_7", A[A.KP_8 = 88] = "KP_8", A[A.KP_9 = 89] = "KP_9", A[A.KP_PLUS = 90] = "KP_PLUS", A[A.KP_BACKSPACE = 91] = "KP_BACKSPACE", A[A.KP_CLEAR = 92] = "KP_CLEAR", A[A.KP_CLEAR_ENTRY = 93] = "KP_CLEAR_ENTRY", A[A.KP_COMMA = 94] = "KP_COMMA", A[A.KP_PERIOD = 95] = "KP_PERIOD", A[A.KP_DIVIDE = 96] = "KP_DIVIDE", A[A.KP_ENTER = 97] = "KP_ENTER", A[A.KP_EQUAL = 98] = "KP_EQUAL", A[A.KP_MEMORY_ADD = 99] = "KP_MEMORY_ADD", A[A.KP_MEMORY_CLEAR = 100] = "KP_MEMORY_CLEAR", A[A.KP_MEMORY_RECALL = 101] = "KP_MEMORY_RECALL", A[A.KP_MEMORY_STORE = 102] = "KP_MEMORY_STORE", A[A.KP_MEMORY_SUBTRACT = 103] = "KP_MEMORY_SUBTRACT", A[A.KP_MULTIPLY = 104] = "KP_MULTIPLY", A[A.KP_PAREN_LEFT = 105] = "KP_PAREN_LEFT", A[A.KP_PAREN_RIGHT = 106] = "KP_PAREN_RIGHT", A[A.KP_MINUS = 107] = "KP_MINUS", A[A.KP_SEPARATOR = 108] = "KP_SEPARATOR", A[A.NUMPAD_UP = 109] = "NUMPAD_UP", A[A.NUMPAD_DOWN = 110] = "NUMPAD_DOWN", A[A.NUMPAD_RIGHT = 111] = "NUMPAD_RIGHT", A[A.NUMPAD_LEFT = 112] = "NUMPAD_LEFT", A[A.NUMPAD_BEGIN = 113] = "NUMPAD_BEGIN", A[A.NUMPAD_HOME = 114] = "NUMPAD_HOME", A[A.NUMPAD_END = 115] = "NUMPAD_END", A[A.NUMPAD_INSERT = 116] = "NUMPAD_INSERT", A[A.NUMPAD_DELETE = 117] = "NUMPAD_DELETE", A[A.NUMPAD_PAGE_UP = 118] = "NUMPAD_PAGE_UP", A[A.NUMPAD_PAGE_DOWN = 119] = "NUMPAD_PAGE_DOWN", A[A.ESCAPE = 120] = "ESCAPE", A[A.F1 = 121] = "F1", A[A.F2 = 122] = "F2", A[A.F3 = 123] = "F3", A[A.F4 = 124] = "F4", A[A.F5 = 125] = "F5", A[A.F6 = 126] = "F6", A[A.F7 = 127] = "F7", A[A.F8 = 128] = "F8", A[A.F9 = 129] = "F9", A[A.F10 = 130] = "F10", A[A.F11 = 131] = "F11", A[A.F12 = 132] = "F12", A[A.F13 = 133] = "F13", A[A.F14 = 134] = "F14", A[A.F15 = 135] = "F15", A[A.F16 = 136] = "F16", A[A.F17 = 137] = "F17", A[A.F18 = 138] = "F18", A[A.F19 = 139] = "F19", A[A.F20 = 140] = "F20", A[A.F21 = 141] = "F21", A[A.F22 = 142] = "F22", A[A.F23 = 143] = "F23", A[A.F24 = 144] = "F24", A[A.F25 = 145] = "F25", A[A.FN_LOCK = 146] = "FN_LOCK", A[A.PRINT_SCREEN = 147] = "PRINT_SCREEN", A[A.SCROLL_LOCK = 148] = "SCROLL_LOCK", A[A.PAUSE = 149] = "PAUSE", A[A.BROWSER_BACK = 150] = "BROWSER_BACK", A[A.BROWSER_FAVORITES = 151] = "BROWSER_FAVORITES", A[A.BROWSER_FORWARD = 152] = "BROWSER_FORWARD", A[A.BROWSER_HOME = 153] = "BROWSER_HOME", A[A.BROWSER_REFRESH = 154] = "BROWSER_REFRESH", A[A.BROWSER_SEARCH = 155] = "BROWSER_SEARCH", A[A.BROWSER_STOP = 156] = "BROWSER_STOP", A[A.EJECT = 157] = "EJECT", A[A.LAUNCH_APP_1 = 158] = "LAUNCH_APP_1", A[A.LAUNCH_APP_2 = 159] = "LAUNCH_APP_2", A[A.LAUNCH_MAIL = 160] = "LAUNCH_MAIL", A[A.MEDIA_PLAY_PAUSE = 161] = "MEDIA_PLAY_PAUSE", A[A.MEDIA_SELECT = 162] = "MEDIA_SELECT", A[A.MEDIA_STOP = 163] = "MEDIA_STOP", A[A.MEDIA_TRACK_NEXT = 164] = "MEDIA_TRACK_NEXT", A[A.MEDIA_TRACK_PREVIOUS = 165] = "MEDIA_TRACK_PREVIOUS", A[A.POWER = 166] = "POWER", A[A.SLEEP = 167] = "SLEEP", A[A.AUDIO_VOLUME_DOWN = 168] = "AUDIO_VOLUME_DOWN", A[A.AUDIO_VOLUME_MUTE = 169] = "AUDIO_VOLUME_MUTE", A[A.AUDIO_VOLUME_UP = 170] = "AUDIO_VOLUME_UP", A[A.WAKE_UP = 171] = "WAKE_UP", A[A.COPY = 172] = "COPY", A[A.CUT = 173] = "CUT", A[A.PASTE = 174] = "PASTE", A))(M || {}), yA = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.SHIFT = 1] = "SHIFT", A[A.CTRL = 2] = "CTRL", A[A.ALT = 4] = "ALT", A[A.SUPER = 8] = "SUPER", A[A.CAPSLOCK = 16] = "CAPSLOCK", A[A.NUMLOCK = 32] = "NUMLOCK", A))(yA || {}), Tg = /* @__PURE__ */ ((A) => (A[A.NONE = 0] = "NONE", A[A.PARTIAL = 1] = "PARTIAL", A[A.FULL = 2] = "FULL", A))(Tg || {}), DA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.DIRTY = 3] = "DIRTY", A[A.ROW_ITERATOR = 4] = "ROW_ITERATOR", A[A.COLOR_BACKGROUND = 5] = "COLOR_BACKGROUND", A[A.COLOR_FOREGROUND = 6] = "COLOR_FOREGROUND", A[A.COLOR_CURSOR = 7] = "COLOR_CURSOR", A[A.COLOR_CURSOR_HAS_VALUE = 8] = "COLOR_CURSOR_HAS_VALUE", A[A.COLOR_PALETTE = 9] = "COLOR_PALETTE", A[A.CURSOR_VISUAL_STYLE = 10] = "CURSOR_VISUAL_STYLE", A[A.CURSOR_VISIBLE = 11] = "CURSOR_VISIBLE", A[A.CURSOR_BLINKING = 12] = "CURSOR_BLINKING", A[A.CURSOR_PASSWORD_INPUT = 13] = "CURSOR_PASSWORD_INPUT", A[A.CURSOR_VIEWPORT_HAS_VALUE = 14] = "CURSOR_VIEWPORT_HAS_VALUE", A[A.CURSOR_VIEWPORT_X = 15] = "CURSOR_VIEWPORT_X", A[A.CURSOR_VIEWPORT_Y = 16] = "CURSOR_VIEWPORT_Y", A[A.CURSOR_VIEWPORT_WIDE_TAIL = 17] = "CURSOR_VIEWPORT_WIDE_TAIL", A))(DA || {}), Ii = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Ii || {}), QB = /* @__PURE__ */ ((A) => (A[A.BAR = 0] = "BAR", A[A.BLOCK = 1] = "BLOCK", A[A.UNDERLINE = 2] = "UNDERLINE", A[A.BLOCK_HOLLOW = 3] = "BLOCK_HOLLOW", A))(QB || {}), ZA = /* @__PURE__ */ ((A) => (A[A.COLS = 1] = "COLS", A[A.ROWS = 2] = "ROWS", A[A.CURSOR_X = 3] = "CURSOR_X", A[A.CURSOR_Y = 4] = "CURSOR_Y", A[A.CURSOR_PENDING_WRAP = 5] = "CURSOR_PENDING_WRAP", A[A.ACTIVE_SCREEN = 6] = "ACTIVE_SCREEN", A[A.CURSOR_VISIBLE = 7] = "CURSOR_VISIBLE", A[A.KITTY_KEYBOARD_FLAGS = 8] = "KITTY_KEYBOARD_FLAGS", A[A.SCROLLBAR = 9] = "SCROLLBAR", A[A.CURSOR_STYLE = 10] = "CURSOR_STYLE", A[A.MOUSE_TRACKING = 11] = "MOUSE_TRACKING", A[A.TITLE = 12] = "TITLE", A[A.PWD = 13] = "PWD", A[A.TOTAL_ROWS = 14] = "TOTAL_ROWS", A[A.SCROLLBACK_ROWS = 15] = "SCROLLBACK_ROWS", A[A.WIDTH_PX = 16] = "WIDTH_PX", A[A.HEIGHT_PX = 17] = "HEIGHT_PX", A[A.COLOR_FOREGROUND = 18] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 19] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 20] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 21] = "COLOR_PALETTE", A[A.COLOR_FOREGROUND_DEFAULT = 22] = "COLOR_FOREGROUND_DEFAULT", A[A.COLOR_BACKGROUND_DEFAULT = 23] = "COLOR_BACKGROUND_DEFAULT", A[A.COLOR_CURSOR_DEFAULT = 24] = "COLOR_CURSOR_DEFAULT", A[A.COLOR_PALETTE_DEFAULT = 25] = "COLOR_PALETTE_DEFAULT", A[A.KITTY_IMAGE_STORAGE_LIMIT = 26] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_GRAPHICS = 30] = "KITTY_GRAPHICS", A[A.MODE = 37] = "MODE", A))(ZA || {}), aA = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.WRITE_PTY = 1] = "WRITE_PTY", A[A.BELL = 2] = "BELL", A[A.ENQUIRY = 3] = "ENQUIRY", A[A.XTVERSION = 4] = "XTVERSION", A[A.TITLE_CHANGED = 5] = "TITLE_CHANGED", A[A.SIZE = 6] = "SIZE", A[A.COLOR_FOREGROUND = 11] = "COLOR_FOREGROUND", A[A.COLOR_BACKGROUND = 12] = "COLOR_BACKGROUND", A[A.COLOR_CURSOR = 13] = "COLOR_CURSOR", A[A.COLOR_PALETTE = 14] = "COLOR_PALETTE", A[A.KITTY_IMAGE_STORAGE_LIMIT = 15] = "KITTY_IMAGE_STORAGE_LIMIT", A[A.KITTY_IMAGE_MEDIUM_SHARED_MEM = 18] = "KITTY_IMAGE_MEDIUM_SHARED_MEM", A[A.SCROLLBACK_MAX_BYTES = 27] = "SCROLLBACK_MAX_BYTES", A[A.SCROLLBACK_MAX_LINES = 28] = "SCROLLBACK_MAX_LINES", A[A.MODE_DEFAULT = 33] = "MODE_DEFAULT", A[A.MODE = 34] = "MODE", A[A.PROGRAM_STATUS = 46] = "PROGRAM_STATUS", A))(aA || {}), BB = /* @__PURE__ */ ((A) => (A[A.USERDATA = 0] = "USERDATA", A[A.DECODE_PNG = 1] = "DECODE_PNG", A[A.LOG = 2] = "LOG", A[A.RANDOM_SECURE = 3] = "RANDOM_SECURE", A[A.READ_SHARED_MEMORY = 4] = "READ_SHARED_MEMORY", A))(BB || {}), gi = /* @__PURE__ */ ((A) => (A[A.PLACEMENT_ITERATOR = 1] = "PLACEMENT_ITERATOR", A))(gi || {}), CB = /* @__PURE__ */ ((A) => (A[A.IMAGE_ID = 1] = "IMAGE_ID", A[A.PLACEMENT_ID = 2] = "PLACEMENT_ID", A[A.IS_VIRTUAL = 3] = "IS_VIRTUAL", A[A.X_OFFSET = 4] = "X_OFFSET", A[A.Y_OFFSET = 5] = "Y_OFFSET", A[A.SOURCE_X = 6] = "SOURCE_X", A[A.SOURCE_Y = 7] = "SOURCE_Y", A[A.SOURCE_WIDTH = 8] = "SOURCE_WIDTH", A[A.SOURCE_HEIGHT = 9] = "SOURCE_HEIGHT", A[A.COLUMNS = 10] = "COLUMNS", A[A.ROWS = 11] = "ROWS", A[A.Z = 12] = "Z", A))(CB || {}), FI = /* @__PURE__ */ ((A) => (A[A.ID = 1] = "ID", A[A.NUMBER = 2] = "NUMBER", A[A.WIDTH = 3] = "WIDTH", A[A.HEIGHT = 4] = "HEIGHT", A[A.FORMAT = 5] = "FORMAT", A[A.COMPRESSION = 6] = "COMPRESSION", A[A.DATA_PTR = 7] = "DATA_PTR", A[A.DATA_LEN = 8] = "DATA_LEN", A))(FI || {}), TA = /* @__PURE__ */ ((A) => (A[A.RGB = 0] = "RGB", A[A.RGBA = 1] = "RGBA", A[A.PNG = 2] = "PNG", A[A.GRAY_ALPHA = 3] = "GRAY_ALPHA", A[A.GRAY = 4] = "GRAY", A))(TA || {});
 const dg = 48;
-var Qi = /* @__PURE__ */ ((A) => (A[A.PRIMARY = 0] = "PRIMARY", A[A.ALTERNATE = 1] = "ALTERNATE", A))(Qi || {}), BI = /* @__PURE__ */ ((A) => (A[A.DIRTY = 1] = "DIRTY", A[A.RAW = 2] = "RAW", A[A.CELLS = 3] = "CELLS", A))(BI || {}), Bi = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Bi || {}), dA = /* @__PURE__ */ ((A) => (A[A.RAW = 1] = "RAW", A[A.STYLE = 2] = "STYLE", A[A.GRAPHEMES_LEN = 3] = "GRAPHEMES_LEN", A[A.GRAPHEMES_BUF = 4] = "GRAPHEMES_BUF", A[A.BG_COLOR = 5] = "BG_COLOR", A[A.FG_COLOR = 6] = "FG_COLOR", A))(dA || {}), CB = /* @__PURE__ */ ((A) => (A[A.WRAP = 1] = "WRAP", A[A.WRAP_CONTINUATION = 2] = "WRAP_CONTINUATION", A[A.GRAPHEME = 3] = "GRAPHEME", A[A.STYLED = 4] = "STYLED", A[A.HYPERLINK = 5] = "HYPERLINK", A))(CB || {}), ZI = /* @__PURE__ */ ((A) => (A[A.ACTIVE = 0] = "ACTIVE", A[A.VIEWPORT = 1] = "VIEWPORT", A[A.SCREEN = 2] = "SCREEN", A[A.HISTORY = 3] = "HISTORY", A))(ZI || {}), UI = /* @__PURE__ */ ((A) => (A[A.CODEPOINT = 1] = "CODEPOINT", A[A.CONTENT_TAG = 2] = "CONTENT_TAG", A[A.WIDE = 3] = "WIDE", A[A.HAS_TEXT = 4] = "HAS_TEXT", A[A.HAS_STYLING = 5] = "HAS_STYLING", A[A.STYLE_ID = 6] = "STYLE_ID", A[A.HAS_HYPERLINK = 7] = "HAS_HYPERLINK", A[A.PROTECTED = 8] = "PROTECTED", A[A.SEMANTIC_CONTENT = 9] = "SEMANTIC_CONTENT", A[A.COLOR_PALETTE = 10] = "COLOR_PALETTE", A[A.COLOR_RGB = 11] = "COLOR_RGB", A))(UI || {}), CI = /* @__PURE__ */ ((A) => (A[A.NARROW = 0] = "NARROW", A[A.WIDE = 1] = "WIDE", A[A.SPACER_TAIL = 2] = "SPACER_TAIL", A[A.SPACER_HEAD = 3] = "SPACER_HEAD", A))(CI || {});
-function XC(A, I) {
+var Qi = /* @__PURE__ */ ((A) => (A[A.PRIMARY = 0] = "PRIMARY", A[A.ALTERNATE = 1] = "ALTERNATE", A))(Qi || {}), BI = /* @__PURE__ */ ((A) => (A[A.DIRTY = 1] = "DIRTY", A[A.RAW = 2] = "RAW", A[A.CELLS = 3] = "CELLS", A))(BI || {}), Bi = /* @__PURE__ */ ((A) => (A[A.DIRTY = 0] = "DIRTY", A))(Bi || {}), dA = /* @__PURE__ */ ((A) => (A[A.RAW = 1] = "RAW", A[A.STYLE = 2] = "STYLE", A[A.GRAPHEMES_LEN = 3] = "GRAPHEMES_LEN", A[A.GRAPHEMES_BUF = 4] = "GRAPHEMES_BUF", A[A.BG_COLOR = 5] = "BG_COLOR", A[A.FG_COLOR = 6] = "FG_COLOR", A))(dA || {}), EB = /* @__PURE__ */ ((A) => (A[A.WRAP = 1] = "WRAP", A[A.WRAP_CONTINUATION = 2] = "WRAP_CONTINUATION", A[A.GRAPHEME = 3] = "GRAPHEME", A[A.STYLED = 4] = "STYLED", A[A.HYPERLINK = 5] = "HYPERLINK", A))(EB || {}), ZI = /* @__PURE__ */ ((A) => (A[A.ACTIVE = 0] = "ACTIVE", A[A.VIEWPORT = 1] = "VIEWPORT", A[A.SCREEN = 2] = "SCREEN", A[A.HISTORY = 3] = "HISTORY", A))(ZI || {}), UI = /* @__PURE__ */ ((A) => (A[A.CODEPOINT = 1] = "CODEPOINT", A[A.CONTENT_TAG = 2] = "CONTENT_TAG", A[A.WIDE = 3] = "WIDE", A[A.HAS_TEXT = 4] = "HAS_TEXT", A[A.HAS_STYLING = 5] = "HAS_STYLING", A[A.STYLE_ID = 6] = "STYLE_ID", A[A.HAS_HYPERLINK = 7] = "HAS_HYPERLINK", A[A.PROTECTED = 8] = "PROTECTED", A[A.SEMANTIC_CONTENT = 9] = "SEMANTIC_CONTENT", A[A.COLOR_PALETTE = 10] = "COLOR_PALETTE", A[A.COLOR_RGB = 11] = "COLOR_RGB", A))(UI || {}), CI = /* @__PURE__ */ ((A) => (A[A.NARROW = 0] = "NARROW", A[A.WIDE = 1] = "WIDE", A[A.SPACER_TAIL = 2] = "SPACER_TAIL", A[A.SPACER_HEAD = 3] = "SPACER_HEAD", A))(CI || {});
+function vC(A, I) {
   return A & 32767 | (I ? 32768 : 0);
 }
 var d = /* @__PURE__ */ ((A) => (A[A.BOLD = 1] = "BOLD", A[A.ITALIC = 2] = "ITALIC", A[A.UNDERLINE = 4] = "UNDERLINE", A[A.STRIKETHROUGH = 8] = "STRIKETHROUGH", A[A.INVERSE = 16] = "INVERSE", A[A.INVISIBLE = 32] = "INVISIBLE", A[A.BLINK = 64] = "BLINK", A[A.FAINT = 128] = "FAINT", A))(d || {});
@@ -3272,7 +3272,7 @@ class xo {
     new DataView(this.exports.memory.buffer).setUint8(Q, typeof g == "boolean" ? g ? 1 : 0 : g), this.exports.ghostty_key_encoder_setopt(this.encoder, I, Q), this.exports.ghostty_wasm_free(Q, 1);
   }
   setKittyFlags(I) {
-    this.setOption(kB.KITTY_KEYBOARD_FLAGS, I);
+    this.setOption(MB.KITTY_KEYBOARD_FLAGS, I);
   }
   encode(I) {
     const g = this.exports.ghostty_wasm_alloc_opaque(), Q = this.exports.ghostty_key_event_new(0, g);
@@ -3299,7 +3299,7 @@ class xo {
     this.encoder && (this.exports.ghostty_key_encoder_free(this.encoder), this.encoder = 0);
   }
 }
-const Ci = class EB {
+const Ci = class iB {
   constructor(I, g, Q = 80, B = 24, C) {
     this.kittyRevision = new Oo(), this.renderHandle = 0, this.rowIter = 0, this.rowCells = 0, this.cellPool = [], this.cellWidthPx = 0, this.cellHeightPx = 0, this.rowDirtyCache = null, this.rowWrapCache = null, this.pendingResponses = [], this.pendingProgramStatus = [], this.exports = I, this.memory = g, this._cols = Q, this._rows = B;
     const E = this.exports.ghostty_wasm_alloc_opaque();
@@ -3346,7 +3346,7 @@ const Ci = class EB {
       const D = this.exports.ghostty_wasm_alloc(4);
       try {
         const s = new DataView(this.memory.buffer);
-        s.setUint16(D, XC(2027, !1), !0), s.setUint8(D + 2, 1);
+        s.setUint16(D, vC(2027, !1), !0), s.setUint8(D + 2, 1);
         const t = this.exports.ghostty_terminal_set(
           this.handle,
           aA.MODE_DEFAULT,
@@ -3622,7 +3622,7 @@ const Ci = class EB {
         for (; this.exports.ghostty_kitty_graphics_placement_next(B); ) {
           this.exports.ghostty_kitty_graphics_placement_get(
             B,
-            BB.IMAGE_ID,
+            CB.IMAGE_ID,
             i
           );
           const D = new DataView(this.memory.buffer).getUint32(i, !0), w = this.exports.ghostty_kitty_graphics_image(I, D);
@@ -3639,7 +3639,7 @@ const Ci = class EB {
             continue;
           this.exports.ghostty_kitty_graphics_placement_get(
             B,
-            BB.IS_VIRTUAL,
+            CB.IS_VIRTUAL,
             i
             // reuse the 4-byte slot; the value is a bool but written as u8
           );
@@ -3746,7 +3746,7 @@ const Ci = class EB {
    */
   getCursor() {
     this.update();
-    const I = this.rsGetU8(DA.CURSOR_VIEWPORT_HAS_VALUE) !== 0, g = this.rsGetU8(DA.CURSOR_VISIBLE) !== 0, Q = this.rsGetU8(DA.CURSOR_BLINKING) !== 0, B = this.rsGetU32(DA.CURSOR_VISUAL_STYLE), C = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_X) : -1, E = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_Y) : -1, i = B === gB.BAR ? "bar" : B === gB.UNDERLINE ? "underline" : "block";
+    const I = this.rsGetU8(DA.CURSOR_VIEWPORT_HAS_VALUE) !== 0, g = this.rsGetU8(DA.CURSOR_VISIBLE) !== 0, Q = this.rsGetU8(DA.CURSOR_BLINKING) !== 0, B = this.rsGetU32(DA.CURSOR_VISUAL_STYLE), C = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_X) : -1, E = I ? this.rsGetU16(DA.CURSOR_VIEWPORT_Y) : -1, i = B === QB.BAR ? "bar" : B === QB.UNDERLINE ? "underline" : "block";
     return {
       x: Math.max(0, C),
       y: Math.max(0, E),
@@ -3813,7 +3813,7 @@ const Ci = class EB {
         const i = new DataView(this.memory.buffer);
         this.exports.ghostty_render_state_row_get(this.rowIter, BI.DIRTY, Q), I[E] = i.getUint8(Q) !== 0, this.exports.ghostty_render_state_row_get(this.rowIter, BI.RAW, B);
         const o = new DataView(this.memory.buffer).getBigUint64(B, !0);
-        this.exports.ghostty_row_get(o, CB.WRAP_CONTINUATION, C), g[E] = new DataView(this.memory.buffer).getUint8(C) !== 0, E++;
+        this.exports.ghostty_row_get(o, EB.WRAP_CONTINUATION, C), g[E] = new DataView(this.memory.buffer).getUint8(C) !== 0, E++;
       }
     } finally {
       this.exports.ghostty_wasm_free(Q, 1), this.exports.ghostty_wasm_free(B, 8), this.exports.ghostty_wasm_free(C, 1);
@@ -3881,13 +3881,13 @@ const Ci = class EB {
       for (; h < this._rows && this.exports.ghostty_render_state_row_iterator_next(this.rowIter); ) {
         this.exports.ghostty_render_state_row_get(this.rowIter, BI.DIRTY, B), e[h] = new DataView(this.memory.buffer).getUint8(B) !== 0, this.exports.ghostty_render_state_row_get(this.rowIter, BI.RAW, C);
         const c = new DataView(this.memory.buffer).getBigUint64(C, !0);
-        this.exports.ghostty_row_get(c, CB.WRAP_CONTINUATION, E), N[h] = new DataView(this.memory.buffer).getUint8(E) !== 0, this.populateHandle(
+        this.exports.ghostty_row_get(c, EB.WRAP_CONTINUATION, E), N[h] = new DataView(this.memory.buffer).getUint8(E) !== 0, this.populateHandle(
           (G) => this.exports.ghostty_render_state_row_get(this.rowIter, BI.CELLS, G),
           this.rowCells
         );
-        let r = 0;
-        for (; r < this._cols && this.exports.ghostty_render_state_row_cells_next(this.rowCells); ) {
-          const G = this.cellPool[h * this._cols + r];
+        let L = 0;
+        for (; L < this._cols && this.exports.ghostty_render_state_row_cells_next(this.rowCells); ) {
+          const G = this.cellPool[h * this._cols + L];
           this.exports.ghostty_render_state_row_cells_get(
             this.rowCells,
             dA.GRAPHEMES_LEN,
@@ -3895,9 +3895,9 @@ const Ci = class EB {
           );
           const F = new DataView(this.memory.buffer).getUint32(g, !0);
           if (G.grapheme_len = F > 0 ? F - 1 : 0, F > 0) {
-            let k = t, L = !1;
+            let k = t, r = !1;
             const J = F * 4;
-            F > w && (k = this.exports.ghostty_wasm_alloc(J), L = !0);
+            F > w && (k = this.exports.ghostty_wasm_alloc(J), r = !0);
             try {
               this.exports.ghostty_render_state_row_cells_get(
                 this.rowCells,
@@ -3913,7 +3913,7 @@ const Ci = class EB {
               } else
                 G.grapheme = null;
             } finally {
-              L && this.exports.ghostty_wasm_free(k, J);
+              r && this.exports.ghostty_wasm_free(k, J);
             }
           } else
             G.codepoint = 0, G.grapheme = null;
@@ -3940,8 +3940,8 @@ const Ci = class EB {
           );
           {
             const k = new Uint8Array(this.memory.buffer, i, I);
-            let L = 0;
-            k[56] && (L |= d.BOLD), k[57] && (L |= d.ITALIC), k[58] && (L |= d.FAINT), k[59] && (L |= d.BLINK), k[60] && (L |= d.INVERSE), k[61] && (L |= d.INVISIBLE), k[62] && (L |= d.STRIKETHROUGH), new DataView(this.memory.buffer).getInt32(i + 64, !0) !== 0 && (L |= d.UNDERLINE), G.flags = L;
+            let r = 0;
+            k[56] && (r |= d.BOLD), k[57] && (r |= d.ITALIC), k[58] && (r |= d.FAINT), k[59] && (r |= d.BLINK), k[60] && (r |= d.INVERSE), k[61] && (r |= d.INVISIBLE), k[62] && (r |= d.STRIKETHROUGH), new DataView(this.memory.buffer).getInt32(i + 64, !0) !== 0 && (r |= d.UNDERLINE), G.flags = r;
           }
           this.exports.ghostty_render_state_row_cells_get(
             this.rowCells,
@@ -3951,7 +3951,7 @@ const Ci = class EB {
           const y = new DataView(this.memory.buffer).getBigUint64(o, !0);
           this.exports.ghostty_cell_get(y, UI.WIDE, D);
           const S = new DataView(this.memory.buffer).getUint32(D, !0);
-          G.width = S === CI.WIDE ? 2 : S === CI.SPACER_TAIL || S === CI.SPACER_HEAD ? 0 : 1, this.exports.ghostty_cell_get(y, UI.HAS_HYPERLINK, D), G.hyperlink_id = new DataView(this.memory.buffer).getUint8(D) !== 0 ? 1 : 0, r++;
+          G.width = S === CI.WIDE ? 2 : S === CI.SPACER_TAIL || S === CI.SPACER_HEAD ? 0 : 1, this.exports.ghostty_cell_get(y, UI.HAS_HYPERLINK, D), G.hyperlink_id = new DataView(this.memory.buffer).getUint8(D) !== 0 ? 1 : 0, L++;
         }
         h++;
       }
@@ -4095,19 +4095,19 @@ const Ci = class EB {
             D[h] = this.makeEmptyCell();
             continue;
           }
-          const r = new DataView(this.memory.buffer).getBigUint64(w, !0);
-          this.exports.ghostty_cell_get(r, UI.CODEPOINT, s);
+          const L = new DataView(this.memory.buffer).getBigUint64(w, !0);
+          this.exports.ghostty_cell_get(L, UI.CODEPOINT, s);
           const G = new DataView(this.memory.buffer).getUint32(s, !0);
-          this.exports.ghostty_cell_get(r, UI.WIDE, t);
+          this.exports.ghostty_cell_get(L, UI.WIDE, t);
           const U = new DataView(this.memory.buffer).getUint32(t, !0), F = U === CI.WIDE ? 2 : U === CI.SPACER_TAIL || U === CI.SPACER_HEAD ? 0 : 1;
-          this.exports.ghostty_cell_get(r, UI.HAS_HYPERLINK, t);
+          this.exports.ghostty_cell_get(L, UI.HAS_HYPERLINK, t);
           const y = new DataView(this.memory.buffer).getUint8(t) !== 0;
           new DataView(this.memory.buffer).setUint32(N, e, !0);
           const S = this.exports.ghostty_grid_ref_style(B, N) === 0, k = this.makeEmptyCell();
           if (k.codepoint = G, k.width = F, k.hyperlink_id = y ? 1 : 0, S) {
-            const L = new Uint8Array(this.memory.buffer, N, e), J = new DataView(this.memory.buffer);
+            const r = new Uint8Array(this.memory.buffer, N, e), J = new DataView(this.memory.buffer);
             let a = 0;
-            L[56] && (a |= d.BOLD), L[57] && (a |= d.ITALIC), L[58] && (a |= d.FAINT), L[59] && (a |= d.BLINK), L[60] && (a |= d.INVERSE), L[61] && (a |= d.INVISIBLE), L[62] && (a |= d.STRIKETHROUGH), J.getInt32(N + 64, !0) !== 0 && (a |= d.UNDERLINE), k.flags = a, this.resolveStyleColor(
+            r[56] && (a |= d.BOLD), r[57] && (a |= d.ITALIC), r[58] && (a |= d.FAINT), r[59] && (a |= d.BLINK), r[60] && (a |= d.INVERSE), r[61] && (a |= d.INVISIBLE), r[62] && (a |= d.STRIKETHROUGH), J.getInt32(N + 64, !0) !== 0 && (a |= d.UNDERLINE), k.flags = a, this.resolveStyleColor(
               N + 8,
               o,
               k,
@@ -4244,28 +4244,28 @@ const Ci = class EB {
    */
   installCallbacks() {
     const I = this.exports.__indirect_function_table;
-    let g = EB.callbackRegistries.get(I);
+    let g = iB.callbackRegistries.get(I);
     if (!g) {
-      const Q = /* @__PURE__ */ new Map(), B = (S, k, L, J) => {
+      const Q = /* @__PURE__ */ new Map(), B = (S, k, r, J) => {
         const a = Q.get(S);
-        a && a.pendingResponses.push(new Uint8Array(a.memory.buffer, L, J).slice());
-      }, C = (S, k, L) => {
+        a && a.pendingResponses.push(new Uint8Array(a.memory.buffer, r, J).slice());
+      }, C = (S, k, r) => {
         const J = Q.get(S);
         if (!J)
           return;
         const a = new DataView(J.memory.buffer);
-        if (a.getUint32(L, !0) < 48)
+        if (a.getUint32(r, !0) < 48)
           return;
-        const R = ["idle", "working", "done", "blocked", "error", "clear"], f = [null, "permission", "question", "auth"], l = R[a.getUint32(L + 4, !0)], x = f[a.getUint32(L + 8, !0)];
+        const R = ["idle", "working", "done", "blocked", "error", "clear"], f = [null, "permission", "question", "auth"], l = R[a.getUint32(r + 4, !0)], x = f[a.getUint32(r + 8, !0)];
         if (l === void 0 || x === void 0)
           return;
         const O = (u) => new TextDecoder().decode(
           new Uint8Array(
             J.memory.buffer,
-            a.getUint32(L + u, !0),
-            a.getUint32(L + u + 4, !0)
+            a.getUint32(r + u, !0),
+            a.getUint32(r + u + 4, !0)
           )
-        ), _ = a.getInt8(L + 12);
+        ), _ = a.getInt8(r + 12);
         J.pendingProgramStatus.push({
           state: l,
           kind: x,
@@ -4275,15 +4275,15 @@ const Ci = class EB {
           title: O(32),
           message: O(40)
         });
-      }, E = (S, k, L) => {
+      }, E = (S, k, r) => {
         const J = Q.get(S);
         if (!J || J.cellWidthPx === 0 || J.cellHeightPx === 0)
           return 0;
         const a = new DataView(J.memory.buffer);
-        return a.setUint16(L + 0, J._rows, !0), a.setUint16(L + 2, J._cols, !0), a.setUint32(L + 4, J.cellWidthPx, !0), a.setUint32(L + 8, J.cellHeightPx, !0), 1;
-      }, i = this.exports, o = this.memory, D = (S, k, L, J, a) => {
+        return a.setUint16(r + 0, J._rows, !0), a.setUint16(r + 2, J._cols, !0), a.setUint32(r + 4, J.cellWidthPx, !0), a.setUint32(r + 8, J.cellHeightPx, !0), 1;
+      }, i = this.exports, o = this.memory, D = (S, k, r, J, a) => {
         try {
-          const R = new Uint8Array(o.buffer, L, J).slice(), f = Ko(R), l = uo(f);
+          const R = new Uint8Array(o.buffer, r, J).slice(), f = Ko(R), l = uo(f);
           if (!l)
             return 0;
           const x = i.ghostty_alloc(k, l.length);
@@ -4295,11 +4295,11 @@ const Ci = class EB {
         } catch {
           return 0;
         }
-      }, w = (S, k, L, J, a) => {
+      }, w = (S, k, r, J, a) => {
         const R = globalThis.ghosttyKittySharedMemory;
         if (!(R instanceof Map))
           return 0;
-        const f = new TextDecoder().decode(new Uint8Array(o.buffer, L, J));
+        const f = new TextDecoder().decode(new Uint8Array(o.buffer, r, J));
         if (!R.has(f))
           return 0;
         const l = R.get(f);
@@ -4323,8 +4323,8 @@ const Ci = class EB {
         C
       ), c = I.grow(1);
       I.set(c, s);
-      const r = I.grow(1);
-      I.set(r, t);
+      const L = I.grow(1);
+      I.set(L, t);
       const G = I.grow(1);
       I.set(G, e);
       const U = I.grow(1);
@@ -4332,16 +4332,16 @@ const Ci = class EB {
       const F = I.grow(1);
       I.set(F, h), g = {
         writePtyIndex: c,
-        sizeIndex: r,
+        sizeIndex: L,
         decodePngIndex: G,
         readShmIndex: U,
         programStatusIndex: F,
         instancesByHandle: Q
-      }, this.exports.ghostty_sys_set(QB.DECODE_PNG, G);
-      const y = this.exports.ghostty_sys_set(QB.READ_SHARED_MEMORY, U);
+      }, this.exports.ghostty_sys_set(BB.DECODE_PNG, G);
+      const y = this.exports.ghostty_sys_set(BB.READ_SHARED_MEMORY, U);
       if (y !== 0)
         throw new Error(`Installing Kitty shared memory failed: ${y}`);
-      globalThis.ghosttyKittySharedMemory ?? (globalThis.ghosttyKittySharedMemory = /* @__PURE__ */ new Map()), EB.callbackRegistries.set(I, g);
+      globalThis.ghosttyKittySharedMemory ?? (globalThis.ghosttyKittySharedMemory = /* @__PURE__ */ new Map()), iB.callbackRegistries.set(I, g);
     }
     g.instancesByHandle.set(this.handle, this), this.callbackRegistry = g, this.exports.ghostty_terminal_set(
       this.handle,
@@ -4357,7 +4357,7 @@ const Ci = class EB {
   getMode(I, g = !1) {
     const Q = this.exports.ghostty_wasm_alloc(4);
     try {
-      return new DataView(this.memory.buffer).setUint16(Q, XC(I, g), !0), this.exports.ghostty_terminal_get(this.handle, ZA.MODE, Q) === 0 && new DataView(this.memory.buffer).getUint8(Q + 2) !== 0;
+      return new DataView(this.memory.buffer).setUint16(Q, vC(I, g), !0), this.exports.ghostty_terminal_get(this.handle, ZA.MODE, Q) === 0 && new DataView(this.memory.buffer).getUint8(Q + 2) !== 0;
     } finally {
       this.exports.ghostty_wasm_free(Q, 4);
     }
@@ -4591,23 +4591,23 @@ function bo() {
         }
       }), { map: $, reverseMap: K };
     }
-    var c, r, G;
+    var c, L, G;
     function U() {
       if (!c) {
         var Y = h(N.pairs, !0), v = Y.map, P = Y.reverseMap;
-        c = v, r = P, G = h(N.canonical, !1).map;
+        c = v, L = P, G = h(N.canonical, !1).map;
       }
     }
     function F(Y) {
       return U(), c.get(Y) || null;
     }
     function y(Y) {
-      return U(), r.get(Y) || null;
+      return U(), L.get(Y) || null;
     }
     function S(Y) {
       return U(), G.get(Y) || null;
     }
-    var k = Q.L, L = Q.R, J = Q.EN, a = Q.ES, R = Q.ET, f = Q.AN, l = Q.CS, x = Q.B, O = Q.S, _ = Q.ON, u = Q.BN, Z = Q.NSM, AI = Q.AL, II = Q.LRO, lI = Q.RLO, X = Q.LRE, xA = Q.RLE, pA = Q.PDF, tI = Q.LRI, uA = Q.RLI, HA = Q.FSI, QA = Q.PDI;
+    var k = Q.L, r = Q.R, J = Q.EN, a = Q.ES, R = Q.ET, f = Q.AN, l = Q.CS, x = Q.B, O = Q.S, _ = Q.ON, u = Q.BN, Z = Q.NSM, AI = Q.AL, II = Q.LRO, lI = Q.RLO, X = Q.LRE, xA = Q.RLE, pA = Q.PDF, tI = Q.LRI, uA = Q.RLI, YA = Q.FSI, QA = Q.PDI;
     function tg(Y, v) {
       for (var P = 125, n = new Uint32Array(Y.length), $ = 0; $ < Y.length; $++)
         n[$] = t(Y[$]);
@@ -4621,7 +4621,7 @@ function bo() {
           start: AA,
           end: Y.length - 1,
           // 3.3.1 P2-P3: Determine the paragraph level
-          level: v === "rtl" ? 1 : v === "ltr" ? 0 : _B(AA, !1)
+          level: v === "rtl" ? 1 : v === "ltr" ? 0 : $B(AA, !1)
         }), n[AA] & x && (m.end = AA, m = null);
       for (var JA = xA | X | lI | II | C | QA | pA | x, gI = function(oA) {
         return oA + (oA & 1 ? 1 : 2);
@@ -4635,39 +4635,39 @@ function bo() {
           //0=neutral, 1=L, 2=R
           _isolate: 0
           //bool
-        }], W = void 0, YA = 0, PA = 0, $g = 0;
+        }], W = void 0, lA = 0, PA = 0, $g = 0;
         K.clear();
         for (var CA = m.start; CA <= m.end; CA++) {
           var EA = n[CA];
           if (W = V[V.length - 1], K.set(EA, (K.get(EA) || 0) + 1), EA & i && K.set(i, (K.get(i) || 0) + 1), EA & JA)
             if (EA & (xA | X)) {
               q[CA] = W._level;
-              var RB = (EA === xA ? bA : gI)(W._level);
-              RB <= P && !YA && !PA ? V.push({
-                _level: RB,
+              var yB = (EA === xA ? bA : gI)(W._level);
+              yB <= P && !lA && !PA ? V.push({
+                _level: yB,
                 _override: 0,
                 _isolate: 0
-              }) : YA || PA++;
+              }) : lA || PA++;
             } else if (EA & (lI | II)) {
               q[CA] = W._level;
-              var yB = (EA === lI ? bA : gI)(W._level);
-              yB <= P && !YA && !PA ? V.push({
-                _level: yB,
-                _override: EA & lI ? L : k,
-                _isolate: 0
-              }) : YA || PA++;
-            } else if (EA & C) {
-              EA & HA && (EA = _B(CA + 1, !0) === 1 ? uA : tI), q[CA] = W._level, W._override && T(CA, W._override);
-              var nB = (EA === uA ? bA : gI)(W._level);
-              nB <= P && YA === 0 && PA === 0 ? ($g++, V.push({
+              var nB = (EA === lI ? bA : gI)(W._level);
+              nB <= P && !lA && !PA ? V.push({
                 _level: nB,
+                _override: EA & lI ? r : k,
+                _isolate: 0
+              }) : lA || PA++;
+            } else if (EA & C) {
+              EA & YA && (EA = $B(CA + 1, !0) === 1 ? uA : tI), q[CA] = W._level, W._override && T(CA, W._override);
+              var SB = (EA === uA ? bA : gI)(W._level);
+              SB <= P && lA === 0 && PA === 0 ? ($g++, V.push({
+                _level: SB,
                 _override: 0,
                 _isolate: 1,
                 _isolInitIndex: CA
-              })) : YA++;
+              })) : lA++;
             } else if (EA & QA) {
-              if (YA > 0)
-                YA--;
+              if (lA > 0)
+                lA--;
               else if ($g > 0) {
                 for (PA = 0; !V[V.length - 1]._isolate; )
                   V.pop();
@@ -4676,85 +4676,85 @@ function bo() {
               }
               W = V[V.length - 1], q[CA] = W._level, W._override && T(CA, W._override);
             } else
-              EA & pA ? (YA === 0 && (PA > 0 ? PA-- : !W._isolate && V.length > 1 && (V.pop(), W = V[V.length - 1])), q[CA] = W._level) : EA & x && (q[CA] = m.level);
+              EA & pA ? (lA === 0 && (PA > 0 ? PA-- : !W._isolate && V.length > 1 && (V.pop(), W = V[V.length - 1])), q[CA] = W._level) : EA & x && (q[CA] = m.level);
           else
             q[CA] = W._level, W._override && EA !== u && T(CA, W._override);
         }
-        for (var eI = [], LA = null, QI = m.start; QI <= m.end; QI++) {
+        for (var eI = [], rA = null, QI = m.start; QI <= m.end; QI++) {
           var IQ = n[QI];
           if (!(IQ & o)) {
-            var SB = q[QI], HB = IQ & C, Ui = IQ === QA;
-            LA && SB === LA._level ? (LA._end = QI, LA._endsWithIsolInit = HB) : eI.push(LA = {
+            var HB = q[QI], YB = IQ & C, Ui = IQ === QA;
+            rA && HB === rA._level ? (rA._end = QI, rA._endsWithIsolInit = YB) : eI.push(rA = {
               _start: QI,
               _end: QI,
-              _level: SB,
+              _level: HB,
               _startsWithPDI: Ui,
-              _endsWithIsolInit: HB
+              _endsWithIsolInit: YB
             });
           }
         }
         for (var gQ = [], eg = 0; eg < eI.length; eg++) {
           var hg = eI[eg];
           if (!hg._startsWithPDI || hg._startsWithPDI && !IA.has(hg._start)) {
-            for (var QQ = [LA = hg], YB = void 0; LA && LA._endsWithIsolInit && (YB = IA.get(LA._end)) != null; )
+            for (var QQ = [rA = hg], lB = void 0; rA && rA._endsWithIsolInit && (lB = IA.get(rA._end)) != null; )
               for (var ag = eg + 1; ag < eI.length; ag++)
-                if (eI[ag]._start === YB) {
-                  QQ.push(LA = eI[ag]);
+                if (eI[ag]._start === lB) {
+                  QQ.push(rA = eI[ag]);
                   break;
                 }
             for (var hI = [], BQ = 0; BQ < QQ.length; BQ++)
-              for (var lB = QQ[BQ], CQ = lB._start; CQ <= lB._end; CQ++)
+              for (var fB = QQ[BQ], CQ = fB._start; CQ <= fB._end; CQ++)
                 hI.push(CQ);
-            for (var Ji = q[hI[0]], fB = m.level, Ng = hI[0] - 1; Ng >= 0; Ng--)
+            for (var Ji = q[hI[0]], KB = m.level, Ng = hI[0] - 1; Ng >= 0; Ng--)
               if (!(n[Ng] & o)) {
-                fB = q[Ng];
+                KB = q[Ng];
                 break;
               }
-            var EQ = hI[hI.length - 1], Li = q[EQ], KB = m.level;
+            var EQ = hI[hI.length - 1], ri = q[EQ], dB = m.level;
             if (!(n[EQ] & C)) {
               for (var kg = EQ + 1; kg <= m.end; kg++)
                 if (!(n[kg] & o)) {
-                  KB = q[kg];
+                  dB = q[kg];
                   break;
                 }
             }
             gQ.push({
               _seqIndices: hI,
-              _sosType: Math.max(fB, Ji) % 2 ? L : k,
-              _eosType: Math.max(KB, Li) % 2 ? L : k
+              _sosType: Math.max(KB, Ji) % 2 ? r : k,
+              _eosType: Math.max(dB, ri) % 2 ? r : k
             });
           }
         }
         for (var iQ = 0; iQ < gQ.length; iQ++) {
-          var DQ = gQ[iQ], H = DQ._seqIndices, fI = DQ._sosType, ri = DQ._eosType, aI = q[H[0]] & 1 ? L : k;
+          var DQ = gQ[iQ], H = DQ._seqIndices, fI = DQ._sosType, Li = DQ._eosType, aI = q[H[0]] & 1 ? r : k;
           if (K.get(Z))
             for (var Mg = 0; Mg < H.length; Mg++) {
-              var dB = H[Mg];
-              if (n[dB] & Z) {
+              var OB = H[Mg];
+              if (n[OB] & Z) {
                 for (var wQ = fI, Gg = Mg - 1; Gg >= 0; Gg--)
                   if (!(n[H[Gg]] & o)) {
                     wQ = n[H[Gg]];
                     break;
                   }
-                T(dB, wQ & (C | QA) ? _ : wQ);
+                T(OB, wQ & (C | QA) ? _ : wQ);
               }
             }
           if (K.get(J))
             for (var cg = 0; cg < H.length; cg++) {
-              var OB = H[cg];
-              if (n[OB] & J)
+              var qB = H[cg];
+              if (n[qB] & J)
                 for (var Fg = cg - 1; Fg >= -1; Fg--) {
-                  var qB = Fg === -1 ? fI : n[H[Fg]];
-                  if (qB & E) {
-                    qB === AI && T(OB, f);
+                  var TB = Fg === -1 ? fI : n[H[Fg]];
+                  if (TB & E) {
+                    TB === AI && T(qB, f);
                     break;
                   }
                 }
             }
           if (K.get(AI))
             for (var oQ = 0; oQ < H.length; oQ++) {
-              var TB = H[oQ];
-              n[TB] & AI && T(TB, L);
+              var xB = H[oQ];
+              n[xB] & AI && T(xB, r);
             }
           if (K.get(a) || K.get(l))
             for (var KI = 1; KI < H.length - 1; KI++) {
@@ -4768,74 +4768,74 @@ function bo() {
               }
             }
           if (K.get(J))
-            for (var rA = 0; rA < H.length; rA++) {
-              var Ri = H[rA];
+            for (var LA = 0; LA < H.length; LA++) {
+              var Ri = H[LA];
               if (n[Ri] & J) {
-                for (var Ug = rA - 1; Ug >= 0 && n[H[Ug]] & (R | o); Ug--)
+                for (var Ug = LA - 1; Ug >= 0 && n[H[Ug]] & (R | o); Ug--)
                   T(H[Ug], J);
-                for (rA++; rA < H.length && n[H[rA]] & (R | o | J); rA++)
-                  n[H[rA]] !== J && T(H[rA], J);
+                for (LA++; LA < H.length && n[H[LA]] & (R | o | J); LA++)
+                  n[H[LA]] !== J && T(H[LA], J);
               }
             }
           if (K.get(R) || K.get(a) || K.get(l))
             for (var dI = 0; dI < H.length; dI++) {
-              var xB = H[dI];
-              if (n[xB] & (R | a | l)) {
-                T(xB, _);
+              var pB = H[dI];
+              if (n[pB] & (R | a | l)) {
+                T(pB, _);
                 for (var Jg = dI - 1; Jg >= 0 && n[H[Jg]] & o; Jg--)
                   T(H[Jg], _);
-                for (var Lg = dI + 1; Lg < H.length && n[H[Lg]] & o; Lg++)
-                  T(H[Lg], _);
+                for (var rg = dI + 1; rg < H.length && n[H[rg]] & o; rg++)
+                  T(H[rg], _);
               }
             }
           if (K.get(J))
-            for (var aQ = 0, pB = fI; aQ < H.length; aQ++) {
-              var uB = H[aQ], NQ = n[uB];
-              NQ & J ? pB === k && T(uB, k) : NQ & E && (pB = NQ);
+            for (var aQ = 0, uB = fI; aQ < H.length; aQ++) {
+              var bB = H[aQ], NQ = n[bB];
+              NQ & J ? uB === k && T(bB, k) : NQ & E && (uB = NQ);
             }
           if (K.get(i)) {
-            var OI = L | J | f, bB = OI | k, rg = [];
+            var OI = r | J | f, mB = OI | k, Lg = [];
             {
               for (var kI = [], MI = 0; MI < H.length; MI++)
                 if (n[H[MI]] & i) {
-                  var qI = Y[H[MI]], mB = void 0;
+                  var qI = Y[H[MI]], PB = void 0;
                   if (F(qI) !== null)
                     if (kI.length < 63)
                       kI.push({ char: qI, seqIndex: MI });
                     else
                       break;
-                  else if ((mB = y(qI)) !== null)
+                  else if ((PB = y(qI)) !== null)
                     for (var TI = kI.length - 1; TI >= 0; TI--) {
                       var kQ = kI[TI].char;
-                      if (kQ === mB || kQ === y(S(qI)) || F(S(kQ)) === qI) {
-                        rg.push([kI[TI].seqIndex, MI]), kI.length = TI;
+                      if (kQ === PB || kQ === y(S(qI)) || F(S(kQ)) === qI) {
+                        Lg.push([kI[TI].seqIndex, MI]), kI.length = TI;
                         break;
                       }
                     }
                 }
-              rg.sort(function(oA, UA) {
+              Lg.sort(function(oA, UA) {
                 return oA[0] - UA[0];
               });
             }
-            for (var MQ = 0; MQ < rg.length; MQ++) {
-              for (var PB = rg[MQ], Rg = PB[0], GQ = PB[1], jB = !1, FA = 0, cQ = Rg + 1; cQ < GQ; cQ++) {
-                var VB = H[cQ];
-                if (n[VB] & bB) {
-                  jB = !0;
-                  var ZB = n[VB] & OI ? L : k;
-                  if (ZB === aI) {
-                    FA = ZB;
+            for (var MQ = 0; MQ < Lg.length; MQ++) {
+              for (var jB = Lg[MQ], Rg = jB[0], GQ = jB[1], VB = !1, FA = 0, cQ = Rg + 1; cQ < GQ; cQ++) {
+                var ZB = H[cQ];
+                if (n[ZB] & mB) {
+                  VB = !0;
+                  var XB = n[ZB] & OI ? r : k;
+                  if (XB === aI) {
+                    FA = XB;
                     break;
                   }
                 }
               }
-              if (jB && !FA) {
+              if (VB && !FA) {
                 FA = fI;
                 for (var FQ = Rg - 1; FQ >= 0; FQ--) {
-                  var XB = H[FQ];
-                  if (n[XB] & bB) {
-                    var vB = n[XB] & OI ? L : k;
-                    vB !== aI ? FA = vB : FA = aI;
+                  var vB = H[FQ];
+                  if (n[vB] & mB) {
+                    var zB = n[vB] & OI ? r : k;
+                    zB !== aI ? FA = zB : FA = aI;
                     break;
                   }
                 }
@@ -4859,29 +4859,29 @@ function bo() {
             }
             for (var jA = 0; jA < H.length; jA++)
               if (n[H[jA]] & i) {
-                for (var zB = jA, UQ = jA, JQ = fI, uI = jA - 1; uI >= 0; uI--)
+                for (var WB = jA, UQ = jA, JQ = fI, uI = jA - 1; uI >= 0; uI--)
                   if (n[H[uI]] & o)
-                    zB = uI;
+                    WB = uI;
                   else {
-                    JQ = n[H[uI]] & OI ? L : k;
+                    JQ = n[H[uI]] & OI ? r : k;
                     break;
                   }
-                for (var WB = ri, bI = jA + 1; bI < H.length; bI++)
+                for (var _B = Li, bI = jA + 1; bI < H.length; bI++)
                   if (n[H[bI]] & (i | o))
                     UQ = bI;
                   else {
-                    WB = n[H[bI]] & OI ? L : k;
+                    _B = n[H[bI]] & OI ? r : k;
                     break;
                   }
-                for (var LQ = zB; LQ <= UQ; LQ++)
-                  n[H[LQ]] = JQ === WB ? JQ : aI;
+                for (var rQ = WB; rQ <= UQ; rQ++)
+                  n[H[rQ]] = JQ === _B ? JQ : aI;
                 jA = UQ;
               }
           }
         }
         for (var eA = m.start; eA <= m.end; eA++) {
           var yi = q[eA], yg = n[eA];
-          if (yi & 1 ? yg & (k | J | f) && q[eA]++ : yg & L ? q[eA]++ : yg & (f | J) && (q[eA] += 2), yg & o && (q[eA] = eA === 0 ? m.level : q[eA - 1]), eA === m.end || t(Y[eA]) & (O | x))
+          if (yi & 1 ? yg & (k | J | f) && q[eA]++ : yg & r ? q[eA]++ : yg & (f | J) && (q[eA] += 2), yg & o && (q[eA] = eA === 0 ? m.level : q[eA - 1]), eA === m.end || t(Y[eA]) & (O | x))
             for (var ng = eA; ng >= 0 && t(Y[ng]) & D; ng--)
               q[ng] = m.level;
         }
@@ -4890,16 +4890,16 @@ function bo() {
         levels: q,
         paragraphs: BA
       };
-      function _B(oA, UA) {
+      function $B(oA, UA) {
         for (var sA = oA; sA < Y.length; sA++) {
           var VA = n[sA];
-          if (VA & (L | AI))
+          if (VA & (r | AI))
             return 1;
           if (VA & (x | k) || UA && VA === QA)
             return 0;
           if (VA & C) {
-            var $B = ni(sA);
-            sA = $B === -1 ? Y.length : $B;
+            var AC = ni(sA);
+            sA = AC === -1 ? Y.length : AC;
           }
         }
         return 0;
@@ -4964,12 +4964,12 @@ function bo() {
       }), K;
     }
     function Fi(Y, v, P, n) {
-      var $ = rB(Y, v, P, n), K = [].concat(Y);
+      var $ = RB(Y, v, P, n), K = [].concat(Y);
       return $.forEach(function(T, q) {
         K[q] = (v.levels[T] & 1 ? _g(Y[T]) : null) || Y[T];
       }), K.join("");
     }
-    function rB(Y, v, P, n) {
+    function RB(Y, v, P, n) {
       for (var $ = LB(Y, v, P, n), K = [], T = 0; T < Y.length; T++)
         K[T] = T;
       return $.forEach(function(q) {
@@ -4977,7 +4977,7 @@ function bo() {
           K[BA - AA] = m[AA];
       }), K;
     }
-    return I.closingToOpeningBracket = y, I.getBidiCharType = t, I.getBidiCharTypeName = e, I.getCanonicalBracket = S, I.getEmbeddingLevels = tg, I.getMirroredCharacter = _g, I.getMirroredCharactersMap = ci, I.getReorderSegments = LB, I.getReorderedIndices = rB, I.getReorderedString = Fi, I.openingToClosingBracket = F, Object.defineProperty(I, "__esModule", { value: !0 }), I;
+    return I.closingToOpeningBracket = y, I.getBidiCharType = t, I.getBidiCharTypeName = e, I.getCanonicalBracket = S, I.getEmbeddingLevels = tg, I.getMirroredCharacter = _g, I.getMirroredCharactersMap = ci, I.getReorderSegments = LB, I.getReorderedIndices = RB, I.getReorderedString = Fi, I.openingToClosingBracket = F, Object.defineProperty(I, "__esModule", { value: !0 }), I;
   }({});
   return A;
 }
@@ -5280,7 +5280,7 @@ const mo = [
   119363,
   119364
 ], Po = new Map(mo.map((A, I) => [A, I]));
-function LI(A) {
+function rI(A) {
   return Po.get(A) ?? -1;
 }
 const Pg = 1109742;
@@ -5337,7 +5337,7 @@ const Ei = class ii {
       const c = I[h];
       if (c.width === 0)
         continue;
-      const r = c.codepoint === Pg ? 65 : c.codepoint || 32, G = String.fromCodePoint(r);
+      const L = c.codepoint === Pg ? 65 : c.codepoint || 32, G = String.fromCodePoint(L);
       B += G;
       for (let U = 0; U < G.length; U++)
         C.push(h);
@@ -5398,10 +5398,10 @@ class Zo {
     return I ? I.isAlternateScreen() ? this.alternate : this.normal : this.normal;
   }
   get normal() {
-    return this._normalBuffer || (this._normalBuffer = new vC(this.terminal, "normal")), this._normalBuffer;
+    return this._normalBuffer || (this._normalBuffer = new zC(this.terminal, "normal")), this._normalBuffer;
   }
   get alternate() {
-    return this._alternateBuffer || (this._alternateBuffer = new vC(this.terminal, "alternate")), this._alternateBuffer;
+    return this._alternateBuffer || (this._alternateBuffer = new zC(this.terminal, "alternate")), this._alternateBuffer;
   }
   get onBufferChange() {
     return this.bufferChangeEmitter.event;
@@ -5414,7 +5414,7 @@ class Zo {
     this.bufferChangeEmitter.fire(I);
   }
 }
-class vC {
+class zC {
   constructor(I, g) {
     this.terminal = I, this.bufferType = g;
     const Q = {
@@ -5433,7 +5433,7 @@ class vC {
       grapheme_len: 0,
       grapheme: null
     };
-    this.nullCell = new iB(Q, 0);
+    this.nullCell = new DB(Q, 0);
   }
   get type() {
     return this.bufferType;
@@ -5489,7 +5489,7 @@ class Xo {
   }
   getCell(I) {
     if (!(I < 0 || I >= this._length))
-      return I >= this.cells.length ? new iB(
+      return I >= this.cells.length ? new DB(
         {
           codepoint: 0,
           fg_r: 0,
@@ -5507,7 +5507,7 @@ class Xo {
           grapheme: null
         },
         I
-      ) : new iB(this.cells[I], I);
+      ) : new DB(this.cells[I], I);
   }
   translateToString(I = !1, g = 0, Q = this._length) {
     const B = Math.max(0, Math.min(g, this._length)), C = Math.max(B, Math.min(Q, this._length));
@@ -5522,7 +5522,7 @@ class Xo {
     return I && (E = E.trimEnd()), E;
   }
 }
-class iB {
+class DB {
   constructor(I, g) {
     this.cell = I, this.x = g;
   }
@@ -5757,8 +5757,8 @@ const vo = {
    * @returns Mods flags
    */
   extractModifiers(I) {
-    let g = KA.NONE;
-    return I.shiftKey && (g |= KA.SHIFT), I.ctrlKey && (g |= KA.CTRL), I.altKey && (g |= KA.ALT), I.metaKey && (g |= KA.SUPER), g;
+    let g = yA.NONE;
+    return I.shiftKey && (g |= yA.SHIFT), I.ctrlKey && (g |= yA.CTRL), I.altKey && (g |= yA.ALT), I.metaKey && (g |= yA.SUPER), g;
   }
   /**
    * Check if this is a printable character with no special modifiers
@@ -5779,8 +5779,16 @@ const vo = {
       I.preventDefault();
       return;
     }
-    if ((I.ctrlKey || I.metaKey) && I.code === "KeyV")
+    if ((I.ctrlKey || I.metaKey) && I.code === "KeyV") {
+      const C = this.encoder.encode({
+        action: gB.PRESS,
+        key: M.V,
+        mods: yA.CTRL,
+        utf8: "v"
+      }), E = new TextDecoder().decode(C);
+      E.length > 0 && this.onDataCallback(E);
       return;
+    }
     if (I.metaKey && I.code === "KeyC") {
       this.onCopyCallback && this.onCopyCallback() && I.preventDefault();
       return;
@@ -5793,14 +5801,14 @@ const vo = {
     if (g === null)
       return;
     const Q = this.extractModifiers(I);
-    if (Q === KA.NONE || Q === KA.SHIFT) {
+    if (Q === yA.NONE || Q === yA.SHIFT) {
       let C = null;
       switch (g) {
         case M.ENTER:
           C = "\r";
           break;
         case M.TAB:
-          Q === KA.SHIFT ? C = "\x1B[Z" : C = "	";
+          Q === yA.SHIFT ? C = "\x1B[Z" : C = "	";
           break;
         case M.BACKSPACE:
           C = "";
@@ -5868,11 +5876,11 @@ const vo = {
         return;
       }
     }
-    const B = Ai.PRESS;
+    const B = gB.PRESS;
     try {
       if (this.getModeCallback) {
         const D = this.getModeCallback(1);
-        this.encoder.setOption(kB.CURSOR_KEY_APPLICATION, D);
+        this.encoder.setOption(MB.CURSOR_KEY_APPLICATION, D);
       }
       const C = I.key.length === 1 && I.key.charCodeAt(0) < 128 ? I.key.toLowerCase() : void 0, E = this.encoder.encode({
         action: B,
@@ -6418,7 +6426,7 @@ class _o {
   dispose() {
   }
 }
-const MB = class vI {
+const GB = class vI {
   constructor(I) {
     this.terminal = I;
   }
@@ -6471,11 +6479,11 @@ const MB = class vI {
   dispose() {
   }
 };
-MB.URL_REGEX = /(?:https?:\/\/|mailto:|ftp:\/\/|ssh:\/\/|git:\/\/|tel:|magnet:|gemini:\/\/|gopher:\/\/|news:)[\w\-.~:\/?#@!$&*+,;=%]+/gi;
-MB.TRAILING_PUNCTUATION = /[.,;!?)\]]+$/;
-let $o = MB;
+GB.URL_REGEX = /(?:https?:\/\/|mailto:|ftp:\/\/|ssh:\/\/|git:\/\/|tel:|magnet:|gemini:\/\/|gopher:\/\/|news:)[\w\-.~:\/?#@!$&*+,;=%]+/gi;
+GB.TRAILING_PUNCTUATION = /[.,;!?)\]]+$/;
+let $o = GB;
 const As = 530;
-class GB {
+class cB {
   constructor() {
     this.enabled = !1, this.visible = !0, this.onRequestRender = null;
   }
@@ -6495,7 +6503,7 @@ class GB {
     this.intervalId !== void 0 && clearInterval(this.intervalId), this.intervalId = void 0;
   }
 }
-const zC = 32, rI = 8, WC = 1, _C = 2, Is = 4, gs = 8, Qs = 16, Bs = 32, PQ = 64, Cs = 128, Es = 256, is = 512, $C = 1024, AE = 2048, IE = 4096, gE = 8192, Ds = 16384, $A = {
+const WC = 32, LI = 8, _C = 1, $C = 2, Is = 4, gs = 8, Qs = 16, Bs = 32, PQ = 64, Cs = 128, Es = 256, is = 512, AE = 1024, IE = 2048, gE = 4096, QE = 8192, Ds = 16384, $A = {
   foreground: "#d4d4d4",
   background: "#1e1e1e",
   cursor: "#ffffff",
@@ -6518,12 +6526,12 @@ const zC = 32, rI = 8, WC = 1, _C = 2, Is = 4, gs = 8, Qs = 16, Bs = 32, PQ = 64
   brightMagenta: "#d670d6",
   brightCyan: "#29b8db",
   brightWhite: "#ffffff"
-}, QE = /* @__PURE__ */ new Set();
-function cB(A) {
+}, BE = /* @__PURE__ */ new Set();
+function FB(A) {
   const I = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(A.trim());
-  return I ? [Number.parseInt(I[1], 16), Number.parseInt(I[2], 16), Number.parseInt(I[3], 16)] : (QE.has(A) || (QE.add(A), console.warn("[ghostty-web] unparseable theme color, falling back to black:", A)), [0, 0, 0]);
+  return I ? [Number.parseInt(I[1], 16), Number.parseInt(I[2], 16), Number.parseInt(I[3], 16)] : (BE.has(A) || (BE.add(A), console.warn("[ghostty-web] unparseable theme color, falling back to black:", A)), [0, 0, 0]);
 }
-function FB(A, I) {
+function UB(A, I) {
   const Q = document.createElement("canvas").getContext("2d");
   Q.font = `${A}px ${I}`;
   const B = Q.measureText("M"), C = Math.ceil(B.width), E = B.actualBoundingBoxAscent || A * 0.8, i = B.actualBoundingBoxDescent || A * 0.2, o = Math.ceil(E + i) + 2, D = Math.ceil(E) + 1;
@@ -6531,7 +6539,7 @@ function FB(A, I) {
 }
 function wi(A) {
   const I = new Float32Array(96), g = (Q, B) => {
-    const [C, E, i] = cB(B);
+    const [C, E, i] = FB(B);
     I[Q * 4 + 0] = C / 255, I[Q * 4 + 1] = E / 255, I[Q * 4 + 2] = i / 255, I[Q * 4 + 3] = 1;
   };
   return g(0, A.black), g(1, A.red), g(2, A.green), g(3, A.yellow), g(4, A.blue), g(5, A.magenta), g(6, A.cyan), g(7, A.white), g(8, A.brightBlack), g(9, A.brightRed), g(10, A.brightGreen), g(11, A.brightYellow), g(12, A.brightBlue), g(13, A.brightMagenta), g(14, A.brightCyan), g(15, A.brightWhite), g(16, A.foreground), g(17, A.background), g(18, A.cursor), g(19, A.cursorAccent), g(20, A.selectionBackground), g(21, A.selectionForeground), g(22, "#4A90E2"), I;
@@ -6576,7 +6584,7 @@ class si {
   }
 }
 function ti(A, I, g, Q, B) {
-  var S, k, L;
+  var S, k, r;
   const C = A;
   C.fill(0);
   const E = I.getDimensions(), i = (Q == null ? void 0 : Q.getScrollbackLength()) ?? 0, o = I.getCursor(), D = ((S = B.selectionManager) == null ? void 0 : S.getSelectionCoords()) ?? null, w = ((k = B.selectionManager) == null ? void 0 : k.getSelectionColumnSpace()) === "logical";
@@ -6591,14 +6599,14 @@ function ti(A, I, g, Q, B) {
       return;
     }
     J === D.startRow ? (s = D.startCol, t = Number.MAX_SAFE_INTEGER) : J === D.endRow ? (s = 0, t = D.endCol) : J > D.startRow && J < D.endRow ? (s = 0, t = Number.MAX_SAFE_INTEGER) : (s = -1, t = -1);
-  }, N = B.maxKittyImages ?? 16, h = /* @__PURE__ */ new Map(), c = [], r = /* @__PURE__ */ new Map();
+  }, N = B.maxKittyImages ?? 16, h = /* @__PURE__ */ new Map(), c = [], L = /* @__PURE__ */ new Map();
   if (B.kittyEnabled && I.getKittyGraphics && I.iterPlacements) {
     const J = I.getKittyGraphics();
     if (J !== null)
       for (const a of I.iterPlacements(J, !1))
-        a.isVirtual && (h.set(a.imageId, a), !r.has(a.imageId) && c.length < N && (r.set(a.imageId, c.length), c.push(a.imageId)));
+        a.isVirtual && (h.set(a.imageId, a), !L.has(a.imageId) && c.length < N && (L.set(a.imageId, c.length), c.push(a.imageId)));
   }
-  const G = (IE | gE) >>> 0, U = B.metrics.width, F = B.metrics.height, y = I.getViewport();
+  const G = (gE | QE) >>> 0, U = B.metrics.width, F = B.metrics.height, y = I.getViewport();
   for (let J = 0; J < E.rows; J++) {
     e(J);
     let a = null;
@@ -6617,14 +6625,14 @@ function ti(A, I, g, Q, B) {
     const R = B.bidiMapper && a ? B.bidiMapper.getMap(a) : null, f = R !== null && !R.isIdentity;
     let l = null;
     for (let x = 0; x < E.cols; x++) {
-      const O = (J * E.cols + x) * rI, _ = f && x < R.visualToLogical.length ? R.visualToLogical[x] : x, u = a && _ < a.length ? a[_] : null;
+      const O = (J * E.cols + x) * LI, _ = f && x < R.visualToLogical.length ? R.visualToLogical[x] : x, u = a && _ < a.length ? a[_] : null;
       if (!u || u.width === 0) {
         l ? (C[O + 0] = l.fgPacked, C[O + 1] = l.bgPacked, C[O + 2] = l.slotU + U & 65535 | (l.slotV & 65535) << 16, C[O + 3] = U & 65535 | (l.slotH & 65535) << 16, C[O + 4] = l.flags, l = null) : C[O + 4] = G;
         continue;
       }
       l = null;
       let Z = 0;
-      u.flags & d.BOLD && (Z |= WC), u.flags & d.ITALIC && (Z |= _C), u.flags & d.UNDERLINE && (Z |= Is), u.flags & d.STRIKETHROUGH && (Z |= gs), u.flags & d.INVERSE && (Z |= Qs), u.flags & d.FAINT && (Z |= Bs), u.flags & d.INVISIBLE && (Z |= PQ), u.fgIsDefault && (Z |= IE), u.bgIsDefault && (Z |= gE);
+      u.flags & d.BOLD && (Z |= _C), u.flags & d.ITALIC && (Z |= $C), u.flags & d.UNDERLINE && (Z |= Is), u.flags & d.STRIKETHROUGH && (Z |= gs), u.flags & d.INVERSE && (Z |= Qs), u.flags & d.FAINT && (Z |= Bs), u.flags & d.INVISIBLE && (Z |= PQ), u.fgIsDefault && (Z |= gE), u.bgIsDefault && (Z |= QE);
       const AI = w ? _ : x;
       if (AI >= s && AI <= t && (Z |= Cs), u.hyperlink_id !== 0 && u.hyperlink_id === B.hoveredHyperlinkId && (Z |= Es), B.hoveredLinkRange) {
         const X = B.hoveredLinkRange;
@@ -6634,22 +6642,22 @@ function ti(A, I, g, Q, B) {
       if (B.kittyEnabled && II === Pg) {
         const X = u.grapheme;
         if (X && X.length >= 2) {
-          const xA = LI(X[0]), pA = LI(X[1]);
+          const xA = rI(X[0]), pA = rI(X[1]);
           if (xA >= 0 && pA >= 0) {
             const tI = u.fg_r << 16 | u.fg_g << 8 | u.fg_b;
             let uA = tI;
             if (X.length >= 3) {
-              const tg = LI(X[2]);
+              const tg = rI(X[2]);
               tg >= 0 && (uA = tg << 24 | tI);
             }
-            const HA = h.get(uA), QA = r.get(uA);
-            HA && QA !== void 0 ? (Z |= AE, C[O + 5] = pA & 65535 | (xA & 65535) << 16, C[O + 6] = QA, C[O + 7] = HA.gridCols & 65535 | (HA.gridRows & 65535) << 16) : Z |= PQ;
+            const YA = h.get(uA), QA = L.get(uA);
+            YA && QA !== void 0 ? (Z |= IE, C[O + 5] = pA & 65535 | (xA & 65535) << 16, C[O + 6] = QA, C[O + 7] = YA.gridCols & 65535 | (YA.gridRows & 65535) << 16) : Z |= PQ;
           }
         }
       }
-      if (B.blockElementShaderEnabled && II >= 9600 && II <= 9631 && u.grapheme_len === 0 && (Z |= $C, C[O + 5] = II - 9600), C[O + 0] = u.fg_r | u.fg_g << 8 | u.fg_b << 16, C[O + 1] = u.bg_r | u.bg_g << 8 | u.bg_b << 16, !((Z & (PQ | AE | $C)) !== 0) && B.atlas) {
-        const X = u.grapheme, pA = (f ? (L = R.mirror) == null ? void 0 : L.get(_) : void 0) ?? (u.codepoint || 32), tI = X && X.length > 0 ? String.fromCodePoint(pA, ...X) : String.fromCodePoint(pA), uA = (Z & WC ? 1 : 0) | (Z & _C ? 2 : 0), HA = u.width === 2 ? 2 : 1, QA = B.atlas.getOrRaster(tI, uA, B.metrics.baseline, HA);
-        C[O + 2] = QA.u & 65535 | (QA.v & 65535) << 16, C[O + 3] = HA === 2 ? U & 65535 | (F & 65535) << 16 : QA.w & 65535 | (QA.h & 65535) << 16, HA === 2 && (l = {
+      if (B.blockElementShaderEnabled && II >= 9600 && II <= 9631 && u.grapheme_len === 0 && (Z |= AE, C[O + 5] = II - 9600), C[O + 0] = u.fg_r | u.fg_g << 8 | u.fg_b << 16, C[O + 1] = u.bg_r | u.bg_g << 8 | u.bg_b << 16, !((Z & (PQ | IE | AE)) !== 0) && B.atlas) {
+        const X = u.grapheme, pA = (f ? (r = R.mirror) == null ? void 0 : r.get(_) : void 0) ?? (u.codepoint || 32), tI = X && X.length > 0 ? String.fromCodePoint(pA, ...X) : String.fromCodePoint(pA), uA = (Z & _C ? 1 : 0) | (Z & $C ? 2 : 0), YA = u.width === 2 ? 2 : 1, QA = B.atlas.getOrRaster(tI, uA, B.metrics.baseline, YA);
+        C[O + 2] = QA.u & 65535 | (QA.v & 65535) << 16, C[O + 3] = YA === 2 ? U & 65535 | (F & 65535) << 16 : QA.w & 65535 | (QA.h & 65535) << 16, YA === 2 && (l = {
           slotU: QA.u,
           slotV: QA.v,
           slotH: QA.h,
@@ -6667,7 +6675,7 @@ function ti(A, I, g, Q, B) {
       const R = o.y * E.cols, f = y.slice(R, R + E.cols), l = B.bidiMapper.getMap(f);
       !l.isIdentity && o.x < l.logicalToVisual.length && (J = l.logicalToVisual[o.x]);
     }
-    const a = (o.y * E.cols + J) * rI;
+    const a = (o.y * E.cols + J) * LI;
     C[a + 4] = (C[a + 4] | Ds) >>> 0;
   }
   return { usedKittyImageIds: c };
@@ -6821,12 +6829,12 @@ class Ni {
     return this.nextX += I, g > this.rowHeight && (this.rowHeight = g), Q;
   }
 }
-function BE(A, I) {
+function CE(A, I) {
   return A.width === I.width && A.height === I.height && A.format === I.format && A.dataPtr === I.data.byteOffset && A.dataLen === I.data.length && A.revision === (I.revision ?? 0);
 }
-class CE {
+class EE {
   constructor(I, g = {}) {
-    this.backend = "canvas2d", this.cursorBlink_ = new GB(), this.lastCursorPosition = { x: 0, y: 0 }, this.onRequestRender = null, this.lastViewportY = 0, this.currentBuffer = null, this.kittyImageCache = /* @__PURE__ */ new Map(), this.frameKittyPixels = /* @__PURE__ */ new Map(), this.kittyVirtualPlacements = /* @__PURE__ */ new Map(), this.currentDirectPlacements = [], this.lastKittyDirectSigs = /* @__PURE__ */ new Map(), this.lastKittyVirtualSigs = /* @__PURE__ */ new Map(), this.kittyDamagedRows = /* @__PURE__ */ new Set(), this.currentRenderBuffer = null, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.currentKittyGraphics = null, this.bidiMapper = null, this.currentSelectionCoords = null, this.currentSelectionColumnSpace = "visual", this.hoveredHyperlinkId = 0, this.previousHoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.previousHoveredLinkRange = null, this.invalidateNext = !0, this.canvasEl = I;
+    this.backend = "canvas2d", this.cursorBlink_ = new cB(), this.lastCursorPosition = { x: 0, y: 0 }, this.onRequestRender = null, this.lastViewportY = 0, this.currentBuffer = null, this.kittyImageCache = /* @__PURE__ */ new Map(), this.frameKittyPixels = /* @__PURE__ */ new Map(), this.kittyVirtualPlacements = /* @__PURE__ */ new Map(), this.currentDirectPlacements = [], this.lastKittyDirectSigs = /* @__PURE__ */ new Map(), this.lastKittyVirtualSigs = /* @__PURE__ */ new Map(), this.kittyDamagedRows = /* @__PURE__ */ new Set(), this.currentRenderBuffer = null, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.currentKittyGraphics = null, this.bidiMapper = null, this.currentSelectionCoords = null, this.currentSelectionColumnSpace = "visual", this.hoveredHyperlinkId = 0, this.previousHoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.previousHoveredLinkRange = null, this.invalidateNext = !0, this.canvasEl = I;
     const Q = I.getContext("2d", { alpha: !0 });
     if (!Q)
       throw new Error("Failed to get 2D rendering context");
@@ -6861,7 +6869,7 @@ class CE {
   // Font Metrics Measurement
   // ==========================================================================
   measureFont() {
-    return FB(this.fontSize, this.fontFamily);
+    return UB(this.fontSize, this.fontFamily);
   }
   /**
    * Remeasure font metrics (call after font loads or changes)
@@ -6942,13 +6950,13 @@ class CE {
     const N = Q ? Q.getScrollbackLength() : 0;
     let h = D;
     (J = I.needsFullRedraw) != null && J.call(I) && (h = !0), (this.canvasEl.width !== Math.floor(s.cols * this.metrics.width * this.devicePixelRatio) || this.canvasEl.height !== Math.floor(s.rows * this.metrics.height * this.devicePixelRatio)) && (this.resize(s.cols, s.rows), h = !0), g !== this.lastViewportY && (h = !0, this.lastViewportY = g);
-    const r = w.x !== this.lastCursorPosition.x || w.y !== this.lastCursorPosition.y;
-    if (r || this.cursorBlink) {
+    const L = w.x !== this.lastCursorPosition.x || w.y !== this.lastCursorPosition.y;
+    if (L || this.cursorBlink) {
       if (!h && !I.isRowDirty(w.y)) {
         const a = e(w.y);
         a && this.renderLine(a, w.y, s.cols);
       }
-      if (r && this.lastCursorPosition.y !== w.y && !h && !I.isRowDirty(this.lastCursorPosition.y)) {
+      if (L && this.lastCursorPosition.y !== w.y && !h && !I.isRowDirty(this.lastCursorPosition.y)) {
         const a = e(this.lastCursorPosition.y);
         a && this.renderLine(a, this.lastCursorPosition.y, s.cols);
       }
@@ -7001,11 +7009,11 @@ class CE {
       this.previousHoveredLinkRange = this.hoveredLinkRange;
     }
     let k = !1;
-    const L = /* @__PURE__ */ new Set();
+    const r = /* @__PURE__ */ new Set();
     for (let a = 0; a < s.rows; a++)
-      (g > 0 ? !0 : h || I.isRowDirty(a) || U.has(a) || F.has(a) || this.kittyDamagedRows.has(a)) && (L.add(a), a > 0 && L.add(a - 1), a < s.rows - 1 && L.add(a + 1));
+      (g > 0 ? !0 : h || I.isRowDirty(a) || U.has(a) || F.has(a) || this.kittyDamagedRows.has(a)) && (r.add(a), a > 0 && r.add(a - 1), a < s.rows - 1 && r.add(a + 1));
     for (let a = 0; a < s.rows; a++) {
-      if (!L.has(a))
+      if (!r.has(a))
         continue;
       k = !0;
       let R = null;
@@ -7083,8 +7091,8 @@ class CE {
       this.ctx.fillStyle = y ? this.theme.foreground : this.rgbToCSS(G, U, F);
     }
     I.flags & d.FAINT && (this.ctx.globalAlpha = 0.5);
-    const e = o, N = D + this.metrics.baseline, h = I.grapheme, c = C ?? (I.codepoint || 32), r = h && h.length > 0 ? String.fromCodePoint(c, ...h) : String.fromCodePoint(c);
-    if (I.grapheme_len === 0 && this.renderBlockElement(I.codepoint, o, D, w) || this.ctx.fillText(r, e, N), I.flags & d.FAINT && (this.ctx.globalAlpha = 1), I.flags & d.UNDERLINE) {
+    const e = o, N = D + this.metrics.baseline, h = I.grapheme, c = C ?? (I.codepoint || 32), L = h && h.length > 0 ? String.fromCodePoint(c, ...h) : String.fromCodePoint(c);
+    if (I.grapheme_len === 0 && this.renderBlockElement(I.codepoint, o, D, w) || this.ctx.fillText(L, e, N), I.flags & d.FAINT && (this.ctx.globalAlpha = 1), I.flags & d.UNDERLINE) {
       const G = D + this.metrics.baseline + 2;
       this.ctx.strokeStyle = this.ctx.fillStyle, this.ctx.lineWidth = 1, this.ctx.beginPath(), this.ctx.moveTo(o, G), this.ctx.lineTo(o + w, G), this.ctx.stroke();
     }
@@ -7156,8 +7164,8 @@ class CE {
                 revision: (h == null ? void 0 : h.revision) ?? 0
               };
               E.set(w.imageId, c);
-              const r = this.lastKittyVirtualSigs.get(w.imageId);
-              (!r || r.imgWidth !== c.imgWidth || r.imgHeight !== c.imgHeight || r.imgFormat !== c.imgFormat || r.dataPtr !== c.dataPtr || r.dataLen !== c.dataLen || r.revision !== c.revision) && (i = !0);
+              const L = this.lastKittyVirtualSigs.get(w.imageId);
+              (!L || L.imgWidth !== c.imgWidth || L.imgHeight !== c.imgHeight || L.imgFormat !== c.imgFormat || L.dataPtr !== c.dataPtr || L.dataLen !== c.dataLen || L.revision !== c.revision) && (i = !0);
             }
             continue;
           }
@@ -7209,7 +7217,7 @@ class CE {
     const B = this.kittyImageCache.get(Q), C = this.getFrameKittyPixels(I, g, Q);
     if (!C)
       return (B == null ? void 0 : B.canvas) ?? null;
-    if (B && BE(B, C))
+    if (B && CE(B, C))
       return B.canvas;
     const E = this.decodeKittyImageToCanvas(C);
     return E ? (this.kittyImageCache.set(Q, {
@@ -7313,7 +7321,7 @@ class CE {
     const B = this.currentRenderBuffer, C = this.currentKittyGraphics, E = I.grapheme;
     if (!E || E.length < 2)
       return !1;
-    const i = LI(E[0]), o = LI(E[1]);
+    const i = rI(E[0]), o = rI(E[1]);
     if (i < 0 || o < 0)
       return !1;
     if (!B || C === null)
@@ -7321,7 +7329,7 @@ class CE {
     const D = I.fg_r << 16 | I.fg_g << 8 | I.fg_b;
     let w = D;
     if (E.length >= 3) {
-      const y = LI(E[2]);
+      const y = rI(E[2]);
       y >= 0 && (w = y << 24 | D);
     }
     const s = this.kittyVirtualPlacements.get(w);
@@ -7333,11 +7341,11 @@ class CE {
     const e = this.getOrDecodeKittyImage(B, C, w);
     if (!e)
       return !0;
-    const N = t.width / s.gridCols, h = t.height / s.gridRows, c = o * N, r = i * h, G = g * this.metrics.width, U = Q * this.metrics.height, F = this.ctx.imageSmoothingEnabled;
+    const N = t.width / s.gridCols, h = t.height / s.gridRows, c = o * N, L = i * h, G = g * this.metrics.width, U = Q * this.metrics.height, F = this.ctx.imageSmoothingEnabled;
     return this.ctx.imageSmoothingEnabled = !1, this.ctx.drawImage(
       e,
       c,
-      r,
+      L,
       N,
       h,
       G,
@@ -7353,7 +7361,7 @@ class CE {
         let B = this.kittyImageCache.get(Q.imageId);
         const C = this.getFrameKittyPixels(I, g, Q.imageId);
         if (C) {
-          if (!B || !BE(B, C)) {
+          if (!B || !CE(B, C)) {
             const E = this.decodeKittyImageToCanvas(C);
             if (!E)
               continue;
@@ -7881,9 +7889,9 @@ class Gs extends Ni {
     this.texture = Q, g.bindTexture(g.TEXTURE_2D, Q), g.texStorage2D(g.TEXTURE_2D, 1, g.RGBA8, I, I), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MIN_FILTER, g.LINEAR), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MAG_FILTER, g.LINEAR), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_S, g.CLAMP_TO_EDGE), g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_T, g.CLAMP_TO_EDGE);
   }
 }
-class UB {
+class JB {
   constructor(I, g) {
-    this.backend = "webgl", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new GB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.contextLostListeners = [], this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.cellArray = new Uint32Array(0), this.kittyAtlasRects = new Float32Array(256 * 4), this.cellTexW = 0, this.cellTexH = 0, this.textProgramUniforms = {
+    this.backend = "webgl", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new cB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.contextLostListeners = [], this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.cellArray = new Uint32Array(0), this.kittyAtlasRects = new Float32Array(256 * 4), this.cellTexW = 0, this.cellTexH = 0, this.textProgramUniforms = {
       cellTex: null,
       atlasTex: null
     }, this.kittyProgramUniforms = {
@@ -7891,7 +7899,7 @@ class UB {
     }, this.kittyParamsRing = [], this.canvas = I, this.fontSize = g.fontSize ?? 15, this.fontFamily = g.fontFamily ?? "monospace", this.cursorStyle = g.cursorStyle ?? "block", this.dpr = g.devicePixelRatio ?? (typeof window < "u" ? window.devicePixelRatio : 1) ?? 1, this.theme = { ...$A, ...g.theme }, this.cursorBlink_.setEnabled(g.cursorBlink ?? !1);
   }
   static async create(I, g) {
-    const Q = new UB(I, g);
+    const Q = new JB(I, g);
     return await Q.initialize(), Q;
   }
   async initialize() {
@@ -7924,7 +7932,7 @@ class UB {
   }
   // -------- Font metrics --------
   measureFont() {
-    return FB(this.fontSize, this.fontFamily);
+    return UB(this.fontSize, this.fontFamily);
   }
   compileShader(I, g, Q) {
     const B = this.gl, C = B.createShader(g);
@@ -7972,7 +7980,7 @@ class UB {
     }
   }
   parseHexColor(I) {
-    return cB(I);
+    return FB(I);
   }
   // -------- Cell encoding --------
   encodeCells(I, g, Q) {
@@ -8025,7 +8033,7 @@ class UB {
     this.cols = I, this.rows = g;
     const Q = I * this.metrics.width, B = g * this.metrics.height;
     this.canvas.style.width = `${Q}px`, this.canvas.style.height = `${B}px`, this.canvas.width = Math.round(Q * this.dpr), this.canvas.height = Math.round(B * this.dpr), this.invalidateNext = !0;
-    const C = Math.max(1, I * g * rI);
+    const C = Math.max(1, I * g * LI);
     this.cellArray.length !== C && (this.cellArray = new Uint32Array(C)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new ks(
       this.gl,
       this.metrics.width,
@@ -8074,7 +8082,7 @@ class UB {
     return Q;
   }
   render(I, g = 0, Q) {
-    var c, r, G;
+    var c, L, G;
     if (this.cols === 0 || this.rows === 0)
       return;
     const B = this.gl, C = I.getCursor(), E = this.cursorBlink_.isVisible();
@@ -8093,7 +8101,7 @@ class UB {
     const s = ((c = I.getKittyGraphics) == null ? void 0 : c.call(I)) ?? null;
     if (s !== null && this.kittyAtlas && w.length > 0)
       for (let U = 0; U < w.length; U++) {
-        const F = w[U], y = (r = I.getKittyImagePixels) == null ? void 0 : r.call(I, s, F);
+        const F = w[U], y = (L = I.getKittyImagePixels) == null ? void 0 : L.call(I, s, F);
         if (!y)
           continue;
         const S = this.kittyAtlas.addOrUpdate(F, y);
@@ -8115,8 +8123,8 @@ class UB {
         const k = this.kittyTextures.getOrUpload(y.imageId, S);
         if (!k)
           continue;
-        const L = new Float32Array(16);
-        L[0] = y.sourceX, L[1] = y.sourceY, L[2] = y.sourceWidth, L[3] = y.sourceHeight, L[4] = y.viewportCol * this.metrics.width, L[5] = y.viewportRow * this.metrics.height, L[6] = y.pixelWidth, L[7] = y.pixelHeight, L[8] = S.width, L[9] = S.height, L[10] = U, L[11] = F, t.push({ params: L, tex: k });
+        const r = new Float32Array(16);
+        r[0] = y.sourceX, r[1] = y.sourceY, r[2] = y.sourceWidth, r[3] = y.sourceHeight, r[4] = y.viewportCol * this.metrics.width, r[5] = y.viewportRow * this.metrics.height, r[6] = y.pixelWidth, r[7] = y.pixelHeight, r[8] = S.width, r[9] = S.height, r[10] = U, r[11] = F, t.push({ params: r, tex: k });
       }
     }
     this.ensureKittyRingSize(t.length);
@@ -8575,7 +8583,7 @@ class Js extends ai {
     I.destroy();
   }
 }
-class Ls extends Ni {
+class rs extends Ni {
   constructor(I, g = 1024) {
     super(g), this.device = I, this.texture = I.createTexture({
       size: { width: g, height: g },
@@ -8607,7 +8615,7 @@ class Ls extends Ni {
     });
   }
 }
-class rs extends si {
+class Ls extends si {
   constructor(I, g, Q, B, C) {
     super(g, Q, B, C), this.device = I, this.texture = this.createBackingTexture(this.size);
   }
@@ -8638,9 +8646,9 @@ class rs extends si {
     this.texture.destroy(), this.texture = g;
   }
 }
-class JB {
+class rB {
   constructor(I, g, Q, B) {
-    this.backend = "webgpu", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new GB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = I, this.device = g, this.kittyTextures = new Js(g), this.fontSize = Q.fontSize ?? 15, this.fontFamily = Q.fontFamily ?? "monospace", this.cursorStyle = Q.cursorStyle ?? "block", this.dpr = Q.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...$A, ...Q.theme }, this.cursorBlink_.setEnabled(Q.cursorBlink ?? !1), this.ownsDevice = B;
+    this.backend = "webgpu", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new cB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = I, this.device = g, this.kittyTextures = new Js(g), this.fontSize = Q.fontSize ?? 15, this.fontFamily = Q.fontFamily ?? "monospace", this.cursorStyle = Q.cursorStyle ?? "block", this.dpr = Q.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...$A, ...Q.theme }, this.cursorBlink_.setEnabled(Q.cursorBlink ?? !1), this.ownsDevice = B;
   }
   /**
    * Create a WebGPURenderer.
@@ -8657,7 +8665,7 @@ class JB {
    *   across renderers should pass `false` (the default).
    */
   static async create(I, g, Q, B = !1) {
-    const C = new JB(I, g, Q, B);
+    const C = new rB(I, g, Q, B);
     return await C.initialize(), C;
   }
   async initialize() {
@@ -8827,7 +8835,7 @@ class JB {
   }
   // -------- Font metrics (same logic as CanvasRenderer.measureFont) --------
   measureFont() {
-    return FB(this.fontSize, this.fontFamily);
+    return UB(this.fontSize, this.fontFamily);
   }
   // -------- Buffer helpers --------
   uploadPaletteUBO() {
@@ -8893,7 +8901,7 @@ class JB {
       0,
       this.cellArray.buffer,
       0,
-      B.cols * B.rows * zC
+      B.cols * B.rows * WC
     ), C;
   }
   // -------- Renderer interface --------
@@ -8905,18 +8913,18 @@ class JB {
     this.cols = I, this.rows = g;
     const Q = I * this.metrics.width, B = g * this.metrics.height;
     this.canvas.style.width = `${Q}px`, this.canvas.style.height = `${B}px`, this.canvas.width = Math.round(Q * this.dpr), this.canvas.height = Math.round(B * this.dpr), this.invalidateNext = !0;
-    const C = Math.max(1, I * g * zC);
+    const C = Math.max(1, I * g * WC);
     !this.cellBuffer || this.cellBufferCapacity < C ? ((E = this.cellBuffer) == null || E.destroy(), this.cellBuffer = this.device.createBuffer({
       size: C,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       label: "cellBuffer"
-    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(I * g * rI)) : this.cellArray.length !== I * g * rI && (this.cellArray = new Uint32Array(I * g * rI)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new rs(
+    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(I * g * LI)) : this.cellArray.length !== I * g * LI && (this.cellArray = new Uint32Array(I * g * LI)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new Ls(
       this.device,
       this.metrics.width,
       this.metrics.height,
       this.fontSize,
       this.fontFamily
-    ), this.kittyAtlas || (this.kittyAtlas = new Ls(this.device)), this.rebuildBindGroup();
+    ), this.kittyAtlas || (this.kittyAtlas = new rs(this.device)), this.rebuildBindGroup();
   }
   /**
    * True when no buffer row reports dirty AND no full-redraw is pending.
@@ -8979,10 +8987,10 @@ class JB {
     const w = ((F = I.getKittyGraphics) == null ? void 0 : F.call(I)) ?? null;
     if (w !== null && this.kittyAtlas && D.length > 0)
       for (let k = 0; k < D.length; k++) {
-        const L = D[k], J = (y = I.getKittyImagePixels) == null ? void 0 : y.call(I, w, L);
+        const r = D[k], J = (y = I.getKittyImagePixels) == null ? void 0 : y.call(I, w, r);
         if (!J)
           continue;
-        const a = this.kittyAtlas.addOrUpdate(L, J);
+        const a = this.kittyAtlas.addOrUpdate(r, J);
         if (!a)
           continue;
         const R = this.kittyAtlas.atlasSize;
@@ -9005,7 +9013,7 @@ class JB {
     if (this.kittyPipeline && I.getKittyGraphics && I.iterPlacements) {
       const k = I.getKittyGraphics();
       if (k !== null) {
-        const L = this.cols * this.metrics.width, J = this.rows * this.metrics.height;
+        const r = this.cols * this.metrics.width, J = this.rows * this.metrics.height;
         for (const a of I.iterPlacements(k, !0)) {
           if (a.isVirtual)
             continue;
@@ -9016,7 +9024,7 @@ class JB {
           if (!f)
             continue;
           const l = new Float32Array(16);
-          l[0] = a.sourceX, l[1] = a.sourceY, l[2] = a.sourceWidth, l[3] = a.sourceHeight, l[4] = a.viewportCol * this.metrics.width, l[5] = a.viewportRow * this.metrics.height, l[6] = a.pixelWidth, l[7] = a.pixelHeight, l[8] = R.width, l[9] = R.height, l[10] = L, l[11] = J, t.push({ params: l, view: f.createView() });
+          l[0] = a.sourceX, l[1] = a.sourceY, l[2] = a.sourceWidth, l[3] = a.sourceHeight, l[4] = a.viewportCol * this.metrics.width, l[5] = a.viewportRow * this.metrics.height, l[6] = a.pixelWidth, l[7] = a.pixelHeight, l[8] = R.width, l[9] = R.height, l[10] = r, l[11] = J, t.push({ params: l, view: f.createView() });
         }
       }
     }
@@ -9028,19 +9036,19 @@ class JB {
         t[k].params.buffer
       );
     const e = t.map(
-      (k, L) => this.device.createBindGroup({
+      (k, r) => this.device.createBindGroup({
         layout: this.kittyBindGroupLayout,
         entries: [
-          { binding: 0, resource: { buffer: this.kittyParamsRing[L] } },
+          { binding: 0, resource: { buffer: this.kittyParamsRing[r] } },
           { binding: 1, resource: k.view },
           { binding: 2, resource: this.kittySampler }
         ]
       })
-    ), N = this.context.getCurrentTexture().createView(), [h, c, r] = this.parseHexColor(this.theme.background), G = this.device.createCommandEncoder(), U = G.beginRenderPass({
+    ), N = this.context.getCurrentTexture().createView(), [h, c, L] = this.parseHexColor(this.theme.background), G = this.device.createCommandEncoder(), U = G.beginRenderPass({
       colorAttachments: [
         {
           view: N,
-          clearValue: { r: h / 255, g: c / 255, b: r / 255, a: 1 },
+          clearValue: { r: h / 255, g: c / 255, b: L / 255, a: 1 },
           loadOp: "clear",
           storeOp: "store"
         }
@@ -9052,7 +9060,7 @@ class JB {
     this.cursorPipeline && this.cursorBindGroup && (U.setPipeline(this.cursorPipeline), U.setBindGroup(0, this.cursorBindGroup), U.draw(6)), U.end(), this.device.queue.submit([G.finish()]), I.clearDirty(), this.invalidateNext = !1;
   }
   parseHexColor(I) {
-    return cB(I);
+    return FB(I);
   }
   setTheme(I) {
     var g;
@@ -9105,8 +9113,8 @@ class JB {
     this.kittyParamsRing.length = 0, (I = this.kittyAtlas) == null || I.destroy(), this.kittyAtlasUBO && this.kittyAtlasUBO.destroy(), (g = this.cellBuffer) == null || g.destroy(), (Q = this.paletteUBO) == null || Q.destroy(), (B = this.gridUBO) == null || B.destroy(), (C = this.atlas) == null || C.destroy(), this.ownsDevice && this.device.destroy();
   }
 }
-let EE = !1, iE = !1;
-async function DE(A, I, g) {
+let iE = !1, DE = !1;
+async function wE(A, I, g) {
   const Q = navigator.gpu;
   if (!Q) {
     if (g)
@@ -9121,7 +9129,7 @@ async function DE(A, I, g) {
       return null;
     }
     const C = await B.requestDevice();
-    return await JB.create(
+    return await rB.create(
       A,
       C,
       I,
@@ -9131,40 +9139,40 @@ async function DE(A, I, g) {
   } catch (B) {
     if (g)
       throw B;
-    return EE || (EE = !0, console.warn("[ghostty-web] WebGPU init failed, trying WebGL2:", B)), null;
+    return iE || (iE = !0, console.warn("[ghostty-web] WebGPU init failed, trying WebGL2:", B)), null;
   }
 }
-async function wE(A, I, g) {
+async function oE(A, I, g) {
   try {
-    return await UB.create(A, I);
+    return await JB.create(A, I);
   } catch (Q) {
     if (g)
       throw Q;
-    return iE || (iE = !0, console.warn("[ghostty-web] WebGL2 init failed, falling back to Canvas2D:", Q)), null;
+    return DE || (DE = !0, console.warn("[ghostty-web] WebGL2 init failed, falling back to Canvas2D:", Q)), null;
   }
 }
 async function jQ(A, I, g) {
   if (A === "canvas2d")
-    return new CE(I, g);
+    return new EE(I, g);
   if (A === "webgpu") {
-    const C = await DE(I, g, !0);
+    const C = await wE(I, g, !0);
     if (!C)
       throw new Error("WebGPU initialization failed");
     return C;
   }
   if (A === "webgl") {
-    const C = await wE(I, g, !0);
+    const C = await oE(I, g, !0);
     if (!C)
       throw new Error("WebGL2 initialization failed");
     return C;
   }
-  const Q = await DE(I, g, !1);
+  const Q = await wE(I, g, !1);
   if (Q)
     return Q;
-  const B = await wE(I, g, !1);
-  return B || new CE(I, g);
+  const B = await oE(I, g, !1);
+  return B || new EE(I, g);
 }
-const PI = 8, fA = 4;
+const PI = 8, KA = 4;
 class Rs {
   constructor(I, g) {
     this.canvas = I, this.dpr = g;
@@ -9185,7 +9193,7 @@ class Rs {
     const g = this.ctx, Q = this.canvas.width / this.dpr, B = this.canvas.height / this.dpr;
     if (g.clearRect(0, 0, Q, B), I.opacity <= 0 || I.scrollbackLength === 0)
       return;
-    const C = Q - PI - fA, E = fA, i = B - fA * 2;
+    const C = Q - PI - KA, E = KA, i = B - KA * 2;
     if (i <= 0)
       return;
     const o = I.scrollbackLength + I.visibleRows, D = Math.max(20, I.visibleRows / o * i), w = I.viewportY / I.scrollbackLength, s = E + (i - D) * (1 - w);
@@ -9200,18 +9208,18 @@ class Rs {
   _renderForTest(I) {
     if (I.opacity <= 0 || I.scrollbackLength === 0)
       return { thumb: null };
-    const Q = this.canvas.height / this.dpr - fA * 2;
+    const Q = this.canvas.height / this.dpr - KA * 2;
     if (Q <= 0)
       return { thumb: null };
     const B = I.scrollbackLength + I.visibleRows, C = Math.max(20, I.visibleRows / B * Q), E = I.viewportY / I.scrollbackLength;
-    return { thumb: { y: fA + (Q - C) * (1 - E), height: C } };
+    return { thumb: { y: KA + (Q - C) * (1 - E), height: C } };
   }
   /** Hit-test helper (Terminal's drag handler uses this). */
   hitTest(I, g, Q) {
     if (Q === 0)
       return null;
-    const B = this.canvas.width / this.dpr, C = this.canvas.height / this.dpr, E = B - PI - fA, i = C - fA * 2;
-    return I < E || I > E + PI || g < fA || g > fA + i ? null : "thumb";
+    const B = this.canvas.width / this.dpr, C = this.canvas.height / this.dpr, E = B - PI - KA, i = C - KA * 2;
+    return I < E || I > E + PI || g < KA || g > KA + i ? null : "thumb";
   }
   destroy() {
   }
@@ -9287,8 +9295,8 @@ const zg = class xg {
             if (i < C)
               c = this.wasmTerm.getScrollbackGraphemeString(i, N);
             else {
-              const r = i - C;
-              c = this.wasmTerm.getGraphemeString(r, N);
+              const L = i - C;
+              c = this.wasmTerm.getGraphemeString(L, N);
             }
           else
             c = String.fromCodePoint(h.codepoint);
@@ -9694,7 +9702,7 @@ const zg = class xg {
 zg.AUTO_SCROLL_EDGE_SIZE = 30;
 zg.AUTO_SCROLL_SPEED = 3;
 zg.AUTO_SCROLL_INTERVAL = 50;
-let oE = zg;
+let sE = zg;
 class ps {
   // 200ms fade animation
   constructor(I = {}) {
@@ -9724,7 +9732,7 @@ class ps {
       const o = Math.floor(this.viewportY);
       this.scrollEmitter.fire(o), this.getScrollbackLength() > 0 && this.showScrollbar(), this.requestRender(), this.scrollAnimationFrame = requestAnimationFrame(this.animateScroll);
     }, this.renderTick = () => {
-      var B;
+      var B, C;
       if (this.animationFrameId = void 0, this.isDisposed || !this.isOpen || !this.renderFrame())
         return;
       (B = this.scrollbarOverlay) == null || B.render({
@@ -9734,7 +9742,7 @@ class ps {
         opacity: this.scrollbarOpacity
       });
       const Q = this.wasmTerm.getCursor();
-      Q.y !== this.lastCursorY && (this.lastCursorY = Q.y, this.cursorMoveEmitter.fire());
+      Q.y !== this.lastCursorY && (this.lastCursorY = Q.y, this.cursorMoveEmitter.fire()), Q.style !== this.lastCursorStyle && (this.lastCursorStyle !== void 0 && ((C = this.renderer) == null || C.setCursorStyle(Q.style)), this.lastCursorStyle = Q.style);
     }, this.handleMouseMove = (Q) => {
       if (!(!this.canvas || !this.renderer || !this.wasmTerm)) {
         if (this.isDraggingScrollbar) {
@@ -9767,31 +9775,35 @@ class ps {
         if (D < N)
           s = w - N + D, t = this.wasmTerm.getScrollbackLine(s);
         else {
-          const r = D - N;
-          s = w + r, t = this.wasmTerm.getLine(r);
+          const L = D - N;
+          s = w + L, t = this.wasmTerm.getLine(L);
         }
       else
         s = w + D, t = this.wasmTerm.getLine(D);
       const h = t ? this.visualColToLogical(t, i) : i, c = await this.linkDetector.getLinkAt(h, s);
       c && (c.activate(Q), (Q.ctrlKey || Q.metaKey) && Q.preventDefault());
     }, this.handleWheel = (Q) => {
-      var C, E, i;
-      if (Q.preventDefault(), Q.stopPropagation(), this.customWheelEventHandler && this.customWheelEventHandler(Q))
+      var C, E, i, o;
+      if (this.customWheelEventHandler && this.customWheelEventHandler(Q)) {
+        Q.preventDefault(), Q.stopPropagation();
         return;
-      if (((C = this.wasmTerm) == null ? void 0 : C.isAlternateScreen()) ?? !1) {
-        const o = Q.deltaY > 0 ? "down" : "up", D = Math.min(Math.abs(Math.round(Q.deltaY / 33)), 5);
-        for (let w = 0; w < D; w++)
-          o === "up" ? this.dataEmitter.fire("\x1B[A") : this.dataEmitter.fire("\x1B[B");
+      }
+      if ((C = this.wasmTerm) != null && C.hasMouseTracking())
+        return;
+      if (Q.preventDefault(), Q.stopPropagation(), ((E = this.wasmTerm) == null ? void 0 : E.isAlternateScreen()) ?? !1) {
+        const D = Q.deltaY > 0 ? "down" : "up", w = Math.min(Math.abs(Math.round(Q.deltaY / 33)), 5);
+        for (let s = 0; s < w; s++)
+          D === "up" ? this.dataEmitter.fire("\x1B[A") : this.dataEmitter.fire("\x1B[B");
       } else {
-        let o;
+        let D;
         if (Q.deltaMode === WheelEvent.DOM_DELTA_PIXEL) {
-          const D = ((i = (E = this.renderer) == null ? void 0 : E.getMetrics()) == null ? void 0 : i.height) ?? 20;
-          o = Q.deltaY / D;
+          const w = ((o = (i = this.renderer) == null ? void 0 : i.getMetrics()) == null ? void 0 : o.height) ?? 20;
+          D = Q.deltaY / w;
         } else
-          Q.deltaMode === WheelEvent.DOM_DELTA_LINE ? o = Q.deltaY : Q.deltaMode === WheelEvent.DOM_DELTA_PAGE ? o = Q.deltaY * this.rows : o = Q.deltaY / 33;
-        if (o !== 0) {
-          const D = this.viewportY - o;
-          this.smoothScrollTo(D);
+          Q.deltaMode === WheelEvent.DOM_DELTA_LINE ? D = Q.deltaY : Q.deltaMode === WheelEvent.DOM_DELTA_PAGE ? D = Q.deltaY * this.rows : D = Q.deltaY / 33;
+        if (D !== 0) {
+          const w = this.viewportY - D;
+          this.smoothScrollTo(w);
         }
       }
     }, this.handleMouseDown = (Q) => {
@@ -10079,7 +10091,7 @@ class ps {
         () => this.copySelection(),
         this.textarea,
         i
-      ), this.selectionManager = new oE(
+      ), this.selectionManager = new sE(
         this,
         this.renderer,
         this.wasmTerm,
@@ -10115,8 +10127,8 @@ class ps {
                 cursorBlink: this.options.cursorBlink,
                 theme: this.options.theme
               });
-            } catch (r) {
-              console.warn(`[ghostty-web] ${w} fallback failed; using canvas2d:`, r), this.renderer = await jQ("canvas2d", this.canvas, {
+            } catch (L) {
+              console.warn(`[ghostty-web] ${w} fallback failed; using canvas2d:`, L), this.renderer = await jQ("canvas2d", this.canvas, {
                 fontSize: this.options.fontSize,
                 fontFamily: this.options.fontFamily,
                 cursorStyle: this.options.cursorStyle,
@@ -10124,7 +10136,7 @@ class ps {
                 theme: this.options.theme
               });
             }
-            this.renderer.resize(this.cols, this.rows), this.renderer.setOnRequestRender(() => this.requestRender()), this.selectionManager = new oE(
+            this.renderer.resize(this.cols, this.rows), this.renderer.setOnRequestRender(() => this.requestRender()), this.selectionManager = new sE(
               this,
               this.renderer,
               this.wasmTerm,
@@ -10618,12 +10630,12 @@ class ps {
     o !== e && (this.renderer.setHoveredHyperlinkId(o), this.previousHoveredHyperlinkId = o);
     const N = this.wasmTerm.getScrollbackLength();
     let h;
-    const c = this.getViewportY(), r = Math.max(0, Math.floor(c));
-    if (r > 0)
-      if (i < r)
-        h = N - r + i;
+    const c = this.getViewportY(), L = Math.max(0, Math.floor(c));
+    if (L > 0)
+      if (i < L)
+        h = N - L + i;
       else {
-        const G = i - r;
+        const G = i - L;
         h = N + G;
       }
     else
@@ -10635,7 +10647,7 @@ class ps {
         const k = G ? "pointer" : "text";
         if (this.element && (this.element.style.cursor = k), this.canvas && (this.canvas.style.cursor = k), this.renderer)
           if (G) {
-            const L = ((S = this.wasmTerm) == null ? void 0 : S.getScrollbackLength()) || 0, J = this.getViewportY(), a = Math.max(0, Math.floor(J)), R = G.range.start.y - L + a, f = G.range.end.y - L + a;
+            const r = ((S = this.wasmTerm) == null ? void 0 : S.getScrollbackLength()) || 0, J = this.getViewportY(), a = Math.max(0, Math.floor(J)), R = G.range.start.y - r + a, f = G.range.end.y - r + a;
             R < this.rows && f >= 0 ? this.renderer.setHoveredLinkRange({
               startX: G.range.start.x,
               startY: Math.max(0, R),
@@ -10869,7 +10881,7 @@ class us {
     }), this._resizeObserver.observe(this._terminal.element)));
   }
 }
-const pg = "ghostty-renderer-hud", DB = "ghostty-renderer-hud-styles", Ys = [
+const pg = "ghostty-renderer-hud", wB = "ghostty-renderer-hud-styles", Ys = [
   "webgpu",
   "webgl",
   "canvas2d"
@@ -10891,10 +10903,10 @@ function bs() {
   return VQ(Q) ? Q : "auto";
 }
 function fs() {
-  if (document.getElementById(DB))
+  if (document.getElementById(wB))
     return;
   const A = document.createElement("style");
-  A.id = DB, A.textContent = `
+  A.id = wB, A.textContent = `
     :where(#${pg}) {
       bottom: 12px;
       right: 12px;
@@ -10937,8 +10949,8 @@ function ms(A, I = {}) {
     o += 1;
     const h = performance.now();
     if (h - D >= 1e3) {
-      const r = ((c = A.renderer) == null ? void 0 : c.backend) ?? "?";
-      i.textContent = `${r} ${o} fps`, o = 0, D = h;
+      const L = ((c = A.renderer) == null ? void 0 : c.backend) ?? "?";
+      i.textContent = `${L} ${o} fps`, o = 0, D = h;
     }
     w = requestAnimationFrame(s);
   };
@@ -10954,7 +10966,7 @@ function ms(A, I = {}) {
   };
   return C && window.addEventListener("keydown", N), () => {
     var h;
-    w !== null && cancelAnimationFrame(w), B && i.removeEventListener("click", e), C && window.removeEventListener("keydown", N), i.remove(), (h = document.getElementById(DB)) == null || h.remove();
+    w !== null && cancelAnimationFrame(w), B && i.removeEventListener("click", e), C && window.removeEventListener("keydown", N), i.remove(), (h = document.getElementById(wB)) == null || h.remove();
   };
 }
 let jg = null;
@@ -10978,9 +10990,9 @@ For tests, pass a Ghostty instance directly:
   return jg;
 }
 export {
-  CE as CanvasRenderer,
+  EE as CanvasRenderer,
   d as CellFlags,
-  GB as CursorBlink,
+  cB as CursorBlink,
   Tg as DirtyState,
   MA as EventEmitter,
   us as FitAddon,
@@ -10988,17 +11000,17 @@ export {
   po as GhosttyTerminal,
   zo as InputHandler,
   M as Key,
-  Ai as KeyAction,
+  gB as KeyAction,
   xo as KeyEncoder,
-  kB as KeyEncoderOption,
+  MB as KeyEncoderOption,
   Wo as LinkDetector,
-  KA as Mods,
+  yA as Mods,
   _o as OSC8LinkProvider,
   Rs as ScrollbarOverlay,
-  oE as SelectionManager,
+  sE as SelectionManager,
   ps as Terminal,
   $o as UrlRegexProvider,
-  JB as WebGPURenderer,
+  rB as WebGPURenderer,
   Os as getGhostty,
   Ps as init,
   ms as installRendererHud,
