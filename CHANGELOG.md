@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.10.2] - 2026-10-19
+
 ### Fixed
 
 - OSC 52 clipboard writes now work for in-browser (wasm) programs. The wasm
