@@ -769,7 +769,7 @@ const iD = () => {
     A = A >>> 8 ^ B[(A ^ I[E]) & 255];
   return A ^ -1;
 };
-var gA = wD, RI = {
+var QA = wD, RI = {
   2: "need dictionary",
   /* Z_NEED_DICT       2  */
   1: "stream end",
@@ -875,7 +875,7 @@ const NA = (A) => {
   A.pending_buf[A.pending++] = I >>> 8 & 255, A.pending_buf[A.pending++] = I & 255;
 }, IB = (A, I, g, Q) => {
   let B = A.avail_in;
-  return B > Q && (B = Q), B === 0 ? 0 : (A.avail_in -= B, I.set(A.input.subarray(A.next_in, A.next_in + B), g), A.state.wrap === 1 ? A.adler = Bg(A.adler, I, B, g) : A.state.wrap === 2 && (A.adler = gA(A.adler, I, B, g)), A.next_in += B, A.total_in += B, B);
+  return B > Q && (B = Q), B === 0 ? 0 : (A.avail_in -= B, I.set(A.input.subarray(A.next_in, A.next_in + B), g), A.state.wrap === 1 ? A.adler = Bg(A.adler, I, B, g) : A.state.wrap === 2 && (A.adler = QA(A.adler, I, B, g)), A.next_in += B, A.total_in += B, B);
 }, yE = (A, I) => {
   let g = A.max_chain_length, Q = A.strstart, B, C, E = A.prev_length, i = A.nice_match;
   const o = A.strstart > A.w_size - HA ? A.strstart - (A.w_size - HA) : 0, D = A.window, w = A.w_mask, s = A.prev, t = A.strstart + vA;
@@ -1078,7 +1078,7 @@ const og = (A) => {
       b(
         g,
         (g.gzhead.text ? 1 : 0) + (g.gzhead.hcrc ? 2 : 0) + (g.gzhead.extra ? 4 : 0) + (g.gzhead.name ? 8 : 0) + (g.gzhead.comment ? 16 : 0)
-      ), b(g, g.gzhead.time & 255), b(g, g.gzhead.time >> 8 & 255), b(g, g.gzhead.time >> 16 & 255), b(g, g.gzhead.time >> 24 & 255), b(g, g.level === 9 ? 2 : g.strategy >= Sg || g.level < 2 ? 4 : 0), b(g, g.gzhead.os & 255), g.gzhead.extra && g.gzhead.extra.length && (b(g, g.gzhead.extra.length & 255), b(g, g.gzhead.extra.length >> 8 & 255)), g.gzhead.hcrc && (A.adler = gA(A.adler, g.pending_buf, g.pending, 0)), g.gzindex = 0, g.status = WQ;
+      ), b(g, g.gzhead.time & 255), b(g, g.gzhead.time >> 8 & 255), b(g, g.gzhead.time >> 16 & 255), b(g, g.gzhead.time >> 24 & 255), b(g, g.level === 9 ? 2 : g.strategy >= Sg || g.level < 2 ? 4 : 0), b(g, g.gzhead.os & 255), g.gzhead.extra && g.gzhead.extra.length && (b(g, g.gzhead.extra.length & 255), b(g, g.gzhead.extra.length >> 8 & 255)), g.gzhead.hcrc && (A.adler = QA(A.adler, g.pending_buf, g.pending, 0)), g.gzindex = 0, g.status = WQ;
     else if (b(g, 0), b(g, 0), b(g, 0), b(g, 0), b(g, 0), b(g, g.level === 9 ? 2 : g.strategy >= Sg || g.level < 2 ? 4 : 0), b(g, lD), g.status = iI, NA(A), g.pending !== 0)
       return g.last_flush = -1, iA;
   }
@@ -1087,12 +1087,12 @@ const og = (A) => {
       let B = g.pending, C = (g.gzhead.extra.length & 65535) - g.gzindex;
       for (; g.pending + C > g.pending_buf_size; ) {
         let i = g.pending_buf_size - g.pending;
-        if (g.pending_buf.set(g.gzhead.extra.subarray(g.gzindex, g.gzindex + i), g.pending), g.pending = g.pending_buf_size, g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex += i, NA(A), g.pending !== 0)
+        if (g.pending_buf.set(g.gzhead.extra.subarray(g.gzindex, g.gzindex + i), g.pending), g.pending = g.pending_buf_size, g.gzhead.hcrc && g.pending > B && (A.adler = QA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex += i, NA(A), g.pending !== 0)
           return g.last_flush = -1, iA;
         B = 0, C -= i;
       }
       let E = new Uint8Array(g.gzhead.extra);
-      g.pending_buf.set(E.subarray(g.gzindex, g.gzindex + C), g.pending), g.pending += C, g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex = 0;
+      g.pending_buf.set(E.subarray(g.gzindex, g.gzindex + C), g.pending), g.pending += C, g.gzhead.hcrc && g.pending > B && (A.adler = QA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex = 0;
     }
     g.status = _Q;
   }
@@ -1101,13 +1101,13 @@ const og = (A) => {
       let B = g.pending, C;
       do {
         if (g.pending === g.pending_buf_size) {
-          if (g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B)), NA(A), g.pending !== 0)
+          if (g.gzhead.hcrc && g.pending > B && (A.adler = QA(A.adler, g.pending_buf, g.pending - B, B)), NA(A), g.pending !== 0)
             return g.last_flush = -1, iA;
           B = 0;
         }
         g.gzindex < g.gzhead.name.length ? C = g.gzhead.name.charCodeAt(g.gzindex++) & 255 : C = 0, b(g, C);
       } while (C !== 0);
-      g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex = 0;
+      g.gzhead.hcrc && g.pending > B && (A.adler = QA(A.adler, g.pending_buf, g.pending - B, B)), g.gzindex = 0;
     }
     g.status = $Q;
   }
@@ -1116,13 +1116,13 @@ const og = (A) => {
       let B = g.pending, C;
       do {
         if (g.pending === g.pending_buf_size) {
-          if (g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B)), NA(A), g.pending !== 0)
+          if (g.gzhead.hcrc && g.pending > B && (A.adler = QA(A.adler, g.pending_buf, g.pending - B, B)), NA(A), g.pending !== 0)
             return g.last_flush = -1, iA;
           B = 0;
         }
         g.gzindex < g.gzhead.comment.length ? C = g.gzhead.comment.charCodeAt(g.gzindex++) & 255 : C = 0, b(g, C);
       } while (C !== 0);
-      g.gzhead.hcrc && g.pending > B && (A.adler = gA(A.adler, g.pending_buf, g.pending - B, B));
+      g.gzhead.hcrc && g.pending > B && (A.adler = QA(A.adler, g.pending_buf, g.pending - B, B));
     }
     g.status = AB;
   }
@@ -1713,7 +1713,7 @@ const fw = (A) => {
             i--, D += Q[C++] << w, w += 8;
           }
           if (g.wrap & 2 && D === 35615) {
-            g.wbits === 0 && (g.wbits = 15), g.check = 0, J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0), D = 0, w = 0, g.mode = MC;
+            g.wbits === 0 && (g.wbits = 15), g.check = 0, J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = QA(g.check, J, 2, 0), D = 0, w = 0, g.mode = MC;
             break;
           }
           if (g.head && (g.head.done = !1), !(g.wrap & 1) || /* check if zlib header allowed */
@@ -1745,21 +1745,21 @@ const fw = (A) => {
             A.msg = "unknown header flags set", g.mode = z;
             break;
           }
-          g.head && (g.head.text = D >> 8 & 1), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = GC;
+          g.head && (g.head.text = D >> 8 & 1), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = QA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = GC;
         case GC:
           for (; w < 32; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          g.head && (g.head.time = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, J[2] = D >>> 16 & 255, J[3] = D >>> 24 & 255, g.check = gA(g.check, J, 4, 0)), D = 0, w = 0, g.mode = cC;
+          g.head && (g.head.time = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, J[2] = D >>> 16 & 255, J[3] = D >>> 24 & 255, g.check = QA(g.check, J, 4, 0)), D = 0, w = 0, g.mode = cC;
         case cC:
           for (; w < 16; ) {
             if (i === 0)
               break A;
             i--, D += Q[C++] << w, w += 8;
           }
-          g.head && (g.head.xflags = D & 255, g.head.os = D >> 8), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = FC;
+          g.head && (g.head.xflags = D & 255, g.head.os = D >> 8), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = QA(g.check, J, 2, 0)), D = 0, w = 0, g.mode = FC;
         case FC:
           if (g.flags & 1024) {
             for (; w < 16; ) {
@@ -1767,7 +1767,7 @@ const fw = (A) => {
                 break A;
               i--, D += Q[C++] << w, w += 8;
             }
-            g.length = D, g.head && (g.head.extra_len = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = gA(g.check, J, 2, 0)), D = 0, w = 0;
+            g.length = D, g.head && (g.head.extra_len = D), g.flags & 512 && g.wrap & 4 && (J[0] = D & 255, J[1] = D >>> 8 & 255, g.check = QA(g.check, J, 2, 0)), D = 0, w = 0;
           } else
             g.head && (g.head.extra = null);
           g.mode = UC;
@@ -1781,7 +1781,7 @@ const fw = (A) => {
             ),
             /*len + copy > state.head.extra_max - len ? state.head.extra_max : copy,*/
             k
-          )), g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, g.length -= e), g.length))
+          )), g.flags & 512 && g.wrap & 4 && (g.check = QA(g.check, Q, e, C)), i -= e, C += e, g.length -= e), g.length))
             break A;
           g.length = 0, g.mode = JC;
         case JC:
@@ -1792,7 +1792,7 @@ const fw = (A) => {
             do
               k = Q[C + e++], g.head && k && g.length < 65536 && (g.head.name += String.fromCharCode(k));
             while (k && e < i);
-            if (g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, k)
+            if (g.flags & 512 && g.wrap & 4 && (g.check = QA(g.check, Q, e, C)), i -= e, C += e, k)
               break A;
           } else
             g.head && (g.head.name = null);
@@ -1805,7 +1805,7 @@ const fw = (A) => {
             do
               k = Q[C + e++], g.head && k && g.length < 65536 && (g.head.comment += String.fromCharCode(k));
             while (k && e < i);
-            if (g.flags & 512 && g.wrap & 4 && (g.check = gA(g.check, Q, e, C)), i -= e, C += e, k)
+            if (g.flags & 512 && g.wrap & 4 && (g.check = QA(g.check, Q, e, C)), i -= e, C += e, k)
               break A;
           } else
             g.head && (g.head.comment = null);
@@ -2083,7 +2083,7 @@ const fw = (A) => {
               i--, D |= Q[C++] << w, w += 8;
             }
             if (t -= o, A.total_out += t, g.total += t, g.wrap & 4 && t && (A.adler = g.check = /*UPDATE_CHECK(state.check, put - _out, _out);*/
-            g.flags ? gA(g.check, B, t, E - t) : Bg(g.check, B, t, E - t)), t = o, g.wrap & 4 && (g.flags ? D : xC(D)) !== g.check) {
+            g.flags ? QA(g.check, B, t, E - t) : Bg(g.check, B, t, E - t)), t = o, g.wrap & 4 && (g.flags ? D : xC(D)) !== g.check) {
               A.msg = "incorrect data check", g.mode = z;
               break;
             }
@@ -2117,7 +2117,7 @@ const fw = (A) => {
           return cA;
       }
   return A.next_out = E, A.avail_out = o, A.next_in = C, A.avail_in = i, g.hold = D, g.bits = w, (g.wsize || t !== A.avail_out && g.mode < z && (g.mode < dQ || I !== NC)) && jE(A, A.output, A.next_out, t - A.avail_out), s -= A.avail_in, t -= A.avail_out, A.total_in += s, A.total_out += t, g.total += t, g.wrap & 4 && t && (A.adler = g.check = /*UPDATE_CHECK(state.check, strm.next_out - _out, _out);*/
-  g.flags ? gA(g.check, B, t, A.next_out - t) : Bg(g.check, B, t, A.next_out - t)), A.data_type = g.bits + (g.last ? 64 : 0) + (g.mode === fA ? 128 : 0) + (g.mode === lg || g.mode === KQ ? 256 : 0), (s === 0 && t === 0 || I === NC) && r === oI && (r = Rw), r;
+  g.flags ? QA(g.check, B, t, A.next_out - t) : Bg(g.check, B, t, A.next_out - t)), A.data_type = g.bits + (g.last ? 64 : 0) + (g.mode === fA ? 128 : 0) + (g.mode === lg || g.mode === KQ ? 256 : 0), (s === 0 && t === 0 || I === NC) && r === oI && (r = Rw), r;
 }, dw = (A) => {
   if (sI(A))
     return cA;
@@ -2228,7 +2228,7 @@ var Io = sg, go = kB, Qo = Ao, Bo = kB, Co = wg, Eo = {
   ungzip: Bo,
   constants: Co
 };
-const { Inflate: io, inflate: Do, inflateRaw: Ts, ungzip: xs } = Eo;
+const { Inflate: io, inflate: Do, inflateRaw: us, ungzip: bs } = Eo;
 var bC = io, wo = Do;
 const ZE = [];
 for (let A = 0; A < 256; A++) {
@@ -4559,7 +4559,7 @@ function bo() {
             g[P].split(",").forEach(function($) {
               var K = $.split("+"), T = K[0], q = K[1];
               T = parseInt(T, 36), q = q ? parseInt(q, 36) : 0, w.set(n += T, Q[P]);
-              for (var IA = 0; IA < q; IA++)
+              for (var gA = 0; gA < q; gA++)
                 w.set(++n, Q[P]);
             });
           }
@@ -4580,13 +4580,13 @@ function bo() {
     };
     function h(Y, v) {
       var P = 36, n = 0, $ = /* @__PURE__ */ new Map(), K = v && /* @__PURE__ */ new Map(), T;
-      return Y.split(",").forEach(function q(IA) {
-        if (IA.indexOf("+") !== -1)
-          for (var BA = +IA; BA--; )
+      return Y.split(",").forEach(function q(gA) {
+        if (gA.indexOf("+") !== -1)
+          for (var BA = +gA; BA--; )
             q(T);
         else {
-          T = IA;
-          var m = IA.split(">"), AA = m[0], JA = m[1];
+          T = gA;
+          var m = gA.split(">"), AA = m[0], JA = m[1];
           AA = String.fromCodePoint(n += parseInt(AA, P)), JA = String.fromCodePoint(n += parseInt(JA, P)), $.set(AA, JA), v && K.set(JA, AA);
         }
       }), { map: $, reverseMap: K };
@@ -4607,7 +4607,7 @@ function bo() {
     function S(Y) {
       return U(), G.get(Y) || null;
     }
-    var k = Q.L, r = Q.R, J = Q.EN, a = Q.ES, R = Q.ET, f = Q.AN, l = Q.CS, x = Q.B, O = Q.S, _ = Q.ON, u = Q.BN, Z = Q.NSM, AI = Q.AL, II = Q.LRO, lI = Q.RLO, X = Q.LRE, xA = Q.RLE, pA = Q.PDF, tI = Q.LRI, uA = Q.RLI, YA = Q.FSI, QA = Q.PDI;
+    var k = Q.L, r = Q.R, J = Q.EN, a = Q.ES, R = Q.ET, f = Q.AN, l = Q.CS, x = Q.B, O = Q.S, _ = Q.ON, u = Q.BN, Z = Q.NSM, AI = Q.AL, II = Q.LRO, lI = Q.RLO, X = Q.LRE, xA = Q.RLE, pA = Q.PDF, tI = Q.LRI, uA = Q.RLI, YA = Q.FSI, IA = Q.PDI;
     function tg(Y, v) {
       for (var P = 125, n = new Uint32Array(Y.length), $ = 0; $ < Y.length; $++)
         n[$] = t(Y[$]);
@@ -4616,14 +4616,14 @@ function bo() {
         var sA = n[oA];
         n[oA] = UA, K.set(sA, K.get(sA) - 1), sA & i && K.set(i, K.get(i) - 1), K.set(UA, (K.get(UA) || 0) + 1), UA & i && K.set(i, (K.get(i) || 0) + 1);
       }
-      for (var q = new Uint8Array(Y.length), IA = /* @__PURE__ */ new Map(), BA = [], m = null, AA = 0; AA < Y.length; AA++)
+      for (var q = new Uint8Array(Y.length), gA = /* @__PURE__ */ new Map(), BA = [], m = null, AA = 0; AA < Y.length; AA++)
         m || BA.push(m = {
           start: AA,
           end: Y.length - 1,
           // 3.3.1 P2-P3: Determine the paragraph level
           level: v === "rtl" ? 1 : v === "ltr" ? 0 : $B(AA, !1)
         }), n[AA] & x && (m.end = AA, m = null);
-      for (var JA = xA | X | lI | II | C | QA | pA | x, gI = function(oA) {
+      for (var JA = xA | X | lI | II | C | IA | pA | x, gI = function(oA) {
         return oA + (oA & 1 ? 1 : 2);
       }, bA = function(oA) {
         return oA + (oA & 1 ? 2 : 1);
@@ -4665,14 +4665,14 @@ function bo() {
                 _isolate: 1,
                 _isolInitIndex: CA
               })) : lA++;
-            } else if (EA & QA) {
+            } else if (EA & IA) {
               if (lA > 0)
                 lA--;
               else if ($g > 0) {
                 for (PA = 0; !V[V.length - 1]._isolate; )
                   V.pop();
                 var AQ = V[V.length - 1]._isolInitIndex;
-                AQ != null && (IA.set(AQ, CA), IA.set(CA, AQ)), V.pop(), $g--;
+                AQ != null && (gA.set(AQ, CA), gA.set(CA, AQ)), V.pop(), $g--;
               }
               W = V[V.length - 1], q[CA] = W._level, W._override && T(CA, W._override);
             } else
@@ -4683,7 +4683,7 @@ function bo() {
         for (var eI = [], rA = null, QI = m.start; QI <= m.end; QI++) {
           var IQ = n[QI];
           if (!(IQ & o)) {
-            var HB = q[QI], YB = IQ & C, Ui = IQ === QA;
+            var HB = q[QI], YB = IQ & C, Ui = IQ === IA;
             rA && HB === rA._level ? (rA._end = QI, rA._endsWithIsolInit = YB) : eI.push(rA = {
               _start: QI,
               _end: QI,
@@ -4695,8 +4695,8 @@ function bo() {
         }
         for (var gQ = [], eg = 0; eg < eI.length; eg++) {
           var hg = eI[eg];
-          if (!hg._startsWithPDI || hg._startsWithPDI && !IA.has(hg._start)) {
-            for (var QQ = [rA = hg], lB = void 0; rA && rA._endsWithIsolInit && (lB = IA.get(rA._end)) != null; )
+          if (!hg._startsWithPDI || hg._startsWithPDI && !gA.has(hg._start)) {
+            for (var QQ = [rA = hg], lB = void 0; rA && rA._endsWithIsolInit && (lB = gA.get(rA._end)) != null; )
               for (var ag = eg + 1; ag < eI.length; ag++)
                 if (eI[ag]._start === lB) {
                   QQ.push(rA = eI[ag]);
@@ -4736,7 +4736,7 @@ function bo() {
                     wQ = n[H[Gg]];
                     break;
                   }
-                T(OB, wQ & (C | QA) ? _ : wQ);
+                T(OB, wQ & (C | IA) ? _ : wQ);
               }
             }
           if (K.get(J))
@@ -4895,7 +4895,7 @@ function bo() {
           var VA = n[sA];
           if (VA & (r | AI))
             return 1;
-          if (VA & (x | k) || UA && VA === QA)
+          if (VA & (x | k) || UA && VA === IA)
             return 0;
           if (VA & C) {
             var AC = ni(sA);
@@ -4909,7 +4909,7 @@ function bo() {
           var VA = n[sA];
           if (VA & x)
             break;
-          if (VA & QA) {
+          if (VA & IA) {
             if (--UA === 0)
               return sA;
           } else
@@ -4945,9 +4945,9 @@ function bo() {
       P = Math.max(0, P == null ? 0 : +P), n = Math.min($ - 1, n == null ? $ - 1 : +n);
       var K = [];
       return v.paragraphs.forEach(function(T) {
-        var q = Math.max(P, T.start), IA = Math.min(n, T.end);
-        if (q < IA) {
-          for (var BA = v.levels.slice(q, IA + 1), m = IA; m >= q && t(Y[m]) & D; m--)
+        var q = Math.max(P, T.start), gA = Math.min(n, T.end);
+        if (q < gA) {
+          for (var BA = v.levels.slice(q, gA + 1), m = gA; m >= q && t(Y[m]) & D; m--)
             BA[m] = T.level;
           for (var AA = T.level, JA = 1 / 0, gI = 0; gI < BA.length; gI++) {
             var bA = BA[gI];
@@ -4973,7 +4973,7 @@ function bo() {
       for (var $ = LB(Y, v, P, n), K = [], T = 0; T < Y.length; T++)
         K[T] = T;
       return $.forEach(function(q) {
-        for (var IA = q[0], BA = q[1], m = K.slice(IA, BA + 1), AA = m.length; AA--; )
+        for (var gA = q[0], BA = q[1], m = K.slice(gA, BA + 1), AA = m.length; AA--; )
           K[BA - AA] = m[AA];
       }), K;
     }
@@ -6503,7 +6503,7 @@ class cB {
     this.intervalId !== void 0 && clearInterval(this.intervalId), this.intervalId = void 0;
   }
 }
-const WC = 32, LI = 8, _C = 1, $C = 2, Is = 4, gs = 8, Qs = 16, Bs = 32, PQ = 64, Cs = 128, Es = 256, is = 512, AE = 1024, IE = 2048, gE = 4096, QE = 8192, Ds = 16384, $A = {
+const WC = 32, LI = 8, _C = 1, $C = 2, Is = 4, gs = 8, Qs = 16, Bs = 32, PQ = 64, Cs = 128, Es = 256, is = 512, AE = 1024, IE = 2048, gE = 4096, QE = 8192, Ds = 16384, ws = 32768, $A = {
   foreground: "#d4d4d4",
   background: "#1e1e1e",
   cursor: "#ffffff",
@@ -6548,6 +6548,18 @@ function oi(A) {
   const I = new Uint32Array(20), g = new Float32Array(I.buffer);
   return I[0] = A.cols, I[1] = A.rows, g[2] = A.cellWidth, g[3] = A.cellHeight, g[4] = A.dpr, I[5] = A.cursorVisible && A.cursorBlinkVisible ? 1 : 0, I[6] = A.cursorX, I[7] = A.cursorY, I[8] = A.cursorStyle === "block" ? 0 : A.cursorStyle === "underline" ? 1 : 2, I[9] = 0, I[10] = A.atlasSize, I;
 }
+function os(A) {
+  for (let I = 0; I + 3 < A.length; I += 4)
+    if (!(A[I + 3] < 16) && Math.min(A[I], A[I + 1], A[I + 2]) < 232)
+      return !0;
+  return !1;
+}
+function ss(A) {
+  for (let I = 0; I + 3 < A.length; I += 4) {
+    const g = A[I + 3];
+    g !== 255 && (A[I] = Math.round(A[I] * g / 255), A[I + 1] = Math.round(A[I + 1] * g / 255), A[I + 2] = Math.round(A[I + 2] * g / 255));
+  }
+}
 class si {
   constructor(I, g, Q, B) {
     this.nextX = 0, this.nextY = 0, this.rowHeight = 0, this.cache = /* @__PURE__ */ new Map(), this.offscreen = document.createElement("canvas"), this.cellW = I, this.cellH = g, this.fontSize = Q, this.fontFamily = B, this.size = 1024, this.offscreen.width = I * 2, this.offscreen.height = g, this.offCtx = this.offscreen.getContext("2d", { willReadFrequently: !0 });
@@ -6573,7 +6585,7 @@ class si {
     let s = "";
     g & 1 && (s += "bold "), g & 2 && (s += "italic "), w.font = `${s}${this.fontSize}px ${this.fontFamily}`, w.textBaseline = "alphabetic", w.textAlign = "left", w.fillStyle = "#ffffff", w.fillText(I, 0, Q);
     const t = w.getImageData(0, 0, i, o);
-    return this.uploadRegion(D, t.data, i, o), D;
+    return os(t.data) && (D.color = !0, ss(t.data)), this.uploadRegion(D, t.data, i, o), D;
   }
   grow() {
     const I = this.size * 2;
@@ -6650,17 +6662,17 @@ function ti(A, I, g, Q, B) {
               const tg = rI(X[2]);
               tg >= 0 && (uA = tg << 24 | tI);
             }
-            const YA = h.get(uA), QA = L.get(uA);
-            YA && QA !== void 0 ? (Z |= IE, C[O + 5] = pA & 65535 | (xA & 65535) << 16, C[O + 6] = QA, C[O + 7] = YA.gridCols & 65535 | (YA.gridRows & 65535) << 16) : Z |= PQ;
+            const YA = h.get(uA), IA = L.get(uA);
+            YA && IA !== void 0 ? (Z |= IE, C[O + 5] = pA & 65535 | (xA & 65535) << 16, C[O + 6] = IA, C[O + 7] = YA.gridCols & 65535 | (YA.gridRows & 65535) << 16) : Z |= PQ;
           }
         }
       }
       if (B.blockElementShaderEnabled && II >= 9600 && II <= 9631 && u.grapheme_len === 0 && (Z |= AE, C[O + 5] = II - 9600), C[O + 0] = u.fg_r | u.fg_g << 8 | u.fg_b << 16, C[O + 1] = u.bg_r | u.bg_g << 8 | u.bg_b << 16, !((Z & (PQ | IE | AE)) !== 0) && B.atlas) {
-        const X = u.grapheme, pA = (f ? (r = R.mirror) == null ? void 0 : r.get(_) : void 0) ?? (u.codepoint || 32), tI = X && X.length > 0 ? String.fromCodePoint(pA, ...X) : String.fromCodePoint(pA), uA = (Z & _C ? 1 : 0) | (Z & $C ? 2 : 0), YA = u.width === 2 ? 2 : 1, QA = B.atlas.getOrRaster(tI, uA, B.metrics.baseline, YA);
-        C[O + 2] = QA.u & 65535 | (QA.v & 65535) << 16, C[O + 3] = YA === 2 ? U & 65535 | (F & 65535) << 16 : QA.w & 65535 | (QA.h & 65535) << 16, YA === 2 && (l = {
-          slotU: QA.u,
-          slotV: QA.v,
-          slotH: QA.h,
+        const X = u.grapheme, pA = (f ? (r = R.mirror) == null ? void 0 : r.get(_) : void 0) ?? (u.codepoint || 32), tI = X && X.length > 0 ? String.fromCodePoint(pA, ...X) : String.fromCodePoint(pA), uA = (Z & _C ? 1 : 0) | (Z & $C ? 2 : 0), YA = u.width === 2 ? 2 : 1, IA = B.atlas.getOrRaster(tI, uA, B.metrics.baseline, YA);
+        IA.color && (Z |= ws), C[O + 2] = IA.u & 65535 | (IA.v & 65535) << 16, C[O + 3] = YA === 2 ? U & 65535 | (F & 65535) << 16 : IA.w & 65535 | (IA.h & 65535) << 16, YA === 2 && (l = {
+          slotU: IA.u,
+          slotV: IA.v,
+          slotH: IA.h,
           fgPacked: C[O + 0],
           bgPacked: C[O + 1],
           flags: 0
@@ -6764,8 +6776,8 @@ class ai {
     this.cache.clear();
   }
 }
-const ws = 8192;
-function os(A) {
+const ts = 8192;
+function es(A) {
   let I = 1;
   for (; I < A; )
     I <<= 1;
@@ -6792,8 +6804,8 @@ class Ni {
       return null;
     let E = Q && Q.slot.w === g.width && Q.slot.h === g.height ? Q.slot : this.tryPack(g.width, g.height);
     if (E || (this.clearAndReset(), E = this.tryPack(g.width, g.height)), !E) {
-      const o = Math.max(g.width, g.height), D = os(o);
-      if (D > ws || D <= this.size || (this.size = D, this.clearAndReset(), this.growTexture(D), E = this.tryPack(g.width, g.height), !E))
+      const o = Math.max(g.width, g.height), D = es(o);
+      if (D > ts || D <= this.size || (this.size = D, this.clearAndReset(), this.growTexture(D), E = this.tryPack(g.width, g.height), !E))
         return null;
     }
     this.uploadRegion(E, C, g.width, g.height);
@@ -7617,7 +7629,7 @@ layout(std140) uniform PaletteUBO {
   vec4 linkUnderlineColor;
   vec4 _pad;
 } pal;
-`, ss = `#version 300 es
+`, hs = `#version 300 es
 precision highp float;
 precision highp int;
 ${vg}
@@ -7641,7 +7653,7 @@ void main() {
   vUv = local;
   vCellIdx = gl_InstanceID;
 }
-`, ts = `#version 300 es
+`, as = `#version 300 es
 precision highp float;
 precision highp int;
 precision highp usampler2D;
@@ -7659,6 +7671,7 @@ const uint FLAG_IS_KITTY_PLACEHOLDER = 1u << 11;
 const uint FLAG_USE_THEME_FG = 1u << 12;
 const uint FLAG_USE_THEME_BG = 1u << 13;
 const uint FLAG_IS_CURSOR_CELL = 1u << 14;
+const uint FLAG_COLOR_GLYPH = 1u << 15;
 uniform highp usampler2D uCellTex;
 uniform highp sampler2D uAtlasTex;
 uniform highp sampler2D uKittyAtlas;
@@ -7710,9 +7723,13 @@ void main() {
   vec2 auv = vec2(float(atlasUV & 0xffffu), float((atlasUV >> 16) & 0xffffu));
   vec2 asz = vec2(float(atlasSize & 0xffffu), float((atlasSize >> 16) & 0xffffu));
   vec2 texCoord = (auv + vUv * asz) / float(grid.atlasSize);
-  float mask = textureLod(uAtlasTex, texCoord, 0.0).a;
-  float alpha = (flags & FLAG_FAINT) != 0u ? mask * 0.5 : mask;
-  vec3 outRgb = mix(bg, fg, alpha);
+  vec4 texel = textureLod(uAtlasTex, texCoord, 0.0);
+  float fade = (flags & FLAG_FAINT) != 0u ? 0.5 : 1.0;
+  // A color glyph (emoji) is premultiplied RGBA drawn as it is; any other
+  // glyph is a coverage mask in the fg.
+  vec3 outRgb = (flags & FLAG_COLOR_GLYPH) != 0u
+    ? bg * (1.0 - texel.a * fade) + texel.rgb * fade
+    : mix(bg, fg, texel.a * fade);
   float baselineFrac = 0.85;
   float underlineThickness = 1.0 / grid.cellSize.y;
   bool hoverActive = (flags & (FLAG_IS_HYPERLINK_HOVERED | FLAG_IS_LINK_RANGE_HOVERED)) != 0u;
@@ -7727,7 +7744,7 @@ void main() {
   }
   fragColor = vec4(outRgb, 1.0);
 }
-`, es = `#version 300 es
+`, Ns = `#version 300 es
 precision highp float;
 precision highp int;
 ${vg}
@@ -7745,7 +7762,7 @@ void main() {
   gl_Position = vec4((cssX / canvasW) * 2.0 - 1.0, 1.0 - (cssY / canvasH) * 2.0, 0.0, 1.0);
   vUv = local;
 }
-`, hs = `#version 300 es
+`, ks = `#version 300 es
 precision highp float;
 precision highp int;
 ${vg}
@@ -7765,7 +7782,7 @@ void main() {
   }
   fragColor = vec4(0.0);
 }
-`, as = `#version 300 es
+`, Ms = `#version 300 es
 precision highp float;
 precision highp int;
 layout(std140) uniform KittyParamsUBO {
@@ -7792,7 +7809,7 @@ void main() {
   );
   vUv = (kp.srcOrigin + local * kp.srcSize) / kp.imgSize;
 }
-`, Ns = `#version 300 es
+`, Gs = `#version 300 es
 precision highp float;
 precision highp int;
 uniform highp sampler2D uKittyImg;
@@ -7802,7 +7819,7 @@ void main() {
   fragColor = texture(uKittyImg, vUv);
 }
 `;
-class ks extends si {
+class cs extends si {
   constructor(I, g, Q, B, C) {
     super(g, Q, B, C), this.gl = I;
     const E = this.createBackingTexture(this.size);
@@ -7838,7 +7855,7 @@ class ks extends si {
     (B = (Q = this.gl).deleteTexture) == null || B.call(Q, this.texture), this.texture = g;
   }
 }
-class Ms extends ai {
+class Fs extends ai {
   constructor(I) {
     super(), this.gl = I;
   }
@@ -7858,7 +7875,7 @@ class Ms extends ai {
     this.gl.deleteTexture(I);
   }
 }
-class Gs extends Ni {
+class Us extends Ni {
   constructor(I, g = 1024) {
     super(g), this.gl = I;
     const Q = I.createTexture();
@@ -7910,7 +7927,7 @@ class JB {
     });
     if (!I)
       throw new Error("WebGL2Renderer: failed to acquire webgl2 context");
-    if (this.gl = I, this.kittyTextures = new Ms(this.gl), this.paletteUBO = I.createBuffer() ?? void 0, !this.paletteUBO)
+    if (this.gl = I, this.kittyTextures = new Fs(this.gl), this.paletteUBO = I.createBuffer() ?? void 0, !this.paletteUBO)
       throw new Error("WebGL2Renderer: createBuffer failed (paletteUBO)");
     if (I.bindBuffer(I.UNIFORM_BUFFER, this.paletteUBO), I.bufferData(I.UNIFORM_BUFFER, 384, I.DYNAMIC_DRAW), this.gridUBO = I.createBuffer() ?? void 0, !this.gridUBO)
       throw new Error("WebGL2Renderer: createBuffer failed (gridUBO)");
@@ -7955,7 +7972,7 @@ class JB {
     return B.deleteShader(C), B.deleteShader(E), i;
   }
   setupTextProgram() {
-    const I = this.gl, g = this.buildProgram(ss, ts, "text");
+    const I = this.gl, g = this.buildProgram(hs, as, "text");
     this.textProgram = g;
     const Q = I.getUniformBlockIndex(g, "GridUBO"), B = I.getUniformBlockIndex(g, "PaletteUBO");
     I.uniformBlockBinding(g, Q, 0), I.uniformBlockBinding(g, B, 1), I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "KittyAtlasUBO"), 2), this.textProgramUniforms.cellTex = I.getUniformLocation(g, "uCellTex"), this.textProgramUniforms.atlasTex = I.getUniformLocation(g, "uAtlasTex"), I.useProgram(g), I.uniform1i(this.textProgramUniforms.cellTex, 0), I.uniform1i(this.textProgramUniforms.atlasTex, 1);
@@ -7963,11 +7980,11 @@ class JB {
     I.uniform1i(C, 2);
   }
   setupCursorProgram() {
-    const I = this.gl, g = this.buildProgram(es, hs, "cursor");
+    const I = this.gl, g = this.buildProgram(Ns, ks, "cursor");
     this.cursorProgram = g, I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "GridUBO"), 0), I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "PaletteUBO"), 1);
   }
   setupKittyProgram() {
-    const I = this.gl, g = this.buildProgram(as, Ns, "kitty");
+    const I = this.gl, g = this.buildProgram(Ms, Gs, "kitty");
     this.kittyProgram = g, I.uniformBlockBinding(g, I.getUniformBlockIndex(g, "KittyParamsUBO"), 0), this.kittyProgramUniforms.kittyImg = I.getUniformLocation(g, "uKittyImg"), I.useProgram(g), I.uniform1i(this.kittyProgramUniforms.kittyImg, 0);
   }
   ensureKittyRingSize(I) {
@@ -8034,13 +8051,13 @@ class JB {
     const Q = I * this.metrics.width, B = g * this.metrics.height;
     this.canvas.style.width = `${Q}px`, this.canvas.style.height = `${B}px`, this.canvas.width = Math.round(Q * this.dpr), this.canvas.height = Math.round(B * this.dpr), this.invalidateNext = !0;
     const C = Math.max(1, I * g * LI);
-    this.cellArray.length !== C && (this.cellArray = new Uint32Array(C)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new ks(
+    this.cellArray.length !== C && (this.cellArray = new Uint32Array(C)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new cs(
       this.gl,
       this.metrics.width,
       this.metrics.height,
       this.fontSize,
       this.fontFamily
-    ), this.kittyAtlas || (this.kittyAtlas = new Gs(this.gl));
+    ), this.kittyAtlas || (this.kittyAtlas = new Us(this.gl));
     const E = Math.max(1, I * 2), i = Math.max(1, g);
     if (!this.cellTex || this.cellTexW !== E || this.cellTexH !== i) {
       this.cellTex && this.gl.deleteTexture(this.cellTex);
@@ -8209,7 +8226,7 @@ class JB {
     this.contextLostListeners.push(I);
   }
 }
-const cs = (
+const Js = (
   /* wgsl */
   `
 struct GridUBO {
@@ -8273,6 +8290,7 @@ const FLAG_IS_KITTY_PLACEHOLDER: u32 = 1u << 11u;
 const FLAG_USE_THEME_FG: u32 = 1u << 12u;
 const FLAG_USE_THEME_BG: u32 = 1u << 13u;
 const FLAG_IS_CURSOR_CELL: u32 = 1u << 14u;
+const FLAG_COLOR_GLYPH: u32 = 1u << 15u;
 
 fn drawBlockElement(idx: u32, uv: vec2<f32>) -> bool {
   switch idx {
@@ -8417,10 +8435,15 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
   // the surrounding control flow non-uniform. Chrome's WGSL validator
   // rejects textureSample under non-uniform CF; Safari was lenient.
   // The atlas has no mips, so explicit LOD 0 is correct.
-  let mask = textureSampleLevel(atlasTex, atlasSamp, texCoord, 0.0).a;
+  let texel = textureSampleLevel(atlasTex, atlasSamp, texCoord, 0.0);
+  let fade = select(1.0, 0.5, (flags & FLAG_FAINT) != 0u);
 
-  let alpha = select(mask, mask * 0.5, (flags & FLAG_FAINT) != 0u);
-  let outRgb = mix(bg, fg, alpha);
+  // A color glyph (emoji) is premultiplied RGBA drawn as it is; any other
+  // glyph is a coverage mask in the fg.
+  var outRgb = mix(bg, fg, texel.a * fade);
+  if ((flags & FLAG_COLOR_GLYPH) != 0u) {
+    outRgb = bg * (1.0 - texel.a * fade) + texel.rgb * fade;
+  }
 
   // Underline (thin line near baseline) and strikethrough (mid-cell).
   let baselineFrac = 0.85;       // matches CanvasRenderer's renderCellText
@@ -8445,7 +8468,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
   return vec4<f32>(outRgb, 1.0);
 }
 `
-), Fs = (
+), rs = (
   /* wgsl */
   `
 struct GridUBO {
@@ -8513,7 +8536,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
   return vec4<f32>(0.0);
 }
 `
-), Us = (
+), Ls = (
   /* wgsl */
   `
 struct KittyParams {
@@ -8559,7 +8582,7 @@ fn fsMain(in: VOut) -> @location(0) vec4<f32> {
 }
 `
 );
-class Js extends ai {
+class Rs extends ai {
   constructor(I) {
     super(), this.device = I;
   }
@@ -8583,7 +8606,7 @@ class Js extends ai {
     I.destroy();
   }
 }
-class rs extends Ni {
+class ys extends Ni {
   constructor(I, g = 1024) {
     super(g), this.device = I, this.texture = I.createTexture({
       size: { width: g, height: g },
@@ -8615,7 +8638,7 @@ class rs extends Ni {
     });
   }
 }
-class Ls extends si {
+class ns extends si {
   constructor(I, g, Q, B, C) {
     super(g, Q, B, C), this.device = I, this.texture = this.createBackingTexture(this.size);
   }
@@ -8648,7 +8671,7 @@ class Ls extends si {
 }
 class rB {
   constructor(I, g, Q, B) {
-    this.backend = "webgpu", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new cB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = I, this.device = g, this.kittyTextures = new Js(g), this.fontSize = Q.fontSize ?? 15, this.fontFamily = Q.fontFamily ?? "monospace", this.cursorStyle = Q.cursorStyle ?? "block", this.dpr = Q.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...$A, ...Q.theme }, this.cursorBlink_.setEnabled(Q.cursorBlink ?? !1), this.ownsDevice = B;
+    this.backend = "webgpu", this.theme = $A, this.metrics = { width: 0, height: 0, baseline: 0 }, this.cols = 0, this.rows = 0, this.cursorBlink_ = new cB(), this.bidiMapper = null, this.hoveredHyperlinkId = 0, this.hoveredLinkRange = null, this.onRequestRender = null, this.invalidateNext = !0, this.destroyed = !1, this.deviceLostListeners = [], this.cellBufferCapacity = 0, this.cellArray = new Uint32Array(0), this.kittyParamsRing = [], this.kittyAtlasRects = new Float32Array(256 * 4), this.lastCursorX = -1, this.lastCursorY = -1, this.lastCursorVisible = !1, this.lastCursorBlinkVisible = !0, this.lastViewportYRendered = Number.NaN, this.lastSelectionSig = null, this.lastKittyPlacementSig = null, this.canvas = I, this.device = g, this.kittyTextures = new Rs(g), this.fontSize = Q.fontSize ?? 15, this.fontFamily = Q.fontFamily ?? "monospace", this.cursorStyle = Q.cursorStyle ?? "block", this.dpr = Q.devicePixelRatio ?? window.devicePixelRatio ?? 1, this.theme = { ...$A, ...Q.theme }, this.cursorBlink_.setEnabled(Q.cursorBlink ?? !1), this.ownsDevice = B;
   }
   /**
    * Create a WebGPURenderer.
@@ -8725,7 +8748,7 @@ class rB {
         }
       ]
     });
-    const g = this.device.createShaderModule({ code: cs, label: "textShader" }), Q = this.device.createPipelineLayout({
+    const g = this.device.createShaderModule({ code: Js, label: "textShader" }), Q = this.device.createPipelineLayout({
       bindGroupLayouts: [this.textBindGroupLayout]
     });
     this.textPipeline = this.device.createRenderPipeline({
@@ -8757,7 +8780,7 @@ class rB {
       ]
     });
     const B = this.device.createShaderModule({
-      code: Fs,
+      code: rs,
       label: "cursorShader"
     }), C = this.device.createPipelineLayout({
       bindGroupLayouts: [this.cursorBindGroupLayout]
@@ -8798,7 +8821,7 @@ class rB {
       ]
     });
     const E = this.device.createShaderModule({
-      code: Us,
+      code: Ls,
       label: "kittyShader"
     }), i = this.device.createPipelineLayout({
       bindGroupLayouts: [this.kittyBindGroupLayout]
@@ -8918,13 +8941,13 @@ class rB {
       size: C,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       label: "cellBuffer"
-    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(I * g * LI)) : this.cellArray.length !== I * g * LI && (this.cellArray = new Uint32Array(I * g * LI)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new Ls(
+    }), this.cellBufferCapacity = C, this.cellArray = new Uint32Array(I * g * LI)) : this.cellArray.length !== I * g * LI && (this.cellArray = new Uint32Array(I * g * LI)), this.atlas ? this.atlas.reset(this.metrics.width, this.metrics.height, this.fontSize, this.fontFamily) : this.atlas = new ns(
       this.device,
       this.metrics.width,
       this.metrics.height,
       this.fontSize,
       this.fontFamily
-    ), this.kittyAtlas || (this.kittyAtlas = new rs(this.device)), this.rebuildBindGroup();
+    ), this.kittyAtlas || (this.kittyAtlas = new ys(this.device)), this.rebuildBindGroup();
   }
   /**
    * True when no buffer row reports dirty AND no full-redraw is pending.
@@ -9173,7 +9196,7 @@ async function jQ(A, I, g) {
   return B || new EE(I, g);
 }
 const PI = 8, KA = 4;
-class Rs {
+class Ss {
   constructor(I, g) {
     this.canvas = I, this.dpr = g;
     const Q = I.getContext("2d", { alpha: !0 });
@@ -9703,7 +9726,7 @@ zg.AUTO_SCROLL_EDGE_SIZE = 30;
 zg.AUTO_SCROLL_SPEED = 3;
 zg.AUTO_SCROLL_INTERVAL = 50;
 let sE = zg;
-class ps {
+class ms {
   // 200ms fade animation
   constructor(I = {}) {
     this.kittyAPCState = 0, this.unicode = {
@@ -9826,7 +9849,7 @@ class ps {
       }
     }, this.handleMouseUp = () => {
       this.isDraggingScrollbar && (this.isDraggingScrollbar = !1, this.scrollbarDragStart = null, this.canvas && (this.canvas.style.userSelect = "", this.canvas.style.webkitUserSelect = ""), this.scrollbarVisible && this.getScrollbackLength() > 0 && this.showScrollbar());
-    }, this.ghostty = I.ghostty ?? Os();
+    }, this.ghostty = I.ghostty ?? xs();
     const g = {
       cols: I.cols ?? 80,
       rows: I.rows ?? 24,
@@ -10014,7 +10037,7 @@ class ps {
       const g = this.buildWasmConfig();
       this.wasmTerm = this.ghostty.createTerminal(this.cols, this.rows, g), this.syncProgramStatusHandler(), this.canvas = document.createElement("canvas"), this.canvas.style.display = "block", this.canvas.style.cursor = "text", I.appendChild(this.canvas), this.textarea = document.createElement("textarea"), this.textarea.setAttribute("autocorrect", "off"), this.textarea.setAttribute("autocapitalize", "off"), this.textarea.setAttribute("spellcheck", "false"), this.textarea.setAttribute("tabindex", "0"), this.textarea.setAttribute("aria-label", "Terminal input"), this.textarea.style.position = "absolute", this.textarea.style.left = "0", this.textarea.style.top = "0", this.textarea.style.width = "1px", this.textarea.style.height = "1px", this.textarea.style.padding = "0", this.textarea.style.border = "none", this.textarea.style.margin = "0", this.textarea.style.opacity = "0", this.textarea.style.clipPath = "inset(50%)", this.textarea.style.overflow = "hidden", this.textarea.style.whiteSpace = "nowrap", this.textarea.style.resize = "none", I.appendChild(this.textarea), this.attachCanvasFocusListeners(this.canvas, this.textarea);
       const Q = document.createElement("canvas");
-      Q.style.position = "absolute", Q.style.left = "0", Q.style.top = "0", Q.style.pointerEvents = "none", Q.style.zIndex = "2", I.style.position = I.style.position || "relative", I.appendChild(Q), this.scrollbarCanvas = Q, this.scrollbarOverlay = new Rs(Q, window.devicePixelRatio || 1), this.renderer = await jQ(this.options.renderer ?? "auto", this.canvas, {
+      Q.style.position = "absolute", Q.style.left = "0", Q.style.top = "0", Q.style.pointerEvents = "none", Q.style.zIndex = "2", I.style.position = I.style.position || "relative", I.appendChild(Q), this.scrollbarCanvas = Q, this.scrollbarOverlay = new Ss(Q, window.devicePixelRatio || 1), this.renderer = await jQ(this.options.renderer ?? "auto", this.canvas, {
         fontSize: this.options.fontSize,
         fontFamily: this.options.fontFamily,
         cursorStyle: this.options.cursorStyle,
@@ -10792,8 +10815,8 @@ class ps {
     return this.assertOpen(), this.wasmTerm.hasMouseTracking();
   }
 }
-const ys = 2, ns = 1, Ss = 15, Hs = 100;
-class us {
+const Hs = 2, Ys = 1, ls = 15, fs = 100;
+class Ps {
   constructor() {
     this._isResizing = !1;
   }
@@ -10860,7 +10883,7 @@ class us {
     const C = window.getComputedStyle(B), E = Number.parseInt(C.getPropertyValue("padding-top")) || 0, i = Number.parseInt(C.getPropertyValue("padding-bottom")) || 0, o = Number.parseInt(C.getPropertyValue("padding-left")) || 0, D = Number.parseInt(C.getPropertyValue("padding-right")) || 0, w = B.clientWidth, s = B.clientHeight;
     if (w === 0 || s === 0)
       return;
-    const t = w - o - D - Ss, e = s - E - i, N = Math.max(ys, Math.floor(t / Q.width)), h = Math.max(ns, Math.floor(e / Q.height));
+    const t = w - o - D - ls, e = s - E - i, N = Math.max(Hs, Math.floor(t / Q.width)), h = Math.max(Ys, Math.floor(e / Q.height));
     return { cols: N, rows: h };
   }
   /**
@@ -10877,22 +10900,22 @@ class us {
     (I = this._terminal) != null && I.element && (this._resizeObserver || (this._resizeObserver = new ResizeObserver((g) => {
       this._isResizing || !g[0] || (this._resizeDebounceTimer && clearTimeout(this._resizeDebounceTimer), this._resizeDebounceTimer = setTimeout(() => {
         this.fit();
-      }, Hs));
+      }, fs));
     }), this._resizeObserver.observe(this._terminal.element)));
   }
 }
-const pg = "ghostty-renderer-hud", wB = "ghostty-renderer-hud-styles", Ys = [
+const pg = "ghostty-renderer-hud", wB = "ghostty-renderer-hud-styles", Ks = [
   "webgpu",
   "webgl",
   "canvas2d"
 ];
-function ls(A) {
+function ds(A) {
   return A === "webgpu" || A === "webgl" || A === "canvas2d";
 }
 function VQ(A) {
-  return A === "auto" || ls(A);
+  return A === "auto" || ds(A);
 }
-function bs() {
+function js() {
   const I = new URLSearchParams(window.location.search).get("renderer");
   if (VQ(I))
     return I;
@@ -10902,7 +10925,7 @@ function bs() {
   const Q = window.__boobaDefaultRenderer;
   return VQ(Q) ? Q : "auto";
 }
-function fs() {
+function Os() {
   if (document.getElementById(wB))
     return;
   const A = document.createElement("style");
@@ -10921,15 +10944,15 @@ function fs() {
     }
   `, document.head.appendChild(A);
 }
-function Ks(A, I) {
+function qs(A, I) {
   const g = A === void 0 ? -1 : I.indexOf(A);
   return g < 0 ? I[0] : I[(g + 1) % I.length];
 }
-function ds(A) {
+function Ts(A) {
   const I = new URL(window.location.href);
   I.searchParams.set("renderer", A), window.location.href = I.toString();
 }
-function ms(A, I = {}) {
+function Vs(A, I = {}) {
   if (!A)
     throw new Error(
       "installRendererHud: terminal is null/undefined — call after term.open() so terminal.renderer exists."
@@ -10939,8 +10962,8 @@ function ms(A, I = {}) {
       `installRendererHud: a HUD with id "${pg}" is already installed. Uninstall first if you need to reinstall.`
     ), () => {
     };
-  const g = I.parent ?? document.body, Q = I.position ?? "fixed", B = I.clickToToggle ?? !0, C = I.bindToggleHotkey ?? !0, E = I.cycle && I.cycle.length > 0 ? I.cycle : Ys;
-  fs();
+  const g = I.parent ?? document.body, Q = I.position ?? "fixed", B = I.clickToToggle ?? !0, C = I.bindToggleHotkey ?? !0, E = I.cycle && I.cycle.length > 0 ? I.cycle : Ks;
+  Os();
   const i = document.createElement("div");
   i.id = pg, i.style.position = Q, I.className && (i.className = I.className), B && C ? i.title = "Click or Alt+Shift+R: cycle renderer" : B ? i.title = "Click: cycle renderer" : C && (i.title = "Alt+Shift+R: cycle renderer"), B ? (i.style.cursor = "pointer", i.style.pointerEvents = "auto") : i.style.pointerEvents = "none", g.appendChild(i);
   let o = 0, D = performance.now(), w = null;
@@ -10957,8 +10980,8 @@ function ms(A, I = {}) {
   w = requestAnimationFrame(s);
   const t = () => {
     var c;
-    const h = Ks((c = A.renderer) == null ? void 0 : c.backend, E);
-    ds(h);
+    const h = qs((c = A.renderer) == null ? void 0 : c.backend, E);
+    Ts(h);
   }, e = () => t();
   B && i.addEventListener("click", e);
   const N = (h) => {
@@ -10970,10 +10993,10 @@ function ms(A, I = {}) {
   };
 }
 let jg = null;
-async function Ps() {
+async function Zs() {
   jg || (jg = await $I.load());
 }
-function Os() {
+function xs() {
   if (!jg)
     throw new Error(
       `ghostty-web not initialized. Call init() before creating Terminal instances.
@@ -10995,7 +11018,7 @@ export {
   cB as CursorBlink,
   Tg as DirtyState,
   MA as EventEmitter,
-  us as FitAddon,
+  Ps as FitAddon,
   $I as Ghostty,
   po as GhosttyTerminal,
   zo as InputHandler,
@@ -11006,14 +11029,14 @@ export {
   Wo as LinkDetector,
   yA as Mods,
   _o as OSC8LinkProvider,
-  Rs as ScrollbarOverlay,
+  Ss as ScrollbarOverlay,
   sE as SelectionManager,
-  ps as Terminal,
+  ms as Terminal,
   $o as UrlRegexProvider,
   rB as WebGPURenderer,
-  Os as getGhostty,
-  Ps as init,
-  ms as installRendererHud,
-  bs as parseRendererFromURL,
+  xs as getGhostty,
+  Zs as init,
+  Vs as installRendererHud,
+  js as parseRendererFromURL,
   jQ as pickRenderer
 };

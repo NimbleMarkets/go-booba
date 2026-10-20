@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## [0.10.3] - 2026-10-19
+
+### Fixed
+
+- Color emoji keep their colors with the WebGPU and WebGL renderers. Update
+  the embedded ghostty-web to the fork build from 70a5e6f, whose GPU
+  renderers drew every glyph as a mask in the text color, so emoji came out
+  as silhouettes; Canvas2D already drew them.
+
 ## [0.10.2] - 2026-10-19
 
 ### Fixed
