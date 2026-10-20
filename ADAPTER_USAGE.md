@@ -2,6 +2,26 @@
 
 The BubbleTea adapter abstraction allows you to connect to Booba-based BubbleTea programs in multiple ways. For the full `BoobaTerminal` API reference, see [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md).
 
+## Touch gestures
+
+When a program enables terminal mouse tracking, the terminal canvas translates
+touches into SGR mouse input over any adapter (WASM, WebSocket or WebTransport):
+
+- One finger presses the left button; dragging sends held-button motion as the
+  finger crosses cells, at most once per animation frame. Lifting or cancelling
+  releases the button. A tap sends one press/release click pair.
+- Pinching out sends wheel up (zoom in); pinching in sends wheel down (zoom out),
+  anchored at the cell between the fingers. Each 40 CSS pixels of distance change
+  produces a wheel step.
+- Moving two fingers vertically scrolls by wheel steps: up scrolls down, and
+  down scrolls up, with the same 40 CSS pixel threshold.
+
+Tracked touches prevent page scrolling and suppress duplicate compatibility mouse
+clicks. Ghostty's existing touchend focus behavior remains active. With mouse
+tracking disabled, touches retain the existing browser scrolling behavior.
+Touch modifiers are not supported. Read-only terminals and `disableStdin` do not
+send gesture input.
+
 ## 1. WebSocket Mode (Backend Server)
 
 Connect to a BubbleTea application running on a backend server via WebSocket.

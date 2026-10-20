@@ -11,6 +11,7 @@ import { ProgramStatusStore } from './program_status_store.js';
 import { TerminalSequenceObserver } from './terminal_sequences.js';
 import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js';
 import { applyThemeProperties } from './theme_properties.js';
+import { TouchInput } from './touch_input.js';
 
 import type { RendererBackend } from 'ghostty-web';
 
@@ -41,6 +42,7 @@ export class BoobaTerminal {
     fitAddon: FitAddon | null = null;
     private _resizeHandler: (() => void) | null = null;
     private _dprCleanup: (() => void) | null = null;
+    private touchInput: TouchInput | null = null;
     private osc52Scanner: OSC52Scanner;
     /** Direct publication API until the action OSC envelope is defined. */
     readonly actions: ActionController;
@@ -234,6 +236,12 @@ export class BoobaTerminal {
 
         // Send user input through adapter
         term.onData((data) => this.forwardInput(data));
+        this.touchInput = new TouchInput(this.container, {
+            hasMouseTracking: () => this.hasMouseTracking() && !this.options.disableStdin && !term.options.disableStdin && !this.actionReadOnly,
+            getCellSize: () => term.renderer?.getMetrics(),
+            getSize: () => ({ cols: term.cols, rows: term.rows }),
+            sendInput: data => this.forwardInput(data),
+        });
 
         term.onBell(() => {
             this.onBell?.();
@@ -542,6 +550,8 @@ export class BoobaTerminal {
 
     /** Dispose the terminal and clean up all resources */
     dispose(): void {
+        this.touchInput?.dispose();
+        this.touchInput = null;
         this.disconnect();
         if (this._resizeHandler) {
             window.removeEventListener('resize', this._resizeHandler);

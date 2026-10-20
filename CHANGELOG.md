@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+
+- Translate browser terminal touch gestures into SGR mouse input when the program
+  enables mouse tracking: tap to click, one finger to drag, pinch to zoom around
+  the midpoint, and two fingers to scroll. Support all adapters, prevent page
+  scrolling during tracked gestures, and suppress duplicate mouse clicks.
+
 ## [0.10.3] - 2026-10-19
 
 ### Fixed

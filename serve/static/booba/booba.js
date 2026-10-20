@@ -9,6 +9,7 @@ import { ActionStatusBridge } from './action_status.js';
 import { ProgramStatusStore } from './program_status_store.js';
 import { TerminalSequenceObserver } from './terminal_sequences.js';
 import { applyThemeProperties } from './theme_properties.js';
+import { TouchInput } from './touch_input.js';
 export class BoobaTerminal {
     /** Install a mode-aware encoder; no gestures are enabled without one. */
     setActionKeyEncoder(encoder) {
@@ -61,6 +62,7 @@ export class BoobaTerminal {
         this.fitAddon = null;
         this._resizeHandler = null;
         this._dprCleanup = null;
+        this.touchInput = null;
         this.actionKeyEncoder = null;
         this.actionReadOnly = false;
         this.terminalWriteDepth = 0;
@@ -194,6 +196,12 @@ export class BoobaTerminal {
         console.log('Terminal opened. Size:', term.cols, 'x', term.rows);
         // Send user input through adapter
         term.onData((data) => this.forwardInput(data));
+        this.touchInput = new TouchInput(this.container, {
+            hasMouseTracking: () => this.hasMouseTracking() && !this.options.disableStdin && !term.options.disableStdin && !this.actionReadOnly,
+            getCellSize: () => term.renderer?.getMetrics(),
+            getSize: () => ({ cols: term.cols, rows: term.rows }),
+            sendInput: data => this.forwardInput(data),
+        });
         term.onBell(() => {
             this.onBell?.();
         });
@@ -466,6 +474,8 @@ export class BoobaTerminal {
     // --- Lifecycle ---
     /** Dispose the terminal and clean up all resources */
     dispose() {
+        this.touchInput?.dispose();
+        this.touchInput = null;
         this.disconnect();
         if (this._resizeHandler) {
             window.removeEventListener('resize', this._resizeHandler);
