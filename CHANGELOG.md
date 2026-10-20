@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- Prevent WebGL and WebGPU from clipping the tops of emoji, and Canvas2D from
+  painting them into the row above. The embedded ghostty-web now measures cell
+  height and baseline using descenders, the primary font line box, and emoji
+  fallback ink. Column width stays the same; rows can become taller to fit the
+  full glyph. Joined emoji remain a single two-column grapheme.
+
 ### Added
 
 - Translate browser terminal touch gestures into SGR mouse input when the program

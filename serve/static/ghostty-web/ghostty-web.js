@@ -6534,8 +6534,14 @@ function FB(A) {
 function UB(A, I) {
   const Q = document.createElement("canvas").getContext("2d");
   Q.font = `${A}px ${I}`;
-  const B = Q.measureText("M"), C = Math.ceil(B.width), E = B.actualBoundingBoxAscent || A * 0.8, i = B.actualBoundingBoxDescent || A * 0.2, o = Math.ceil(E + i) + 2, D = Math.ceil(E) + 1;
-  return { width: C, height: o, baseline: D };
+  const B = Q.measureText("M"), C = Math.ceil(B.width), E = Q.measureText("Mg😀"), i = Math.max(
+    E.actualBoundingBoxAscent || A * 0.8,
+    B.fontBoundingBoxAscent || 0
+  ), o = Math.max(
+    E.actualBoundingBoxDescent || A * 0.2,
+    B.fontBoundingBoxDescent || 0
+  ), D = Math.ceil(i) + Math.ceil(o) + 2, w = Math.ceil(i) + 1;
+  return { width: C, height: D, baseline: w };
 }
 function wi(A) {
   const I = new Float32Array(96), g = (Q, B) => {
