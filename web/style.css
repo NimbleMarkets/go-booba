@@ -122,6 +122,17 @@ h1, h2, h3 {
 #context { font-family: var(--font-mono); color: var(--secondary); font-size: 14px; }
 .demo-controls details { margin-top: 12px; }
 .demo-controls pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+
+/* Lightweight mouse/touch inspector: keep the grid and counters in view. */
+.tracking-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.main.tracking-main { min-width: 0; }
+.terminal-frame.tracking-frame { height: clamp(210px, 40vh, 420px); min-height: 0; }
+.tracking-frame #terminal { min-height: 0; }
+.tracking-results pre { font: 13px/1.5 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.tracking-results #counts { min-height: 117px; }
+.tracking-results #log { min-height: 98px; color: var(--secondary); }
+.tracking-instructions { padding-bottom: 160px; }
+.tracking-instructions h2 { font-size: 20px; }
 /* booba's action-bar defaults live in @layer booba, so these plain rules win. */
 .booba-action-bar { margin: 12px 0; }
 .booba-action,

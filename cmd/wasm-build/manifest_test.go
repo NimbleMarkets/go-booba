@@ -46,6 +46,13 @@ func TestLoadManifestRejectsUnknownFields(t *testing.T) {
 	}
 }
 
+func TestBrowserOnlyDemoRequiresPage(t *testing.T) {
+	_, err := loadManifest(strings.NewReader(validManifestWith("", "") + "        browser_only: true\n"))
+	if err == nil || !strings.Contains(err.Error(), "requires a page") {
+		t.Fatalf("browser-only demo without a setup page should be rejected, got %v", err)
+	}
+}
+
 func TestLoadManifestRejectsUnsafeDemoNames(t *testing.T) {
 	for _, name := range []string{"../escape", "quick/start", "-flag", "Uppercase", "two--hyphens", "trailing-", ""} {
 		t.Run(name, func(t *testing.T) {

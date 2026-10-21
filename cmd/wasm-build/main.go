@@ -1,5 +1,5 @@
 // wasm-build generates the go-booba demo site into web/: it compiles each
-// demo in web/demos.yaml to WebAssembly, collects the browser runtime with
+// Go demo in web/demos.yaml to WebAssembly, collects the browser runtime with
 // booba-assets, and renders the HTML pages from web/_templates. Run it from
 // the repository root.
 package main

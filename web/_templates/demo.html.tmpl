@@ -16,30 +16,29 @@
     <h1>{{ .Demo.Title }}</h1>
     <p class="demo-blurb">{{ .Demo.BlurbHTML }}</p>
     <a class="demo-source-link" href="{{ .Demo.SourceURL }}">Source on GitHub →</a>
+    {{ if not .Demo.BrowserOnly }}
     <div class="demo-run">
       <p>Run it natively from a checkout of go-booba:</p>
       <pre><code>{{ .Demo.RunCommand }}</code></pre>
     </div>
+    {{ end }}
   </header>
   {{ .ExtraBody }}
+  {{ if not .Demo.BrowserOnly }}
   <div class="demo-program-row">
     <section class="demo-status"></section>
     <button id="restart" class="demo-restart" type="button" disabled>Restart program</button>
   </div>
+  {{ end }}
   <section class="terminal-frame">
     <div id="terminal"></div>
   </section>
 </main>
-<script src="{{ .Base }}/_assets/wasm_exec.js"></script>
+{{ if not .Demo.BrowserOnly }}<script src="{{ .Base }}/_assets/wasm_exec.js"></script>{{ end }}
 {{ .ExtraScript }}
 <script type="module">
-  // Compile this demo's app.wasm once, mount a BoobaTerminal on the container,
-  // and run the program through the WASM adapter. A fragment may set
-  // window.demoOptions (merged into the terminal options) and window.demoSetup
-  // (awaited after init, before the program starts). The Restart button runs
-  // the compiled module again on a fresh Go runtime: a Go program cannot be
-  // re-entered once it returns, but the module can be instantiated any number
-  // of times.
+  // A fragment can set demoOptions and demoSetup to customize the terminal.
+  // Browser-only demos connect their local adapter in demoSetup.
   import {
     BoobaTerminal,
     installRendererHud,
@@ -47,6 +46,7 @@
     parseRendererFromURL,
   } from "{{ .Base }}/_assets/booba/booba.js";
 
+  {{ if not .Demo.BrowserOnly }}
   async function run(booba, module) {
     const go = new Go();
     const instance = await WebAssembly.instantiate(module, go.importObject);
@@ -54,23 +54,29 @@
     booba.connectWasm();
     booba.focus();
   }
+  {{ end }}
 
   async function main() {
+    {{ if not .Demo.BrowserOnly }}
     const module = await WebAssembly.compileStreaming(fetch("./app.wasm"));
+    {{ end }}
 
     const booba = new BoobaTerminal("terminal", {
       renderer: parseRendererFromURL(),
       ...(window.demoOptions ?? {}),
     });
     await booba.init();
+    {{ if not .Demo.BrowserOnly }}
     // Program status (OSC 7501) from the demo, shown outside the canvas.
     installStatusBar(booba.programStatus, {
       parent: document.querySelector(".demo-status"),
       onLayout: () => booba.fitAddon?.fit(),
     });
+    {{ end }}
     if (typeof window.demoSetup === "function") {
       await window.demoSetup(booba);
     }
+    {{ if not .Demo.BrowserOnly }}
     await run(booba, module);
 
     const restart = document.getElementById("restart");
@@ -97,6 +103,7 @@
       }
     });
     restart.disabled = false;
+    {{ end }}
 
     const frame = document.querySelector(".terminal-frame");
     installRendererHud(booba.term, {

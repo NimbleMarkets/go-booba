@@ -1,0 +1,48 @@
+{{- define "tracking-body" -}}
+<section class="demo-controls tracking-controls">
+  <p>Drag one finger or a mouse to draw. Spread two fingers for wheel up; pinch for wheel down.
+    A purple <b>Z</b> marks the midpoint, and the wheel counters change. The grid does not scale.</p>
+  <div class="tracking-buttons">
+    <button id="tracking" class="booba-action" type="button" disabled>Starting…</button>
+    <button id="reset" class="booba-action" type="button" disabled>Reset counters</button>
+    <button id="keyboard" class="booba-action" type="button" disabled>Keyboard OFF</button>
+  </div>
+</section>
+{{- end -}}
+
+{{- define "tracking-script" -}}
+<script type="module">
+  import { installTouchTrackingDemo } from "{{ .Base }}/_assets/touch-tracking.js";
+
+  // Set the compact layout before init: FitAddon ignores repeated fits during
+  // its initial resize, so changing the container in demoSetup is too late.
+  const frame = document.querySelector('.terminal-frame');
+  document.querySelector('.main').classList.add('tracking-main');
+  frame.classList.add('tracking-frame');
+  window.demoOptions = { cursorBlink: false, scrollback: 0 };
+  window.demoSetup = async booba => {
+    const results = document.createElement('section');
+    results.className = 'tracking-results';
+    results.innerHTML = '<pre id="counts"></pre><pre id="log"></pre><p id="status" role="status">Starting…</p>';
+    frame.after(results);
+    const instructions = document.createElement('section');
+    instructions.className = 'tracking-instructions';
+    instructions.innerHTML = `
+      <h2>Try these checks</h2>
+      <ol>
+        <li>Reset, then tap once: one press and one release.</li>
+        <li>Drag: motion draws a trail; the page stays still.</li>
+        <li>Spread and pinch: wheel up/down counters increase, with one step per 40 CSS pixels of separation change.</li>
+        <li>Move two fingers vertically: wheel events scroll around their midpoint.</li>
+        <li>Turn tracking OFF: gestures send no mouse input, and the page can scroll normally.</li>
+      </ol>
+      <p>Keyboard starts OFF to keep the on-screen keyboard out of your gestures. Turn it ON to type.
+        This demo makes the input read-only while Keyboard is OFF; ordinary booba terminals retain their existing focus behavior.</p>
+      <p>All input goes through booba's real terminal and adapter path to a local JavaScript inspector.
+        No Go application, maps, tiles, external fonts, polling, or network requests after the terminal runtime loads.</p>`;
+    results.after(instructions);
+    await installTouchTrackingDemo(booba);
+    for (const button of document.querySelectorAll('.tracking-buttons button')) button.disabled = false;
+  };
+</script>
+{{- end -}}

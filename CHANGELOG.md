@@ -12,6 +12,9 @@
 
 ### Added
 
+- Add a lightweight touch and mouse tracking demo to the demo site, with a local
+  input inspector, decoded modifiers, gesture counters, and explicit keyboard
+  and tracking controls. It needs no Go application or network after startup.
 - Translate browser terminal touch gestures into SGR mouse input when the program
   enables mouse tracking: tap to click, one finger to drag, pinch to zoom around
   the midpoint, and two fingers to scroll. Support all adapters, prevent page

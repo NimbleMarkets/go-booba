@@ -22,6 +22,14 @@ tracking disabled, touches retain the existing browser scrolling behavior.
 Touch modifiers are not supported. Read-only terminals and `disableStdin` do not
 send gesture input.
 
+Try the [touch and mouse tracking demo](https://nimblemarkets.github.io/go-booba/demos/tracking/)
+to inspect press, motion, release, and wheel input without running a Go program.
+Its keyboard starts off so gestures do not open the on-screen keyboard. This is
+a demo-specific policy: it makes the editable input read-only and uses
+`inputmode="none"` until Keyboard is enabled. Booba's default touchend focus
+behavior remains unchanged. Do not use `disableStdin` to hide the keyboard while
+testing gestures, since it disables touch input too.
+
 ## 1. WebSocket Mode (Backend Server)
 
 Connect to a BubbleTea application running on a backend server via WebSocket.

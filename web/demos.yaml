@@ -6,6 +6,14 @@ groups:
         title: Multiple views
         blurb: The Bubble Tea <em>views</em> sample, compiled to WebAssembly and running entirely in your browser. Press <kbd>j</kbd>/<kbd>k</kbd> and <kbd>Enter</kbd>.
         source: ./cmd/booba-view-example
+  - title: Terminal input
+    demos:
+      - name: tracking
+        title: Touch and mouse tracking
+        blurb: Draw with a finger or mouse, pinch to send wheel events, and inspect the terminal input. Keyboard and mouse tracking have separate controls.
+        source: ./web/_assets/touch-tracking.js
+        browser_only: true
+        page: tracking
   - title: Terminal Actions (experimental)
     demos:
       - name: actions

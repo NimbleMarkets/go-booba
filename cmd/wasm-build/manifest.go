@@ -27,6 +27,8 @@ type Demo struct {
 	Title  string `yaml:"title"`
 	Blurb  string `yaml:"blurb"`
 	Source string `yaml:"source"`
+	// BrowserOnly demos use a local JavaScript adapter instead of a Go program.
+	BrowserOnly bool `yaml:"browser_only"`
 	// Page names an optional fragment template under web/_templates/demos/
 	// that adds markup and a setup script to this demo's page.
 	Page string `yaml:"page"`
@@ -41,7 +43,7 @@ func (d Demo) BlurbHTML() template.HTML { return template.HTML(d.Blurb) }
 // through pkg@version.
 func (d Demo) RunCommand() string { return "go run " + d.Source }
 
-// SourceURL links to the demo's source directory on GitHub.
+// SourceURL links to the demo's source on GitHub.
 func (d Demo) SourceURL() string { return repoURL + strings.TrimPrefix(d.Source, "./") }
 
 func (m *Manifest) AllDemos() []Demo {
@@ -83,6 +85,9 @@ func loadManifest(r io.Reader) (*Manifest, error) {
 			}
 			if d.Page != "" && !validSlug(d.Page) {
 				return nil, fmt.Errorf("group %q demo %q: invalid page %q: use lowercase letters, digits, and single hyphens", g.Title, d.Name, d.Page)
+			}
+			if d.BrowserOnly && d.Page == "" {
+				return nil, fmt.Errorf("group %q demo %q: browser-only demo requires a page", g.Title, d.Name)
 			}
 		}
 	}

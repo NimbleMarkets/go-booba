@@ -59,6 +59,12 @@ func TestCompileAndAssetsEndToEnd(t *testing.T) {
 	}
 	for _, d := range m.AllDemos() {
 		wasm := filepath.Join(out, "demos", d.Name, "app.wasm")
+		if d.BrowserOnly {
+			if _, err := os.Stat(wasm); !os.IsNotExist(err) {
+				t.Fatalf("browser-only demo must not compile app.wasm: %v", err)
+			}
+			continue
+		}
 		head := make([]byte, 4)
 		f, err := os.Open(wasm)
 		if err != nil {

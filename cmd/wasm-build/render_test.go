@@ -68,6 +68,22 @@ func TestRenderFragmentScriptPrecedesMainScript(t *testing.T) {
 	}
 }
 
+func TestBrowserOnlyDemoHasNoGoRuntime(t *testing.T) {
+	m, err := loadManifestFile("../../web/demos.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := t.TempDir()
+	if err := renderSite(m, "../../web/_templates", out); err != nil {
+		t.Fatal(err)
+	}
+	page := filepath.Join(out, "demos", "tracking", "index.html")
+	mustContain(t, filepath.Join(out, "index.html"), `href="/go-booba/demos/tracking/"`)
+	mustContain(t, page, "Touch and mouse tracking", "installTouchTrackingDemo", "touch-tracking.js",
+		`id="keyboard"`, `id="tracking"`, "booba.init()", "window.demoSetup(booba)")
+	mustNotContain(t, page, "app.wasm", "wasm_exec.js", "connectWasm()", "new Go()", `id="restart"`, "go run")
+}
+
 func TestValidatePagesRejectsMissingFragment(t *testing.T) {
 	m := &Manifest{Groups: []Group{{Title: "A", Demos: []Demo{
 		{Name: "x", Title: "X", Source: "./cmd/booba-view-example", Page: "nope"},

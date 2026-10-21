@@ -18,7 +18,7 @@ func buildCommand(d Demo, dst string) (string, []string) {
 	return "go", []string{"build", "-o", dst, d.Source}
 }
 
-// validateSources checks that every demo source is an existing directory.
+// validateSources checks Go source directories and browser demo source files.
 // The generator runs from the repository root, so sources resolve as written.
 func validateSources(m *Manifest) error {
 	for _, d := range m.AllDemos() {
@@ -26,20 +26,27 @@ func validateSources(m *Manifest) error {
 		if err != nil {
 			return fmt.Errorf("demo %q: source %s: %w", d.Name, d.Source, err)
 		}
-		if !info.IsDir() {
+		if d.BrowserOnly {
+			if !info.Mode().IsRegular() {
+				return fmt.Errorf("demo %q: source %s is not a file", d.Name, d.Source)
+			}
+		} else if !info.IsDir() {
 			return fmt.Errorf("demo %q: source %s is not a directory", d.Name, d.Source)
 		}
 	}
 	return nil
 }
 
-// compileAll builds GOOS=js GOARCH=wasm binaries for every demo, in parallel.
+// compileAll builds GOOS=js GOARCH=wasm binaries for Go demos, in parallel.
 // Output: <outDir>/demos/<demo.Name>/app.wasm
 func compileAll(m *Manifest, outDir string) error {
 	demos := m.AllDemos()
 	errs := make([]error, len(demos))
 	var wg sync.WaitGroup
 	for i, d := range demos {
+		if d.BrowserOnly {
+			continue
+		}
 		wg.Add(1)
 		go func(i int, d Demo) {
 			defer wg.Done()
