@@ -12,6 +12,9 @@
 
 ### Added
 
+- Add ANSI colors/text styles and the existing RTL/BiDi harness to the demo
+  site, with browser reference text and the documented cursive-shaping
+  limitation. Link the ntcanvas and ntmaps consumer demos from the overview.
 - Add a lightweight touch and mouse tracking demo to the demo site, with a local
   input inspector, decoded modifiers, gesture counters, and explicit keyboard
   and tracking controls. It needs no Go application or network after startup.

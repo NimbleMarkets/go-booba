@@ -19,6 +19,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/NimbleMarkets/go-booba"
 	"github.com/spf13/pflag"
 )
 
@@ -93,7 +94,7 @@ func main() {
 		return
 	}
 
-	if _, err := tea.NewProgram(model{}).Run(); err != nil {
+	if err := booba.Run(model{}); err != nil {
 		fmt.Println("could not start program:", err)
 	}
 }

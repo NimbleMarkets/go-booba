@@ -133,6 +133,15 @@ h1, h2, h3 {
 .tracking-results #log { min-height: 98px; color: var(--secondary); }
 .tracking-instructions { padding-bottom: 160px; }
 .tracking-instructions h2 { font-size: 20px; }
+
+.main.rendering-main { min-width: 0; }
+.sample-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.rtl-red { color: #ff5f5f; }
+.rtl-blue { color: #5fafff; }
+.rtl-reference { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 12px; }
+.rtl-reference p { font: 28px/1.5 monospace; text-align: start; }
+.terminal-frame.rtl-frame { height: 1100px; min-height: 0; }
+.rtl-frame #terminal { min-height: 0; }
 /* booba's action-bar defaults live in @layer booba, so these plain rules win. */
 .booba-action-bar { margin: 12px 0; }
 .booba-action,

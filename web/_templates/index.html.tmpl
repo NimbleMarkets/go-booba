@@ -19,8 +19,8 @@
       <code>go-booba</code> puts <a href="https://github.com/charmbracelet/bubbletea">Bubble Tea</a>
       programs in the browser on a <a href="https://github.com/coder/ghostty-web">Ghostty</a>-powered terminal.
       Compile a program to WebAssembly and run it with no server, or serve a program over
-      WebSocket or WebTransport from a machine that has it. The demos here are the first kind:
-      everything you see runs in this page.
+      WebSocket or WebTransport from a machine that has it. The demos here run locally in your
+      browser, using either a compiled Go program or a small JavaScript example.
     </p>
     <p class="hero-ctas">
       <a class="cta" href="https://github.com/NimbleMarkets/go-booba">View on GitHub</a>
@@ -43,6 +43,17 @@
       {{- end }}
     </ul>
     {{- end }}
+  </section>
+
+  <section class="features">
+    <h2>Built with booba</h2>
+    <p>Projects that use booba, with demos and runnable examples:</p>
+    <ul class="feature-list">
+      <li><a href="https://nimbleterminal.github.io/ntcanvas/?demo=grids"><strong>ntcanvas — Unicode grids</strong>
+        <span>Compare rune and grapheme grids, wide cells, combining marks, and joined emoji.</span></a></li>
+      <li><a href="https://github.com/NimbleTerminal/ntmaps/tree/main/examples/explorer"><strong>ntmaps — Map explorer source</strong>
+        <span>Runnable explorer with maps, 3D buildings, terminal graphics, and interactive controls.</span></a></li>
+    </ul>
   </section>
 
   <section class="prose">

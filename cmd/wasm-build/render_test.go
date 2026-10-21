@@ -82,6 +82,16 @@ func TestBrowserOnlyDemoHasNoGoRuntime(t *testing.T) {
 	mustContain(t, page, "Touch and mouse tracking", "installTouchTrackingDemo", "touch-tracking.js",
 		`id="keyboard"`, `id="tracking"`, "booba.init()", "window.demoSetup(booba)")
 	mustNotContain(t, page, "app.wasm", "wasm_exec.js", "connectWasm()", "new Go()", `id="restart"`, "go run")
+
+	colors := filepath.Join(out, "demos", "colors", "index.html")
+	mustContain(t, colors, "Colors and text styles", "installColorsDemo", "colors.js", "RGB gradients")
+	mustNotContain(t, colors, "app.wasm", "wasm_exec.js", "connectWasm()", "new Go()")
+	rtl := filepath.Join(out, "demos", "rtl", "index.html")
+	mustContain(t, rtl, "Right-to-left text", "Browser ordering", "Forced logical order",
+		"cursive shaping is a known limitation", "go run ./tests/rtl-text", "connectWasm()")
+	mustContain(t, filepath.Join(out, "index.html"), "Built with booba",
+		"https://nimbleterminal.github.io/ntcanvas/?demo=grids",
+		"https://github.com/NimbleTerminal/ntmaps/tree/main/examples/explorer")
 }
 
 func TestValidatePagesRejectsMissingFragment(t *testing.T) {

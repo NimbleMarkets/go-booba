@@ -1,0 +1,34 @@
+{{- define "rtl-body" -}}
+<section class="demo-controls rtl-controls">
+  <p>The colored Hebrew row should put <span class="rtl-red" lang="he">שלום</span> on the <b>right</b>
+    and <span class="rtl-blue" lang="he">עולם</span> on the <b>left</b>. The labels and codepoints remain left-to-right.</p>
+  <p>Arabic and Persian ordering can be correct while cursive letters remain disconnected.
+    Cross-cell cursive shaping is a known limitation; this page makes it visible rather than treating it as supported.</p>
+  <details open>
+    <summary>Browser reference text (same font)</summary>
+    <div class="rtl-reference">
+      <div><b>Browser ordering</b><p dir="auto" lang="he"><span class="rtl-red">שלום</span> <span class="rtl-blue">עולם</span></p></div>
+      <div><b>Forced logical order</b><p><bdo dir="ltr" lang="he"><span class="rtl-red">שלום</span> <span class="rtl-blue">עולם</span></bdo></p></div>
+      <div><b>Browser cursive shaping</b><p dir="auto" lang="ar">مرحبا بالعالم</p><p dir="auto" lang="fa">سلام دنیا</p></div>
+    </div>
+  </details>
+  <p>Scroll down to inspect the static terminal screen. Use the renderer badge to compare backends.
+    See the <a href="https://github.com/NimbleMarkets/go-booba/blob/main/tests/rtl-text/README.md">harness notes</a> for the samples and known limitations.</p>
+</section>
+{{- end -}}
+
+{{- define "rtl-script" -}}
+<script>
+  document.querySelector('.main').classList.add('rendering-main');
+  document.querySelector('.terminal-frame').classList.add('rtl-frame');
+  window.demoOptions = { fontSize: 14, cursorBlink: false };
+  window.demoSetup = async booba => {
+    // Static visual sample: avoid opening a keyboard while inspecting glyphs.
+    booba.container.contentEditable = 'false';
+    booba.container.inputMode = 'none';
+    booba.term.textarea.readOnly = true;
+    booba.term.textarea.inputMode = 'none';
+    window.addEventListener('pagehide', () => booba.dispose(), { once: true });
+  };
+</script>
+{{- end -}}

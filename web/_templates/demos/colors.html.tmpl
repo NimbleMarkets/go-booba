@@ -1,0 +1,24 @@
+{{- define "colors-body" -}}
+<section class="demo-controls">
+  <p>Choose a sample. Scroll inside the terminal for longer output; use the renderer badge to compare backends.</p>
+  <div class="sample-buttons">
+    <button class="booba-action" type="button" data-color-sample="standard" disabled>16 colors</button>
+    <button class="booba-action" type="button" data-color-sample="palette" disabled>256 colors</button>
+    <button class="booba-action" type="button" data-color-sample="rgb" disabled>RGB gradients</button>
+    <button class="booba-action" type="button" data-color-sample="styles" disabled>Text styles</button>
+    <button class="booba-action" type="button" data-color-sample="combinations" disabled>Combinations</button>
+    <button class="booba-action" type="button" data-color-sample="all" disabled>Show all</button>
+  </div>
+  <p>Adapted from the <a href="https://github.com/NimbleMarkets/ghostty-web/blob/nm-kitty-meow/demo/colors-demo.html">ghostty-web colors demo</a>.
+    Runs locally without a Go application or requests after the terminal runtime loads.</p>
+</section>
+{{- end -}}
+
+{{- define "colors-script" -}}
+<script type="module">
+  import { installColorsDemo } from "{{ .Base }}/_assets/colors.js";
+  document.querySelector('.main').classList.add('rendering-main');
+  window.demoOptions = { fontSize: 14, cursorBlink: false, disableStdin: true };
+  window.demoSetup = installColorsDemo;
+</script>
+{{- end -}}

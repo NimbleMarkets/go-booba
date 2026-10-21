@@ -64,6 +64,10 @@ Because the screen is static, anything wrong on it is the renderer's doing.
 
 ## Running
 
+The [browser demo](https://nimblemarkets.github.io/go-booba/demos/rtl/) builds
+this harness for WASM through `booba.Run` and includes browser reference text.
+The same model still runs natively and through the server below.
+
 Native terminal:
 
 ```sh

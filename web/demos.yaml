@@ -14,6 +14,19 @@ groups:
         source: ./web/_assets/touch-tracking.js
         browser_only: true
         page: tracking
+  - title: Terminal rendering
+    demos:
+      - name: colors
+        title: Colors and text styles
+        blurb: Explore ANSI colors, the 256-color palette, RGB gradients, and styled text. Switch renderers to compare the same output.
+        source: ./web/_assets/colors.js
+        browser_only: true
+        page: colors
+      - name: rtl
+        title: Right-to-left text
+        blurb: Hebrew, Arabic, and Persian samples with styled runs and browser reference text. Compare bidirectional ordering and the known cursive-shaping limitation.
+        source: ./tests/rtl-text
+        page: rtl
   - title: Terminal Actions (experimental)
     demos:
       - name: actions
