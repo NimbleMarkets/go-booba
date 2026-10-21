@@ -1,27 +1,31 @@
 # `booba` CHANGELOG
 
-## Unreleased
-
-### Fixed
-
-- Prevent WebGL and WebGPU from clipping the tops of emoji, and Canvas2D from
-  painting them into the row above. The embedded ghostty-web now measures cell
-  height and baseline using descenders, the primary font line box, and emoji
-  fallback ink. Column width stays the same; rows can become taller to fit the
-  full glyph. Joined emoji remain a single two-column grapheme.
+## [0.10.4] - 2026-10-21
 
 ### Added
 
-- Add ANSI colors/text styles and the existing RTL/BiDi harness to the demo
-  site, with browser reference text and the documented cursive-shaping
-  limitation. Link the ntcanvas and ntmaps consumer demos from the overview.
-- Add a lightweight touch and mouse tracking demo to the demo site, with a local
-  input inspector, decoded modifiers, gesture counters, and explicit keyboard
-  and tracking controls. It needs no Go application or network after startup.
-- Translate browser terminal touch gestures into SGR mouse input when the program
-  enables mouse tracking: tap to click, one finger to drag, pinch to zoom around
-  the midpoint, and two fingers to scroll. Support all adapters, prevent page
-  scrolling during tracked gestures, and suppress duplicate mouse clicks.
+- Support touch input in browser terminals when the application enables mouse
+  tracking. Tap to click, drag with one finger, pinch to zoom around the fingers'
+  midpoint, and move two fingers vertically to scroll. Gestures work through
+  WASM, WebSocket, and WebTransport adapters, prevent page scrolling while
+  tracking, and suppress duplicate browser-generated mouse clicks. Touches send
+  no mouse input when tracking is disabled or the terminal is read-only.
+- Add three [live demos](https://nimblemarkets.github.io/go-booba/): a lightweight
+  touch/mouse inspector with gesture counters and separate keyboard/tracking
+  controls; ANSI colors, RGB gradients, and text styles; and the existing RTL/BiDi
+  harness with browser reference text. The RTL demo documents the remaining
+  Arabic/Persian cursive-shaping limitation. The inspector and colors demo run
+  without a Go application or network requests after startup.
+- Link ntcanvas's Unicode grid demo and ntmaps's explorer source from the demo
+  overview.
+
+### Fixed
+
+- Prevent WebGL and WebGPU from clipping emoji at the top of a cell, and
+  Canvas2D from painting emoji into the row above. Update the embedded
+  ghostty-web to source `95c43ef` (prebuilt `4214b04`), which accounts for emoji
+  fallback ink and font ascent/descent when measuring cells. Rows may become
+  taller to fit the full glyph; column width is unchanged.
 
 ## [0.10.3] - 2026-10-19
 
