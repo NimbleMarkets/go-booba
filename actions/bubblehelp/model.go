@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 
 	"charm.land/bubbles/v2/help"
 	tea "charm.land/bubbletea/v2"
@@ -110,7 +111,21 @@ func (m *Model) View() tea.View { return m.Inner.View() }
 // away once booba's WASM fork is rebased and the typed API can be imported.
 func IsProgramStatusSupport(msg tea.Msg) bool {
 	if osc, ok := msg.(uv.UnknownOscEvent); ok {
-		return string(osc) == actions.QueryProgramStatus || string(osc) == "\x1b]7501;?\a"
+		payload, ok := strings.CutPrefix(string(osc), "\x1b]7501;")
+		if !ok {
+			return false
+		}
+		if body, ok := strings.CutSuffix(payload, "\x1b\\"); ok {
+			payload = body
+		} else if body, ok := strings.CutSuffix(payload, "\a"); ok {
+			payload = body
+		} else {
+			return false
+		}
+		// Revision 0.4 appends capability lists. Keep accepting the legacy
+		// bare reply and allow future capability fields without requiring
+		// a particular list or ordering.
+		return payload == "?" || strings.HasPrefix(payload, "?:")
 	}
 	t := reflect.TypeOf(msg)
 	return t != nil && t.PkgPath() == "charm.land/bubbletea/v2" && t.Name() == "ProgramStatusSupportMsg"

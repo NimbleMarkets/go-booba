@@ -1,5 +1,20 @@
 # `booba` CHANGELOG
 
+## [Unreleased]
+
+### Changed
+
+- Update embedded ghostty-web to prebuilt `9256dbb` (source `6a66683`), using
+  Ghostty v1.4.0. Include resolved Kitty image placements and animation frame
+  scheduling, plus the WebGL optimization that avoids split text passes when
+  no images are present.
+
+### Fixed
+
+- Recognize OSC 7501 revision 0.4 capability replies from Ghostty 1.4 so
+  Bubble Tea action publication starts correctly. Continue accepting legacy
+  bare replies and both BEL and ST terminators.
+
 ## [0.10.4] - 2026-10-21
 
 ### Added

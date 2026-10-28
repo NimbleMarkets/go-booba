@@ -50,7 +50,7 @@ adjust our wrapper code for API changes.
   PR-able to `coder/ghostty-web` upstream.
 - **Coder upstream:** `github.com/coder/ghostty-web`. Parity checks for
   the Terminal API surface are manual.
-- **Last fork API parity check:** 2026-09-27 (`c51504e`, built from `10a023d`)
+- **Last fork API parity check:** 2026-10-28 (`9256dbb`, built from `6a66683`; Ghostty v1.4.0)
 - **Last coder upstream API parity check:** 2026-04-15
 
 ### What comes from upstream

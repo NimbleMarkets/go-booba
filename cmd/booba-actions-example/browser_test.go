@@ -87,7 +87,7 @@ func TestBrowserDemo(t *testing.T) {
 				body := pending[start+7 : start+end]
 				pending = pending[start+end+2:]
 				if body == "?" {
-					send(actions.QueryProgramStatus)
+					send("\x1b]7501;?:states=idle,working,done,blocked,error:kinds=permission,question,auth\x1b\\")
 					continue
 				}
 				for _, field := range strings.Split(body, ":") {
