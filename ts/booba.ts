@@ -13,11 +13,13 @@ import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js
 import { applyThemeProperties } from './theme_properties.js';
 import { TouchInput } from './touch_input.js';
 
-import type { RendererBackend } from 'ghostty-web';
+import type { ITerminalOptions, RendererBackend } from 'ghostty-web';
 
 export interface BoobaTerminalOptions {
-    fontSize?: number;
-    fontFamily?: string;
+    fontSize?: ITerminalOptions['fontSize'];
+    fontFamily?: ITerminalOptions['fontFamily'];
+    /** Optional web fonts loaded before initial measurement; no downloads by default. */
+    fontFaces?: ITerminalOptions['fontFaces'];
     cols?: number;
     rows?: number;
     cursorBlink?: boolean;
@@ -131,7 +133,8 @@ export class BoobaTerminal {
                 background: '#1e1e1e',
                 foreground: '#d4d4d4',
             },
-            ...options
+            ...options,
+            fontFamily: options.fontFamily ?? '"JetBrains Mono", "Iosevka", "Cascadia Code", ui-monospace, monospace',
         };
         this.osc52Scanner = new OSC52Scanner(this.options.allowOSC52 ?? false);
         this.actions = new ActionController({

@@ -80,6 +80,17 @@ booba.focus();
 
 `BoobaTerminal` exposes methods for selection, scrollback, terminal control, mode queries, events, link detection, and custom key/wheel handlers. 
 
+Omitting font options uses 15px text with a JetBrains Mono / Iosevka / Cascadia Code / system monospace stack, with no font downloads. To load a font you host, opt in with `fontFaces`:
+
+```javascript
+const booba = new BoobaTerminal('terminal-container', {
+    fontFamily: '"JetBrains Mono", monospace',
+    fontSize: 14,
+    fontFaces: [{ family: 'JetBrains Mono', src: 'url(/fonts/JetBrainsMono-Regular.woff2)', display: 'swap' }],
+});
+await booba.init();
+```
+
 **Renderer Selection:** Booba ships with WebGPU (modern hardware-accelerated), WebGL (fallback), and Canvas2D (universal) renderers. The `renderer` option and `installRendererHud()` let users select and monitor the active backend.
 
 See [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md) for the full reference.

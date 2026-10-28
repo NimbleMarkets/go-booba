@@ -50,7 +50,7 @@ adjust our wrapper code for API changes.
   PR-able to `coder/ghostty-web` upstream.
 - **Coder upstream:** `github.com/coder/ghostty-web`. Parity checks for
   the Terminal API surface are manual.
-- **Last fork API parity check:** 2026-10-28 (`9256dbb`, built from `6a66683`; Ghostty v1.4.0)
+- **Last fork API parity check:** 2026-10-28 (`9bf5204`, built from `6191d20`; Ghostty v1.4.0)
 - **Last coder upstream API parity check:** 2026-04-15
 
 ### What comes from upstream
@@ -115,7 +115,7 @@ When upstream ghostty-web updates, check:
 
 1. **Terminal constructor options** — New options in `ITerminalOptions`
    (upstream `lib/interfaces.ts`) that `BoobaTerminalOptions` should mirror.
-   Currently booba surfaces: `fontSize`, `fontFamily`, `cols`, `rows`,
+   Currently booba surfaces: `fontSize`, `fontFamily`, `fontFaces`, `cols`, `rows`,
    `cursorBlink`, `cursorStyle`, `scrollback`, `allowTransparency`,
    `convertEol`, `disableStdin`, `smoothScrollDuration`, `theme`, `renderer`, plus
    booba-specific `allowOSC52`. Watch for additions upstream.

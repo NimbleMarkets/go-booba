@@ -90,7 +90,8 @@ export class BoobaTerminal {
                 background: '#1e1e1e',
                 foreground: '#d4d4d4',
             },
-            ...options
+            ...options,
+            fontFamily: options.fontFamily ?? '"JetBrains Mono", "Iosevka", "Cascadia Code", ui-monospace, monospace',
         };
         this.osc52Scanner = new OSC52Scanner(this.options.allowOSC52 ?? false);
         this.actions = new ActionController({

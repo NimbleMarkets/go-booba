@@ -6,13 +6,20 @@
 
 - Update Go dependencies, including Bubbles v2.2.1, Prometheus client v1.25.0,
   QUIC v0.64.1, and the Bubble Tea WASM fork at `536722b0bdb6`.
-- Update embedded ghostty-web to prebuilt `9256dbb` (source `6a66683`), using
+- Update embedded ghostty-web to prebuilt `9bf5204` (source `6191d20`), using
   Ghostty v1.4.0. Include resolved Kitty image placements and animation frame
   scheduling, plus the WebGL optimization that avoids split text passes when
-  no images are present.
+  no images are present. Default to a local JetBrains Mono / Iosevka / Cascadia
+  Code / system monospace font stack, with opt-in `fontFaces` for web-font
+  loading and improved font and display-density handling.
 
 ### Fixed
 
+- Advertise explicit WebTransport stream and data allowances so Safari can open
+  bidirectional streams after the session handshake. Use finite, replenished
+  flow-control windows instead of the library's omitted default settings.
+- Fall back to WebSocket after three seconds when WebTransport connection setup
+  stalls, including Safari connections that remain pending indefinitely.
 - Recognize OSC 7501 revision 0.4 capability replies from Ghostty 1.4 so
   Bubble Tea action publication starts correctly. Continue accepting legacy
   bare replies and both BEL and ST terminators.

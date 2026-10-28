@@ -31,38 +31,66 @@ export class BoobaWebTransportAdapter {
         this.onStateChangeCallback = onStateChange;
         this.closed = false;
         onStateChange('connecting', 'Connecting (WebTransport)...');
+        let timeout;
         try {
             // Convert hex cert hash to Uint8Array for serverCertificateHashes
             const hashBytes = new Uint8Array(this.certHash.match(/.{2}/g).map(h => parseInt(h, 16)));
-            this.transport = new WebTransport(this.url, {
+            const transport = new WebTransport(this.url, {
                 serverCertificateHashes: [{
                         algorithm: 'sha-256',
                         value: hashBytes,
                     }],
             });
-            await this.transport.ready;
-            const stream = await this.transport.createBidirectionalStream();
-            this.writer = stream.writable.getWriter();
-            onStateChange('connected', 'Connected (WebTransport)');
-            this._startPing();
-            // Read from the stream
-            this._readLoop(stream.readable);
-            // Handle transport closure
-            this.transport.closed.then(() => {
-                if (!this.closed) {
+            this.transport = transport;
+            // Observe closure immediately, including during a failed handshake.
+            transport.closed.then(() => {
+                if (!this.closed && this.transport === transport) {
                     this._stopPing();
                     onStateChange('disconnected', 'Disconnected');
                 }
             }).catch(() => {
-                if (!this.closed) {
+                if (!this.closed && this.transport === transport) {
                     this._stopPing();
                     onStateChange('disconnected', 'Disconnected');
                 }
             });
+            const opening = (async () => {
+                await transport.ready;
+                if (this.closed || this.transport !== transport)
+                    throw new Error('Connection cancelled');
+                const stream = await transport.createBidirectionalStream();
+                if (this.closed || this.transport !== transport) {
+                    void stream.readable.cancel().catch(() => { });
+                    void stream.writable.abort().catch(() => { });
+                    throw new Error('Connection cancelled');
+                }
+                return stream;
+            })();
+            // Some browsers leave ready pending instead of rejecting an unsupported
+            // connection. Bound both the handshake and stream creation so auto can
+            // fall back to WebSocket.
+            const stream = await Promise.race([
+                opening,
+                new Promise((_, reject) => {
+                    timeout = setTimeout(() => reject(new Error('Connection timed out')), 3000);
+                }),
+            ]);
+            if (this.closed || this.transport !== transport)
+                throw new Error('Connection cancelled');
+            this.writer = stream.writable.getWriter();
+            onStateChange('connected', 'Connected (WebTransport)');
+            this._startPing();
+            void this._readLoop(stream.readable);
         }
         catch (err) {
-            onStateChange('disconnected', `WebTransport failed: ${err}`);
+            const cancelled = this.closed;
+            this.disconnect();
+            if (!cancelled)
+                onStateChange('disconnected', `WebTransport failed: ${err}`);
             throw err; // Let the auto adapter catch this and fall back
+        }
+        finally {
+            clearTimeout(timeout);
         }
     }
     async _readLoop(readable) {

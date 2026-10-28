@@ -36,9 +36,40 @@ booba.focus();
 
 ## Terminal Options
 
-All [ghostty-web ITerminalOptions](https://github.com/coder/ghostty-web) are supported: `fontSize`, `fontFamily`, `cols`, `rows`, `cursorBlink`, `cursorStyle`, `scrollback`, `allowOSC52`, `allowTransparency`, `convertEol`, `disableStdin`, `smoothScrollDuration`, and a full `theme` with 16-color palette and cursor/selection colors.
+Supported terminal options include `fontSize`, `fontFamily`, `fontFaces`, `cols`, `rows`, `cursorBlink`, `cursorStyle`, `scrollback`, `allowOSC52`, `allowTransparency`, `convertEol`, `disableStdin`, `smoothScrollDuration`, `renderer`, and a full `theme` with 16-color palette and cursor/selection colors.
 
 After `init()`, the container element carries the resolved `theme.background` and `theme.foreground` as the CSS custom properties `--booba-background` and `--booba-foreground`. They inherit to the container and its descendants only, so the padding around the canvas can use `var(--booba-background)` without repeating the hex value.
+
+### Fonts
+
+Omitting font options uses 15px text with Booba's preferred local stack:
+`"JetBrains Mono", "Iosevka", "Cascadia Code", ui-monospace, monospace`.
+The actual face depends on installed fonts; no web fonts are downloaded by default.
+Existing `fontFamily` and `fontSize` overrides continue to work unchanged.
+
+To use a web font consistently across machines, host the font file and supply
+`fontFaces` explicitly (the constructor takes a container **ID**):
+
+```typescript
+const booba = new BoobaTerminal('terminal-container', {
+    fontFamily: '"JetBrains Mono", monospace',
+    fontSize: 14,
+    fontFaces: [{ family: 'JetBrains Mono', src: 'url(/fonts/JetBrainsMono-Regular.woff2)', display: 'swap' }],
+});
+await booba.init();
+```
+
+Each face requires `family` and `src` (a URL, CSS `url()` / `local()` source,
+or an array of sources). Optional descriptors are `weight` (string or number),
+`style` (string), and `display` (`auto`, `block`, `swap`, `fallback`, or `optional`).
+Booba forwards these unchanged to ghostty-web. Set them before `init()`;
+ghostty-web waits up to three seconds for faces before initial measurement.
+Loads that time out are dropped even if they later finish; they do not trigger
+remeasurement. Loading failures are silent and leave the fallback stack in use,
+including failures caused by missing CORS permissions. Remote font URLs must
+allow cross-origin loading from your page's origin.
+Remeasurement covers font-size, font-family, and display-density changes only.
+Supplying a local `fontFamily` alone never triggers a font download.
 
 ## Selection & Clipboard
 

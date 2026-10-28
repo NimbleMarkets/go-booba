@@ -237,6 +237,16 @@ func (s *Server) newWebTransportServer() *webtransport.Server {
 
 	wtAddr := fmt.Sprintf("%s:%d", s.config.Host, http3Port)
 	wtServer := &webtransport.Server{
+		// Safari needs explicit initial stream/data allowances to open a
+		// bidirectional stream. A nil Config in webtransport-go v0.13 omits
+		// those SETTINGS: the session becomes ready but stream creation hangs.
+		// Keep finite windows; webtransport-go replenishes credit as it is read.
+		// https://github.com/quic-go/webtransport-go/issues/355
+		Config: &webtransport.Config{
+			MaxIncomingStreams:    16,
+			MaxIncomingUniStreams: 16,
+			MaxIncomingData:       1 << 20,
+		},
 		H3: &http3.Server{
 			Addr:            wtAddr,
 			TLSConfig:       s.http3TLSConfig(),
