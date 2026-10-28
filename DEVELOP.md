@@ -5,7 +5,7 @@
 booba uses a patched version of BubbleTea with WebAssembly support. The patched fork is at [neomantra/bubbletea:nm-wasm](https://github.com/neomantra/bubbletea/tree/nm-wasm) and is pinned by pseudo-version via a `replace` directive in `go.mod`:
 
 ```
-replace charm.land/bubbletea/v2 => github.com/neomantra/bubbletea/v2 v2.0.0-20261009201241-c397c32a5074
+replace charm.land/bubbletea/v2 => github.com/neomantra/bubbletea/v2 v2.0.0-20261020122444-536722b0bdb6
 ```
 
 This means:

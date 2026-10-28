@@ -1,9 +1,11 @@
 # `booba` CHANGELOG
 
-## [Unreleased]
+## [0.10.5] - 2026-10-28
 
 ### Changed
 
+- Update Go dependencies, including Bubbles v2.2.1, Prometheus client v1.25.0,
+  QUIC v0.64.1, and the Bubble Tea WASM fork at `536722b0bdb6`.
 - Update embedded ghostty-web to prebuilt `9256dbb` (source `6a66683`), using
   Ghostty v1.4.0. Include resolved Kitty image placements and animation frame
   scheduling, plus the WebGL optimization that avoids split text passes when
