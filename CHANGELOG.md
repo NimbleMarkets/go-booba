@@ -1,5 +1,21 @@
 # `booba` CHANGELOG
 
+## [0.10.7] - 2026-10-28
+
+### Fixed
+
+- Render common thin, heavy, double, and rounded box-drawing borders continuously
+  across Canvas2D, WebGL, and WebGPU. Draw borders as cell-filling geometry while
+  preserving ordinary text spacing, emoji rendering, and terminal dimensions.
+- Prevent WebGL and WebGPU glyph atlas sampling from introducing border seams
+  at fractional device pixel ratios.
+
+### Changed
+
+- Update embedded ghostty-web to CI-built `737439d` (source `547ae5c`). The fix
+  covers 37 common border characters; mixed-weight, dashed, diagonal, and
+  combining forms continue to use font rendering.
+
 ## [0.10.6] - 2026-10-28
 
 ### Changed
