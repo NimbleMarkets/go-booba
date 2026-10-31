@@ -33,7 +33,7 @@ import (
 // Match runtime files explicitly so development artifacts and Go source are
 // never served. The *.js globs also match underscore-prefixed Vite chunks.
 //
-//go:embed static/booba/*.js static/ghostty-web/*.js static/ghostty-web/*.wasm static/index.html
+//go:embed static/ghostty-web/*.js static/ghostty-web/*.wasm static/booba/*.js static/ntwebterm/*.js static/ntwebterm/*.wasm static/index.html
 var staticFiles embed.FS
 
 // Server serves terminal sessions over WebSocket.

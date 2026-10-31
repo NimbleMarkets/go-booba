@@ -31,12 +31,12 @@ func browserHandler(ghosttyDir string) (http.Handler, error) {
 	}
 	mux := http.NewServeMux()
 	if ghosttyDir != "" {
-		for _, name := range []string{"ghostty-web.js", "ghostty-vt.wasm"} {
+		for _, name := range []string{"ntwebterm.js", "ghostty-vt.wasm"} {
 			if _, err := os.Stat(filepath.Join(ghosttyDir, name)); err != nil {
 				return nil, err
 			}
 		}
-		mux.Handle("/static/ghostty-web/", http.StripPrefix("/static/ghostty-web/", http.FileServer(http.Dir(ghosttyDir))))
+		mux.Handle("/static/ntwebterm/", http.StripPrefix("/static/ntwebterm/", http.FileServer(http.Dir(ghosttyDir))))
 	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {

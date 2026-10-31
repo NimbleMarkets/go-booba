@@ -77,7 +77,7 @@ func TestHTTPHandlerServesIndexWithoutListener(t *testing.T) {
 }
 
 // SEC-2: /static/ must honor Basic Auth. Fingerprinting via
-// /static/booba/booba.js and /static/ghostty-web/ghostty-web.js
+// /static/booba/booba.js and /static/ntwebterm/ntwebterm.js
 // shouldn't be possible without credentials. We drive these through
 // newMux directly so we don't have to produce real TLS material just
 // to exercise the gating.

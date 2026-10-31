@@ -36,7 +36,7 @@ anything wrong on screen is the renderer's doing, not a race in the harness.
 
 ```sh
 go run ./tests/<name>                 # native terminal baseline
-go run ./tests/<name> --listen :8099  # ghostty-web in the browser
+go run ./tests/<name> --listen :8099  # ntwebterm in the browser
 ```
 
 `:8080` is often already taken; pick a high port. Serve assets are embedded at
@@ -104,11 +104,11 @@ what was painted. Screenshots are the only evidence.
 
 ## Reporting a finding
 
-State the branch, the ghostty-web submodule SHA and version, and the renderer
+State the branch, the ntwebterm submodule SHA and version, and the renderer
 backend. Without all three a screenshot isn't reproducible:
 
 ```sh
 git rev-parse --abbrev-ref HEAD
-git -C third_party/ghostty-web log -1 --format='%h %ci %s'
-grep -m1 '"version"' third_party/ghostty-web/package.json
+git -C third_party/ntwebterm log -1 --format='%h %ci %s'
+grep -m1 '"version"' third_party/ntwebterm/package.json
 ```

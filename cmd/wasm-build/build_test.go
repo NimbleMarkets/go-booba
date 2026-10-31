@@ -79,7 +79,7 @@ func TestCompileAndAssetsEndToEnd(t *testing.T) {
 	if err := copyAssets(out); err != nil {
 		t.Fatalf("copyAssets: %v", err)
 	}
-	for _, p := range []string{"wasm_exec.js", "booba/booba.js", "ghostty-web/ghostty-web.js", "ghostty-web/ghostty-vt.wasm"} {
+	for _, p := range []string{"wasm_exec.js", "booba/booba.js", "ntwebterm/ntwebterm.js", "ntwebterm/ghostty-vt.wasm"} {
 		if _, err := os.Stat(filepath.Join(out, "_assets", p)); err != nil {
 			t.Errorf("missing asset %s: %v", p, err)
 		}

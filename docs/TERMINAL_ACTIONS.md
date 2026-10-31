@@ -1,6 +1,6 @@
 # Terminal Actions (experimental)
 
-This is an opt-in experiment in Booba. APIs and the private wire convention may change without compatibility guarantees. The reference demo lives in `cmd/booba-actions-example`. The ghostty-web runtime embedded since Booba 0.8.0 supports OSC 7501.
+This is an opt-in experiment in Booba. APIs and the private wire convention may change without compatibility guarantees. The reference demo lives in `cmd/booba-actions-example`. The ntwebterm runtime embedded since Booba 0.8.0 supports OSC 7501.
 
 Terminal Actions turns an application's help bindings into touch controls. The current implementation provides a transport-independent JSON model, Go publisher, Bubbles v2 adapter, browser controller, and optional action bar. The browser demo carries actions inside OSC 7501 terminal output using an opt-in private convention; activations return as ordinary keyboard input.
 
@@ -89,7 +89,7 @@ without claiming to offer an incomplete or altered set of bindings.
 
 ## Browser controls
 
-The standalone `ActionController` accepts host callbacks for capability checks and complete key activation. `BoobaTerminal.actions` supplies a controller connected to booba's input and connection lifecycle. Install a key encoder explicitly: the current ghostty-web Terminal API does not expose enough keyboard state to assume a general-purpose encoder. Until an encoder is installed, buttons remain disabled.
+The standalone `ActionController` accepts host callbacks for capability checks and complete key activation. `BoobaTerminal.actions` supplies a controller connected to booba's input and connection lifecycle. Install a key encoder explicitly: the current ntwebterm Terminal API does not expose enough keyboard state to assume a general-purpose encoder. Until an encoder is installed, buttons remain disabled.
 
 ```ts
 booba.setActionKeyEncoder({
@@ -116,7 +116,7 @@ booba.setActionKeyEncoder({
 });
 ```
 
-`booba.encodeKey` reads current cursor, backarrow, and newline modes on every call. It supports navigation, F1–F12, printable characters, and common modifiers; unsupported combinations return `null`. Shift changes ASCII letter case; shifted punctuation must be supplied as its resulting character. The standalone `encodeKey(gesture, modes)` export accepts explicit `KeyEncodingModes`. Set `extendedKeyboard: true` to decline encoding when an extended protocol is active. These are **legacy encoders**: the pinned ghostty-web API cannot report Kitty keyboard flags or modifyOtherKeys state. Hosts using those protocols must provide a protocol-aware encoder. The legacy encoder is opt-in and is not installed automatically.
+`booba.encodeKey` reads current cursor, backarrow, and newline modes on every call. It supports navigation, F1–F12, printable characters, and common modifiers; unsupported combinations return `null`. Shift changes ASCII letter case; shifted punctuation must be supplied as its resulting character. The standalone `encodeKey(gesture, modes)` export accepts explicit `KeyEncodingModes`. Set `extendedKeyboard: true` to decline encoding when an extended protocol is active. These are **legacy encoders**: the pinned ntwebterm API cannot report Kitty keyboard flags or modifyOtherKeys state. Hosts using those protocols must provide a protocol-aware encoder. The legacy encoder is opt-in and is not installed automatically.
 
 `hostEncoder` can instead be supplied by the embedding application. It must encode a complete gesture according to current terminal modes, including releases where required. Returning `null` declines activation. Do not implement it by concatenating help text or dispatching a synthetic browser event. The API deliberately has no default encoder that could silently send an incorrect key.
 
@@ -185,7 +185,7 @@ exposing the output's file descriptor when the output is a tty.
 
 Bubble Tea v2.1 provides `View.ProgramStatus`, `RequestProgramStatusSupport`, and `ProgramStatusSupportMsg`. Booba's pinned WASM fork is based on v2.1.0 as of 0.8.0, so those APIs are available to WASM builds. The help adapter uses Bubbles v2.1.0.
 
-The embedded ghostty-web runtime (`nm-kitty-built` `579fc63`, source `3f84d01`) exposes `onProgramStatus` backed by libghostty-vt parsing. Booba forwards it when the loaded runtime provides it:
+The embedded ntwebterm runtime (`built` `579fc63`, source `3f84d01`) exposes `onProgramStatus` backed by libghostty-vt parsing. Booba forwards it when the loaded runtime provides it:
 
 ```ts
 booba.onProgramStatus = report => statusStore.apply(report);
@@ -193,7 +193,7 @@ booba.onProgramStatus = report => statusStore.apply(report);
 console.log(booba.supportsProgramStatus); // Inspect after init.
 ```
 
-Booba does not advertise status support merely because this callback exists on its wrapper: it subscribes to the underlying event only when a consumer is present. `supportsProgramStatus` reports whether the loaded runtime provides the event, which matters when a host supplies its own ghostty-web build.
+Booba does not advertise status support merely because this callback exists on its wrapper: it subscribes to the underlying event only when a consumer is present. `supportsProgramStatus` reports whether the loaded runtime provides the event, which matters when a host supplies its own ntwebterm build.
 
 Reports also land in `booba.programStatus`, a store with the protocol's lifetime rules, which `installStatusBar` renders; see "Program Status" in `docs/TYPESCRIPT_API.md`. An action record reaches the store with its readable summary as the message.
 
@@ -217,7 +217,7 @@ go run ./cmd/booba-actions-example -listen 127.0.0.1:8081
 
 Open http://127.0.0.1:8081. Each tab gets a live Bubble Tea session. Tap More to reveal navigation, select an item, and tap Open. The controls change to Confirm and Back as the Go application changes context. Hide TUI help / Show TUI help (the `h` key) toggles the terminal help while browser controls remain available. Help is visible initially; `?` switches compact/full terminal help and reveals it if hidden. Keyboard opens normal terminal input; Restart starts a fresh session. The expandable snapshot panel shows the exact help-generated description.
 
-To test a ghostty-web build before it is embedded, pass `-ghostty-assets <dir>` with a directory containing `ghostty-web.js`, its imported JavaScript chunks, and the matching `ghostty-vt.wasm`. A source checkout may put JavaScript in `dist/` and WASM at the repository root; assemble them in a temporary directory. The page reports an error if the loaded runtime lacks OSC 7501 support.
+To test a ntwebterm build before it is embedded, pass `-ghostty-assets <dir>` with a directory containing `ntwebterm.js`, its imported JavaScript chunks, and the matching `ghostty-vt.wasm`. A source checkout may put JavaScript in `dist/` and WASM at the repository root; assemble them in a temporary directory. The page reports an error if the loaded runtime lacks OSC 7501 support.
 
 The demo uses Booba’s normal Sip WebSocket connection and PTY-backed Bubble Tea sessions. Action reports are ordinary terminal output; button presses are terminal input. It opts into Booba's shared legacy key encoder, including application cursor mode; it does not enable extended keyboard protocols. The demo binds to loopback only.
 

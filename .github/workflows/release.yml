@@ -26,8 +26,8 @@ jobs:
           node-version: 20
 
       # No bun/zig/task setup needed: release-binaries trusts the committed
-      # serve/static/booba/* and serve/static/ghostty-web/* in HEAD.
-      # ghostty-web ships prebuilt dist/ on the nm-kitty-built submodule
+      # serve/static/booba/* and serve/static/ntwebterm/* in HEAD.
+      # ntwebterm ships prebuilt dist/ on the built submodule
       # branch; serve/static is copied from there at commit time.
       # Rebuilding here would (a) leave a .zig-cache/ behind and (b) produce
       # env-specific bytes that diverge from HEAD — both of which break
@@ -61,8 +61,8 @@ jobs:
 
       - run: npm ci
 
-      # ghostty-web ships prebuilt dist/ on the nm-kitty-built submodule
-      # branch, so npm installs its prebuilt dist/index.d.ts from the
+      # ntwebterm ships prebuilt dist/ on the built submodule
+      # branch, so npm installs its prebuilt dist/ntwebterm.d.ts from the
       # local package — no zig/bun build needed.
       - run: npm run build
 

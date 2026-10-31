@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { BoobaAdapter, BoobaConnectionState } from './adapter.js';
-vi.mock('ghostty-web', () => ({ init: vi.fn(), Terminal: class {}, FitAddon: class {}, installRendererHud: vi.fn(), parseRendererFromURL: vi.fn() }));
+vi.mock('ntwebterm', () => ({ init: vi.fn(), Terminal: class {}, FitAddon: class {}, installRendererHud: vi.fn(), parseRendererFromURL: vi.fn() }));
 import { BoobaTerminal } from './booba.js';
 import { ACTION_MESSAGE_MARKER, actionStatusID } from './action_status.js';
 import type { ProgramStatusReport } from './program_status.js';
@@ -121,7 +121,7 @@ describe('BoobaTerminal program status store', () => {
         const { booba, adapter, emit, terminal } = setup();
         booba.programStatus.subscribe(() => {});
         emit(report({ id: 'result', state: 'done' }));
-        // ghostty-web answers queries synchronously inside write(), on the same onData path as keystrokes.
+        // ntwebterm answers queries synchronously inside write(), on the same onData path as keystrokes.
         terminal.write.mockImplementation(() => booba.forwardInput('\x1b]7501;?\x1b\\'));
         adapter.output('\x1b]7501;?\x1b\\');
         expect(adapter.boobaWrite).toHaveBeenCalledWith('\x1b]7501;?\x1b\\');

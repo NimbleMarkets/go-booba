@@ -1,4 +1,4 @@
-/** OSC 7501 report shape exposed by ghostty-web's osc-7501 branch.
+/** OSC 7501 report shape exposed by ntwebterm's osc-7501 branch.
  * Remove this compatibility declaration when that API reaches the pinned build.
  * Consumers own status-record replacement and lifetime policy.
  */

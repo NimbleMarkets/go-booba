@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-vi.mock('ghostty-web', () => {
+vi.mock('ntwebterm', () => {
     const handler = () => vi.fn(() => ({ dispose: vi.fn() }));
     class Terminal {
         cols = 80; rows = 24;

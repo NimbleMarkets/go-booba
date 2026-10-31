@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { BoobaAdapter, BoobaConnectionState } from './adapter.js';
-vi.mock('ghostty-web', () => ({ init: vi.fn(), Terminal: class {}, FitAddon: class {}, installRendererHud: vi.fn(), parseRendererFromURL: vi.fn() }));
+vi.mock('ntwebterm', () => ({ init: vi.fn(), Terminal: class {}, FitAddon: class {}, installRendererHud: vi.fn(), parseRendererFromURL: vi.fn() }));
 import { BoobaTerminal } from './booba.js';
 
 // Program output reaches the terminal as bytes from a WebSocket and as

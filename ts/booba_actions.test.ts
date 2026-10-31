@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { BoobaAdapter, BoobaConnectionState } from './adapter.js';
-vi.mock('ghostty-web', () => ({ init: vi.fn(), Terminal: class {}, FitAddon: class {}, installRendererHud: vi.fn(), parseRendererFromURL: vi.fn() }));
+vi.mock('ntwebterm', () => ({ init: vi.fn(), Terminal: class {}, FitAddon: class {}, installRendererHud: vi.fn(), parseRendererFromURL: vi.fn() }));
 import { BoobaTerminal } from './booba.js';
 import { BoobaProtocolAdapter, type WebSocketAdapterCallbacks } from './websocket_adapter.js';
 const snapshot = () => JSON.parse(readFileSync('actions/testdata/snapshots.json', 'utf8'))[0].snapshot;

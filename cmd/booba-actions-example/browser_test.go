@@ -25,7 +25,7 @@ func TestBrowserDemo(t *testing.T) {
 	}
 	server := httptest.NewServer(handler)
 	defer server.Close()
-	for _, path := range []string{"/", "/static/booba/booba.js", "/static/booba/action_bar.js", "/static/ghostty-web/ghostty-vt.wasm"} {
+	for _, path := range []string{"/", "/static/booba/booba.js", "/static/booba/action_bar.js", "/static/ntwebterm/ghostty-vt.wasm"} {
 		res, err := http.Get(server.URL + path)
 		if err != nil {
 			t.Fatal(err)

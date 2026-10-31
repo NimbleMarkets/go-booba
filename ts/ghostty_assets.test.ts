@@ -2,15 +2,15 @@
 
 import { readFile } from 'node:fs/promises';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { Ghostty } from '../serve/static/ghostty-web/ghostty-web.js';
+import { Ghostty } from '../serve/static/ntwebterm/ntwebterm.js';
 
 // Exercise the actual embedded bundle and WASM together. Type-checking the
 // wrapper alone cannot detect a stale WASM binary paired with a newer bundle.
-describe('embedded ghostty-web assets', () => {
+describe('embedded ntwebterm assets', () => {
     let ghostty: Ghostty;
 
     beforeAll(async () => {
-        const wasm = await readFile(new URL('../serve/static/ghostty-web/ghostty-vt.wasm', import.meta.url));
+        const wasm = await readFile(new URL('../serve/static/ntwebterm/ghostty-vt.wasm', import.meta.url));
         ghostty = await Ghostty.load(`data:application/wasm;base64,${wasm.toString('base64')}`);
     });
 
@@ -49,4 +49,15 @@ describe('embedded ghostty-web assets', () => {
             term.free();
         }
     });
+});
+
+// This is a real ESM import, so a broken relative alias fails the test.
+it('legacy import re-exports the same runtime and matching WASM', async () => {
+    const legacy = await import('../serve/static/ghostty-web/ghostty-web.js');
+    const current = await import('../serve/static/ntwebterm/ntwebterm.js');
+    expect(legacy.Terminal).toBe(current.Terminal);
+    expect(legacy.Ghostty).toBe(current.Ghostty);
+    const oldWasm = await readFile(new URL('../serve/static/ghostty-web/ghostty-vt.wasm', import.meta.url));
+    const newWasm = await readFile(new URL('../serve/static/ntwebterm/ghostty-vt.wasm', import.meta.url));
+    expect(oldWasm).toEqual(newWasm);
 });

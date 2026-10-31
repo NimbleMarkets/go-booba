@@ -1,5 +1,7 @@
 # go-booba - Web-based BubbleTea TUIs using libghostty
 
+The terminal engine is ntwebterm, formerly NimbleMarkets' ghostty-web fork.
+
 <p>
     <a href="https://nimblemarkets.github.io/go-booba/"><img src="https://img.shields.io/badge/Live%20Demos-E24F36" alt="Live Demos"></a>
     <a href="https://github.com/NimbleMarkets/go-booba/blob/main/docs/markdown/booba.md"><img src="https://img.shields.io/badge/Command%20Ref-6B2DAD" alt="Command Reference"></a>
@@ -49,7 +51,7 @@ npm install @nimblemarkets/booba
 The primary enabling technologies of this are:
 
  * [`libghostty`](https://github.com/ghostty-org/ghostty) - Terminal emulation engine
- * [`ghostty-web`](https://github.com/coder/ghostty-web) - Web-based terminal using Ghostty's VT100 parser via WebAssembly
+ * [`ntwebterm`](https://github.com/coder/ghostty-web) - Web-based terminal using Ghostty's VT100 parser via WebAssembly
  * [`BubbleTea`](https://github.com/charmbracelet/bubbletea) - Terminal UI framework for Go
  * [`WebAssembly`](https://webassembly.org) - For running Go code in browsers
  * [`WebTransport`](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport_API) - HTTP/3-based low-latency browser transport (with WebSocket fallback)
@@ -58,7 +60,7 @@ The name `booba` is a portmanteau of the words *Boba* and *Boo!*: the [key ingre
 
 ## TypeScript API
 
-The `BoobaTerminal` class wraps ghostty-web's Terminal and provides a high-level API for embedding BubbleTea programs:
+The `BoobaTerminal` class wraps ntwebterm's Terminal and provides a high-level API for embedding BubbleTea programs:
 
 ```javascript
 import { BoobaTerminal, installRendererHud, parseRendererFromURL } from './booba/booba.js';
@@ -153,7 +155,7 @@ GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 
 > **Troubleshooting:** compile errors inside `charm.land/bubbletea/v2` such as `p.listenForResize undefined`, `undefined: suspendProcess`, or `p.initInput undefined` mean the replace directive is missing from your module — upstream BubbleTea has no `js/wasm` implementations of these.
 
-The compiled `app.wasm` needs supporting files alongside it. The `booba-assets` tool scaffolds a complete `web/` directory — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ghostty-web/` emulator assets, and a starter `index.html`:
+The compiled `app.wasm` needs supporting files alongside it. The `booba-assets` tool scaffolds a complete `web/` directory — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ntwebterm/` emulator assets, and a starter `index.html`:
 
 ```sh
 go get -tool github.com/NimbleMarkets/go-booba/cmd/booba-assets@v0.8.0
@@ -298,7 +300,7 @@ We welcome contributions and feedback.  Please adhere to our [Code of Conduct](.
 
 ## Acknowledgements
 
-Thanks to the [Ghostty developers](https://github.com/ghostty-org/ghostty), the [ghostty-web](https://github.com/coder/ghostty-web) developers, and to [Charm.sh](https://charm.sh) for making the command line glamorous with [Bubble Tea](https://github.com/charmbracelet/bubbletea).
+Thanks to the [Ghostty developers](https://github.com/ghostty-org/ghostty), the [ntwebterm](https://github.com/coder/ghostty-web) developers, and to [Charm.sh](https://charm.sh) for making the command line glamorous with [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 
 Thanks to [@BigJK](https://github.com/BigJk/bubbletea-in-wasm) for the initial inspiration when I was exploring this before `libghostty`.
 

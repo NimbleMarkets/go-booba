@@ -15,16 +15,16 @@ booba.exe
 /completions/
 /docs/man/
 
-# serve/static/booba/ and serve/static/ghostty-web/ are generated but the
+# serve/static/booba/ and serve/static/ntwebterm/ are generated but the
 # runtime artifacts (.js, .wasm) are committed so the Go module is
 # self-contained. Dev artifacts (.d.ts, .map) are excluded.
 serve/static/booba/*.d.ts
 serve/static/booba/*.d.ts.map
 serve/static/booba/*.js.map
-serve/static/ghostty-web/*
-!serve/static/ghostty-web/ghostty-web.js
-!serve/static/ghostty-web/ghostty-vt.wasm
-!serve/static/ghostty-web/__vite-*.js
+serve/static/ntwebterm/*
+!serve/static/ntwebterm/ntwebterm.js
+!serve/static/ntwebterm/ghostty-vt.wasm
+!serve/static/ntwebterm/__vite-*.js
 
 # git worktrees
 .worktrees/
@@ -35,4 +35,6 @@ web/demos/
 web/_assets/wasm_exec.js
 web/_assets/index.html
 web/_assets/booba/
+web/_assets/ntwebterm/
+
 web/_assets/ghostty-web/

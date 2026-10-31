@@ -1,4 +1,4 @@
-import { init, Terminal, FitAddon } from '../ghostty-web/ghostty-web.js';
+import { init, Terminal, FitAddon } from '../ntwebterm/ntwebterm.js';
 import { BoobaWasmAdapter } from './adapter.js';
 import { BoobaProtocolAdapter } from './websocket_adapter.js';
 import { BoobaAutoAdapter } from './auto_adapter.js';
@@ -17,7 +17,7 @@ export class BoobaTerminal {
         this.actions.clear();
     }
     /** Encode a legacy VT/xterm gesture using current cursor, backarrow and newline modes.
-     * Opt-in only: ghostty-web cannot report Kitty/modifyOtherKeys state. Hosts using
+     * Opt-in only: ntwebterm cannot report Kitty/modifyOtherKeys state. Hosts using
      * those protocols must supply their own ActionKeyEncoder instead.
      */
     encodeKey(gesture) {
@@ -29,7 +29,7 @@ export class BoobaTerminal {
             newline: this.getMode(20, true),
         });
     }
-    /** Available when the loaded ghostty-web runtime provides OSC 7501 events. */
+    /** Available when the loaded ntwebterm runtime provides OSC 7501 events. */
     get supportsProgramStatus() {
         return typeof this.term?.onProgramStatus === 'function';
     }
@@ -179,7 +179,7 @@ export class BoobaTerminal {
         // callers that call init() then immediately connectWasm() will race the
         // renderer's async initialization. If WebGPU adapter is slow (cold cache),
         // term.write() will call assertOpen() before isOpen flips true, causing
-        // "Terminal must be opened" error. See ghostty-web.js:8055-8067 for details.
+        // "Terminal must be opened" error. See ntwebterm.js:8055-8067 for details.
         await term.open(this.container);
         applyThemeProperties(this.container, this.options.theme);
         this.fitAddon.fit();
@@ -492,7 +492,7 @@ export class BoobaTerminal {
         this.fitAddon = null;
     }
     // --- Advanced Access ---
-    /** Get the underlying ghostty-web Terminal instance for advanced use cases */
+    /** Get the underlying ntwebterm Terminal instance for advanced use cases */
     get terminal() {
         return this.term;
     }
@@ -564,8 +564,8 @@ export { BoobaAutoAdapter } from './auto_adapter.js';
 export { BoobaWebTransportAdapter } from './webtransport_adapter.js';
 export { OSC52Scanner } from './clipboard.js';
 export { resolveBoobaURLs } from './urls.js';
-// HUD utilities (optional, treeshakeable) — re-exported from ghostty-web
-export { installRendererHud, parseRendererFromURL } from '../ghostty-web/ghostty-web.js';
+// HUD utilities (optional, treeshakeable) — re-exported from ntwebterm
+export { installRendererHud, parseRendererFromURL } from '../ntwebterm/ntwebterm.js';
 // Transport-independent terminal actions and optional host UI.
 export { ActionController, ACTION_LIMITS, validateActionSnapshot, decodeActionSnapshot } from './actions.js';
 export { installActionBar, ACTION_BAR_CSS } from './action_bar.js';

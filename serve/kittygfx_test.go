@@ -152,7 +152,7 @@ func TestTranscoder_SplitAcrossReads(t *testing.T) {
 }
 
 func TestTranscoder_PassesThroughUnicodePlaceholderTransmissions(t *testing.T) {
-	// ghostty-web's renderer substitutes U+10EEEE cells with kitty graphics
+	// ntwebterm's renderer substitutes U+10EEEE cells with kitty graphics
 	// image slices, so U=1 transmissions must reach the wasm — transcoded
 	// from PNG (f=100) to raw RGBA (f=32) like any other PNG transmission.
 	pngBytes := makePNG(t, 8, 8)

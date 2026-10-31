@@ -1,4 +1,4 @@
-[submodule "third_party/ghostty-web"]
-	path = third_party/ghostty-web
-	url = https://github.com/NimbleMarkets/ghostty-web.git
-	branch = nm-kitty-built
+[submodule "third_party/ntwebterm"]
+	path = third_party/ntwebterm
+	url = https://github.com/NimbleTerminal/ntwebterm.git
+	branch = built

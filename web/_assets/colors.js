@@ -1,5 +1,5 @@
 /*
- * Adapted from ghostty-web demo/colors-demo.html (vendored, unmodified source).
+ * Adapted from ntwebterm demo/colors-demo.html (vendored, unmodified source).
  *
  * MIT License
  *

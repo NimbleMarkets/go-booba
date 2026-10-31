@@ -1,12 +1,12 @@
 # rtl-text
 
-Isolated reproduction for right-to-left text rendering in ghostty-web, covering
+Isolated reproduction for right-to-left text rendering in ntwebterm, covering
 both BiDi ordering and Arabic cursive joining across Hebrew, Arabic, and Persian.
 
 - [coder/ghostty-web#83](https://github.com/coder/ghostty-web/issues/83) — Hebrew renders reversed in the browser terminal
 - [ghostty-org/ghostty#1442](https://github.com/ghostty-org/ghostty/issues/1442) — upstream BiDi support in the VT/screen model
 
-**Update (2026-09-27):** booba now pins ghostty-web `c51504e` (source `10a023d`),
+**Update (2026-09-27):** booba now pins ntwebterm `c51504e` (source `10a023d`),
 which adds BiDi ordering across Canvas2D, WebGL, and WebGPU, with corresponding
 selection, link, and mouse-coordinate mapping. The findings below describe the
 previous `52ed6df` build. Keep this harness for visual regression checks; Arabic
@@ -74,7 +74,7 @@ Native terminal:
 go run ./tests/rtl-text
 ```
 
-Served to the browser through ghostty-web (the case under test):
+Served to the browser through ntwebterm (the case under test):
 
 ```sh
 go run ./tests/rtl-text --listen :8099
@@ -124,7 +124,7 @@ program, not against this file.
 
 ## Two defects, not one
 
-Confirmed 2026-07-29 against ghostty-web 0.3.0 (`nm-kitty-built`, submodule
+Confirmed 2026-07-29 against ntwebterm 0.3.0 (`built`, submodule
 `52ed6df`), WebGPU backend:
 
 **Ordering.** Rows 5 and 10 both paint red left of blue, so RTL runs are laid out

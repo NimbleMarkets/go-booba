@@ -1,22 +1,22 @@
-# Prompt: implement BiDi rendering in ghostty-web
+# Prompt: implement BiDi rendering in ntwebterm
 
-Paste the section below to an agent working in a `ghostty-web` checkout.
+Paste the section below to an agent working in a `ntwebterm` checkout.
 
 ---
 
 ## Task
 
-Implement Unicode bidirectional (BiDi) text rendering in ghostty-web. RTL scripts
+Implement Unicode bidirectional (BiDi) text rendering in ntwebterm. RTL scripts
 currently render mirrored. Tracking issue: coder/ghostty-web#83; upstream context:
 ghostty-org/ghostty#1442.
 
 ## Findings — read these before planning; they are verified, not assumptions
 
-Source audited at `ghostty-web@bfbe0e5` (branch `nm-webgpu`) and
+Source audited at `ntwebterm@bfbe0e5` (branch `nm-webgpu`) and
 `ghostty@94b93a091` (branch `nm-webgpu`). Defect reproduced on the WebGPU backend
 via a Go TUI over WebTransport, 2026-07-29.
 
-### The fix belongs entirely in ghostty-web. Ghostty needs no changes.
+### The fix belongs entirely in ntwebterm. Ghostty needs no changes.
 
 This is the answer to the question issue #83 puts to maintainers, and it is the
 single most important finding here.
@@ -26,7 +26,7 @@ src/ include/` across the Zig tree returns **two** incidental comments — one i
 `src/font/shaper/coretext.zig:192` that deliberately *disables* CoreText's BiDi,
 one unrelated in `src/terminal/Screen.zig:8667`.
 
-More to the point, ghostty-web already has everything the algorithm needs.
+More to the point, ntwebterm already has everything the algorithm needs.
 `GhosttyTerminal.getViewport()` (`lib/ghostty.ts:1137`) batch-materializes the
 whole viewport as a JS `GhosttyCell[]`, codepoints and all. BiDi is a pure
 function of a row's codepoint sequence plus a paragraph direction. **The VT API
@@ -38,7 +38,7 @@ direction, no character path, no BiDi mode.
 
 **Scope caveat.** All of the above holds for *implicit* BiDi, where the terminal
 auto-detects paragraph direction per row. That is what #83 asks for. If
-ghostty-web later wants *explicit*, application-controlled direction — ECMA-48
+ntwebterm later wants *explicit*, application-controlled direction — ECMA-48
 `SCP` (Select Character Path), `SDS`/`SRS`, or `BDSM` from the terminal-wg BiDi
 draft — those are escape sequences, and parsing them into per-row state is
 squarely libghostty-vt's job. Decide up front which of the two you are building;
@@ -147,7 +147,7 @@ Never reverse strings.
 1. New module producing, for a row of `GhosttyCell[]`, a `visualToLogical` index
    map plus its inverse. Implementing the UBA from scratch is a large job —
    evaluate a vetted implementation such as `bidi-js` first, against
-   ghostty-web's dependency and bundle-size budget.
+   ntwebterm's dependency and bundle-size budget.
 2. `renderLine()` iterates visual positions, resolving each to a logical cell
    through the map. Keep the two-pass background/text split.
 3. `encodeCells()` does the same when writing instance data — the map applies at
@@ -232,9 +232,9 @@ one. `renderer-factory.ts` picks the backend.
 ## Constraints
 
 - `origin` is `coder/ghostty-web`, `nm` is the NimbleMarkets fork. Per fork
-  convention `nm-kitty-meow` is the pristine, PR-able series against upstream,
+  convention `main` is the pristine, PR-able series against upstream,
   while the current working branch is `nm-webgpu` (what the vendored
-  `nm-kitty-built` artifacts are built from). Confirm which branch this work
+  `built` artifacts are built from). Confirm which branch this work
   should land on before starting.
 - Build with `nix develop --command bun run build`. Homebrew zig and the
   ziglang.org tarball both fail on this project.

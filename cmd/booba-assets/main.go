@@ -4,7 +4,7 @@
 // It writes:
 //   - wasm_exec.js  — copied from GOROOT (Go's WASM runtime shim)
 //   - booba/*.js    — the terminal wrapper (embedded in this binary)
-//   - ghostty-web/* — the ghostty-web terminal emulator (embedded)
+//   - ntwebterm/* — the ntwebterm terminal emulator (embedded)
 //   - index.html    — a starter template (embedded), unless one exists
 //
 // Every asset except wasm_exec.js is embedded at compile time via the
@@ -42,7 +42,7 @@ func main() {
 	force := pflag.BoolP("force", "f", false, "overwrite an existing index.html")
 	pflag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [--force] [--no-index] <output-dir>\n\n", os.Args[0])
-		fmt.Fprintln(os.Stderr, "Populates <output-dir> with wasm_exec.js, booba/, ghostty-web/,")
+		fmt.Fprintln(os.Stderr, "Populates <output-dir> with wasm_exec.js, booba/, ntwebterm/,")
 		fmt.Fprintln(os.Stderr, "and a starter index.html for hosting a BubbleTea WASM program.")
 		pflag.PrintDefaults()
 	}
@@ -80,20 +80,25 @@ func run(outDir string, force, noIndex bool) error {
 	}
 	fmt.Printf("  booba/ (%d files)      → %s\n", n, boobaDst)
 
-	// ghostty-web (terminal emulator) — embedded
-	ghDst := filepath.Join(outDir, "ghostty-web")
-	n, err = copyEmbedded("ghostty-web", ghDst, isBrowserAsset)
+	// ntwebterm (terminal emulator) — embedded
+	ghDst := filepath.Join(outDir, "ntwebterm")
+	n, err = copyEmbedded("ntwebterm", ghDst, isBrowserAsset)
 	if err != nil {
-		return fmt.Errorf("write ghostty-web assets: %w", err)
+		return fmt.Errorf("write ntwebterm assets: %w", err)
 	}
 	if n == 0 {
-		return fmt.Errorf("no embedded ghostty-web assets found — booba-assets build is corrupt")
+		return fmt.Errorf("no embedded ntwebterm assets found — booba-assets build is corrupt")
 	}
 	// Sanity check: ensure all __vite- references are resolved.
-	if err := checkViteReferences(filepath.Join(ghDst, "ghostty-web.js"), ghDst); err != nil {
-		return fmt.Errorf("ghostty-web.js contains unresolved Vite references: %w", err)
+	if err := checkViteReferences(filepath.Join(ghDst, "ntwebterm.js"), ghDst); err != nil {
+		return fmt.Errorf("ntwebterm.js contains unresolved Vite references: %w", err)
 	}
-	fmt.Printf("  ghostty-web/ (%d files) → %s\n", n, ghDst)
+	fmt.Printf("  ntwebterm/ (%d files) → %s\n", n, ghDst)
+
+	// Compatibility for 0.11; remove with the old import path in 0.12.
+	if _, err := copyEmbedded("ghostty-web", filepath.Join(outDir, "ghostty-web"), isBrowserAsset); err != nil {
+		return fmt.Errorf("write legacy terminal aliases: %w", err)
+	}
 
 	if noIndex {
 		return nil

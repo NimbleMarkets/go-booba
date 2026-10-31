@@ -1,6 +1,8 @@
 # `BoobaTerminal` TypeScript API
 
-The `BoobaTerminal` class wraps ghostty-web's Terminal and provides a high-level API for embedding BubbleTea programs in a web page.
+The terminal engine is ntwebterm, formerly NimbleMarkets' ghostty-web fork.
+
+The `BoobaTerminal` class wraps ntwebterm's Terminal and provides a high-level API for embedding BubbleTea programs in a web page.
 
 ## Quick Start
 
@@ -62,8 +64,8 @@ await booba.init();
 Each face requires `family` and `src` (a URL, CSS `url()` / `local()` source,
 or an array of sources). Optional descriptors are `weight` (string or number),
 `style` (string), and `display` (`auto`, `block`, `swap`, `fallback`, or `optional`).
-Booba forwards these unchanged to ghostty-web. Set them before `init()`;
-ghostty-web waits up to three seconds for faces before initial measurement.
+Booba forwards these unchanged to ntwebterm. Set them before `init()`;
+ntwebterm waits up to three seconds for faces before initial measurement.
 Loads that time out are dropped even if they later finish; they do not trigger
 remeasurement. Loading failures are silent and leave the fallback stack in use,
 including failures caused by missing CORS permissions. Remote font URLs must
@@ -184,14 +186,14 @@ booba.attachCustomWheelEventHandler((event) => {
 
 ```javascript
 booba.dispose()   // Clean up all resources
-booba.terminal    // Access underlying ghostty-web Terminal
+booba.terminal    // Access underlying ntwebterm Terminal
 booba.cols        // Current column count
 booba.rows        // Current row count
 ```
 
 ## Renderer HUD (Optional Dev Feature)
 
-Display active renderer backend and live FPS in a corner badge. Booba re-exports ghostty-web's renderer HUD for convenience.
+Display active renderer backend and live FPS in a corner badge. Booba re-exports ntwebterm's renderer HUD for convenience.
 
 ```javascript
 import { BoobaTerminal, installRendererHud, parseRendererFromURL } from '@nimblemarkets/booba';
@@ -215,7 +217,7 @@ Click the badge to cycle through available renderers: WebGPU (modern hardware-ac
 
 ### Options & Behavior
 
-For complete option documentation (including `cycle`, `clickToToggle`, `bindToggleHotkey`), see [ghostty-web's renderer HUD documentation](https://github.com/NimbleMarkets/ghostty-web/blob/nm-kitty-meow/lib/renderer-hud.ts).
+For complete option documentation (including `cycle`, `clickToToggle`, `bindToggleHotkey`), see [ntwebterm's renderer HUD documentation](https://github.com/NimbleTerminal/ntwebterm/blob/main/lib/renderer-hud.ts).
 
 Key options:
 - **`parent`** (HTMLElement): Where to mount the badge. Defaults to `document.body`.

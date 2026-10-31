@@ -1,6 +1,6 @@
 // tests/rtl-text/rtl_text.go
 //
-// Isolated reproduction for RTL text rendering in ghostty-web: BiDi ordering
+// Isolated reproduction for RTL text rendering in ntwebterm: BiDi ordering
 // and Arabic cursive joining, across Hebrew, Arabic, and Persian.
 //
 //	https://github.com/coder/ghostty-web/issues/83
@@ -9,7 +9,7 @@
 // Every sample is written to the PTY in logical (Unicode) order. The screen is
 // static — no timers, no animation — so anything wrong on it comes from the
 // renderer, not from this program. Run it natively for a baseline, then with
-// --listen to compare the same byte stream as painted by ghostty-web.
+// --listen to compare the same byte stream as painted by ntwebterm.
 
 package main
 
@@ -124,7 +124,7 @@ func (m model) View() tea.View {
 	}
 
 	var b strings.Builder
-	b.WriteString(headerStyle.Render("ghostty-web RTL/BiDi repro — coder/ghostty-web#83"))
+	b.WriteString(headerStyle.Render("ntwebterm RTL/BiDi repro — coder/ghostty-web#83"))
 	b.WriteString("\n\n")
 	b.WriteString(subtleStyle.Render(
 		"Every sample is written in logical (Unicode) order. A conforming renderer\n" +

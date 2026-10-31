@@ -22,32 +22,31 @@ This document defines the agents and personas associated with the `booba` projec
 ## Upstream Reference: libghostty-vt Demo Implementations
 
 Booba's VT-to-web bridge is derived from the reference demo implementations
-shipped with libghostty-vt (ghostty-web). These demos show how to wire
-ghostty-web's WASM-based terminal emulator to WebSocket and WebTransport
+shipped with libghostty-vt (ntwebterm). These demos show how to wire
+ntwebterm's WASM-based terminal emulator to WebSocket and WebTransport
 backends using the Sip protocol.
 
-We vendor ghostty-web as a git submodule at `third_party/ghostty-web`,
-pinned to the prebuilt `nm-kitty-built` branch of our long-term fork at
-`github.com/NimbleMarkets/ghostty-web`. That branch carries dist/ +
+We vendor ntwebterm as a git submodule at `third_party/ntwebterm`,
+pinned to the prebuilt `built` branch of our long-term fork at
+`github.com/NimbleTerminal/ntwebterm`. That branch carries dist/ +
 ghostty-vt.wasm committed by the fork's CI, so booba doesn't run a
 zig/bun toolchain — `task build-serve-assets` just copies the prebuilt
-files into `serve/static/ghostty-web/`. We adapted the demo's terminal
+files into `serve/static/ntwebterm/`. We adapted the demo's terminal
 initialization patterns into our own TypeScript wrapper; the transport
 protocol (Sip-compatible binary framing, WebTransport, etc.) is entirely
 booba's own — the upstream demo uses raw strings over WebSocket.
 
-As ghostty-web evolves (new Terminal API, bug fixes, renderer
+As ntwebterm evolves (new Terminal API, bug fixes, renderer
 improvements), we should periodically refresh the submodule pointer and
 adjust our wrapper code for API changes.
 
 ### Upstream tracking
 
-- **Fork repo (consumed):** `github.com/NimbleMarkets/ghostty-web`,
-  branch `nm-kitty-built` (auto-rebuilt daily at 07:00 UTC from
-  `nm-kitty-meow` source via the fork's `build-nm-kitty-built` workflow;
+- **Fork repo (consumed):** `github.com/NimbleTerminal/ntwebterm`,
+  branch `built` (auto-rebuilt daily at 07:00 UTC from
+  `main` source via the fork's `build-artifacts` workflow;
   also `workflow_dispatch`-able).
-- **Pristine source branch:** `nm-kitty-meow` — our patch series, kept
-  PR-able to `coder/ghostty-web` upstream.
+- **Source branch:** `main` — NimbleTerminal’s browser layer, descended from Coder’s wrapper.
 - **Coder upstream:** `github.com/coder/ghostty-web`. Parity checks for
   the Terminal API surface are manual.
 - **Last fork API parity check:** 2026-10-28 (`737439d`, built from `547ae5c`; Ghostty v1.4.0)
@@ -55,32 +54,32 @@ adjust our wrapper code for API changes.
 
 ### What comes from upstream
 
-#### Pre-built ghostty-web distribution (vendored via submodule)
+#### Pre-built ntwebterm distribution (vendored via submodule)
 
 | File | Description |
 |------|-------------|
-| `serve/static/ghostty-web/ghostty-web.js` | Terminal emulation engine + public API (including `installRendererHud`, `parseRendererFromURL`) compiled from libghostty |
-| `serve/static/ghostty-web/ghostty-vt.wasm` | WASM binary for VT100 parsing |
-| `serve/static/ghostty-web/__vite-*.js` | Runtime chunks imported by the ESM bundle |
+| `serve/static/ntwebterm/ntwebterm.js` | Terminal emulation engine + public API (including `installRendererHud`, `parseRendererFromURL`) compiled from libghostty |
+| `serve/static/ntwebterm/ghostty-vt.wasm` | WASM binary for VT100 parsing |
+| `serve/static/ntwebterm/__vite-*.js` | Runtime chunks imported by the ESM bundle |
 
-These are copies of the browser runtime files in `third_party/ghostty-web/dist/` from the
-`nm-kitty-built` submodule pointer; we commit them so
+These are copies of the browser runtime files in `third_party/ntwebterm/dist/` from the
+`built` submodule pointer; we commit them so
 `go install .../cmd/booba` works without a JS toolchain.
-`scripts/copy-ghostty-assets.mjs` copies only `.js` and `.wasm` files and
+`scripts/copy-ntwebterm-assets.mjs` copies only `.js` and `.wasm` files and
 prunes obsolete copies. The UMD/CJS bundle, declarations, and source maps are
 not embedded. TypeScript resolves upstream declarations through the installed
-ghostty-web npm package; `npm run build` still emits booba's own declarations
+ntwebterm npm package; `npm run build` still emits booba's own declarations
 and source maps into `dist/` for npm consumers.
 
 To update: bump the submodule pointer (after triggering the fork's
-`build-nm-kitty-built` workflow if the latest source isn't yet built —
+`build-artifacts` workflow if the latest source isn't yet built —
 otherwise wait for the daily run), then run `task build-serve-assets`
 to refresh the embedded copies. Commit pointer + statics together.
 
 #### Terminal initialization pattern (adapted from demo)
 
 The upstream demo (`demo/index.html`, `demo/bin/demo.js`) shows the
-canonical way to initialize and wire ghostty-web. Our `ts/booba.ts`
+canonical way to initialize and wire ntwebterm. Our `ts/booba.ts`
 follows this pattern:
 
 ```
@@ -111,7 +110,7 @@ The upstream demo uses raw UTF-8 strings for I/O and JSON
 
 ### Areas to watch for parity
 
-When upstream ghostty-web updates, check:
+When upstream ntwebterm updates, check:
 
 1. **Terminal constructor options** — New options in `ITerminalOptions`
    (upstream `lib/interfaces.ts`) that `BoobaTerminalOptions` should mirror.
@@ -132,14 +131,14 @@ When upstream ghostty-web updates, check:
    onBell, onSelectionChange, onKey, onTitleChange, onScroll, onRender,
    onCursorMove. Watch for new events upstream.
 
-5. **Build artifacts** — When `ghostty-web.js`, `ghostty-vt.wasm`, or
-   `index.d.ts` change upstream, refresh by bumping the
-   `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built`
+5. **Build artifacts** — When `ntwebterm.js`, `ghostty-vt.wasm`, or
+   `ntwebterm.d.ts` change upstream, refresh by bumping the
+   `third_party/ntwebterm` submodule pointer to a new `built`
    tip and running `task build-serve-assets`. Verify our TypeScript
    still compiles against the new types (`task build-assets`).
 
 6. **Renderer HUD API** — Booba re-exports `installRendererHud`, `parseRendererFromURL`,
-   and `RendererHudOptions` from ghostty-web. Watch for new options (e.g., `cycle`,
+   and `RendererHudOptions` from ntwebterm. Watch for new options (e.g., `cycle`,
    `clickToToggle`, `bindToggleHotkey`) and sync changes if breaking.
 
 7. **Mobile viewport handling** — Both booba and upstream use a

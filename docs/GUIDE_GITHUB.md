@@ -9,6 +9,6 @@ The example repo includes:
 - A working BubbleTea program with both native and WASM entry points
 - A GitHub Actions workflow that builds the WASM binary and deploys to Pages
 - The WASM overlay build script (workaround for BubbleTea v2's missing `js/wasm` tags)
-- An `index.html` that wires up ghostty-web and booba's WASM adapter
+- An `index.html` that wires up ntwebterm and booba's WASM adapter
 
 Fork it, enable Pages (Settings → Pages → Source: GitHub Actions), and push.

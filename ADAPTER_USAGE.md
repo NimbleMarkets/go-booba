@@ -1,5 +1,7 @@
 # Booba Adapter Usage Guide
 
+The terminal engine is ntwebterm, formerly NimbleMarkets' ghostty-web fork.
+
 The BubbleTea adapter abstraction allows you to connect to Booba-based BubbleTea programs in multiple ways. For the full `BoobaTerminal` API reference, see [docs/TYPESCRIPT_API.md](./docs/TYPESCRIPT_API.md).
 
 ## Touch gestures
@@ -104,14 +106,14 @@ booba.connectWasm(16); // Poll every 16ms (~60fps)
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
 
-**Scaffolding the `web/` directory**: The compiled `app.wasm` needs supporting files alongside it — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ghostty-web/` emulator assets, and an `index.html` host page. The `booba-assets` tool populates all of these:
+**Scaffolding the `web/` directory**: The compiled `app.wasm` needs supporting files alongside it — Go's `wasm_exec.js` runtime shim, the `booba/` terminal wrapper, the `ntwebterm/` emulator assets, and an `index.html` host page. The `booba-assets` tool populates all of these:
 
 ```sh
 go run github.com/NimbleMarkets/go-booba/cmd/booba-assets web/
 GOOS=js GOARCH=wasm go build -o web/app.wasm ./cmd/myapp/
 ```
 
-This produces a `web/` directory ready to serve with any static file server. The generated `index.html` is a starter template — it is left untouched on re-runs unless you pass `--force`, so your customizations survive. Re-run `booba-assets` (without `--force`) after upgrading the go-booba dependency to refresh `wasm_exec.js`, `booba/`, and `ghostty-web/`.
+This produces a `web/` directory ready to serve with any static file server. The generated `index.html` is a starter template — it is left untouched on re-runs unless you pass `--force`, so your customizations survive. Re-run `booba-assets` (without `--force`) after upgrading the go-booba dependency to refresh `wasm_exec.js`, `booba/`, and `ntwebterm/`.
 
 For advanced use cases that need direct control over the JS bridge (custom `js.FuncOf` callbacks, manual buffer management, etc.), the [`wasm`](./wasm) subpackage exposes the low-level API.
 
@@ -185,7 +187,7 @@ Close the connection and clean up resources.
 
 Regardless of which adapter you use, all `BoobaTerminal` features work the same way. The adapter only handles the transport (how data gets to/from the BubbleTea program). Features like selection, scrollback, paste, focus, link detection, and events are handled by the terminal layer above the adapter.
 
-**Mouse tracking**: If your BubbleTea program enables mouse tracking (e.g., via `tea.WithMouseCellMotion()`), mouse events are encoded as escape sequences by ghostty-web and flow through the adapter's `boobaWrite` as regular input data. No adapter changes are needed.
+**Mouse tracking**: If your BubbleTea program enables mouse tracking (e.g., via `tea.WithMouseCellMotion()`), mouse events are encoded as escape sequences by ntwebterm and flow through the adapter's `boobaWrite` as regular input data. No adapter changes are needed.
 
 **Bracketed paste**: Similarly, `booba.paste(data)` wraps the text in bracketed paste escape sequences when the program has enabled bracketed paste mode. The escape sequences flow through `boobaWrite` transparently.
 

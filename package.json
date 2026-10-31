@@ -1,8 +1,8 @@
 {
   "name": "@nimblemarkets/booba",
-  "version": "0.10.7",
+  "version": "0.11.0",
   "type": "module",
-  "description": "Terminal wrapper for BubbleTea programs using ghostty-web",
+  "description": "Terminal wrapper for BubbleTea programs using ntwebterm",
   "main": "dist/booba.js",
   "module": "dist/booba.js",
   "types": "dist/booba.d.ts",
@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:embed": "tsc -p tsconfig.embed.json && sed -i.bak -e \"s|from 'ghostty-web'|from '../ghostty-web/ghostty-web.js'|\" serve/static/booba/booba.js && rm serve/static/booba/booba.js.bak",
+    "build:embed": "tsc -p tsconfig.embed.json && sed -i.bak -e \"s|from 'ntwebterm'|from '../ntwebterm/ntwebterm.js'|\" serve/static/booba/booba.js && rm serve/static/booba/booba.js.bak",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -30,7 +30,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "ghostty-web": "file:third_party/ghostty-web",
+    "ntwebterm": "file:third_party/ntwebterm",
     "happy-dom": "^20.14.5",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11"

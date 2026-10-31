@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-vi.mock('ghostty-web', () => {
+vi.mock('ntwebterm', () => {
     const handler = () => vi.fn(() => ({ dispose: vi.fn() }));
     class Terminal {
         options: Record<string, unknown>;

@@ -1,4 +1,4 @@
-import { init, Terminal, FitAddon } from 'ghostty-web';
+import { init, Terminal, FitAddon } from 'ntwebterm';
 import { BoobaAdapter, BoobaConnectionState, BoobaWasmAdapter } from './adapter.js';
 import { BoobaProtocolAdapter, type WebSocketAdapterCallbacks } from './websocket_adapter.js';
 import { BoobaAutoAdapter } from './auto_adapter.js';
@@ -13,7 +13,7 @@ import type { BoobaTheme, BoobaBufferRange, BoobaLinkProvider } from './types.js
 import { applyThemeProperties } from './theme_properties.js';
 import { TouchInput } from './touch_input.js';
 
-import type { ITerminalOptions, RendererBackend } from 'ghostty-web';
+import type { ITerminalOptions, RendererBackend } from 'ntwebterm';
 
 export interface BoobaTerminalOptions {
     fontSize?: ITerminalOptions['fontSize'];
@@ -65,7 +65,7 @@ export class BoobaTerminal {
     }
 
     /** Encode a legacy VT/xterm gesture using current cursor, backarrow and newline modes.
-     * Opt-in only: ghostty-web cannot report Kitty/modifyOtherKeys state. Hosts using
+     * Opt-in only: ntwebterm cannot report Kitty/modifyOtherKeys state. Hosts using
      * those protocols must supply their own ActionKeyEncoder instead.
      */
     encodeKey(gesture: ActionGesture): string | null {
@@ -80,7 +80,7 @@ export class BoobaTerminal {
     private programStatusSubscription: { dispose(): void } | null = null;
     private programStatusCallback: ((report: ProgramStatusReport) => void) | null = null;
 
-    /** Available when the loaded ghostty-web runtime provides OSC 7501 events. */
+    /** Available when the loaded ntwebterm runtime provides OSC 7501 events. */
     get supportsProgramStatus(): boolean {
         return typeof (this.term as ProgramStatusSource | null)?.onProgramStatus === 'function';
     }
@@ -216,7 +216,7 @@ export class BoobaTerminal {
         // callers that call init() then immediately connectWasm() will race the
         // renderer's async initialization. If WebGPU adapter is slow (cold cache),
         // term.write() will call assertOpen() before isOpen flips true, causing
-        // "Terminal must be opened" error. See ghostty-web.js:8055-8067 for details.
+        // "Terminal must be opened" error. See ntwebterm.js:8055-8067 for details.
         await term.open(this.container);
         applyThemeProperties(this.container, this.options.theme);
         this.fitAddon.fit();
@@ -572,7 +572,7 @@ export class BoobaTerminal {
 
     // --- Advanced Access ---
 
-    /** Get the underlying ghostty-web Terminal instance for advanced use cases */
+    /** Get the underlying ntwebterm Terminal instance for advanced use cases */
     get terminal(): Terminal | null {
         return this.term;
     }
@@ -655,20 +655,20 @@ export { OSC52Scanner } from './clipboard.js';
 export { resolveBoobaURLs, type BoobaURLs } from './urls.js';
 export type { BoobaTheme, BoobaBufferRange, BoobaKeyEvent, BoobaRenderEvent, BoobaLinkProvider, BoobaLink } from './types.js';
 
-// HUD utilities (optional, treeshakeable) — re-exported from ghostty-web
-export { installRendererHud, parseRendererFromURL, type RendererHudOptions, type RendererBackend } from 'ghostty-web';
+// HUD utilities (optional, treeshakeable) — re-exported from ntwebterm
+export { installRendererHud, parseRendererFromURL, type RendererHudOptions, type RendererBackend } from 'ntwebterm';
 
 // Deprecated aliases for source compatibility
-import type { RendererHudOptions, RendererBackend as _RendererBackend } from 'ghostty-web';
+import type { RendererHudOptions, RendererBackend as _RendererBackend } from 'ntwebterm';
 
 /**
- * @deprecated Renamed to RendererHudOptions when the HUD moved to ghostty-web.
+ * @deprecated Renamed to RendererHudOptions when the HUD moved to ntwebterm.
  * This alias will be removed in a future major version.
  */
 export type BoobaRendererHudOptions = RendererHudOptions;
 
 /**
- * @deprecated Renamed to RendererBackend when the HUD moved to ghostty-web.
+ * @deprecated Renamed to RendererBackend when the HUD moved to ntwebterm.
  * This alias also expanded to include 'webgl', so behavior is wider than the
  * old name implied.
  */

@@ -1,5 +1,18 @@
 # `booba` CHANGELOG
 
+## [0.11.0] - 2026-10-31
+
+### Changed
+
+- Migrate the terminal engine to ntwebterm 0.4.0 and its `built` artifact branch.
+  The xterm.js-compatible terminal API is unchanged.
+- Serve `static/ntwebterm/ntwebterm.js`; `booba-assets` now writes `ntwebterm/`.
+- Keep `static/ghostty-web/ghostty-web.js` as a re-export and its WASM path
+  for the 0.11 minor release. These compatibility paths will be removed in
+  0.12. Update imports when bumping booba (including gloss, ntfilepicker,
+  nt3d, ntmaps, and thinkt).
+
+
 ## [0.10.7] - 2026-10-28
 
 ### Fixed

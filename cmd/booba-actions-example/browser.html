@@ -57,7 +57,7 @@ try {
  booba.onStatusChange = (state,message) => { status.textContent = message || state; };
  booba.onProgramStatus = report => { if(report.message) status.textContent = report.message; };
  booba.onActionError = error => { status.textContent = String(error); };
- if (!booba.supportsProgramStatus) throw new Error('This ghostty-web runtime lacks OSC 7501 support (onProgramStatus). Use booba 0.8.0 or newer, or pass -ghostty-assets with a runtime that provides it.');
+ if (!booba.supportsProgramStatus) throw new Error('This ntwebterm runtime lacks OSC 7501 support (onProgramStatus). Use booba 0.8.0 or newer, or pass -ghostty-assets with a runtime that provides it.');
  booba.connectWebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws`);
 } catch(error) { status.textContent=String(error); }
 document.getElementById('restart').addEventListener('click',()=>location.reload());

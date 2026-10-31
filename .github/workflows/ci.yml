@@ -29,16 +29,16 @@ jobs:
       - uses: go-task/setup-task@v2
 
       - name: Build assets
-        # ghostty-web ships prebuilt dist/ on the nm-kitty-built submodule
+        # ntwebterm ships prebuilt dist/ on the built submodule
         # branch; no zig/bun toolchain needed here. We still wipe committed
         # outputs first so Task's source/generates check actually re-copies
         # rather than false-positively reusing stale committed bytes.
         run: |
-          rm -rf serve/static/booba serve/static/ghostty-web
+          rm -rf serve/static/booba serve/static/ntwebterm
           task build-serve-assets
 
       - name: Verify committed assets
-        run: git diff --exit-code -- serve/static/booba serve/static/ghostty-web
+        run: git diff --exit-code -- serve/static/booba serve/static/ntwebterm
 
       - name: Test
         run: task test

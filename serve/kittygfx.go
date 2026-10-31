@@ -12,7 +12,7 @@ import (
 // kittyGfxTranscoder is a stateful byte-stream filter that intercepts kitty
 // graphics protocol APC sequences carrying PNG payloads (f=100) and rewrites
 // them as raw RGBA payloads (f=32). The wasm build of ghostty-vt used by
-// ghostty-web does not link wuffs, so PNGs are rejected with
+// ntwebterm does not link wuffs, so PNGs are rejected with
 // "EINVAL: unsupported format" — this transcoder makes PNG-emitting TUI
 // libraries (kitten icat, ntcharts, etc.) work transparently.
 //

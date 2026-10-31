@@ -37,9 +37,11 @@ func TestEmbeddedAssetsContainOnlyRuntimeFiles(t *testing.T) {
 func TestEmbeddedStaticAssetsPresent(t *testing.T) {
 	required := []string{
 		"static/index.html",
-		"static/booba/booba.js",
 		"static/ghostty-web/ghostty-web.js",
 		"static/ghostty-web/ghostty-vt.wasm",
+		"static/booba/booba.js",
+		"static/ntwebterm/ntwebterm.js",
+		"static/ntwebterm/ghostty-vt.wasm",
 	}
 
 	for _, name := range required {
@@ -51,17 +53,17 @@ func TestEmbeddedStaticAssetsPresent(t *testing.T) {
 
 // TestEmbeddedViteChunksResolve guards against accidentally excluding Vite's
 // underscore-prefixed chunks. The browser fetches these at runtime, so every
-// "__vite-" reference in ghostty-web.js must be embedded.
+// "__vite-" reference in ntwebterm.js must be embedded.
 func TestEmbeddedViteChunksResolve(t *testing.T) {
-	js, err := staticFiles.ReadFile("static/ghostty-web/ghostty-web.js")
+	js, err := staticFiles.ReadFile("static/ntwebterm/ntwebterm.js")
 	if err != nil {
-		t.Fatalf("read embedded ghostty-web.js: %v", err)
+		t.Fatalf("read embedded ntwebterm.js: %v", err)
 	}
 
 	re := regexp.MustCompile(`__vite-[A-Za-z0-9.\-]+`)
 	for _, ref := range re.FindAllString(string(js), -1) {
-		if _, err := staticFiles.ReadFile("static/ghostty-web/" + ref); err != nil {
-			t.Errorf("ghostty-web.js references %s but it is not embedded "+
+		if _, err := staticFiles.ReadFile("static/ntwebterm/" + ref); err != nil {
+			t.Errorf("ntwebterm.js references %s but it is not embedded "+
 				"(check the go:embed patterns in server.go): %v", ref, err)
 		}
 	}

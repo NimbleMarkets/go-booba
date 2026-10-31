@@ -43,9 +43,9 @@ tasks:
       - .npmrc
       - package.json
       - package-lock.json
-      - third_party/ghostty-web/package.json
-      - third_party/ghostty-web/dist/*
-      - third_party/ghostty-web/ghostty-vt.wasm
+      - third_party/ntwebterm/package.json
+      - third_party/ntwebterm/dist/*
+      - third_party/ntwebterm/ghostty-vt.wasm
 
   build:
     desc: 'Build all the things'
@@ -104,7 +104,7 @@ tasks:
   build-assets:
     desc: 'Build frontend assets'
     # npm-deps initializes the submodule first, so npm and tsc both see
-    # the checked-out ghostty-web package and its prebuilt declarations.
+    # the checked-out ntwebterm package and its prebuilt declarations.
     deps: [npm-deps]
     run: once
     cmds:
@@ -113,7 +113,7 @@ tasks:
       - package.json
       - tsconfig.json
       - tsconfig.embed.json
-      - third_party/ghostty-web/dist/index.d.ts
+      - third_party/ntwebterm/dist/ntwebterm.d.ts
       - ts/*.ts
     generates:
       - serve/static/booba/*.js
@@ -126,13 +126,13 @@ tasks:
     sources:
       - package.json
       - tsconfig.json
-      - third_party/ghostty-web/dist/index.d.ts
+      - third_party/ntwebterm/dist/ntwebterm.d.ts
       - ts/*.ts
     generates:
       - dist/*.js
 
   init-submodules:
-    desc: 'Initialize git submodules (third_party/ghostty-web on nm-kitty-built ships prebuilt dist/)'
+    desc: 'Initialize git submodules (third_party/ntwebterm on built ships prebuilt dist/)'
     run: once
     cmds:
       - git submodule update --init --recursive
@@ -140,22 +140,24 @@ tasks:
     # bump that has not been staged yet. After switching booba branches, run
     # git submodule update --init --recursive explicitly to sync their pins.
     status:
-      - test -e third_party/ghostty-web/.git
-      - test -e third_party/ghostty-web/dist/index.d.ts
+      - test -e third_party/ntwebterm/.git
+      - test -e third_party/ntwebterm/dist/ntwebterm.d.ts
 
   build-serve-assets:
-    desc: 'Copy prebuilt ghostty-web browser runtime assets for go:embed'
+    desc: 'Copy prebuilt ntwebterm browser runtime assets for go:embed'
     deps: [build-assets, init-submodules]
     run: once
     cmds:
-      - node scripts/copy-ghostty-assets.mjs
+      - node scripts/copy-ntwebterm-assets.mjs
     sources:
-      - scripts/copy-ghostty-assets.mjs
-      - third_party/ghostty-web/dist/*
+      - scripts/copy-ntwebterm-assets.mjs
+      - third_party/ntwebterm/dist/*
     generates:
       - serve/static/ghostty-web/ghostty-web.js
-      - serve/static/ghostty-web/__vite-*.js
       - serve/static/ghostty-web/ghostty-vt.wasm
+      - serve/static/ntwebterm/ntwebterm.js
+      - serve/static/ntwebterm/__vite-*.js
+      - serve/static/ntwebterm/ghostty-vt.wasm
 
   clean:
     desc: 'Clean commands'
@@ -168,6 +170,7 @@ tasks:
     cmds:
       - rm -rf dist
       - rm -rf serve/static/booba
+      - rm -rf serve/static/ntwebterm
       - rm -rf serve/static/ghostty-web
 
 ###############################################################################

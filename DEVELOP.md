@@ -31,7 +31,7 @@ installed golangci-lint binary to panic while analyzing the standard library.
 The hook also uses that toolchain's `gofmt`. Go downloads the selected toolchain
 automatically if it is not already installed.
 
-booba vendors [`ghostty-web`](https://github.com/NimbleMarkets/ghostty-web) (NimbleMarkets fork) as a git submodule at `third_party/ghostty-web`. Clone with submodules:
+booba vendors [`ntwebterm`](https://github.com/NimbleTerminal/ntwebterm) (NimbleMarkets fork) as a git submodule at `third_party/ntwebterm`. Clone with submodules:
 
 ```sh
 git clone --recurse-submodules https://github.com/NimbleMarkets/go-booba.git
@@ -39,17 +39,17 @@ git clone --recurse-submodules https://github.com/NimbleMarkets/go-booba.git
 git submodule update --init --recursive
 ```
 
-The submodule is pinned to the `nm-kitty-built` branch, which ships the prebuilt `dist/` (wasm + JS + .d.ts) committed alongside the source by ghostty-web's CI. `task build` copies only the browser runtime `.js` and `.wasm` files into `serve/static/ghostty-web/`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally. The copy script prunes obsolete chunks and non-runtime artifacts. Upstream declarations remain available through the installed npm package.
+The submodule is pinned to the `built` branch, which ships the prebuilt `dist/` (wasm + JS + .d.ts) committed alongside the source by ntwebterm's CI. `task build` copies only the browser runtime `.js` and `.wasm` files into `serve/static/ntwebterm/`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally. The copy script prunes obsolete chunks and non-runtime artifacts. Upstream declarations remain available through the installed npm package.
 
-The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so Go builds need no JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built` tip and re-running `task build-serve-assets` locally before committing.
+The embedded `serve/static/booba/*.js` and `serve/static/ntwebterm/*` files are committed so Go builds need no JS toolchain. They're refreshed by bumping the `third_party/ntwebterm` submodule pointer to a new `built` tip and re-running `task build-serve-assets` locally before committing.
 
 The `serve/static` package (`serve/static/embed.go`) `go:embed`s these same files, so both the `serve` package and the `booba-assets` scaffolding tool ship them inside their binaries. Explicit `*.js` and `*.wasm` patterns include underscore-prefixed Vite chunks while excluding CJS bundles, declarations, and maps left over from older builds. The embed build emits JavaScript only; `npm run build` still emits declarations and source maps into `dist/` for npm consumers.
 
-### Updating ghostty-web
+### Updating ntwebterm
 
 ```sh
-git -C third_party/ghostty-web fetch origin nm-kitty-built
-git -C third_party/ghostty-web checkout --detach origin/nm-kitty-built
+git -C third_party/ntwebterm fetch origin built
+git -C third_party/ntwebterm checkout --detach origin/built
 npm install --package-lock-only --ignore-scripts
 task build-serve-assets
 task build-npm
@@ -62,7 +62,7 @@ and checks that the committed copies match, and `task test` runs both Go and
 TypeScript tests.
 
 The project's `.npmrc` uses `install-links=true` to install the prebuilt
-ghostty-web package without its development dependencies. Booba declares its
+ntwebterm package without its development dependencies. Booba declares its
 own test tools, including Happy DOM. Run `npm ci` after changing the submodule
 checkout to refresh the installed copy; Task tracks the upstream distribution
 and does this automatically.
@@ -81,7 +81,7 @@ GOOS=js GOARCH=wasm go build -o app.wasm ./cmd/myapp/
 
 The patched BubbleTea (via the `replace` directive — see [BubbleTea Integration](#bubbletea-integration)) provides all necessary WASM stubs (signal handling, TTY initialization) automatically. No custom build tool is needed, but builds outside this repository must carry the replace directive in their own `go.mod`.
 
-`app.wasm` needs supporting files alongside it to run in a browser. The `booba-assets` tool scaffolds a complete `web/` directory (`wasm_exec.js`, `booba/`, `ghostty-web/`, starter `index.html`):
+`app.wasm` needs supporting files alongside it to run in a browser. The `booba-assets` tool scaffolds a complete `web/` directory (`wasm_exec.js`, `booba/`, `ntwebterm/`, starter `index.html`):
 
 ```sh
 go get -tool github.com/NimbleMarkets/go-booba/cmd/booba-assets@v0.8.0

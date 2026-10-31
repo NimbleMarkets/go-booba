@@ -4,7 +4,7 @@
 //
 // It registers JavaScript functions on window (bubbletea_read, bubbletea_write,
 // bubbletea_resize) that booba's BoobaWasmAdapter polls to shuttle data between
-// the ghostty-web terminal emulator and the Go program.
+// the ntwebterm terminal emulator and the Go program.
 //
 // Program exit:
 //
@@ -20,7 +20,7 @@
 // sets TERM_PROGRAM=ghostty, COLORTERM=truecolor, and CLICOLOR_FORCE=1 in the
 // Go environment, unless they're already set. This allows libraries that detect
 // terminal capabilities via environment variables to discover that the rendering
-// target (ghostty-web) supports advanced features like Kitty graphics protocol
+// target (ntwebterm) supports advanced features like Kitty graphics protocol
 // and truecolor output, and ensures color output is not disabled. Consumers can
 // override these values with os.Setenv before calling Run if needed.
 //

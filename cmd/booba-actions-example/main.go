@@ -130,7 +130,7 @@ func newActionModel() tea.Model {
 func main() {
 	context := flag.String("snapshot", "", "print a files or confirm JSON snapshot instead of running the TUI")
 	listen := flag.String("listen", "", "serve the browser demo, e.g. 127.0.0.1:8081")
-	ghosttyAssets := flag.String("ghostty-assets", "", "serve a local ghostty-web dist with OSC 7501 support")
+	ghosttyAssets := flag.String("ghostty-assets", "", "serve a local ntwebterm dist with OSC 7501 support")
 	flag.Parse()
 	if *listen != "" {
 		if err := serveBrowser(*listen, *ghosttyAssets); err != nil {

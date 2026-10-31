@@ -77,7 +77,7 @@ func compileOne(d Demo, outDir string) error {
 }
 
 // copyAssets populates <outDir>/_assets/ with the runtime embedded in this
-// repository (wasm_exec.js, booba/, ghostty-web/) by running the local
+// repository (wasm_exec.js, booba/, ntwebterm/) by running the local
 // booba-assets command. Its starter index.html is removed: the site renders
 // its own pages.
 func copyAssets(outDir string) error {
