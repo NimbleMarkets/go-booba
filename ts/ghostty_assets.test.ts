@@ -59,5 +59,5 @@ it('legacy import re-exports the same runtime and matching WASM', async () => {
     expect(legacy.Ghostty).toBe(current.Ghostty);
     const oldWasm = await readFile(new URL('../serve/static/ghostty-web/ghostty-vt.wasm', import.meta.url));
     const newWasm = await readFile(new URL('../serve/static/ntwebterm/ghostty-vt.wasm', import.meta.url));
-    expect(oldWasm).toEqual(newWasm);
+    expect(oldWasm.equals(newWasm)).toBe(true);
 });
